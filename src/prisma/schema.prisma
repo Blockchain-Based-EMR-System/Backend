@@ -39,7 +39,7 @@ model User {
 
 model Doctor {
   id            String   @id @default(uuid())
-  specification String   @db.VarChar(255)
+  specialization String   @db.VarChar(255)
   avg_time      DateTime? @db.Time(0)
 
   // Relations
@@ -53,11 +53,11 @@ model Patient {
   id                     String  @id @default(uuid())
   bc_address             String  @db.VarChar(255)
   consent                Boolean @default(false)
-  controlling_nurse      String?
+  controlling_nurse_id      String?
 
   // Relations
   user                   User    @relation(fields: [id], references: [id])
-  controlling_nurse_user User?   @relation("ControllingNurse", fields: [controlling_nurse], references: [id])
+  controlling_nurse_user User?   @relation("ControllingNurse", fields: [controlling_nurse_id], references: [id])
 
   @@map("Patient")
 }
