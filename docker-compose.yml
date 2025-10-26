@@ -7,8 +7,10 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx.conf:/etc/nginx/nginx.conf 
     restart: "unless-stopped"
+    depends_on:
+      - server    
     networks:
       - backend
 
@@ -19,28 +21,38 @@ services:
       dockerfile: Dockerfile.dev
     ports:
       - "3000:3000"
+      - "5555:5555" 
     environment:
-      DATABASE_URL: mysql://root:password@localhost:3306/dev
+      DATABASE_URL: "postgresql://myuser:mypassword@postgres:5432/mydatabase?schema=public"
+      NODE_ENV: development
     volumes:
       - ./:/app
       - /app/node_modules
     restart: "unless-stopped"
-    networks:
-      - backend
-    links:
-      - mysql
     depends_on:
-      - mysql
-
-  mysql:
-    container_name: mysql
-    image: mysql:5.7
-    environment:
-      DATABASE_URL: mysql://root:password@localhost:3306/dev
-    ports:
-      - "3306:3306"
+      - postgres
     networks:
       - backend
+    command: > 
+      sh -c "
+        npx prisma migrate dev &&
+        npx prisma generate &&
+        npm run dev
+      "
+
+  postgres:
+    container_name: postgres_db
+    image: postgres:16
+    environment:
+      - POSTGRES_USER=myuser
+      - POSTGRES_PASSWORD=mypassword
+      - POSTGRES_DB=mydatabase
+    volumes:
+      - data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - backend
+    
 
 networks:
   backend:
