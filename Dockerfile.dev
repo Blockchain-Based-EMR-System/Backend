@@ -1,5 +1,10 @@
 # NodeJS Version 16
-FROM node:16.18-buster-slim
+FROM node:16-bullseye
+
+# install openSSL (for prisma)
+RUN apt-get update -y && \
+    apt-get install -y openssl && \
+    rm -rf /var/lib/apt/lists/*
 
 # Copy Dir
 COPY . ./app
@@ -8,7 +13,7 @@ COPY . ./app
 WORKDIR /app
 
 # Install Node Package
-RUN npm install --legacy-peer-deps
+RUN npm install --legacy-peer-deps 
 
 # Set Env
 ENV NODE_ENV development
