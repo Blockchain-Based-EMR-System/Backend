@@ -32,11 +32,8 @@ services:
       - postgres
     networks:
       - backend
-    command: > 
-      sh -c "
-        npx prisma generate &&
-        npm run dev
-      "
+    command: npm run dev
+
 
   postgres:
     container_name: postgres_db
