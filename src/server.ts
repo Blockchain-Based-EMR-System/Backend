@@ -5,6 +5,6 @@ import { ValidateEnv } from '@utils/validateEnv';
 
 ValidateEnv();
 
-const app = new App([new UserRoute(), new AuthRoute()]);
+const app = new App([new AuthRoute()]);
 
 app.listen();

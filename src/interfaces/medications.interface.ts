@@ -11,6 +11,7 @@ export interface Medication {
   frequency: number;
   period: Period;
   description?: string;
+  category: string;
   created_at: Date;
   modified_at: Date;
   deleted_at?: Date;

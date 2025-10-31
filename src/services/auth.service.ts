@@ -22,8 +22,8 @@ export class AuthService {
 
     const hashedPassword = await hash(userData.password, 10);
     const username = emailHandle;
-
-    const createUserData: Promise<User> = this.users.create({ data: { ...userData, username ,password_hash: hashedPassword } });
+    const { password, ...userDataWithoutPassword } = userData;
+    const createUserData: Promise<User> = this.users.create({ data: { ...userDataWithoutPassword, username ,password_hash: hashedPassword } });
 
     return createUserData;
   }

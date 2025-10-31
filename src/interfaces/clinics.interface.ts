@@ -5,6 +5,7 @@ export interface Clinic {
   is_active: boolean;
   opening_at: Date;
   closing_at: Date;
+  address: string;
   created_at: Date;
   modified_at: Date;
   deleted_at?: Date;

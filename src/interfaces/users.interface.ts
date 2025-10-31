@@ -3,6 +3,7 @@ import { Medication } from './medications.interface';
 import { ScanLab } from './scans-labs.interface';
 import { ClinicNurse, ClinicDoctor } from './clinics.interface';
 import { AuditLog } from './audit-logs.interface';
+import { Gender } from '@prisma/client';
 
 export interface User {
   id: string;
@@ -10,6 +11,8 @@ export interface User {
   email: string;
   username: string;
   phone: string;
+  gender: Gender;
+  date_of_birth: Date;
   password_hash: string;
   created_at: Date;
   modified_at: Date;
@@ -46,5 +49,4 @@ export interface Doctor {
   user: User;
   clinic_doctors?: ClinicDoctor[];
 }
-
 

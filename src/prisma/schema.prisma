@@ -24,16 +24,16 @@ model User {
   deleted_at    DateTime?
 
   // Relations
-  patient                 Patient?
-  doctor                  Doctor?
+  patient                 Patient?      @relation("UserAsPatient")
+  doctor                  Doctor?       @relation("UserAsDoctor")
   appointments_as_patient Appointment[] @relation("PatientAppointments")
   appointments_as_doctor  Appointment[] @relation("DoctorAppointments")
   medications_as_patient  Medication[]  @relation("PatientMedications")
   medications_as_doctor   Medication[]  @relation("DoctorMedications")
   scans_labs_as_patient   ScanLab[]     @relation("PatientScansLabs")
   scans_labs_as_doctor    ScanLab[]     @relation("DoctorScansLabs")
-  clinics_as_nurse        ClinicNurse[]
-  audit_logs              AuditLog[]
+  clinics_as_nurse        ClinicNurse[] @relation("NurseClinics")
+  audit_logs              AuditLog[]    @relation("UserAuditLogs")
   controlled_patients     Patient[]     @relation("ControllingNurse")
 
   @@map("Users")
@@ -45,7 +45,7 @@ model Doctor {
   avg_time      DateTime? @db.Time(0)
 
   // Relations
-  user           User           @relation(fields: [id], references: [id])
+  user           User           @relation("UserAsDoctor", fields: [id], references: [id], onDelete: Cascade)
   clinic_doctors ClinicDoctor[]
 
   @@map("Doctor")
@@ -58,16 +58,16 @@ model Patient {
   controlling_nurse_id      String?
 
   // Relations
-  user                   User    @relation(fields: [id], references: [id])
-  controlling_nurse_user User?   @relation("ControllingNurse", fields: [controlling_nurse_id], references: [id])
+  user                   User    @relation("UserAsPatient", fields: [id], references: [id], onDelete: Cascade)
+  controlling_nurse_user User?   @relation("ControllingNurse", fields: [controlling_nurse_id], references: [id], onDelete: SetNull)
 
   @@map("Patient")
 }
 
 model Appointment {
   id             String    @id @default(uuid())
-  patient_id     String    
-  doctor_id      String    
+  patient_id     String?    
+  doctor_id      String?    
   scheduled_time DateTime
   is_online      Boolean   @default(false)
   is_completed   Boolean   @default(false)
@@ -77,9 +77,12 @@ model Appointment {
   deleted_at     DateTime?
 
   // Relations
-  patient User @relation("PatientAppointments", fields: [patient_id], references: [id])
-  doctor  User @relation("DoctorAppointments", fields: [doctor_id], references: [id])
+  patient User? @relation("PatientAppointments", fields: [patient_id], references: [id], onDelete: Restrict)
+  doctor  User? @relation("DoctorAppointments", fields: [doctor_id], references: [id], onDelete: Restrict)
 
+  @@index([patient_id])
+  @@index([doctor_id])
+  @@index([scheduled_time])
   @@map("Appointments")
 }
 
@@ -99,9 +102,11 @@ model Medication {
   deleted_at            DateTime?
 
   // Relations
-  patient User @relation("PatientMedications", fields: [patient_id], references: [id])
-  doctor  User @relation("DoctorMedications", fields: [doctor_id], references: [id])
+  patient User @relation("PatientMedications", fields: [patient_id], references: [id], onDelete: Restrict)
+  doctor  User @relation("DoctorMedications", fields: [doctor_id], references: [id], onDelete: Restrict)
 
+  @@index([patient_id])
+  @@index([doctor_id])
   @@map("Medications")
 }
 
@@ -121,9 +126,11 @@ model ScanLab {
   deleted_at     DateTime?
 
   // Relations
-  patient User @relation("PatientScansLabs", fields: [patient_id], references: [id])
-  doctor  User @relation("DoctorScansLabs", fields: [doctor_id], references: [id])
+  patient User @relation("PatientScansLabs", fields: [patient_id], references: [id], onDelete: Restrict)
+  doctor  User @relation("DoctorScansLabs", fields: [doctor_id], references: [id], onDelete: Restrict)
 
+  @@index([patient_id])
+  @@index([doctor_id])
   @@map("Scans_Labs")
 }
 
@@ -150,9 +157,11 @@ model ClinicNurse {
   nurse_id  String
 
   // Relations
-  clinic Clinic @relation(fields: [clinic_id], references: [id])
-  nurse  User   @relation(fields: [nurse_id], references: [id])
+  clinic Clinic @relation(fields: [clinic_id], references: [id], onDelete: Cascade)
+  nurse  User   @relation("NurseClinics", fields: [nurse_id], references: [id], onDelete: Cascade)
 
+  @@unique([clinic_id, nurse_id])
+  @@index([nurse_id])
   @@map("ClinicNurse")
 }
 
@@ -162,9 +171,11 @@ model ClinicDoctor {
   doctor_id String
 
   // Relations
-  clinic Clinic @relation(fields: [clinic_id], references: [id])
-  doctor Doctor @relation(fields: [doctor_id], references: [id])
+  clinic Clinic @relation(fields: [clinic_id], references: [id], onDelete: Cascade)
+  doctor Doctor @relation(fields: [doctor_id], references: [id], onDelete: Cascade)
 
+  @@unique([clinic_id, doctor_id])
+  @@index([doctor_id])
   @@map("ClinicDoctor")
 }
 
@@ -176,8 +187,10 @@ model AuditLog {
   created_at DateTime @default(now())
 
   // Relations
-  user User @relation(fields: [user_id], references: [id])
+  user User @relation("UserAuditLogs", fields: [user_id], references: [id], onDelete: Restrict)
 
+  @@index([user_id])
+  @@index([created_at])
   @@map("AuditLogs")
 }
 
