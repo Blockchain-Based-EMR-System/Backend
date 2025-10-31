@@ -24,17 +24,18 @@ model User {
   deleted_at    DateTime?
 
   // Relations
-  patient                 Patient?      @relation("UserAsPatient")
-  doctor                  Doctor?       @relation("UserAsDoctor")
-  appointments_as_patient Appointment[] @relation("PatientAppointments")
-  appointments_as_doctor  Appointment[] @relation("DoctorAppointments")
-  medications_as_patient  Medication[]  @relation("PatientMedications")
-  medications_as_doctor   Medication[]  @relation("DoctorMedications")
-  scans_labs_as_patient   ScanLab[]     @relation("PatientScansLabs")
-  scans_labs_as_doctor    ScanLab[]     @relation("DoctorScansLabs")
-  clinics_as_nurse        ClinicNurse[] @relation("NurseClinics")
-  audit_logs              AuditLog[]    @relation("UserAuditLogs")
-  controlled_patients     Patient[]     @relation("ControllingNurse")
+  patient                 Patient?       @relation("UserAsPatient")
+  doctor                  Doctor?        @relation("UserAsDoctor")
+  appointments_as_patient Appointment[]  @relation("PatientAppointments")
+  appointments_as_doctor  Appointment[]  @relation("DoctorAppointments")
+  medications_as_patient  Medication[]   @relation("PatientMedications")
+  medications_as_doctor   Medication[]   @relation("DoctorMedications")
+  scans_labs_as_patient   ScanLab[]      @relation("PatientScansLabs")
+  scans_labs_as_doctor    ScanLab[]      @relation("DoctorScansLabs")
+  clinics_as_nurse        ClinicNurse[]  @relation("NurseClinics")
+  audit_logs              AuditLog[]     @relation("UserAuditLogs")
+  controlled_patients     Patient[]      @relation("ControllingNurse")
+  refresh_tokens          RefreshToken[] @relation("UserRefreshTokens")
 
   @@map("Users")
 }
@@ -192,6 +193,24 @@ model AuditLog {
   @@index([user_id])
   @@index([created_at])
   @@map("AuditLogs")
+}
+
+model RefreshToken {
+  id           String    @id @default(uuid())
+  user_id      String
+  token_hash   String    @db.VarChar(255)
+  expires_at   DateTime
+  is_revoked   Boolean   @default(false)
+  created_at   DateTime  @default(now())
+  revoked_at   DateTime?
+
+  // Relations
+  user User @relation("UserRefreshTokens", fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([token_hash])
+  @@index([expires_at])
+  @@map("RefreshTokens")
 }
 
 

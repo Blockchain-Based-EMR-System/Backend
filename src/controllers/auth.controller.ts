@@ -22,9 +22,10 @@ export class AuthController {
   public logIn = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const userData: LoginUserDto = req.body;
-      const { cookie, findUser } = await this.auth.login(userData);
-
-      res.setHeader('Set-Cookie', [cookie]);
+      const { cookies, findUser } = await this.auth.login(userData);
+      console.log(cookies);
+      
+      res.setHeader('Set-Cookie', cookies);
       res.status(200).json({ data: findUser, message: 'Logged In Successfully' });
     } catch (error) {
       next(error);
@@ -36,8 +37,29 @@ export class AuthController {
       const userData: User = req.user;
       const logOutUserData: User = await this.auth.logout(userData);
 
-      res.setHeader('Set-Cookie', ['Authorization=; Max-age=0']);
+      res.setHeader('Set-Cookie', ['Authorization=; Max-age=0', 'RefreshToken=; Max-age=0']);
       res.status(200).json({ message: 'Logged Out Successfully' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public refresh = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const refreshToken = req.cookies?.RefreshToken;
+      const { cookies, user, accessToken } = await this.auth.refreshAccessToken(refreshToken);
+
+      res.setHeader('Set-Cookie', cookies);
+      res.status(200).json({ 
+        data: { 
+          user, 
+          accessToken: {
+            expiresIn: accessToken.expiresIn,
+            expiresAt: new Date(Date.now() + accessToken.expiresIn * 1000)
+          }
+        }, 
+        message: 'Token Refreshed Successfully' 
+      });
     } catch (error) {
       next(error);
     }

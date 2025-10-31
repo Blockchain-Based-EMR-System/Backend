@@ -18,8 +18,7 @@ const getAuthorization = (req: Request) => {
 
 export const AuthMiddleware = async (req: RequestWithUser, res: Response, next: NextFunction) => {
   try {
-    const Authorization = getAuthorization(req);
-
+    const Authorization = getAuthorization(req);    
     if (Authorization) {
       const { id } = (await verify(Authorization, SECRET_KEY)) as DataStoredInToken;
       const users = new PrismaClient().user;
