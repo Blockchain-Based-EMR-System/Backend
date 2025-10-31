@@ -4,6 +4,7 @@ import { verify } from 'jsonwebtoken';
 import { SECRET_KEY } from '@config';
 import { HttpException } from '@exceptions/HttpException';
 import { DataStoredInToken, RequestWithUser } from '@interfaces/auth.interface';
+import { User } from '@/interfaces';
 
 const getAuthorization = (req: Request) => {
   const cookie = req.cookies['Authorization'];
@@ -22,7 +23,7 @@ export const AuthMiddleware = async (req: RequestWithUser, res: Response, next: 
     if (Authorization) {
       const { id } = (await verify(Authorization, SECRET_KEY)) as DataStoredInToken;
       const users = new PrismaClient().user;
-      const findUser = await users.findUnique({ where: { id: Number(id) } });
+      const findUser: User = await users.findUnique({ where: { id } });
 
       if (findUser) {
         req.user = findUser;

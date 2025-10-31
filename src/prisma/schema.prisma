@@ -17,6 +17,8 @@ model User {
   username      String    @unique @db.VarChar(255)
   phone         String    @db.VarChar(20)
   password_hash String    @db.VarChar(255)
+  gender        Gender
+  date_of_birth DateTime
   created_at    DateTime  @default(now())
   modified_at   DateTime  @updatedAt
   deleted_at    DateTime?
@@ -86,6 +88,7 @@ model Medication {
   patient_id            String    
   doctor_id             String    
   treatment_name        String    @db.VarChar(255)
+  category              String    @db.VarChar(100)
   medication_end_date   DateTime
   medication_start_time DateTime  @db.Time(0)
   frequency             Int
@@ -129,6 +132,7 @@ model Clinic {
   is_active   Boolean   @default(true)
   opening_at  DateTime  @db.Time(0)
   closing_at  DateTime  @db.Time(0)
+  address     String    @db.VarChar(300)
   created_at  DateTime  @default(now())
   modified_at DateTime  @updatedAt
   deleted_at  DateTime?
@@ -197,4 +201,9 @@ enum Period {
   WEEKLY
   MONTHLY
   YEARLY
+}
+
+enum Gender {
+  MALE
+  FEMALE
 }

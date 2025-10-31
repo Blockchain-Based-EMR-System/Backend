@@ -6,8 +6,25 @@ export class CreateUserDto {
 
   @IsString()
   @IsNotEmpty()
-  @MinLength(9)
+  public name: string;
+
+  @IsString()
+  @IsNotEmpty()
+  public phone: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(8)
   @MaxLength(32)
+  public password: string;
+}
+
+export class LoginUserDto {
+  @IsEmail()
+  public email: string;
+
+  @IsString()
+  @IsNotEmpty()
   public password: string;
 }
 
