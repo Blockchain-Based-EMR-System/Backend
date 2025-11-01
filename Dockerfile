@@ -1,0 +1,41 @@
+# First stage: BUILD THE APP #
+
+# NodeJS Version 22
+FROM node:22-bullseye AS builder
+
+# Work to Dir
+WORKDIR /app
+
+#copy package and prisma files
+COPY package*.json ./
+COPY src/prisma ./src/prisma
+
+# Install Node Package
+RUN npm ci --legacy-peer-deps 
+
+# generate prisma client
+RUN npx prisma generate
+
+# Copy rest of the app
+COPY . .
+
+
+
+# second stage #
+
+FROM node:22-bullseye AS runner
+
+WORKDIR /app
+
+# copy only needed files
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/src/prisma ./src/prisma
+COPY --from=builder /app/package*.json ./
+
+# Set Env
+ENV NODE_ENV=development
+
+EXPOSE 3000
+
+# Cmd script
+CMD ["npm", "run", "start"]

@@ -15,20 +15,6 @@ jobs:
   tests:
     runs-on: ubuntu-latest
 
-    env:
-      NODE_ENV: test
-      DATABASE_URL: "postgresql://testuser:testpassword@localhost:5432/testdb"
-
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_USER: testuser
-          POSTGRES_PASSWORD: testpassword
-          POSTGRES_DB: testdb
-        ports:
-          - 5432:5432
-
     steps:
       - name: checkout code
         uses: actions/checkout@v4
@@ -44,10 +30,10 @@ jobs:
       - name: generate prisma client 
         run: npx prisma generate
       
-      - name: run Prisma migrations
-        run: npx prisma migrate deploy
-        env:
-          DATABASE_URL: ${{ env.DATABASE_URL }}
+      # - name: run Prisma migrations
+      #   run: npx prisma migrate deploy
+      #   env:
+      #     DATABASE_URL: ${{ env.DATABASE_URL }}
       
       - name: build app
         run: npm run build
