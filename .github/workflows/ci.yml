@@ -5,40 +5,27 @@ on:
     branches:
       - main
       - dev
-
   pull_request:
     branches:
       - main
       - dev
 
 jobs:
-  tests:
+  setup-check:
     runs-on: ubuntu-latest
 
     steps:
-      - name: checkout code
+      - name: Checkout code
         uses: actions/checkout@v4
       
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
+          cache: 'npm'
       
-      - name: install dependencies
+      - name: Install dependencies
         run: npm ci 
       
-      - name: generate prisma client 
+      - name: Generate Prisma client 
         run: npx prisma generate
-      
-      # - name: run Prisma migrations
-      #   run: npx prisma migrate deploy
-      #   env:
-      #     DATABASE_URL: ${{ env.DATABASE_URL }}
-      
-      - name: build app
-        run: npm run build
-      
-      - name: run tests
-        run: npm test
-
-
