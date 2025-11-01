@@ -17,12 +17,12 @@ services:
     container_name: server
     build:
       context: ./
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile
     ports:
-      - "3000:3000"
+      - "3000:3000" 
       - "5555:5555" 
     environment:
-      DATABASE_URL: "postgresql://myuser:mypassword@postgres:5432/mydatabase?schema=public"
+      DATABASE_URL: "postgresql://NG:password@postgres:5432/EMR_DB?schema=public"
       NODE_ENV: development
     volumes:
       - ./:/app
@@ -39,9 +39,9 @@ services:
     container_name: postgres_db
     image: postgres:16
     environment:
-      - POSTGRES_USER=myuser
-      - POSTGRES_PASSWORD=mypassword
-      - POSTGRES_DB=mydatabase
+      - POSTGRES_USER=NG
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=EMR_DB
     volumes:
       - data:/var/lib/postgresql/data
     restart: unless-stopped
