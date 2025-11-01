@@ -1,0 +1,58 @@
+
+services:
+  proxy:
+    container_name: proxy
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf 
+    restart: "unless-stopped"
+    depends_on:
+      - server    
+    networks:
+      - backend
+
+  server:
+    container_name: server
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000" 
+      - "5555:5555" 
+    environment:
+      DATABASE_URL: "postgresql://NG:password@postgres:5432/EMR_DB?schema=public"
+      NODE_ENV: development
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    restart: "unless-stopped"
+    depends_on:
+      - postgres
+    networks:
+      - backend
+    command: npm run dev
+
+
+  postgres:
+    container_name: postgres_db
+    image: postgres:16
+    environment:
+      - POSTGRES_USER=NG
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=EMR_DB
+    volumes:
+      - data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - backend
+    
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  data:
+    driver: local

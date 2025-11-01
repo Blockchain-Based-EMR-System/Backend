@@ -1,0 +1,241 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(uuid())
+  name          String    @db.VarChar(255)
+  email         String    @unique @db.VarChar(255)
+  username      String    @unique @db.VarChar(255)
+  phone         String    @db.VarChar(20)
+  password_hash String    @db.VarChar(255)
+  gender        Gender
+  date_of_birth DateTime
+  created_at    DateTime  @default(now())
+  modified_at   DateTime  @updatedAt
+  deleted_at    DateTime?
+
+  // Relations
+  patient                 Patient?       @relation("UserAsPatient")
+  doctor                  Doctor?        @relation("UserAsDoctor")
+  appointments_as_patient Appointment[]  @relation("PatientAppointments")
+  appointments_as_doctor  Appointment[]  @relation("DoctorAppointments")
+  medications_as_patient  Medication[]   @relation("PatientMedications")
+  medications_as_doctor   Medication[]   @relation("DoctorMedications")
+  scans_labs_as_patient   ScanLab[]      @relation("PatientScansLabs")
+  scans_labs_as_doctor    ScanLab[]      @relation("DoctorScansLabs")
+  clinics_as_nurse        ClinicNurse[]  @relation("NurseClinics")
+  audit_logs              AuditLog[]     @relation("UserAuditLogs")
+  controlled_patients     Patient[]      @relation("ControllingNurse")
+  refresh_tokens          RefreshToken[] @relation("UserRefreshTokens")
+
+  @@map("Users")
+}
+
+model Doctor {
+  id            String   @id @default(uuid())
+  specialization String   @db.VarChar(255)
+  avg_time      DateTime? @db.Time(0)
+
+  // Relations
+  user           User           @relation("UserAsDoctor", fields: [id], references: [id], onDelete: Cascade)
+  clinic_doctors ClinicDoctor[]
+
+  @@map("Doctor")
+}
+
+model Patient {
+  id                     String  @id @default(uuid())
+  bc_address             String  @db.VarChar(255)
+  consent                Boolean @default(false)
+  controlling_nurse_id      String?
+
+  // Relations
+  user                   User    @relation("UserAsPatient", fields: [id], references: [id], onDelete: Cascade)
+  controlling_nurse_user User?   @relation("ControllingNurse", fields: [controlling_nurse_id], references: [id], onDelete: SetNull)
+
+  @@map("Patient")
+}
+
+model Appointment {
+  id             String    @id @default(uuid())
+  patient_id     String?    
+  doctor_id      String?    
+  scheduled_time DateTime
+  is_online      Boolean   @default(false)
+  is_completed   Boolean   @default(false)
+  estimated_time Float?
+  created_at     DateTime  @default(now())
+  modified_at    DateTime  @updatedAt
+  deleted_at     DateTime?
+
+  // Relations
+  patient User? @relation("PatientAppointments", fields: [patient_id], references: [id], onDelete: Restrict)
+  doctor  User? @relation("DoctorAppointments", fields: [doctor_id], references: [id], onDelete: Restrict)
+
+  @@index([patient_id])
+  @@index([doctor_id])
+  @@index([scheduled_time])
+  @@map("Appointments")
+}
+
+model Medication {
+  id                    String    @id @default(uuid())
+  patient_id            String    
+  doctor_id             String    
+  treatment_name        String    @db.VarChar(255)
+  category              String    @db.VarChar(100)
+  medication_end_date   DateTime
+  medication_start_time DateTime  @db.Time(0)
+  frequency             Int
+  period                Period
+  description           String?   @db.Text
+  created_at            DateTime  @default(now())
+  modified_at           DateTime  @updatedAt
+  deleted_at            DateTime?
+
+  // Relations
+  patient User @relation("PatientMedications", fields: [patient_id], references: [id], onDelete: Restrict)
+  doctor  User @relation("DoctorMedications", fields: [doctor_id], references: [id], onDelete: Restrict)
+
+  @@index([patient_id])
+  @@index([doctor_id])
+  @@map("Medications")
+}
+
+model ScanLab {
+  id             String      @id @default(uuid())
+  patient_id     String      
+  doctor_id      String      
+  name           String      @db.VarChar(255)
+  scheduled_date DateTime?
+  scheduled_time DateTime?   @db.Time(0)
+  frequency      Int?
+  period         Period?
+  description    String?     @db.Text
+  type           ScanLabType
+  created_at     DateTime    @default(now())
+  modified_at    DateTime    @updatedAt
+  deleted_at     DateTime?
+
+  // Relations
+  patient User @relation("PatientScansLabs", fields: [patient_id], references: [id], onDelete: Restrict)
+  doctor  User @relation("DoctorScansLabs", fields: [doctor_id], references: [id], onDelete: Restrict)
+
+  @@index([patient_id])
+  @@index([doctor_id])
+  @@map("Scans_Labs")
+}
+
+model Clinic {
+  id          String    @id @default(uuid())
+  is_active   Boolean   @default(true)
+  opening_at  DateTime  @db.Time(0)
+  closing_at  DateTime  @db.Time(0)
+  address     String    @db.VarChar(300)
+  created_at  DateTime  @default(now())
+  modified_at DateTime  @updatedAt
+  deleted_at  DateTime?
+
+  // Relations
+  clinic_nurses  ClinicNurse[]
+  clinic_doctors ClinicDoctor[]
+
+  @@map("Clinic")
+}
+
+model ClinicNurse {
+  id        String @id @default(uuid())
+  clinic_id String
+  nurse_id  String
+
+  // Relations
+  clinic Clinic @relation(fields: [clinic_id], references: [id], onDelete: Cascade)
+  nurse  User   @relation("NurseClinics", fields: [nurse_id], references: [id], onDelete: Cascade)
+
+  @@unique([clinic_id, nurse_id])
+  @@index([nurse_id])
+  @@map("ClinicNurse")
+}
+
+model ClinicDoctor {
+  id        String @id @default(uuid()) 
+  clinic_id String
+  doctor_id String
+
+  // Relations
+  clinic Clinic @relation(fields: [clinic_id], references: [id], onDelete: Cascade)
+  doctor Doctor @relation(fields: [doctor_id], references: [id], onDelete: Cascade)
+
+  @@unique([clinic_id, doctor_id])
+  @@index([doctor_id])
+  @@map("ClinicDoctor")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  user_id    String  
+  action     Action
+  bc_hash    String   @db.VarChar(255)
+  created_at DateTime @default(now())
+
+  // Relations
+  user User @relation("UserAuditLogs", fields: [user_id], references: [id], onDelete: Restrict)
+
+  @@index([user_id])
+  @@index([created_at])
+  @@map("AuditLogs")
+}
+
+model RefreshToken {
+  id           String    @id @default(uuid())
+  user_id      String
+  token_hash   String    @db.VarChar(255)
+  expires_at   DateTime
+  is_revoked   Boolean   @default(false)
+  created_at   DateTime  @default(now())
+  revoked_at   DateTime?
+
+  // Relations
+  user User @relation("UserRefreshTokens", fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([token_hash])
+  @@index([expires_at])
+  @@map("RefreshTokens")
+}
+
+
+enum ScanLabType {
+  SCAN
+  LAB
+}
+
+enum Action {
+  CREATE
+  UPDATE
+  DELETE
+  READ
+  LOGIN
+  LOGOUT
+}
+
+enum Period {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
