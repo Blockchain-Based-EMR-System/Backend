@@ -11,9 +11,11 @@ export class AuthController {
   public signUp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const userData: CreateUserDto = req.body;
-      const signUpUserData: User = await this.auth.signup(userData);
+      const { createdUserData, cookies} = await this.auth.signup(userData);
 
-      res.status(201).json({ data: signUpUserData, message: 'Signed Up Successfully' });
+      res.setHeader('Set-Cookie', cookies);
+
+      res.status(201).json({ data: createdUserData, message: 'Signed Up Successfully' });
     } catch (error) {
       next(error);
     }
@@ -60,6 +62,18 @@ export class AuthController {
         }, 
         message: 'Token Refreshed Successfully' 
       });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public completeProfile = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const userData: User = req.user;
+      const profileData = req.body;
+      const updatedUserData: User = await this.auth.completeProfile(userData, profileData);
+
+      res.status(200).json({ data: updatedUserData, message: 'Profile Completed Successfully' });
     } catch (error) {
       next(error);
     }

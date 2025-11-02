@@ -21,6 +21,8 @@ export class AuthRoute implements Routes {
     this.router.post(`${this.path}/login`, ValidationMiddleware(LoginUserDto), this.auth.logIn);
     this.router.post(`${this.path}/logout`, AuthMiddleware, this.auth.logOut);
     this.router.post(`${this.path}/refresh`, AuthMiddleware ,this.auth.refresh);
+    this.router.patch(`${this.path}/complete-profile`, AuthMiddleware, this.auth.completeProfile);
+
     this.router.get(`${this.path}/google`, this.googleAuth.googleOAuth);
     this.router.get(`${this.path}/google/callback`, this.googleAuth.googleOAuthCallback);
   }

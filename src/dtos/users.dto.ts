@@ -1,6 +1,5 @@
 import { Gender } from '@prisma/client';
-import { IsEmail, IsString, IsNotEmpty, MinLength, MaxLength, IsDate, IsBoolean, IsOptional } from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsEmail, IsString, IsNotEmpty, MinLength, MaxLength, IsDateString, IsBoolean, IsOptional } from 'class-validator';
 
 export class CreateUserDto {
   @IsEmail()
@@ -9,19 +8,6 @@ export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
   public name: string;
-
-  @IsString()
-  @IsNotEmpty()
-  public phone: string;
-
-  @IsString()
-  @IsNotEmpty()
-  public gender: Gender;
-
-  @IsNotEmpty()
-  @Type(() => Date)
-  @IsDate()
-  public date_of_birth: Date;
 
   @IsString()
   @IsNotEmpty()
@@ -52,5 +38,15 @@ export class UpdateUserDto {
 }
 
 export class CompleteUserProfileDto {
+  @IsString()
+  @IsNotEmpty()
+  public phone: string;
 
+  @IsString()
+  @IsNotEmpty()
+  public gender: Gender;
+
+  @IsNotEmpty()
+  @IsDateString()
+  public date_of_birth: string;
 }
