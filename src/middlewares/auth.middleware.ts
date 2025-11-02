@@ -18,6 +18,7 @@ const getAuthorization = (req: Request) => {
 
 export const AuthMiddleware = async (req: RequestWithUser, res: Response, next: NextFunction) => {
   try {
+    // Check for JWT token
     const Authorization = getAuthorization(req);    
     if (Authorization) {
       const { id } = (await verify(Authorization, SECRET_KEY)) as DataStoredInToken;
@@ -31,7 +32,7 @@ export const AuthMiddleware = async (req: RequestWithUser, res: Response, next: 
         next(new HttpException(401, 'Wrong authentication token'));
       }
     } else {
-      next(new HttpException(404, 'Authentication token missing'));
+      next(new HttpException(401, 'Authentication required'));
     }
   } catch (error) {
     next(new HttpException(401, 'Wrong authentication token'));
