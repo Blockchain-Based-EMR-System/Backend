@@ -11,9 +11,11 @@ export class AuthController {
   public signUp = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const userData: CreateUserDto = req.body;
-      const { createdUserData, cookies} = await this.auth.signup(userData);
+      const { createdUserData, cookies } = await this.auth.signup(userData);
 
       res.setHeader('Set-Cookie', cookies);
+
+      await this.auth.sendEmailOtp(userData.email);
 
       res.status(201).json({ data: createdUserData, message: 'Signed Up Successfully' });
     } catch (error) {
@@ -26,7 +28,7 @@ export class AuthController {
       const userData: LoginUserDto = req.body;
       const { cookies, findUser } = await this.auth.login(userData);
       console.log(cookies);
-      
+
       res.setHeader('Set-Cookie', cookies);
       res.status(200).json({ data: findUser, message: 'Logged In Successfully' });
     } catch (error) {
@@ -52,15 +54,15 @@ export class AuthController {
       const { cookies, user, accessToken } = await this.auth.refreshAccessToken(refreshToken);
 
       res.setHeader('Set-Cookie', cookies);
-      res.status(200).json({ 
-        data: { 
-          user, 
+      res.status(200).json({
+        data: {
+          user,
           accessToken: {
             expiresIn: accessToken.expiresIn,
             expiresAt: new Date(Date.now() + accessToken.expiresIn * 1000)
           }
-        }, 
-        message: 'Token Refreshed Successfully' 
+        },
+        message: 'Token Refreshed Successfully'
       });
     } catch (error) {
       next(error);
@@ -78,4 +80,16 @@ export class AuthController {
       next(error);
     }
   };
+
+  public verifyOTP = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const email = await this.auth.getUserEmail(req)
+      const { otp } = req.body;
+      const isSuccessful = await this.auth.verifyEmailOtp(email, otp);
+      res.status(200).json({ data: isSuccessful, message: 'OTP Verified Successfully' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
 }

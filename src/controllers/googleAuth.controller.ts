@@ -3,9 +3,13 @@ import passport from "passport";
 import { Container } from "typedi";
 import { NextFunction, Request, Response } from "express";
 import { User } from "@/interfaces/users.interface";
+import { RequestWithUser } from "@/interfaces";
+import { GoogleAuthService } from "@/services/googleAuth.service";
+import { UpdateGoogleUserPhoneDto } from "@/dtos/googleUsers.dto";
 
 export class GoogleAuthController {
     public authService = Container.get(AuthService);
+    public googleAuthService = Container.get(GoogleAuthService);
 
     public googleOAuth = passport.authenticate('google', {
         scope: ['profile', 'email'],
@@ -36,5 +40,15 @@ export class GoogleAuthController {
                 next(error);
             }
         })(req, res, next);
+    };
+
+    public updatePhoneNumber = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const phone: UpdateGoogleUserPhoneDto = req.body.phone;
+            await this.googleAuthService.updatePhoneNumber(req.user.id, phone.phone);
+            res.status(200).json({ message: 'Phone Number Updated Successfully' });
+        } catch (error) {
+            next(error);
+        }
     };
 }

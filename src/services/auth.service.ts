@@ -5,8 +5,9 @@ import { Service } from 'typedi';
 import { SECRET_KEY, REFRESH_TOKEN_SECRET, REFRESH_TOKEN_EXPIRY, ACCESS_TOKEN_EXPIRY } from '@config';
 import { CompleteUserProfileDto, CreateUserDto, LoginUserDto } from '@dtos/users.dto';
 import { HttpException } from '@exceptions/HttpException';
-import { DataStoredInToken, AccessTokenData, RefreshTokenData, TokenResponse } from '@interfaces/auth.interface';
+import { DataStoredInToken, AccessTokenData, RefreshTokenData, TokenResponse, RequestWithUser } from '@interfaces/auth.interface';
 import { User } from '@interfaces/users.interface';
+import { transporter } from '@/utils/nodeMailerService';
 import crypto from 'crypto';
 
 @Service()
@@ -14,7 +15,7 @@ export class AuthService {
   public users = new PrismaClient().user;
   public refreshTokens = new PrismaClient().refreshToken;
 
-  public async signup(userData: CreateUserDto): Promise<{ createdUserData:User; cookies: string[] }> {
+  public async signup(userData: CreateUserDto): Promise<{ createdUserData: User; cookies: string[] }> {
     const findUserSameEmail: User = await this.users.findUnique({ where: { email: userData.email } });
     if (findUserSameEmail) throw new HttpException(409, `This email ${userData.email} already exists`);
 
@@ -194,6 +195,76 @@ export class AuthService {
       default: return 3600; // Default 1 hour
     }
   }
+
+  public async sendEmailOtp(email: string): Promise<void> {
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiryDate = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    const userInfo: Partial<User> = await this.users.update({
+      where: { email },
+      data: {
+        email_OTP: otp,
+        email_OTP_expires_at: expiryDate,
+      },
+      select: { email: true }
+    });
+
+    const mailOptions = {
+      from: 'theshooter200306@gmail.com',
+      to: userInfo.email,
+      subject: 'Your Email Verification Code',
+      html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
+        <h2 style="text-align: center; color: #333;">Email Verification</h2>
+        <p style="font-size: 16px;">Hi there,</p>
+        <p style="font-size: 16px;">Thank you for registering. Please use the following code to verify your email address:</p>
+        <p style="font-size: 24px; text-align: center; font-weight: bold; letter-spacing: 3px; margin: 25px 0; padding: 10px; background-color: #f4f4f4; border-radius: 5px;">
+          ${otp}
+        </p>
+        <p style="font-size: 16px;">This code will expire in 10 minutes.</p>
+        <p style="font-size: 16px;">If you did not request this, please ignore this email.</p>
+      </div>
+    `
+    };
+
+    await transporter.sendMail(mailOptions);
+  }
+
+  public async getUserEmail(req: RequestWithUser): Promise<string> {
+    const email = await this.users.findUnique({
+      where: { id: req.user.id },
+      select: { email: true }
+    });
+    if (!email) throw new HttpException(404, "User email not found");
+    return email.email;
+  }
+
+  public async verifyEmailOtp(email: string, otp: string): Promise<Boolean> {
+    const user = await this.users.findUnique({ where: { email } });
+    if (!user) throw new HttpException(404, "User not found");
+
+    if (user.email_OTP !== otp) {
+      throw new HttpException(400, "Invalid OTP");
+    }
+
+    if (user.email_OTP_expires_at && user.email_OTP_expires_at < new Date()) {
+      throw new HttpException(400, "OTP has expired");
+    }
+
+    // Clear OTP fields after successful verification
+    await this.users.update({
+      where: { email },
+      data: {
+        email_OTP: null,
+        email_OTP_expires_at: null,
+        isVerified: true,
+      },
+    });
+
+    return true;
+  }
+
 
   // Keep old methods for backward compatibility
   public createToken(user: User): AccessTokenData {

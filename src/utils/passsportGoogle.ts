@@ -3,10 +3,12 @@ import { Strategy as GoogleStrategy, Profile } from 'passport-google-oauth20';
 import { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_CALLBACK_URL } from '@/config';
 import { PrismaClient } from '@prisma/client';
 import { CreateGoogleUsersDto } from '@/dtos/googleUsers.dto';
-import { createInitialProfileGoogle } from '@/services/googleAuth.service';
+import { GoogleAuthService } from '@/services/googleAuth.service';
 import { User } from '@/interfaces';
+import Container from 'typedi';
 
 const prisma = new PrismaClient();
+const googleAuthService = Container.get(GoogleAuthService);
 
 passport.use(new GoogleStrategy({
     clientID: GOOGLE_CLIENT_ID,
@@ -38,7 +40,7 @@ passport.use(new GoogleStrategy({
                     email,
                     name,
                 };
-                const createdUser:User = await createInitialProfileGoogle(newGoogleUserData);
+                const createdUser:User = await googleAuthService.createInitialProfileGoogle(newGoogleUserData);
                 return done(null, createdUser);
             }
             return done(null, user);
