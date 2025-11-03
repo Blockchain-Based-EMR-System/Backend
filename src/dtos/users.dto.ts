@@ -8,6 +8,10 @@ export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
   public name: string;
+  
+  @IsString()
+  @IsNotEmpty()
+  public phone: string;
 
   @IsString()
   @IsNotEmpty()
@@ -24,9 +28,8 @@ export class LoginUserDto {
   @IsNotEmpty()
   public password: string;
 
-  @IsOptional()
   @IsBoolean()
-  public rememberMe?: boolean;
+  public rememberMe: boolean;
 }
 
 export class UpdateUserDto {
@@ -38,9 +41,6 @@ export class UpdateUserDto {
 }
 
 export class CompleteUserProfileDto {
-  @IsString()
-  @IsNotEmpty()
-  public phone: string;
 
   @IsString()
   @IsNotEmpty()

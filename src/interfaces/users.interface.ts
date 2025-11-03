@@ -14,6 +14,7 @@ export interface User {
   gender: Gender;
   date_of_birth: Date;
   password_hash: string;
+  isVerified: boolean;
   created_at: Date;
   modified_at: Date;
   deleted_at?: Date;

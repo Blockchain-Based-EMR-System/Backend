@@ -66,12 +66,19 @@ export class App {
 
   private initializeSwagger() {
     const options = {
-      swaggerDefinition: {
+      definition: {
+        openapi: '3.0.0',
         info: {
-          title: 'REST API',
+          title: 'GP Backend Authentication API',
           version: '1.0.0',
-          description: 'Example docs',
+          description: 'Comprehensive API documentation for authentication routes including email/password auth and Google OAuth',
         },
+        servers: [
+          {
+            url: `http://localhost:${this.port}`,
+            description: 'Development server',
+          },
+        ],
       },
       apis: ['swagger.yaml'],
     };
@@ -84,3 +91,4 @@ export class App {
     this.app.use(ErrorMiddleware);
   }
 }
+

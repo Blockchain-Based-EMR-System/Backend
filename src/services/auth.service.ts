@@ -29,7 +29,7 @@ export class AuthService {
     const createdUserData: User = await this.users.create({
       data: {
         ...userDataWithoutPassword, username, password_hash: hashedPassword,
-        phone: "", gender: "MALE", date_of_birth: new Date("2000-01-01")
+        gender: "MALE", date_of_birth: new Date("2000-01-01")
       }
     });
 
@@ -72,7 +72,6 @@ export class AuthService {
     const updatedUserData: User = await this.users.update({
       where: { id: userData.id },
       data: {
-        phone: profileData.phone,
         gender: profileData.gender,
         date_of_birth: new Date(profileData.date_of_birth),
       },
@@ -127,13 +126,12 @@ export class AuthService {
     const cookies: string[] = [];
 
     // Access token cookie
-    cookies.push(`Authorization=${tokenResponse.accessToken.token}; HttpOnly; Max-Age=${tokenResponse.accessToken.expiresIn}; Path=/; SameSite=Strict`);
+    cookies.push(`Authorization=${tokenResponse.accessToken.token}; HttpOnly; Max-Age=${tokenResponse.accessToken.expiresIn}; Path=/; SameSite=Lax`);
 
     // Refresh token cookie (if exists)
     if (tokenResponse.refreshToken) {
-      cookies.push(`RefreshToken=${tokenResponse.refreshToken.token}; HttpOnly; Max-Age=${tokenResponse.refreshToken.expiresIn}; Path=/; SameSite=Strict`);
+      cookies.push(`RefreshToken=${tokenResponse.refreshToken.token}; HttpOnly; Max-Age=${tokenResponse.refreshToken.expiresIn}; Path=/; SameSite=Lax`);
     }
-
     return cookies;
   }
 
@@ -307,9 +305,9 @@ export class AuthService {
         password_reset_token_expires_at: { gt: new Date() },
       },
     });
-    
+
     if (!user) throw new HttpException(400, "Invalid or expired password reset token");
-    
+
     const hashedPassword = await hash(newPassword, 10);
 
     await this.users.update({
@@ -321,7 +319,7 @@ export class AuthService {
       },
     });
   }
-  
+
 
   // Keep old methods for backward compatibility
   public createToken(user: User): AccessTokenData {
