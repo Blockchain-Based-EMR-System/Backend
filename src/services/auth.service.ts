@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { compare, hash } from 'bcrypt';
 import { sign, verify } from 'jsonwebtoken';
 import { Service } from 'typedi';
-import { SECRET_KEY, REFRESH_TOKEN_SECRET, REFRESH_TOKEN_EXPIRY, ACCESS_TOKEN_EXPIRY } from '@config';
+import { SECRET_KEY, REFRESH_TOKEN_SECRET, REFRESH_TOKEN_EXPIRY, ACCESS_TOKEN_EXPIRY, FRONTEND_URL, SENDER_EMAIL } from '@config';
 import { CompleteUserProfileDto, CreateUserDto, LoginUserDto } from '@dtos/users.dto';
 import { HttpException } from '@exceptions/HttpException';
 import { DataStoredInToken, AccessTokenData, RefreshTokenData, TokenResponse, RequestWithUser } from '@interfaces/auth.interface';
@@ -211,7 +211,7 @@ export class AuthService {
     });
 
     const mailOptions = {
-      from: 'theshooter200306@gmail.com',
+      from: SENDER_EMAIL,
       to: userInfo.email,
       subject: 'Your Email Verification Code',
       html: `
@@ -265,6 +265,63 @@ export class AuthService {
     return true;
   }
 
+  public async sendPasswordResetEmail(email: string): Promise<void> {
+    const user = await this.users.findUnique({ where: { email } });
+    if (!user) throw new HttpException(200, "Email will be sent if account exists");
+
+    const resetPasswordToken = crypto.randomBytes(32).toString('hex');
+    const resetPasswordTokenExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+    await this.users.update({
+      where: { email },
+      data: {
+        password_reset_token: resetPasswordToken,
+        password_reset_token_expires_at: resetPasswordTokenExpiry,
+      },
+    });
+
+    const resetLink = `${FRONTEND_URL}/reset-password?token=${resetPasswordToken}`;
+    const mailOptions = {
+      from: SENDER_EMAIL,
+      to: user.email,
+      subject: 'Your Password Reset Request',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px;">
+          <h2 style="color: #333;">Password Reset Request</h2>
+          <p>You are receiving this email because you (or someone else) requested a password reset for your account.</p>
+          <p>Please click the button below to reset your password:</p>
+          <a href="${resetLink}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
+            Reset Your Password
+          </a>
+          <p style="margin-top: 20px;">If you did not request this, please ignore this email. This link is valid for 10 minutes.</p>
+        </div>
+      `
+    };
+    await transporter.sendMail(mailOptions);
+  }
+
+  public async resetPassword(token: string, newPassword: string): Promise<void> {
+    const user = await this.users.findFirst({
+      where: {
+        password_reset_token: token,
+        password_reset_token_expires_at: { gt: new Date() },
+      },
+    });
+    
+    if (!user) throw new HttpException(400, "Invalid or expired password reset token");
+    
+    const hashedPassword = await hash(newPassword, 10);
+
+    await this.users.update({
+      where: { id: user.id },
+      data: {
+        password_hash: hashedPassword,
+        password_reset_token: null,
+        password_reset_token_expires_at: null,
+      },
+    });
+  }
+  
 
   // Keep old methods for backward compatibility
   public createToken(user: User): AccessTokenData {

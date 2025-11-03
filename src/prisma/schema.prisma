@@ -11,20 +11,22 @@ datasource db {
 }
 
 model User {
-  id                   String    @id @default(uuid())
-  name                 String    @db.VarChar(255)
-  email                String    @unique @db.VarChar(255)
-  username             String    @unique @db.VarChar(255)
-  phone                String    @db.VarChar(20)
-  password_hash        String    @db.VarChar(255)
-  gender               Gender
-  date_of_birth        DateTime
-  isVerified           Boolean   @default(false)
-  email_OTP            String?   @db.VarChar(6)
-  email_OTP_expires_at DateTime?
-  created_at           DateTime  @default(now())
-  modified_at          DateTime  @updatedAt
-  deleted_at           DateTime?
+  id                              String    @id @default(uuid())
+  name                            String    @db.VarChar(255)
+  email                           String    @unique @db.VarChar(255)
+  username                        String    @unique @db.VarChar(255)
+  phone                           String    @db.VarChar(20)
+  password_hash                   String    @db.VarChar(255)
+  gender                          Gender
+  date_of_birth                   DateTime
+  isVerified                      Boolean   @default(false)
+  email_OTP                       String?   @db.VarChar(6)
+  email_OTP_expires_at            DateTime?
+  password_reset_token            String?   @db.VarChar(255)
+  password_reset_token_expires_at DateTime?
+  created_at                      DateTime  @default(now())
+  modified_at                     DateTime  @updatedAt
+  deleted_at                      DateTime?
 
   // Relations
   patient                 Patient?       @relation("UserAsPatient")

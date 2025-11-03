@@ -3,7 +3,7 @@ import { Container } from 'typedi';
 import { RequestWithUser } from '@interfaces/auth.interface';
 import { User } from '@interfaces/users.interface';
 import { AuthService } from '@services/auth.service';
-import { CreateUserDto, LoginUserDto } from '@/dtos/users.dto';
+import { CompleteUserProfileDto, CreateUserDto, LoginUserDto, ResetPasswordDto } from '@/dtos/users.dto';
 
 export class AuthController {
   public auth = Container.get(AuthService);
@@ -72,7 +72,7 @@ export class AuthController {
   public completeProfile = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     try {
       const userData: User = req.user;
-      const profileData = req.body;
+      const profileData: CompleteUserProfileDto = req.body;
       const updatedUserData: User = await this.auth.completeProfile(userData, profileData);
 
       res.status(200).json({ data: updatedUserData, message: 'Profile Completed Successfully' });
@@ -85,6 +85,9 @@ export class AuthController {
     try {
       const email = await this.auth.getUserEmail(req)
       const { otp } = req.body;
+      if (!otp) {
+        throw new Error('OTP is required');
+      }
       const isSuccessful = await this.auth.verifyEmailOtp(email, otp);
       res.status(200).json({ data: isSuccessful, message: 'OTP Verified Successfully' });
     } catch (error) {
@@ -92,4 +95,27 @@ export class AuthController {
     }
   };
 
+  public forgetPassword = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const email = req.body.email;
+      if(!email){
+        throw new Error('Email is required');
+      }
+      await this.auth.sendPasswordResetEmail(email);
+      res.status(200).json({ message: 'Password Reset Email Sent Successfully' });
+    } catch (error) {
+      next(error);
+    }
+  };
+
+  public resetPassword = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const { token, newPassword }: ResetPasswordDto = req.body;
+
+      await this.auth.resetPassword(token, newPassword);
+      res.status(200).json({ message: 'Password Reset Successfully' });
+    } catch (error) {
+      next(error);
+    }
+  };
 }

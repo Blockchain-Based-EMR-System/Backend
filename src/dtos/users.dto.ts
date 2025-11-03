@@ -50,3 +50,15 @@ export class CompleteUserProfileDto {
   @IsDateString()
   public date_of_birth: string;
 }
+
+export class ResetPasswordDto {
+  @IsString()
+  @IsNotEmpty()
+  public token: string;
+  
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(8)
+  @MaxLength(32)
+  public newPassword: string;
+}
