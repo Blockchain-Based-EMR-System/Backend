@@ -6,6 +6,12 @@ import { CreateGoogleUsersDto } from '@/dtos/googleUsers.dto';
 import { GoogleAuthService } from '@/services/googleAuth.service';
 import { User } from '@/interfaces';
 import Container from 'typedi';
+import { ErrorMessages } from '@/utils/errorMessages';
+
+// Define a custom error type with Arabic message support
+interface BilingualError extends Error {
+    messageAr?: string;
+}
 
 const prisma = new PrismaClient();
 const googleAuthService = Container.get(GoogleAuthService);
@@ -27,7 +33,9 @@ passport.use(new GoogleStrategy({
             const name = profile.displayName;
             
             if (!email) {
-                return done(new Error('No email found in Google profile'), undefined);
+                const error: BilingualError = new Error(ErrorMessages.NO_EMAIL_IN_GOOGLE_PROFILE.en);
+                error.messageAr = ErrorMessages.NO_EMAIL_IN_GOOGLE_PROFILE.ar;
+                return done(error, undefined);
             }
 
             // Find user in database by email
@@ -46,7 +54,9 @@ passport.use(new GoogleStrategy({
             return done(null, user);
         } catch (error) {
             console.error('Error in Google authentication:', error);
-            return done(error as Error, undefined);
+            const err: BilingualError = new Error(ErrorMessages.GOOGLE_AUTH_ERROR.en);
+            err.messageAr = ErrorMessages.GOOGLE_AUTH_ERROR.ar;
+            return done(err, undefined);
         }
     }
 ));

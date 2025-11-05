@@ -2,6 +2,8 @@ import { CreateGoogleUsersDto } from "@/dtos/googleUsers.dto";
 import { User } from "@/interfaces";
 import { PrismaClient } from "@prisma/client";
 import { Service } from "typedi";
+import { HttpException } from "@/exceptions/HttpException";
+import { ErrorMessages, createBilingualError } from "@/utils/errorMessages";
 
 const prisma = new PrismaClient();
 
@@ -25,6 +27,8 @@ export class GoogleAuthService {
             return createdUser;
         } catch (error) {
             console.error("Error creating initial Google user profile:", error);
+            const err = createBilingualError(500, ErrorMessages.SOMETHING_WENT_WRONG);
+            throw new HttpException(err.status, err.message, err.messageAr);
         }
     }
 
@@ -36,7 +40,8 @@ export class GoogleAuthService {
             });
         } catch (error) {
             console.error("Error updating phone number:", error);
-            throw error;
+            const err = createBilingualError(500, ErrorMessages.SOMETHING_WENT_WRONG);
+            throw new HttpException(err.status, err.message, err.messageAr);
         }
     }
 }

@@ -5,6 +5,7 @@ import { SECRET_KEY } from '@config';
 import { HttpException } from '@exceptions/HttpException';
 import { DataStoredInToken, RequestWithUser } from '@interfaces/auth.interface';
 import { User } from '@/interfaces';
+import { ErrorMessages, createBilingualError } from '@/utils/errorMessages';
 
 const getAuthorization = (req: Request) => {
   const cookie = req.cookies['Authorization'];
@@ -29,12 +30,15 @@ export const AuthMiddleware = async (req: RequestWithUser, res: Response, next: 
         req.user = findUser;
         next();
       } else {
-        next(new HttpException(401, 'Wrong authentication token'));
+        const error = createBilingualError(401, ErrorMessages.WRONG_AUTHENTICATION_TOKEN);
+        next(new HttpException(error.status, error.message, error.messageAr));
       }
     } else {
-      next(new HttpException(401, 'Authentication required'));
+      const error = createBilingualError(401, ErrorMessages.AUTHENTICATION_REQUIRED);
+      next(new HttpException(error.status, error.message, error.messageAr));
     }
   } catch (error) {
-    next(new HttpException(401, 'Wrong authentication token'));
+    const err = createBilingualError(401, ErrorMessages.WRONG_AUTHENTICATION_TOKEN);
+    next(new HttpException(err.status, err.message, err.messageAr));
   }
 };
