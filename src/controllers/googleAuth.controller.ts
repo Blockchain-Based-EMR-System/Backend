@@ -25,17 +25,17 @@ export class GoogleAuthController {
             if (!user) {
                 return res.redirect('/login');
             }
-            
+
             try {
                 // Generate JWT tokens for Google OAuth user
                 const tokenResponse = await this.authService.createTokens(user, true);
                 const cookies = this.authService.createCookies(tokenResponse);
-                
+
                 // Set JWT cookies
                 res.setHeader('Set-Cookie', cookies);
-                                
+
                 // Redirect to dashboard with success
-                res.redirect('/dashboard');
+                res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
             } catch (error) {
                 next(error);
             }
