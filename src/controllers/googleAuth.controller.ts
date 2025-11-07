@@ -35,7 +35,7 @@ export class GoogleAuthController {
                 res.setHeader('Set-Cookie', cookies);
 
                 // Redirect to dashboard with success
-                res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
+                res.redirect(`${process.env.FRONTEND_URL}/complete-profile`);
             } catch (error) {
                 next(error);
             }
