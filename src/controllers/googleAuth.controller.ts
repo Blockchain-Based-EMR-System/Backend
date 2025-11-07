@@ -18,7 +18,7 @@ export class GoogleAuthController {
     public googleOAuthCallback = (req: Request, res: Response, next: NextFunction) => {
         passport.authenticate('google', {
             failureRedirect: '/login',
-        }, async (err, user: User, info) => {
+        }, async (err, user: User, info: { isNewUser?: boolean }) => {
             if (err) {
                 return next(err);
             }
@@ -34,8 +34,15 @@ export class GoogleAuthController {
                 // Set JWT cookies
                 res.setHeader('Set-Cookie', cookies);
 
-                // Redirect to dashboard with success
-                res.redirect(`${process.env.FRONTEND_URL}/complete-profile`);
+                // Check if it's a new user from the info object
+                const isNewUser = info?.isNewUser || false;
+                
+                // Redirect based on whether it's first time or not
+                if (isNewUser) {
+                    res.redirect(`${process.env.FRONTEND_URL}/complete-profile`);
+                } else {
+                    res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
+                }
             } catch (error) {
                 next(error);
             }

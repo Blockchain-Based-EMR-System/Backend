@@ -49,9 +49,11 @@ passport.use(new GoogleStrategy({
                     name,
                 };
                 const createdUser:User = await googleAuthService.createInitialProfileGoogle(newGoogleUserData);
-                return done(null, createdUser);
+                // Pass isNewUser flag in the info object
+                return done(null, createdUser, { isNewUser: true });
             }
-            return done(null, user);
+            // Existing user - not new
+            return done(null, user, { isNewUser: false });
         } catch (error) {
             console.error('Error in Google authentication:', error);
             const err: BilingualError = new Error(ErrorMessages.GOOGLE_AUTH_ERROR.en);
