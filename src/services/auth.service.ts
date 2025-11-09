@@ -275,7 +275,7 @@ export class AuthService {
 
     await transporter.sendMail(mailOptions);
   }
-
+  
   public async getUserEmail(req: RequestWithUser): Promise<string> {
     const email = await this.users.findUnique({
       where: { id: req.user.id },

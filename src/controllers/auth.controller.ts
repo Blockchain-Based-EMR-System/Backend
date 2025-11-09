@@ -118,5 +118,15 @@ export class AuthController {
       next(error);
     }
   };
+
+  public resendOTP = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const email = await this.auth.getUserEmail(req)
+      await this.auth.sendEmailOtp(email);
+      res.status(200).json({ message: 'OTP Resent Successfully' });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
 

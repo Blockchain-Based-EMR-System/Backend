@@ -285,6 +285,38 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
+  /auth/resend-otp:
+    post:
+      tags:
+        - Authentication
+      summary: Resend OTP
+      description: Resend OTP verification code to authenticated user's email
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+      responses:
+        '200':
+          description: OTP resent successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: OTP Resent Successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                messageEn: User not found
+                messageAr: المستخدم غير موجود
+
   /auth/forget-password:
     post:
       tags:
