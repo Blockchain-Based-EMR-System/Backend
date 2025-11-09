@@ -1,5 +1,10 @@
 export const ErrorMessages = {
     // Authentication errors
+    USER_NOT_FOUND: {
+        en: 'User not found',
+        ar: 'المستخدم غير موجود',
+    },
+
     EMAIL_EXISTS: {
         en: `This email already exists`,
         ar: `البريد الإلكتروني موجود بالفعل`,

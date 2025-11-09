@@ -51,3 +51,12 @@ export interface Doctor {
   clinic_doctors?: ClinicDoctor[];
 }
 
+export interface UserLoginData {
+  name: string,
+  email: string,
+  username: string,
+  phone: string,
+  gender: Gender,
+  date_of_birth: Date,
+  isVerified: Boolean,
+}

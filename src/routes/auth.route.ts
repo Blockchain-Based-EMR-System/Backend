@@ -30,5 +30,6 @@ export class AuthRoute implements Routes {
     this.router.get(`${this.path}/google`, this.googleAuth.googleOAuth);
     this.router.get(`${this.path}/google/callback`, this.googleAuth.googleOAuthCallback);
     this.router.patch(`${this.path}/google/update-phone`, ValidationMiddleware(UpdateGoogleUserPhoneDto), AuthMiddleware, this.googleAuth.updatePhoneNumber);
+    this.router.get(`${this.path}/google/userData`, AuthMiddleware, this.googleAuth.getGoogleUserData);
   }
 }

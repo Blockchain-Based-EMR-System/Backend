@@ -97,7 +97,7 @@ paths:
                 type: object
                 properties:
                   data:
-                    $ref: '#/components/schemas/User'
+                    $ref: '#/components/schemas/PatientLoginData'
                   message:
                     type: string
                     example: Logged In Successfully
@@ -458,6 +458,40 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
+  /auth/google/userData:
+    get:
+      tags:
+        - Google OAuth
+      summary: Get Google OAuth user data
+      description: Retrieve authenticated Google user's profile information
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+      responses:
+        '200':
+          description: User data retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PatientLoginData'
+                  message:
+                    type: string
+                    example: Google User Data Retrieved Successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                messageEn: User not found
+                messageAr: المستخدم غير موجود
+
 components:
   securitySchemes:
     bearerAuth:
@@ -526,7 +560,7 @@ components:
       properties:
         gender:
           type: string
-          enum: [MALE, FEMALE, OTHER]
+          enum: [MALE, FEMALE]
           description: User's gender
         date_of_birth:
           type: string
@@ -600,6 +634,33 @@ components:
           type: string
           format: date-time
           description: Last update timestamp
+
+    PatientLoginData:
+      type: object
+      properties:
+        name:
+          type: string
+          description: User's full name
+        email:
+          type: string
+          format: email
+          description: User's email address
+        username:
+          type: string
+          description: User's username
+        phone:
+          type: string
+          description: User's phone number
+        gender:
+          type: string
+          enum: [MALE, FEMALE]
+        date_of_birth:
+          type: string
+          format: date
+          description: User's date of birth
+        isVerified:
+          type: boolean
+          description: Whether email is verified
 
     Error:
       type: object

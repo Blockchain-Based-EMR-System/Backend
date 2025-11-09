@@ -2,7 +2,7 @@ import { AuthService } from "@/services/auth.service";
 import passport from "passport";
 import { Container } from "typedi";
 import { NextFunction, Request, Response } from "express";
-import { User } from "@/interfaces/users.interface";
+import { User, UserLoginData } from "@/interfaces/users.interface";
 import { RequestWithUser } from "@/interfaces";
 import { GoogleAuthService } from "@/services/googleAuth.service";
 import { UpdateGoogleUserPhoneDto } from "@/dtos/googleUsers.dto";
@@ -54,6 +54,15 @@ export class GoogleAuthController {
             const phone: UpdateGoogleUserPhoneDto = req.body.phone;
             await this.googleAuthService.updatePhoneNumber(req.user.id, phone.phone);
             res.status(200).json({ message: 'Phone Number Updated Successfully' });
+        } catch (error) {
+            next(error);
+        }
+    };
+
+    public getGoogleUserData = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const googleUserData: UserLoginData = await this.googleAuthService.getGoogleUserData(req.user.id);
+            res.status(200).json({ data: googleUserData, message: 'Google User Data Retrieved Successfully' });
         } catch (error) {
             next(error);
         }

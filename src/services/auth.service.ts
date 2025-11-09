@@ -6,7 +6,7 @@ import { SECRET_KEY, REFRESH_TOKEN_SECRET, REFRESH_TOKEN_EXPIRY, ACCESS_TOKEN_EX
 import { CompleteUserProfileDto, CreateUserDto, LoginUserDto } from '@dtos/users.dto';
 import { HttpException } from '@exceptions/HttpException';
 import { DataStoredInToken, AccessTokenData, RefreshTokenData, TokenResponse, RequestWithUser } from '@interfaces/auth.interface';
-import { User } from '@interfaces/users.interface';
+import { UserLoginData, User } from '@interfaces/users.interface';
 import { transporter } from '@/utils/nodeMailerService';
 import { ErrorMessages, createBilingualError } from '@/utils/errorMessages';
 import crypto from 'crypto';
@@ -46,7 +46,7 @@ export class AuthService {
     return { createdUserData, cookies };
   }
 
-  public async login(userData: LoginUserDto): Promise<{ cookies: string[]; findUser: User }> {
+  public async login(userData: LoginUserDto): Promise<{ cookies: string[]; findUser: UserLoginData }> {
     const findUser: User = await this.users.findFirst({
       where: {
         OR: [
@@ -66,10 +66,21 @@ export class AuthService {
       throw new HttpException(error.status, error.message, error.messageAr);
     }
 
+    const { name, gender, date_of_birth, email, isVerified, username, phone } = findUser;
+    const patientLoginData: UserLoginData = {
+      name,
+      email,
+      username,
+      phone,
+      gender,
+      date_of_birth,
+      isVerified
+    };
+
     const tokenResponse = await this.createTokens(findUser, userData.rememberMe);
     const cookies = this.createCookies(tokenResponse);
 
-    return { cookies, findUser };
+    return { cookies, findUser: patientLoginData };
   }
 
   public async logout(userData: User): Promise<User> {
