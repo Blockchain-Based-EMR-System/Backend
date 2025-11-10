@@ -51,8 +51,8 @@ export class GoogleAuthController {
 
     public updatePhoneNumber = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
         try {
-            const phone: UpdateGoogleUserPhoneDto = req.body.phone;
-            await this.googleAuthService.updatePhoneNumber(req.user.id, phone.phone);
+            const phone: string = req.body.phone;
+            await this.googleAuthService.updatePhoneNumber(req.user.id, phone);
             res.status(200).json({ message: 'Phone Number Updated Successfully' });
         } catch (error) {
             next(error);
