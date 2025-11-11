@@ -27,7 +27,6 @@ export class AuthController {
     try {
       const userData: LoginUserDto = req.body;
       const { cookies, findUser } = await this.auth.login(userData);
-      console.log(cookies);
 
       res.setHeader('Set-Cookie', cookies);
       res.status(200).json({ data: findUser, message: 'Logged In Successfully' });
@@ -45,7 +44,6 @@ export class AuthController {
         'Authorization=; HttpOnly; Max-Age=0; Path=/; SameSite=Lax',
         'RefreshToken=; HttpOnly; Max-Age=0; Path=/; SameSite=Lax'
       ]);
-      console.log(res.getHeaders());
 
       res.status(200).json({ message: 'Logged Out Successfully' });
     } catch (error) {

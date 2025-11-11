@@ -26,11 +26,10 @@ passport.use(new GoogleStrategy({
     // 'done' is a callback you must call to tell Passport the authentication is complete.
     async (accessToken, refreshToken, profile: Profile, done) => {
         try {
-            console.log("Google profile:", profile);
-
             // Extract email from Google profile
             const email = profile.emails?.[0]?.value;
             const name = profile.displayName;
+            const isEmailVerified = profile.emails?.[0]?.verified;
             
             if (!email) {
                 const error: BilingualError = new Error(ErrorMessages.NO_EMAIL_IN_GOOGLE_PROFILE.en);
@@ -47,6 +46,7 @@ passport.use(new GoogleStrategy({
                 const newGoogleUserData: CreateGoogleUsersDto = {
                     email,
                     name,
+                    isEmailVerified: isEmailVerified || false,
                 };
                 const createdUser:User = await googleAuthService.createInitialProfileGoogle(newGoogleUserData);
                 // Pass isNewUser flag in the info object

@@ -3,7 +3,7 @@ import { Medication } from './medications.interface';
 import { ScanLab } from './scans-labs.interface';
 import { ClinicNurse, ClinicDoctor } from './clinics.interface';
 import { AuditLog } from './audit-logs.interface';
-import { Gender } from '@prisma/client';
+import { Gender, Role } from '@prisma/client';
 
 export interface User {
   id: string;
@@ -13,6 +13,7 @@ export interface User {
   phone: string;
   gender: Gender;
   date_of_birth: Date;
+  role: Role;
   password_hash: string;
   isVerified: boolean;
   created_at: Date;

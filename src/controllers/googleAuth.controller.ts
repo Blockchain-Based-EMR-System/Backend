@@ -5,7 +5,6 @@ import { NextFunction, Request, Response } from "express";
 import { User, UserLoginData } from "@/interfaces/users.interface";
 import { RequestWithUser } from "@/interfaces";
 import { GoogleAuthService } from "@/services/googleAuth.service";
-import { UpdateGoogleUserPhoneDto } from "@/dtos/googleUsers.dto";
 
 export class GoogleAuthController {
     public authService = Container.get(AuthService);

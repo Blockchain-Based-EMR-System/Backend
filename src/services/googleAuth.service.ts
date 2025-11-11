@@ -17,12 +17,20 @@ export class GoogleAuthService {
                 data: {
                     email: newUserData.email,
                     name: newUserData.name,
+                    isVerified: newUserData.isEmailVerified,
                     username,
                     phone: '',
                     gender: "MALE",
                     date_of_birth: new Date('2000-01-01'),
                     password_hash: '',
                 },
+            });
+            await prisma.patient.create({
+                data: {
+                    id: createdUser.id,
+                    bc_address: '',
+                    consent: false,
+                }
             });
             return createdUser;
         } catch (error) {

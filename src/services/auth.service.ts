@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Role } from '@prisma/client';
 import { compare, hash } from 'bcrypt';
 import { sign, verify } from 'jsonwebtoken';
 import { Service } from 'typedi';
@@ -14,6 +14,7 @@ import crypto from 'crypto';
 @Service()
 export class AuthService {
   public users = new PrismaClient().user;
+  public patients = new PrismaClient().patient;
   public refreshTokens = new PrismaClient().refreshToken;
 
   public async signup(userData: CreateUserDto): Promise<{ createdUserData: User; cookies: string[] }> {
@@ -36,7 +37,16 @@ export class AuthService {
     const createdUserData: User = await this.users.create({
       data: {
         ...userDataWithoutPassword, username, password_hash: hashedPassword,
+        role: Role.PATIENT,
         gender: "MALE", date_of_birth: new Date("2000-01-01")
+      }
+    });
+
+    await this.patients.create({
+      data: {
+        id: createdUserData.id,
+        bc_address: '',
+        consent: false,
       }
     });
 
