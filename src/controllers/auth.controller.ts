@@ -41,7 +41,12 @@ export class AuthController {
       const userData: User = req.user;
       const logOutUserData: User = await this.auth.logout(userData);
 
-      res.setHeader('Set-Cookie', ['Authorization=; Max-age=0', 'RefreshToken=; Max-age=0']);
+      res.setHeader('Set-Cookie', [
+        'Authorization=; HttpOnly; Max-Age=0; Path=/; SameSite=Lax',
+        'RefreshToken=; HttpOnly; Max-Age=0; Path=/; SameSite=Lax'
+      ]);
+      console.log(res.getHeaders());
+
       res.status(200).json({ message: 'Logged Out Successfully' });
     } catch (error) {
       next(error);
@@ -98,7 +103,7 @@ export class AuthController {
   public forgetPassword = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     try {
       const email = req.body.email;
-      if(!email){
+      if (!email) {
         throw new Error('Email is required');
       }
       await this.auth.sendPasswordResetEmail(email);
