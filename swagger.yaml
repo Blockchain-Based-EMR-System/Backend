@@ -658,6 +658,10 @@ components:
         isVerified:
           type: boolean
           description: Whether email is verified
+        hasCompletedProfile:
+          type: boolean
+          description: Whether user has completed profile
+          default: false
         created_at:
           type: string
           format: date-time
@@ -693,6 +697,10 @@ components:
         isVerified:
           type: boolean
           description: Whether email is verified
+        hasCompletedProfile:
+          type: boolean
+          description: Whether user has completed profile
+          default: false
 
     Error:
       type: object
