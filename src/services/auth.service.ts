@@ -76,7 +76,7 @@ export class AuthService {
       throw new HttpException(error.status, error.message, error.messageAr);
     }
 
-    const { name, gender, date_of_birth, email, isVerified, username, phone } = findUser;
+    const { name, gender, date_of_birth, email, isVerified, username, phone, hasCompletedProfile } = findUser;
     const patientLoginData: UserLoginData = {
       name,
       email,
@@ -84,9 +84,10 @@ export class AuthService {
       phone,
       gender,
       date_of_birth,
-      isVerified
+      isVerified,
+      hasCompletedProfile
     };
-
+    
     const tokenResponse = await this.createTokens(findUser, userData.rememberMe);
     const cookies = this.createCookies(tokenResponse);
 
@@ -121,6 +122,7 @@ export class AuthService {
       data: {
         gender: profileData.gender,
         date_of_birth: new Date(profileData.date_of_birth),
+        hasCompletedProfile: true,
       },
     });
 

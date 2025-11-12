@@ -16,6 +16,7 @@ export interface User {
   role: Role;
   password_hash: string;
   isVerified: boolean;
+  hasCompletedProfile: boolean;
   created_at: Date;
   modified_at: Date;
   deleted_at?: Date;
@@ -60,4 +61,5 @@ export interface UserLoginData {
   gender: Gender,
   date_of_birth: Date,
   isVerified: Boolean,
+  hasCompletedProfile: Boolean,
 }

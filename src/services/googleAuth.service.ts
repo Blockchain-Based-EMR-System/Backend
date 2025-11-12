@@ -65,6 +65,7 @@ export class GoogleAuthService {
                     gender: true,
                     date_of_birth: true,
                     isVerified: true,
+                    hasCompletedProfile: true,
                 }
             });
             if (!user) {
