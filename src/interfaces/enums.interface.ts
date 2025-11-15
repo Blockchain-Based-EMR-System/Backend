@@ -20,6 +20,8 @@ export enum Action {
 }
 
 export enum RecordType {
+  LAB_RESULT = 'LAB_RESULT',
+  SCAN = 'SCAN',
   DIAGNOSIS = 'DIAGNOSIS',
   VISIT_SUMMARY = 'VISIT_SUMMARY'
 }

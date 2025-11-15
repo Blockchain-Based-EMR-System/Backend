@@ -1,5 +1,5 @@
 import { User } from './users.interface';
-import { RecordType } from './enums.interface';
+import { RecordType } from '@prisma/client'; 
 
 export interface MedicalRecord {
   id: string;
