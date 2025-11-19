@@ -7,13 +7,13 @@ import { MedicalRecord } from '@/interfaces/medicalRecords.interface';
 const prisma = new PrismaClient();
 
 // create a new  MR
-export const createMedicalRecord = async(
+export const createMedicalRecord = async (
     patient_id: string,
     fileData: CreateMedicalRecordDto,
     fileBuffer: Buffer,
     fileName: string,
 ): Promise<MedicalRecord> => {
-    try{
+    try {
         // upload to IPFS and get cid
         const cid = await uploadFile(fileBuffer, fileName);
         console.log(`file is uploaded to ipfs, cid:" ${cid}`)
@@ -33,11 +33,11 @@ export const createMedicalRecord = async(
                 patient: true,
             },
         });
-        
+
         return medicalRecord;
 
     }
-    catch(e){
+    catch (e) {
         console.error('error creating medical record:', e);
         throw new HttpException(500, 'failed to create medical record');
     }
@@ -47,13 +47,13 @@ export const createMedicalRecord = async(
 // get all medical records for a specific patient
 
 export const getPatientRecords = async (patient_id: string): Promise<MedicalRecord[]> => {
-    try{
+    try {
         const records = await prisma.medicalRecord.findMany({
             where: {
                 patient_id: patient_id,
                 deleted_at: null,
             },
-            orderBy:{
+            orderBy: {
                 created_at: 'desc',
             },
             include: {
@@ -63,38 +63,63 @@ export const getPatientRecords = async (patient_id: string): Promise<MedicalReco
 
         return records;
     }
-    catch(e){
+    catch (e) {
         console.error('error fetching patient records:', e);
         throw new HttpException(500, 'failed to fetch patient records');
     }
 };
 
 // get MR shared with a doctor 
-export const getDoctorRecords = async(doctor_id: string): Promise<MedicalRecord[]> => {
-    try{
+export const getDoctorRecords = async (doctor_id: string): Promise<MedicalRecord[]> => {
+    try {
         const records = await prisma.medicalRecord.findMany({
-            where:{
+            where: {
                 doctor_id: doctor_id,
                 deleted_at: null,
             },
-            orderBy:{
+            orderBy: {
                 created_at: 'desc',
             },
-            include:{
+            include: {
                 patient: true,
             },
         });
 
         return records;
     }
-    catch(e){
+    catch (e) {
         console.error('error fetching doctor records:', e);
         throw new HttpException(500, 'failed to fetch doctor records');
     }
 }
 
-// get a specific MR by id?? 
-
 // delete any MR (soft)
+export const deleteRecord = async (record_id: string) => {
+    try {
+        // checking if it's already deleted
+        const record = await prisma.medicalRecord.findFirst({
+            where: {
+                id: record_id,
+                deleted_at: null,
+            },
+        });
+        if (!record) {
+            throw new HttpException(404, 'medical record not found or already deleted');
+        }
 
+        await prisma.medicalRecord.update({
+            where: {
+                id: record_id,
+            },
+            data: {
+                deleted_at: new Date(),
+            },
+        });
+    }
+    catch (e) {
+        console.error('Error deleting medical record:', e);
+        throw new HttpException(500, 'failed to delete medical record');
+    }
+}
+// get a specific MR by id?? 
 // handle permissions --> fabric stuff 
