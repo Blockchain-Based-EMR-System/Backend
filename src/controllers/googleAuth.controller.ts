@@ -38,7 +38,7 @@ export class GoogleAuthController {
                 
                 // Redirect based on whether it's first time or not
                 if (isNewUser) {
-                    res.redirect(`${process.env.FRONTEND_URL}/complete-profile`);
+                    res.redirect(`${process.env.FRONTEND_URL}/api/auth/google-callback`);
                 } else {
                     res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
                 }
