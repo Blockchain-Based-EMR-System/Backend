@@ -40,7 +40,7 @@ export class GoogleAuthController {
                 if (isNewUser) {
                     res.redirect(`${process.env.FRONTEND_URL}/api/auth/google-callback`);
                 } else {
-                    res.redirect(`${process.env.FRONTEND_URL}/dashboard`);
+                    res.redirect(`${process.env.FRONTEND_URL}/api/auth/google-callback`);
                 }
             } catch (error) {
                 next(error);
