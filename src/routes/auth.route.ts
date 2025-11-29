@@ -4,10 +4,10 @@ import { CompleteUserProfileDto, CreateUserDto, LoginUserDto, ResetPasswordDto }
 import { Routes } from '@interfaces/routes.interface';
 import { AuthMiddleware } from '@middlewares/auth.middleware';
 import { GoogleAuthController } from '@/controllers/googleAuth.controller';
-import
-/* #swagger.tags = ['Auth'] */ { ValidationMiddleware } from '@middlewares/validation.middleware';
+import { ValidationMiddleware } from '@middlewares/validation.middleware';
 import { UpdateGoogleUserPhoneDto } from '@/dtos/googleUsers.dto';
-https://github.com/Blockchain-Based-EMR-System/Backendhttps://github.com/Blockchain-Based-EMR-System/Backend
+
+
 export class AuthRoute implements Routes {
   public path = '/auth';
   public router = Router();
