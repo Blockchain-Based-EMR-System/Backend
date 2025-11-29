@@ -9,15 +9,11 @@
   "basePath": "/",
   "tags": [
     {
-      "name": "Auth",
+      "name": "auth",
       "description": "Authentication and account endpoints"
     },
     {
-      "name": "Users",
-      "description": "User management endpoints"
-    },
-    {
-      "name": "Fabric",
+      "name": "fabric",
       "description": "Hyperledger Fabric asset endpoints"
     }
   ],
@@ -28,7 +24,7 @@
     "/auth/signup": {
       "post": {
         "tags": [
-          "Auth"
+          "auth"
         ],
         "description": "",
         "responses": {
@@ -41,7 +37,7 @@
     "/auth/login": {
       "post": {
         "tags": [
-          "Auth"
+          "auth"
         ],
         "description": "",
         "responses": {
@@ -54,7 +50,7 @@
     "/auth/logout": {
       "post": {
         "tags": [
-          "Auth"
+          "auth"
         ],
         "description": "",
         "responses": {
@@ -67,7 +63,7 @@
     "/auth/refresh": {
       "post": {
         "tags": [
-          "Auth"
+          "auth"
         ],
         "description": "",
         "responses": {
@@ -80,7 +76,7 @@
     "/auth/complete-profile-info": {
       "patch": {
         "tags": [
-          "Auth"
+          "auth"
         ],
         "description": "",
         "responses": {
@@ -93,7 +89,7 @@
     "/auth/verify-otp": {
       "patch": {
         "tags": [
-          "Auth"
+          "auth"
         ],
         "description": "",
         "responses": {
@@ -106,7 +102,7 @@
     "/auth/forget-password": {
       "post": {
         "tags": [
-          "Auth"
+          "auth"
         ],
         "description": "",
         "responses": {
@@ -119,7 +115,20 @@
     "/auth/reset-password": {
       "post": {
         "tags": [
-          "Auth"
+          "auth"
+        ],
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/auth/resend-otp": {
+      "post": {
+        "tags": [
+          "auth"
         ],
         "description": "",
         "responses": {
@@ -132,7 +141,7 @@
     "/auth/google": {
       "get": {
         "tags": [
-          "Auth"
+          "auth"
         ],
         "description": "",
         "responses": {
@@ -145,7 +154,7 @@
     "/auth/google/callback": {
       "get": {
         "tags": [
-          "Auth"
+          "auth"
         ],
         "description": "",
         "responses": {
@@ -158,7 +167,20 @@
     "/auth/google/update-phone": {
       "patch": {
         "tags": [
-          "Auth"
+          "auth"
+        ],
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/auth/google/userData": {
+      "get": {
+        "tags": [
+          "auth"
         ],
         "description": "",
         "responses": {
@@ -171,7 +193,7 @@
     "/assets": {
       "get": {
         "tags": [
-          "Fabric"
+          "fabric"
         ],
         "description": "",
         "responses": {
@@ -182,7 +204,7 @@
       },
       "post": {
         "tags": [
-          "Fabric"
+          "fabric"
         ],
         "description": "",
         "responses": {
@@ -195,7 +217,7 @@
     "/assets/health": {
       "get": {
         "tags": [
-          "Fabric"
+          "fabric"
         ],
         "description": "",
         "responses": {
@@ -208,7 +230,7 @@
     "/assets/{id}": {
       "get": {
         "tags": [
-          "Fabric"
+          "fabric"
         ],
         "description": "",
         "parameters": [
@@ -229,95 +251,12 @@
     "/assets/{id}/transfer": {
       "put": {
         "tags": [
-          "Fabric"
+          "fabric"
         ],
         "description": "",
         "parameters": [
           {
             "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/users": {
-      "get": {
-        "tags": [
-          "Users"
-        ],
-        "description": "",
-        "responses": {
-          "default": {
-            "description": ""
-          }
-        }
-      },
-      "post": {
-        "tags": [
-          "Users"
-        ],
-        "description": "",
-        "responses": {
-          "default": {
-            "description": ""
-          }
-        }
-      }
-    },
-    "/users/{id(\\\\d+)}": {
-      "get": {
-        "tags": [
-          "Users"
-        ],
-        "description": "",
-        "parameters": [
-          {
-            "name": "id(\\\\d+)",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": ""
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "Users"
-        ],
-        "description": "",
-        "parameters": [
-          {
-            "name": "id(\\\\d+)",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": ""
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "Users"
-        ],
-        "description": "",
-        "parameters": [
-          {
-            "name": "id(\\\\d+)",
             "in": "path",
             "required": true,
             "type": "string"
