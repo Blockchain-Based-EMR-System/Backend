@@ -5,6 +5,7 @@ import { promises as fs } from 'fs';
 import * as path from 'path';
 import { TextDecoder } from 'util';
 import { HttpException } from '@/exceptions/HttpException';
+import { MedicalRecord } from '@/interfaces/medical-records.interface';
 
 class FabricService {
     private gateway: Gateway | undefined;
@@ -53,42 +54,66 @@ class FabricService {
         }
     }
 
-    public async getAllAssets(): Promise<any> {
-        console.log('\n--> Evaluate Transaction: GetAllAssets');
-        const resultBytes = await this.contract.evaluateTransaction('GetAllAssets');
+    public async getAllRecords(): Promise<MedicalRecord[]> {
+        const contract = this.ensureContract();
+        console.log('\n--> Evaluate Transaction: GetAllRecords');
+        const resultBytes = await contract.evaluateTransaction('GetAllRecords');
         const resultJson = this.utf8Decoder.decode(resultBytes);
-        return JSON.parse(resultJson);
+        return JSON.parse(resultJson) as MedicalRecord[];
     }
 
-    public async createAsset(id: string, color: string, size: string, owner: string, appraisedValue: string): Promise<void> {
-        console.log('\n--> Submit Transaction: CreateAsset');
-        await this.contract.submitTransaction('CreateAsset', id, color, size, owner, appraisedValue);
+    public async addRecord(payload: MedicalRecord): Promise<void> {
+        const contract = this.ensureContract();
+        console.log('\n--> Submit Transaction: AddRecord');
+        await contract.submitTransaction(
+            'AddRecord',
+            payload.patientId,
+            payload.firstName,
+            payload.lastName,
+            payload.dateOfBirth,
+            payload.gender,
+            payload.bloodType,
+            payload.ipfsCid,
+            payload.summary || '',
+        );
     }
 
-    public async readAssetByID(assetId: string): Promise<any> {
-        console.log('\n--> Evaluate Transaction: ReadAsset');
-        const resultBytes = await this.contract.evaluateTransaction('ReadAsset', assetId);
+    public async getRecordByPatientId(patientId: string): Promise<MedicalRecord> {
+        const contract = this.ensureContract();
+        console.log('\n--> Evaluate Transaction: GetRecord');
+        const resultBytes = await contract.evaluateTransaction('GetRecord', patientId);
         const resultJson = this.utf8Decoder.decode(resultBytes);
-        return JSON.parse(resultJson);
+        return JSON.parse(resultJson) as MedicalRecord;
     }
 
-    public async transferAsset(assetId: string, newOwner: string): Promise<string> {
-        console.log('\n--> Async Submit Transaction: TransferAsset');
-        const commit = await this.contract.submitAsync('TransferAsset', {
-            arguments: [assetId, newOwner],
-        });
-        const oldOwner = this.utf8Decoder.decode(commit.getResult());
-        const status = await commit.getStatus();
-        if (!status.successful) {
-            throw new Error(`Transaction ${status.transactionId} failed to commit with status code ${String(status.code)}`);
-        }
-        return oldOwner;
+    public async updateRecord(patientId: string, payload: Omit<MedicalRecord, 'patientId'>): Promise<void> {
+        const contract = this.ensureContract();
+        console.log('\n--> Submit Transaction: UpdateRecord');
+        await contract.submitTransaction(
+            'UpdateRecord',
+            patientId,
+            payload.firstName,
+            payload.lastName,
+            payload.dateOfBirth,
+            payload.gender,
+            payload.bloodType,
+            payload.ipfsCid,
+            payload.summary || '',
+        );
     }
 
     private async initLedger(): Promise<void> {
+        const contract = this.ensureContract();
         console.log('\n--> Submit Transaction: InitLedger');
-        await this.contract.submitTransaction('InitLedger');
+        await contract.submitTransaction('InitLedger');
         console.log('*** InitLedger transaction committed successfully');
+    }
+
+    private ensureContract(): Contract {
+        if (!this.contract) {
+            throw new HttpException(503, 'Fabric network connection is not ready');
+        }
+        return this.contract;
     }
 
     private async newGrpcConnection(): Promise<grpc.Client> {

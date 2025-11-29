@@ -1,9 +1,11 @@
 import { Router } from 'express';
 import FabricContoller from '@/controllers/fabric.controller';
+import { CreateMedicalRecordDto, UpdateMedicalRecordDto } from '@/dtos/medicalRecord.dto';
+import { ValidationMiddleware } from '@middlewares/validation.middleware';
 import { Routes } from '@interfaces/routes.interface';
 
 export class FabricRoute implements Routes {
-    public path = '/assets';
+    public path = '/records';
     public router = Router();
     public fabricController = new FabricContoller();
 
@@ -13,31 +15,33 @@ export class FabricRoute implements Routes {
 
     private initializeRoutes() {
         this.router.get(
-            '/assets',
-            /* #swagger.tags = ['fabric'] */
-            this.fabricController.getAllAssets,
+            '/records',
+            /* #swagger.tags = ['MedicalRecords'] */
+            this.fabricController.getAllRecords,
         );
-        // Place the explicit health route before the dynamic `:id` route so the literal
-        // path `/assets/health` is matched first instead of being captured as `:id = 'health'.
+        // Place the explicit health route before the dynamic `:patientId` route so the literal
+        // path `/records/health` is matched first instead of being captured as `:patientId = 'health'.
         this.router.get(
-            '/assets/health',
-            /* #swagger.tags = ['fabric'] */
+            '/records/health',
+            /* #swagger.tags = ['MedicalRecords'] */
             this.fabricController.checkHealth,
         );
         this.router.get(
-            '/assets/:id',
-            /* #swagger.tags = ['fabric'] */
-            this.fabricController.getAssetById,
+            '/records/:patientId',
+            /* #swagger.tags = ['MedicalRecords'] */
+            this.fabricController.getRecordById,
         );
         this.router.post(
-            '/assets',
-            /* #swagger.tags = ['fabric'] */
-            this.fabricController.createAsset,
+            '/records',
+            /* #swagger.tags = ['MedicalRecords'] */
+            ValidationMiddleware(CreateMedicalRecordDto),
+            this.fabricController.addRecord,
         );
         this.router.put(
-            '/assets/:id/transfer',
-            /* #swagger.tags = ['fabric'] */
-            this.fabricController.transferAsset,
+            '/records/:patientId',
+            /* #swagger.tags = ['MedicalRecords'] */
+            ValidationMiddleware(UpdateMedicalRecordDto),
+            this.fabricController.updateRecord,
         );
     }
 }

@@ -9,12 +9,12 @@
   "basePath": "/",
   "tags": [
     {
-      "name": "auth",
+      "name": "Auth",
       "description": "Authentication and account endpoints"
     },
     {
-      "name": "fabric",
-      "description": "Hyperledger Fabric asset endpoints"
+      "name": "MedicalRecords",
+      "description": "Hyperledger Fabric medical record endpoints"
     }
   ],
   "schemes": [
@@ -24,7 +24,7 @@
     "/auth/signup": {
       "post": {
         "tags": [
-          "auth"
+          "Auth"
         ],
         "description": "",
         "responses": {
@@ -37,7 +37,7 @@
     "/auth/login": {
       "post": {
         "tags": [
-          "auth"
+          "Auth"
         ],
         "description": "",
         "responses": {
@@ -50,7 +50,7 @@
     "/auth/logout": {
       "post": {
         "tags": [
-          "auth"
+          "Auth"
         ],
         "description": "",
         "responses": {
@@ -63,7 +63,7 @@
     "/auth/refresh": {
       "post": {
         "tags": [
-          "auth"
+          "Auth"
         ],
         "description": "",
         "responses": {
@@ -76,7 +76,7 @@
     "/auth/complete-profile-info": {
       "patch": {
         "tags": [
-          "auth"
+          "Auth"
         ],
         "description": "",
         "responses": {
@@ -89,7 +89,7 @@
     "/auth/verify-otp": {
       "patch": {
         "tags": [
-          "auth"
+          "Auth"
         ],
         "description": "",
         "responses": {
@@ -102,7 +102,7 @@
     "/auth/forget-password": {
       "post": {
         "tags": [
-          "auth"
+          "Auth"
         ],
         "description": "",
         "responses": {
@@ -115,7 +115,7 @@
     "/auth/reset-password": {
       "post": {
         "tags": [
-          "auth"
+          "Auth"
         ],
         "description": "",
         "responses": {
@@ -128,7 +128,7 @@
     "/auth/resend-otp": {
       "post": {
         "tags": [
-          "auth"
+          "Auth"
         ],
         "description": "",
         "responses": {
@@ -141,7 +141,7 @@
     "/auth/google": {
       "get": {
         "tags": [
-          "auth"
+          "Auth"
         ],
         "description": "",
         "responses": {
@@ -154,7 +154,7 @@
     "/auth/google/callback": {
       "get": {
         "tags": [
-          "auth"
+          "Auth"
         ],
         "description": "",
         "responses": {
@@ -167,7 +167,7 @@
     "/auth/google/update-phone": {
       "patch": {
         "tags": [
-          "auth"
+          "Auth"
         ],
         "description": "",
         "responses": {
@@ -180,7 +180,7 @@
     "/auth/google/userData": {
       "get": {
         "tags": [
-          "auth"
+          "Auth"
         ],
         "description": "",
         "responses": {
@@ -190,10 +190,10 @@
         }
       }
     },
-    "/assets": {
+    "/records": {
       "get": {
         "tags": [
-          "fabric"
+          "MedicalRecords"
         ],
         "description": "",
         "responses": {
@@ -204,7 +204,7 @@
       },
       "post": {
         "tags": [
-          "fabric"
+          "MedicalRecords"
         ],
         "description": "",
         "responses": {
@@ -214,10 +214,10 @@
         }
       }
     },
-    "/assets/health": {
+    "/records/health": {
       "get": {
         "tags": [
-          "fabric"
+          "MedicalRecords"
         ],
         "description": "",
         "responses": {
@@ -227,15 +227,15 @@
         }
       }
     },
-    "/assets/{id}": {
+    "/records/{patientId}": {
       "get": {
         "tags": [
-          "fabric"
+          "MedicalRecords"
         ],
         "description": "",
         "parameters": [
           {
-            "name": "id",
+            "name": "patientId",
             "in": "path",
             "required": true,
             "type": "string"
@@ -246,17 +246,15 @@
             "description": ""
           }
         }
-      }
-    },
-    "/assets/{id}/transfer": {
+      },
       "put": {
         "tags": [
-          "fabric"
+          "MedicalRecords"
         ],
         "description": "",
         "parameters": [
           {
-            "name": "id",
+            "name": "patientId",
             "in": "path",
             "required": true,
             "type": "string"

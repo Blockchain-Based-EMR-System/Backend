@@ -4,41 +4,39 @@ import FabricService from '@/services/fabric.service';
 class FabricController {
     public fabricService = new FabricService();
 
-    public getAllAssets = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    public getAllRecords = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
-            const assets = await this.fabricService.getAllAssets();
-            res.status(200).json({ data: assets, message: 'findAll' });
+            const records = await this.fabricService.getAllRecords();
+            res.status(200).json({ data: records, message: 'findAll' });
         } catch (error) {
             next(error);
         }
     };
 
-    public getAssetById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    public getRecordById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
-            const assetId = req.params.id;
-            const asset = await this.fabricService.readAssetByID(assetId);
-            res.status(200).json({ data: asset, message: 'findOne' });
+            const patientId = req.params.patientId;
+            const record = await this.fabricService.getRecordByPatientId(patientId);
+            res.status(200).json({ data: record, message: 'findOne' });
         } catch (error) {
             next(error);
         }
     };
 
-    public createAsset = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    public addRecord = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
-            const { id, color, size, owner, appraisedValue } = req.body;
-            await this.fabricService.createAsset(id, color, size, owner, appraisedValue);
+            await this.fabricService.addRecord(req.body);
             res.status(201).json({ message: 'created' });
         } catch (error) {
             next(error);
         }
     };
 
-    public transferAsset = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    public updateRecord = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
-            const assetId = req.params.id;
-            const { newOwner } = req.body;
-            const oldOwner = await this.fabricService.transferAsset(assetId, newOwner);
-            res.status(200).json({ message: `transferred from ${oldOwner} to ${newOwner}` });
+            const patientId = req.params.patientId;
+            await this.fabricService.updateRecord(patientId, req.body);
+            res.status(200).json({ message: 'updated' });
         } catch (error) {
             next(error);
         }

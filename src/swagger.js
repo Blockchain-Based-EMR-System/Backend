@@ -8,8 +8,8 @@ const doc = {
   host: 'localhost:3000',
   schemes: ['http'],
   tags: [
-    { name: 'auth', description: 'Authentication and account endpoints' },
-    { name: 'fabric', description: 'Hyperledger Fabric asset endpoints' },
+    { name: 'Auth', description: 'Authentication and account endpoints' },
+    { name: 'MedicalRecords', description: 'Hyperledger Fabric medical record endpoints' },
   ],
 };
 

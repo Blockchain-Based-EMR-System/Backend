@@ -24,3 +24,6 @@ export * from './clinics.interface';
 
 // Audit Logs
 export * from './audit-logs.interface';
+
+// Medical Records
+export * from './medical-records.interface';
