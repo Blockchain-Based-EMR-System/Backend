@@ -27,7 +27,6 @@ export class AuthController {
     try {
       const userData: LoginUserDto = req.body;
       const { cookies, findUser } = await this.auth.login(userData);
-      console.log(cookies);
 
       res.setHeader('Set-Cookie', cookies);
       res.status(200).json({ data: findUser, message: 'Logged In Successfully' });
@@ -41,7 +40,11 @@ export class AuthController {
       const userData: User = req.user;
       const logOutUserData: User = await this.auth.logout(userData);
 
-      res.setHeader('Set-Cookie', ['Authorization=; Max-age=0', 'RefreshToken=; Max-age=0']);
+      res.setHeader('Set-Cookie', [
+        'Authorization=; HttpOnly; Max-Age=0; Path=/; SameSite=Lax',
+        'RefreshToken=; HttpOnly; Max-Age=0; Path=/; SameSite=Lax'
+      ]);
+
       res.status(200).json({ message: 'Logged Out Successfully' });
     } catch (error) {
       next(error);
@@ -98,7 +101,7 @@ export class AuthController {
   public forgetPassword = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     try {
       const email = req.body.email;
-      if(!email){
+      if (!email) {
         throw new Error('Email is required');
       }
       await this.auth.sendPasswordResetEmail(email);
@@ -118,4 +121,15 @@ export class AuthController {
       next(error);
     }
   };
+
+  public resendOTP = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const email = await this.auth.getUserEmail(req)
+      await this.auth.sendEmailOtp(email);
+      res.status(200).json({ message: 'OTP Resent Successfully' });
+    } catch (error) {
+      next(error);
+    }
+  }
 }
+

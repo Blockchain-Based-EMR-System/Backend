@@ -6,6 +6,12 @@ import { CreateGoogleUsersDto } from '@/dtos/googleUsers.dto';
 import { GoogleAuthService } from '@/services/googleAuth.service';
 import { User } from '@/interfaces';
 import Container from 'typedi';
+import { ErrorMessages } from '@/utils/errorMessages';
+
+// Define a custom error type with Arabic message support
+interface BilingualError extends Error {
+    messageAr?: string;
+}
 
 const prisma = new PrismaClient();
 const googleAuthService = Container.get(GoogleAuthService);
@@ -20,14 +26,15 @@ passport.use(new GoogleStrategy({
     // 'done' is a callback you must call to tell Passport the authentication is complete.
     async (accessToken, refreshToken, profile: Profile, done) => {
         try {
-            console.log("Google profile:", profile);
-
             // Extract email from Google profile
             const email = profile.emails?.[0]?.value;
             const name = profile.displayName;
+            const isEmailVerified = profile.emails?.[0]?.verified;
             
             if (!email) {
-                return done(new Error('No email found in Google profile'), undefined);
+                const error: BilingualError = new Error(ErrorMessages.NO_EMAIL_IN_GOOGLE_PROFILE.en);
+                error.messageAr = ErrorMessages.NO_EMAIL_IN_GOOGLE_PROFILE.ar;
+                return done(error, undefined);
             }
 
             // Find user in database by email
@@ -39,14 +46,19 @@ passport.use(new GoogleStrategy({
                 const newGoogleUserData: CreateGoogleUsersDto = {
                     email,
                     name,
+                    isEmailVerified: isEmailVerified || false,
                 };
                 const createdUser:User = await googleAuthService.createInitialProfileGoogle(newGoogleUserData);
-                return done(null, createdUser);
+                // Pass isNewUser flag in the info object
+                return done(null, createdUser, { isNewUser: true });
             }
-            return done(null, user);
+            // Existing user - not new
+            return done(null, user, { isNewUser: false });
         } catch (error) {
             console.error('Error in Google authentication:', error);
-            return done(error as Error, undefined);
+            const err: BilingualError = new Error(ErrorMessages.GOOGLE_AUTH_ERROR.en);
+            err.messageAr = ErrorMessages.GOOGLE_AUTH_ERROR.ar;
+            return done(err, undefined);
         }
     }
 ));

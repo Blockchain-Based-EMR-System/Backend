@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, Role } from '@prisma/client';
 import { compare, hash } from 'bcrypt';
 import { sign, verify } from 'jsonwebtoken';
 import { Service } from 'typedi';
@@ -6,22 +6,30 @@ import { SECRET_KEY, REFRESH_TOKEN_SECRET, REFRESH_TOKEN_EXPIRY, ACCESS_TOKEN_EX
 import { CompleteUserProfileDto, CreateUserDto, LoginUserDto } from '@dtos/users.dto';
 import { HttpException } from '@exceptions/HttpException';
 import { DataStoredInToken, AccessTokenData, RefreshTokenData, TokenResponse, RequestWithUser } from '@interfaces/auth.interface';
-import { User } from '@interfaces/users.interface';
+import { UserLoginData, User } from '@interfaces/users.interface';
 import { transporter } from '@/utils/nodeMailerService';
+import { ErrorMessages, createBilingualError } from '@/utils/errorMessages';
 import crypto from 'crypto';
 
 @Service()
 export class AuthService {
   public users = new PrismaClient().user;
+  public patients = new PrismaClient().patient;
   public refreshTokens = new PrismaClient().refreshToken;
 
   public async signup(userData: CreateUserDto): Promise<{ createdUserData: User; cookies: string[] }> {
     const findUserSameEmail: User = await this.users.findUnique({ where: { email: userData.email } });
-    if (findUserSameEmail) throw new HttpException(409, `This email ${userData.email} already exists`);
+    if (findUserSameEmail) {
+      const error = createBilingualError(409, ErrorMessages.EMAIL_EXISTS);
+      throw new HttpException(error.status, error.message, error.messageAr);
+    }
 
     const emailHandle = userData.email.split('@')[0];
     const findUserSameUsername: User = await this.users.findUnique({ where: { username: emailHandle } });
-    if (findUserSameUsername) throw new HttpException(409, `This username ${emailHandle} already exists`);
+    if (findUserSameUsername) {
+      const error = createBilingualError(409, ErrorMessages.USERNAME_EXISTS);
+      throw new HttpException(error.status, error.message, error.messageAr);
+    }
 
     const hashedPassword = await hash(userData.password, 10);
     const username = emailHandle;
@@ -29,7 +37,16 @@ export class AuthService {
     const createdUserData: User = await this.users.create({
       data: {
         ...userDataWithoutPassword, username, password_hash: hashedPassword,
+        role: Role.PATIENT,
         gender: "MALE", date_of_birth: new Date("2000-01-01")
+      }
+    });
+
+    await this.patients.create({
+      data: {
+        id: createdUserData.id,
+        bc_address: '',
+        consent: false,
       }
     });
 
@@ -39,22 +56,50 @@ export class AuthService {
     return { createdUserData, cookies };
   }
 
-  public async login(userData: LoginUserDto): Promise<{ cookies: string[]; findUser: User }> {
-    const findUser: User = await this.users.findUnique({ where: { email: userData.email } });
-    if (!findUser) throw new HttpException(409, `This email ${userData.email} was not found`);
+  public async login(userData: LoginUserDto): Promise<{ cookies: string[]; findUser: UserLoginData }> {
+    const findUser: User = await this.users.findFirst({
+      where: {
+        OR: [
+          { email: userData.emailOrUsername },
+          { username: userData.emailOrUsername }
+        ]
+      }
+    });
+    if (!findUser) {
+      const error = createBilingualError(404, ErrorMessages.USER_NOT_FOUND_CREDENTIALS);
+      throw new HttpException(error.status, error.message, error.messageAr);
+    }
 
     const isPasswordMatching: boolean = await compare(userData.password, findUser.password_hash);
-    if (!isPasswordMatching) throw new HttpException(409, 'Password is not matching');
+    if (!isPasswordMatching) {
+      const error = createBilingualError(404, ErrorMessages.PASSWORD_NOT_MATCHING);
+      throw new HttpException(error.status, error.message, error.messageAr);
+    }
 
+    const { name, gender, date_of_birth, email, isVerified, username, phone, hasCompletedProfile } = findUser;
+    const patientLoginData: UserLoginData = {
+      name,
+      email,
+      username,
+      phone,
+      gender,
+      date_of_birth,
+      isVerified,
+      hasCompletedProfile
+    };
+    
     const tokenResponse = await this.createTokens(findUser, userData.rememberMe);
     const cookies = this.createCookies(tokenResponse);
 
-    return { cookies, findUser };
+    return { cookies, findUser: patientLoginData };
   }
 
   public async logout(userData: User): Promise<User> {
     const findUser: User = await this.users.findFirst({ where: { email: userData.email, password_hash: userData.password_hash } });
-    if (!findUser) throw new HttpException(409, "User doesn't exist");
+    if (!findUser) {
+      const error = createBilingualError(404, ErrorMessages.USER_NOT_EXIST);
+      throw new HttpException(error.status, error.message, error.messageAr);
+    }
 
     // Revoke all refresh tokens for this user
     await this.refreshTokens.updateMany({
@@ -67,13 +112,17 @@ export class AuthService {
 
   public async completeProfile(userData: User, profileData: CompleteUserProfileDto): Promise<User> {
     const findUser: User = await this.users.findUnique({ where: { id: userData.id } });
-    if (!findUser) throw new HttpException(409, "User doesn't exist");
+    if (!findUser) {
+      const error = createBilingualError(404, ErrorMessages.USER_NOT_EXIST);
+      throw new HttpException(error.status, error.message, error.messageAr);
+    }
 
     const updatedUserData: User = await this.users.update({
       where: { id: userData.id },
       data: {
         gender: profileData.gender,
         date_of_birth: new Date(profileData.date_of_birth),
+        hasCompletedProfile: true,
       },
     });
 
@@ -136,7 +185,10 @@ export class AuthService {
   }
 
   public async refreshAccessToken(refreshToken: string): Promise<{ cookies: string[]; user: User; accessToken: AccessTokenData }> {
-    if (!refreshToken) throw new HttpException(401, 'Refresh token not provided');
+    if (!refreshToken) {
+      const error = createBilingualError(401, ErrorMessages.REFRESH_TOKEN_NOT_PROVIDED);
+      throw new HttpException(error.status, error.message, error.messageAr);
+    }
 
     try {
       // Verify the refresh token
@@ -156,11 +208,17 @@ export class AuthService {
         },
       });
 
-      if (!storedToken) throw new HttpException(401, 'Invalid or expired refresh token');
+      if (!storedToken) {
+        const error = createBilingualError(401, ErrorMessages.INVALID_REFRESH_TOKEN);
+        throw new HttpException(error.status, error.message, error.messageAr);
+      }
 
       // Get user
       const user = await this.users.findUnique({ where: { id: decoded.id } });
-      if (!user) throw new HttpException(401, 'User not found');
+      if (!user) {
+        const error = createBilingualError(401, ErrorMessages.USER_NOT_EXIST);
+        throw new HttpException(error.status, error.message, error.messageAr);
+      }
 
       // Create new access token
       const accessToken = this.createAccessToken(user);
@@ -168,7 +226,8 @@ export class AuthService {
 
       return { cookies, user, accessToken };
     } catch (error) {
-      throw new HttpException(401, 'Invalid refresh token');
+      const err = createBilingualError(401, ErrorMessages.INVALID_REFRESH_TOKEN);
+      throw new HttpException(err.status, err.message, err.messageAr);
     }
   }
 
@@ -228,26 +287,34 @@ export class AuthService {
 
     await transporter.sendMail(mailOptions);
   }
-
+  
   public async getUserEmail(req: RequestWithUser): Promise<string> {
     const email = await this.users.findUnique({
       where: { id: req.user.id },
       select: { email: true }
     });
-    if (!email) throw new HttpException(404, "User email not found");
+    if (!email) {
+      const error = createBilingualError(404, ErrorMessages.USER_EMAIL_NOT_FOUND);
+      throw new HttpException(error.status, error.message, error.messageAr);
+    }
     return email.email;
   }
 
   public async verifyEmailOtp(email: string, otp: string): Promise<Boolean> {
     const user = await this.users.findUnique({ where: { email } });
-    if (!user) throw new HttpException(404, "User not found");
+    if (!user) {
+      const error = createBilingualError(404, ErrorMessages.USER_NOT_EXIST);
+      throw new HttpException(error.status, error.message, error.messageAr);
+    }
 
     if (user.email_OTP !== otp) {
-      throw new HttpException(400, "Invalid OTP");
+      const error = createBilingualError(400, ErrorMessages.INVALID_OTP);
+      throw new HttpException(error.status, error.message, error.messageAr);
     }
 
     if (user.email_OTP_expires_at && user.email_OTP_expires_at < new Date()) {
-      throw new HttpException(400, "OTP has expired");
+      const error = createBilingualError(400, ErrorMessages.OTP_EXPIRED);
+      throw new HttpException(error.status, error.message, error.messageAr);
     }
 
     // Clear OTP fields after successful verification
@@ -265,7 +332,10 @@ export class AuthService {
 
   public async sendPasswordResetEmail(email: string): Promise<void> {
     const user = await this.users.findUnique({ where: { email } });
-    if (!user) throw new HttpException(200, "Email will be sent if account exists");
+    if (!user) {
+      const error = createBilingualError(200, ErrorMessages.EMAIL_SENT_IF_EXISTS);
+      throw new HttpException(error.status, error.message, error.messageAr);
+    }
 
     const resetPasswordToken = crypto.randomBytes(32).toString('hex');
     const resetPasswordTokenExpiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
@@ -306,7 +376,10 @@ export class AuthService {
       },
     });
 
-    if (!user) throw new HttpException(400, "Invalid or expired password reset token");
+    if (!user) {
+      const error = createBilingualError(400, ErrorMessages.INVALID_PASSWORD_RESET_TOKEN);
+      throw new HttpException(error.status, error.message, error.messageAr);
+    }
 
     const hashedPassword = await hash(newPassword, 10);
 

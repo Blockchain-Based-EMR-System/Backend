@@ -21,7 +21,10 @@ export const ValidationMiddleware = (type: any, skipMissingProperties = false, w
       })
       .catch((errors: ValidationError[]) => {
         const message = errors.map((error: ValidationError) => Object.values(error.constraints)).join(', ');
-        next(new HttpException(400, message));
+        // For validation errors, we keep the detailed message in English and provide a generic Arabic message
+        // since validation constraints are typically defined in English
+        const messageAr = 'خطأ في التحقق من صحة البيانات المدخلة';
+        next(new HttpException(400, message, messageAr));
       });
   };
 };

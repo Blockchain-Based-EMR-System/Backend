@@ -19,7 +19,9 @@ model User {
   password_hash                   String    @db.VarChar(255)
   gender                          Gender
   date_of_birth                   DateTime
+  role                            Role      @default(PATIENT)
   isVerified                      Boolean   @default(false)
+  hasCompletedProfile             Boolean   @default(false)
   email_OTP                       String?   @db.VarChar(6)
   email_OTP_expires_at            DateTime?
   password_reset_token            String?   @db.VarChar(255)
@@ -242,4 +244,11 @@ enum Period {
 enum Gender {
   MALE
   FEMALE
+}
+
+enum Role {
+  ADMIN
+  DOCTOR
+  NURSE
+  PATIENT
 }
