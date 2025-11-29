@@ -14,10 +14,32 @@ export class UserRoute implements Routes {
   }
 
   private initializeRoutes() {
-    this.router.get(`${this.path}`, this.user.getUsers);
-    this.router.get(`${this.path}/:id(\\d+)`, this.user.getUserById);
-    this.router.post(`${this.path}`, ValidationMiddleware(CreateUserDto), this.user.createUser);
-    this.router.put(`${this.path}/:id(\\d+)`, ValidationMiddleware(CreateUserDto, true), this.user.updateUser);
-    this.router.delete(`${this.path}/:id(\\d+)`, this.user.deleteUser);
+    this.router.get(
+      '/users',
+      /* #swagger.tags = ['Users'] */
+      this.user.getUsers,
+    );
+    this.router.get(
+      '/users/:id(\\d+)',
+      /* #swagger.tags = ['Users'] */
+      this.user.getUserById,
+    );
+    this.router.post(
+      '/users',
+      /* #swagger.tags = ['Users'] */
+      ValidationMiddleware(CreateUserDto),
+      this.user.createUser,
+    );
+    this.router.put(
+      '/users/:id(\\d+)',
+      /* #swagger.tags = ['Users'] */
+      ValidationMiddleware(CreateUserDto, true),
+      this.user.updateUser,
+    );
+    this.router.delete(
+      '/users/:id(\\d+)',
+      /* #swagger.tags = ['Users'] */
+      this.user.deleteUser,
+    );
   }
 }

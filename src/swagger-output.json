@@ -1,0 +1,334 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "My API",
+    "description": "Description",
+    "version": "1.0.0"
+  },
+  "host": "localhost:3000",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "Authentication and account endpoints"
+    },
+    {
+      "name": "Users",
+      "description": "User management endpoints"
+    },
+    {
+      "name": "Fabric",
+      "description": "Hyperledger Fabric asset endpoints"
+    }
+  ],
+  "schemes": [
+    "http"
+  ],
+  "paths": {
+    "/auth/signup": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/auth/complete-profile-info": {
+      "patch": {
+        "tags": [
+          "Auth"
+        ],
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/auth/verify-otp": {
+      "patch": {
+        "tags": [
+          "Auth"
+        ],
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/auth/forget-password": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/auth/reset-password": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/auth/google": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/auth/google/callback": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/auth/google/update-phone": {
+      "patch": {
+        "tags": [
+          "Auth"
+        ],
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/assets": {
+      "get": {
+        "tags": [
+          "Fabric"
+        ],
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Fabric"
+        ],
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/assets/health": {
+      "get": {
+        "tags": [
+          "Fabric"
+        ],
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/assets/{id}": {
+      "get": {
+        "tags": [
+          "Fabric"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/assets/{id}/transfer": {
+      "put": {
+        "tags": [
+          "Fabric"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/users": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/users/{id(\\\\d+)}": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id(\\\\d+)",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Users"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id(\\\\d+)",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Users"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id(\\\\d+)",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    }
+  }
+}

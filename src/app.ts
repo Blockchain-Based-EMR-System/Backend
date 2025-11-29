@@ -6,7 +6,6 @@ import express from 'express';
 import helmet from 'helmet';
 import hpp from 'hpp';
 import morgan from 'morgan';
-import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
 import { NODE_ENV, PORT, LOG_FORMAT, ORIGIN, CREDENTIALS } from '@config';
 import { Routes } from '@interfaces/routes.interface';
@@ -65,26 +64,10 @@ export class App {
   }
 
   private initializeSwagger() {
-    const options = {
-      definition: {
-        openapi: '3.0.0',
-        info: {
-          title: 'GP Backend Authentication API',
-          version: '1.0.0',
-          description: 'Comprehensive API documentation for authentication routes including email/password auth and Google OAuth',
-        },
-        servers: [
-          {
-            url: `http://localhost:${this.port}`,
-            description: 'Development server',
-          },
-        ],
-      },
-      apis: ['swagger.yaml'],
-    };
+    const swaggerFile = require('./swagger-output.json'); // Path to the generated swagger file
+    const swaggerUi = require('swagger-ui-express');
 
-    const specs = swaggerJSDoc(options);
-    this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
+    this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));
   }
 
   private initializeErrorHandling() {

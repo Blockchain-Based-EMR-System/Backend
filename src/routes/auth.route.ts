@@ -18,17 +18,71 @@ export class AuthRoute implements Routes {
   }
 
   private initializeRoutes() {
-    this.router.post(`${this.path}/signup`, ValidationMiddleware(CreateUserDto), this.auth.signUp);
-    this.router.post(`${this.path}/login`, ValidationMiddleware(LoginUserDto), this.auth.logIn);
-    this.router.post(`${this.path}/logout`, AuthMiddleware, this.auth.logOut);
-    this.router.post(`${this.path}/refresh`, AuthMiddleware, this.auth.refresh);
-    this.router.patch(`${this.path}/complete-profile-info`, ValidationMiddleware(CompleteUserProfileDto), AuthMiddleware, this.auth.completeProfile);
-    this.router.patch(`${this.path}/verify-otp`, AuthMiddleware, this.auth.verifyOTP);
-    this.router.post(`${this.path}/forget-password`, this.auth.forgetPassword);
-    this.router.post(`${this.path}/reset-password`, ValidationMiddleware(ResetPasswordDto), this.auth.resetPassword);
+    this.router.post(
+      '/auth/signup',
+      /* #swagger.tags = ['Auth'] */
+      ValidationMiddleware(CreateUserDto),
+      this.auth.signUp,
+    );
+    this.router.post(
+      '/auth/login',
+      /* #swagger.tags = ['Auth'] */
+      ValidationMiddleware(LoginUserDto),
+      this.auth.logIn,
+    );
+    this.router.post(
+      '/auth/logout',
+      /* #swagger.tags = ['Auth'] */
+      AuthMiddleware,
+      this.auth.logOut,
+    );
+    this.router.post(
+      '/auth/refresh',
+      /* #swagger.tags = ['Auth'] */
+      AuthMiddleware,
+      this.auth.refresh,
+    );
+    this.router.patch(
+      '/auth/complete-profile-info',
+      /* #swagger.tags = ['Auth'] */
+      ValidationMiddleware(CompleteUserProfileDto),
+      AuthMiddleware,
+      this.auth.completeProfile,
+    );
+    this.router.patch(
+      '/auth/verify-otp',
+      /* #swagger.tags = ['Auth'] */
+      AuthMiddleware,
+      this.auth.verifyOTP,
+    );
+    this.router.post(
+      '/auth/forget-password',
+      /* #swagger.tags = ['Auth'] */
+      this.auth.forgetPassword,
+    );
+    this.router.post(
+      '/auth/reset-password',
+      /* #swagger.tags = ['Auth'] */
+      ValidationMiddleware(ResetPasswordDto),
+      this.auth.resetPassword,
+    );
 
-    this.router.get(`${this.path}/google`, this.googleAuth.googleOAuth);
-    this.router.get(`${this.path}/google/callback`, this.googleAuth.googleOAuthCallback);
-    this.router.patch(`${this.path}/google/update-phone`, ValidationMiddleware(UpdateGoogleUserPhoneDto), AuthMiddleware, this.googleAuth.updatePhoneNumber);
+    this.router.get(
+      '/auth/google',
+      /* #swagger.tags = ['Auth'] */
+      this.googleAuth.googleOAuth,
+    );
+    this.router.get(
+      '/auth/google/callback',
+      /* #swagger.tags = ['Auth'] */
+      this.googleAuth.googleOAuthCallback,
+    );
+    this.router.patch(
+      '/auth/google/update-phone',
+      /* #swagger.tags = ['Auth'] */
+      ValidationMiddleware(UpdateGoogleUserPhoneDto),
+      AuthMiddleware,
+      this.googleAuth.updatePhoneNumber,
+    );
   }
 }
