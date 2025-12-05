@@ -21,8 +21,9 @@ services:
     ports:
       - "3000:3000" 
       - "5555:5555" 
+    env_file:
+    - .env
     environment:
-      DATABASE_URL: "postgresql://NG:password@postgres:5432/EMR_DB?schema=public"
       NODE_ENV: development
     volumes:
       - ./:/app
