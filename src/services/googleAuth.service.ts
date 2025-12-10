@@ -4,8 +4,8 @@ import { PrismaClient } from "@prisma/client";
 import { Service } from "typedi";
 import { HttpException } from "@/exceptions/HttpException";
 import { ErrorMessages, createBilingualError } from "@/utils/errorMessages";
+import prisma from "@/config/prisma";
 
-const prisma = new PrismaClient();
 
 @Service()
 export class GoogleAuthService {

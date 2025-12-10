@@ -1,4 +1,4 @@
-import { PrismaClient, Role } from '@prisma/client';
+import { Role } from '@prisma/client';
 import { compare, hash } from 'bcrypt';
 import { sign, verify } from 'jsonwebtoken';
 import { Service } from 'typedi';
@@ -10,12 +10,13 @@ import { UserLoginData, User } from '@interfaces/users.interface';
 import { transporter } from '@/utils/nodeMailerService';
 import { ErrorMessages, createBilingualError } from '@/utils/errorMessages';
 import crypto from 'crypto';
+import prisma from '@/config/prisma';
 
 @Service()
 export class AuthService {
-  public users = new PrismaClient().user;
-  public patients = new PrismaClient().patient;
-  public refreshTokens = new PrismaClient().refreshToken;
+  public users = prisma.user;
+  public patients = prisma.patient;
+  public refreshTokens = prisma.refreshToken;
 
   public async signup(userData: CreateUserDto): Promise<{ createdUserData: User; cookies: string[] }> {
     const findUserSameEmail: User = await this.users.findUnique({ where: { email: userData.email } });

@@ -3,8 +3,7 @@ import { HttpException } from '@/exceptions/HttpException';
 import { CreateMedicalRecordDto } from '@/dtos/medical-records.dto';
 import { uploadFile, getFile } from '@/services/ipfs.service';
 import { MedicalRecord } from '@/interfaces/medicalRecords.interface';
-
-const prisma = new PrismaClient();
+import prisma from '@/config/prisma';
 
 // create a new  MR
 export const createMedicalRecord = async (
