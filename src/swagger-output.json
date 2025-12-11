@@ -27,6 +27,41 @@
           "Auth"
         ],
         "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "User signup data",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "example": "user@example.com"
+                },
+                "name": {
+                  "type": "string",
+                  "example": "John Doe"
+                },
+                "phone": {
+                  "type": "string",
+                  "example": "1234567890"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "password123"
+                }
+              },
+              "required": [
+                "email",
+                "name",
+                "phone",
+                "password"
+              ]
+            }
+          }
+        ],
         "responses": {
           "default": {
             "description": ""
@@ -40,6 +75,35 @@
           "Auth"
         ],
         "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "User login data",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "emailOrUsername": {
+                  "type": "string",
+                  "example": "user@example.com"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "password123"
+                },
+                "rememberMe": {
+                  "type": "boolean",
+                  "example": false
+                }
+              },
+              "required": [
+                "emailOrUsername",
+                "password"
+              ]
+            }
+          }
+        ],
         "responses": {
           "default": {
             "description": ""
@@ -79,6 +143,31 @@
           "Auth"
         ],
         "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Complete user profile",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "gender": {
+                  "type": "string",
+                  "example": "Male"
+                },
+                "date_of_birth": {
+                  "type": "string",
+                  "example": "1990-01-01"
+                }
+              },
+              "required": [
+                "gender",
+                "date_of_birth"
+              ]
+            }
+          }
+        ],
         "responses": {
           "default": {
             "description": ""
@@ -92,6 +181,26 @@
           "Auth"
         ],
         "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Verify OTP",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "otp": {
+                  "type": "string",
+                  "example": "123456"
+                }
+              },
+              "required": [
+                "otp"
+              ]
+            }
+          }
+        ],
         "responses": {
           "default": {
             "description": ""
@@ -105,6 +214,26 @@
           "Auth"
         ],
         "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Request password reset",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "example": "user@example.com"
+                }
+              },
+              "required": [
+                "email"
+              ]
+            }
+          }
+        ],
         "responses": {
           "default": {
             "description": ""
@@ -118,6 +247,31 @@
           "Auth"
         ],
         "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Reset password",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "token": {
+                  "type": "string",
+                  "example": "reset-token"
+                },
+                "newPassword": {
+                  "type": "string",
+                  "example": "newPassword123"
+                }
+              },
+              "required": [
+                "token",
+                "newPassword"
+              ]
+            }
+          }
+        ],
         "responses": {
           "default": {
             "description": ""
@@ -170,6 +324,26 @@
           "Auth"
         ],
         "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Update Google user phone",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "phone": {
+                  "type": "string",
+                  "example": "1234567890"
+                }
+              },
+              "required": [
+                "phone"
+              ]
+            }
+          }
+        ],
         "responses": {
           "default": {
             "description": ""
@@ -190,12 +364,161 @@
         }
       }
     },
+    "/fabric/onboard": {
+      "post": {
+        "tags": [
+          "FabricIdentity"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Identity onboarding data",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "label": {
+                  "type": "string",
+                  "example": "org1"
+                },
+                "mspId": {
+                  "type": "string",
+                  "example": "Org1MSP"
+                },
+                "certificate": {
+                  "type": "string",
+                  "example": "PEM certificate"
+                },
+                "privateKey": {
+                  "type": "string",
+                  "example": "PEM private key"
+                },
+                "peerEndpoint": {
+                  "type": "string",
+                  "example": "localhost:7051"
+                },
+                "peerHostAlias": {
+                  "type": "string",
+                  "example": "peer0.org1.example.com"
+                },
+                "tlsCertificate": {
+                  "type": "string",
+                  "example": "PEM TLS certificate"
+                },
+                "channelName": {
+                  "type": "string",
+                  "example": "mychannel"
+                },
+                "chaincodeName": {
+                  "type": "string",
+                  "example": "basic"
+                }
+              },
+              "required": [
+                "label",
+                "mspId",
+                "certificate",
+                "privateKey",
+                "peerEndpoint",
+                "peerHostAlias",
+                "tlsCertificate"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/fabric/identities": {
+      "get": {
+        "tags": [
+          "FabricIdentity"
+        ],
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/fabric/identities/{label}": {
+      "delete": {
+        "tags": [
+          "FabricIdentity"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "label",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/fabric/connections": {
+      "get": {
+        "tags": [
+          "FabricIdentity"
+        ],
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/fabric/init-ledger": {
+      "post": {
+        "tags": [
+          "FabricIdentity"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "X-Fabric-Identity",
+            "in": "header",
+            "description": "Identity label (e.g., org1)",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/records": {
       "get": {
         "tags": [
           "MedicalRecords"
         ],
         "description": "",
+        "parameters": [
+          {
+            "name": "X-Fabric-Identity",
+            "in": "header",
+            "description": "Identity label (e.g., org1)",
+            "required": true,
+            "type": "string"
+          }
+        ],
         "responses": {
           "default": {
             "description": ""
@@ -207,6 +530,67 @@
           "MedicalRecords"
         ],
         "description": "",
+        "parameters": [
+          {
+            "name": "X-Fabric-Identity",
+            "in": "header",
+            "description": "Identity label (e.g., org1)",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Medical record data",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "patientId": {
+                  "type": "string",
+                  "example": "P12345"
+                },
+                "firstName": {
+                  "type": "string",
+                  "example": "John"
+                },
+                "lastName": {
+                  "type": "string",
+                  "example": "Doe"
+                },
+                "dateOfBirth": {
+                  "type": "string",
+                  "example": "1990-01-01"
+                },
+                "gender": {
+                  "type": "string",
+                  "example": "Male"
+                },
+                "bloodType": {
+                  "type": "string",
+                  "example": "O+"
+                },
+                "ipfsCid": {
+                  "type": "string",
+                  "example": "Qm..."
+                },
+                "summary": {
+                  "type": "string",
+                  "example": "Optional summary"
+                }
+              },
+              "required": [
+                "patientId",
+                "firstName",
+                "lastName",
+                "dateOfBirth",
+                "gender",
+                "bloodType",
+                "ipfsCid"
+              ]
+            }
+          }
+        ],
         "responses": {
           "default": {
             "description": ""
@@ -239,6 +623,13 @@
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "X-Fabric-Identity",
+            "in": "header",
+            "description": "Identity label (e.g., org1)",
+            "required": true,
+            "type": "string"
           }
         ],
         "responses": {
@@ -258,6 +649,60 @@
             "in": "path",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "X-Fabric-Identity",
+            "in": "header",
+            "description": "Identity label (e.g., org1)",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Update medical record data",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "firstName": {
+                  "type": "string",
+                  "example": "John"
+                },
+                "lastName": {
+                  "type": "string",
+                  "example": "Doe"
+                },
+                "dateOfBirth": {
+                  "type": "string",
+                  "example": "1990-01-01"
+                },
+                "gender": {
+                  "type": "string",
+                  "example": "Male"
+                },
+                "bloodType": {
+                  "type": "string",
+                  "example": "O+"
+                },
+                "ipfsCid": {
+                  "type": "string",
+                  "example": "Qm..."
+                },
+                "summary": {
+                  "type": "string",
+                  "example": "Optional summary"
+                }
+              },
+              "required": [
+                "firstName",
+                "lastName",
+                "dateOfBirth",
+                "gender",
+                "bloodType",
+                "ipfsCid"
+              ]
+            }
           }
         ],
         "responses": {

@@ -1,70 +1,123 @@
 import * as grpc from '@grpc/grpc-js';
 import { connect, Contract, Gateway, Identity, Signer, signers } from '@hyperledger/fabric-gateway';
 import * as crypto from 'crypto';
-import { promises as fs } from 'fs';
-import * as path from 'path';
 import { TextDecoder } from 'util';
 import { HttpException } from '@/exceptions/HttpException';
 import { MedicalRecord } from '@/interfaces/medical-records.interface';
+import { FabricIdentity } from '@/interfaces/fabric-identity.interface';
+import identityStorage from '@/services/identity-storage.service';
+
+
+interface GatewayConnection {
+    gateway: Gateway;
+    client: grpc.Client;
+    contract: Contract;
+    identity: FabricIdentity;
+    lastUsed: Date;
+}
 
 class FabricService {
-    private gateway: Gateway | undefined;
-    private contract: Contract | undefined;
     private readonly utf8Decoder = new TextDecoder();
-
-    // Configuration - should be moved to your config/index.ts and .env file
-    private readonly channelName = process.env.CHANNEL_NAME || 'mychannel';
-    private readonly chaincodeName = process.env.CHAINCODE_NAME || 'test';
-    private readonly mspId = process.env.MSP_ID || 'Org1MSP';
-    private readonly cryptoPath = process.env.CRYPTO_PATH || path.resolve(__dirname, '../../../Blockchain/test-network/organizations/peerOrganizations/org1.example.com');
-    private readonly keyDirectoryPath = process.env.KEY_DIRECTORY_PATH || path.resolve(this.cryptoPath, 'users', 'User1@org1.example.com', 'msp', 'keystore');
-    private readonly certDirectoryPath = process.env.CERT_DIRECTORY_PATH || path.resolve(this.cryptoPath, 'users', 'User1@org1.example.com', 'msp', 'signcerts');
-    private readonly tlsCertPath = process.env.TLS_CERT_PATH || path.resolve(this.cryptoPath, 'peers', 'peer0.org1.example.com', 'tls', 'ca.crt');
-    private readonly peerEndpoint = process.env.PEER_ENDPOINT || 'localhost:7051';
-    private readonly peerHostAlias = process.env.PEER_HOST_ALIAS || 'peer0.org1.example.com';
-    private client: grpc.Client | undefined;
+    
+    // Connection cache with TTL
+    private connections: Map<string, GatewayConnection> = new Map();
+    private readonly CONNECTION_TTL_MS = 30 * 60 * 1000; // 30 minutes
+    private cleanupInterval: NodeJS.Timeout | null = null;
 
     constructor() {
-        this.connectToNetwork().catch(error => {
-            console.error('Failed to connect to Fabric network on initialization:', error);
-            process.exit(1);
-        });
+        this.startCleanupInterval();
     }
 
-    private async connectToNetwork(): Promise<void> {
+    public async getGatewayConnection(identityLabel: string): Promise<GatewayConnection> {
+
+        const cached = this.connections.get(identityLabel);
+        if (cached) {
+            cached.lastUsed = new Date();
+            return cached;
+        }
+
+        const identity = await identityStorage.getIdentity(identityLabel);
+        const connection = await this.createConnection(identity);
+        this.connections.set(identityLabel, connection);
+
+        console.log(`✅ Created new gateway connection for: ${identityLabel}`);
+        return connection;
+    }
+
+    private async createConnection(identity: FabricIdentity): Promise<GatewayConnection> {
         try {
-            this.client = await this.newGrpcConnection();
-            this.gateway = connect({
-                client: this.client,
-                identity: await this.newIdentity(),
-                signer: await this.newSigner(),
+
+            const client = await this.newGrpcConnection(identity);
+
+
+            const gateway = connect({
+                client,
+                identity: this.createIdentity(identity),
+                signer: this.createSigner(identity),
             });
-            const network = this.gateway.getNetwork(this.channelName);
-            this.contract = network.getContract(this.chaincodeName);
-            await this.initLedger();
-            console.log('*** Fabric Service Initialized and Ledger Ready ***');
-        } catch (error) {
-            console.error('fabric network not connected');
-            // Do not throw to avoid crashing the application during startup.
-            // Leave gateway/client/contract undefined so callers can detect uninitialized service.
-            this.gateway = undefined;
-            this.client = undefined;
-            this.contract = undefined;
-            return;
+
+
+            const network = gateway.getNetwork(identity.channelName);
+            const contract = network.getContract(identity.chaincodeName);
+
+            return {
+                gateway,
+                client,
+                contract,
+                identity,
+                lastUsed: new Date(),
+            };
+        } catch (error: any) {
+            console.error(`❌ Failed to create connection for ${identity.label}:`, error.message);
+            throw new HttpException(503, `Failed to connect to Fabric network: ${error.message}`);
         }
     }
 
-    public async getAllRecords(): Promise<MedicalRecord[]> {
-        const contract = this.ensureContract();
-        console.log('\n--> Evaluate Transaction: GetAllRecords');
+    private async newGrpcConnection(identity: FabricIdentity): Promise<grpc.Client> {
+        const tlsRootCert = Buffer.from(identity.tlsCertificate);
+        const tlsCredentials = grpc.credentials.createSsl(tlsRootCert);
+        
+        return new grpc.Client(identity.peerEndpoint, tlsCredentials, {
+            'grpc.ssl_target_name_override': identity.peerHostAlias,
+            'grpc.keepalive_time_ms': 120000,
+            'grpc.http2.min_time_between_pings_ms': 120000,
+            'grpc.keepalive_timeout_ms': 20000,
+            'grpc.http2.max_pings_without_data': 0,
+            'grpc.keepalive_permit_without_calls': 1,
+        });
+    }
+
+    private createIdentity(identity: FabricIdentity): Identity {
+        return {
+            mspId: identity.mspId,
+            credentials: Buffer.from(identity.certificate),
+        };
+    }
+
+    private createSigner(identity: FabricIdentity): Signer {
+        const privateKey = crypto.createPrivateKey(identity.privateKey);
+        return signers.newPrivateKeySigner(privateKey);
+    }
+
+    public async initLedger(identityLabel: string): Promise<void> {
+        const { contract } = await this.getGatewayConnection(identityLabel);
+        console.log(`\n--> Submit Transaction: InitLedger (${identityLabel})`);
+        await contract.submitTransaction('InitLedger');
+        console.log('*** InitLedger transaction committed successfully');
+    }
+
+
+    public async getAllRecords(identityLabel: string): Promise<MedicalRecord[]> {
+        const { contract } = await this.getGatewayConnection(identityLabel);
+        console.log(`\n--> Evaluate Transaction: GetAllRecords (${identityLabel})`);
         const resultBytes = await contract.evaluateTransaction('GetAllRecords');
         const resultJson = this.utf8Decoder.decode(resultBytes);
         return JSON.parse(resultJson) as MedicalRecord[];
     }
 
-    public async addRecord(payload: MedicalRecord): Promise<void> {
-        const contract = this.ensureContract();
-        console.log('\n--> Submit Transaction: AddRecord');
+    public async addRecord(identityLabel: string, payload: MedicalRecord): Promise<void> {
+        const { contract } = await this.getGatewayConnection(identityLabel);
+        console.log(`\n--> Submit Transaction: AddRecord (${identityLabel})`);
         await contract.submitTransaction(
             'AddRecord',
             payload.patientId,
@@ -74,21 +127,26 @@ class FabricService {
             payload.gender,
             payload.bloodType,
             payload.ipfsCid,
-            payload.summary || '',
+            '',
         );
     }
 
-    public async getRecordByPatientId(patientId: string): Promise<MedicalRecord> {
-        const contract = this.ensureContract();
-        console.log('\n--> Evaluate Transaction: GetRecord');
+    public async getRecordByPatientId(identityLabel: string, patientId: string): Promise<MedicalRecord> {
+        const { contract } = await this.getGatewayConnection(identityLabel);
+        console.log(`\n--> Evaluate Transaction: GetRecord (${identityLabel})`);
         const resultBytes = await contract.evaluateTransaction('GetRecord', patientId);
         const resultJson = this.utf8Decoder.decode(resultBytes);
         return JSON.parse(resultJson) as MedicalRecord;
     }
 
-    public async updateRecord(patientId: string, payload: Omit<MedicalRecord, 'patientId'>): Promise<void> {
-        const contract = this.ensureContract();
-        console.log('\n--> Submit Transaction: UpdateRecord');
+
+    public async updateRecord(
+        identityLabel: string,
+        patientId: string,
+        payload: Omit<MedicalRecord, 'patientId'>
+    ): Promise<void> {
+        const { contract } = await this.getGatewayConnection(identityLabel);
+        console.log(`\n--> Submit Transaction: UpdateRecord (${identityLabel})`);
         await contract.submitTransaction(
             'UpdateRecord',
             patientId,
@@ -98,56 +156,60 @@ class FabricService {
             payload.gender,
             payload.bloodType,
             payload.ipfsCid,
-            payload.summary || '',
+            '',
         );
     }
 
-    private async initLedger(): Promise<void> {
-        const contract = this.ensureContract();
-        console.log('\n--> Submit Transaction: InitLedger');
-        await contract.submitTransaction('InitLedger');
-        console.log('*** InitLedger transaction committed successfully');
-    }
-
-    private ensureContract(): Contract {
-        if (!this.contract) {
-            throw new HttpException(503, 'Fabric network connection is not ready');
+    public async closeConnection(identityLabel: string): Promise<void> {
+        const connection = this.connections.get(identityLabel);
+        if (connection) {
+            connection.gateway.close();
+            connection.client.close();
+            this.connections.delete(identityLabel);
+            console.log(`Closed connection for: ${identityLabel}`);
         }
-        return this.contract;
     }
 
-    private async newGrpcConnection(): Promise<grpc.Client> {
-        const tlsRootCert = await fs.readFile(this.tlsCertPath);
-        const tlsCredentials = grpc.credentials.createSsl(tlsRootCert);
-        return new grpc.Client(this.peerEndpoint, tlsCredentials, {
-            'grpc.ssl_target_name_override': this.peerHostAlias,
-        });
-    }
-
-    private async newIdentity(): Promise<Identity> {
-        const certPath = await this.getFirstDirFileName(this.certDirectoryPath);
-        const credentials = await fs.readFile(certPath);
-        return { mspId: this.mspId, credentials };
-    }
-
-    private async newSigner(): Promise<Signer> {
-        const keyPath = await this.getFirstDirFileName(this.keyDirectoryPath);
-        const privateKeyPem = await fs.readFile(keyPath);
-        const privateKey = crypto.createPrivateKey(privateKeyPem);
-        return signers.newPrivateKeySigner(privateKey);
-    }
-
-    private async getFirstDirFileName(dirPath: string): Promise<string> {
-        const files = await fs.readdir(dirPath);
-        if (!files[0]) {
-            throw new Error(`No files in directory: ${dirPath}`);
+    public closeAllConnections(): void {
+        for (const [label, connection] of this.connections) {
+            connection.gateway.close();
+            connection.client.close();
+            console.log(`Closed connection for: ${label}`);
         }
-        return path.join(dirPath, files[0]);
+        this.connections.clear();
+
+        if (this.cleanupInterval) {
+            clearInterval(this.cleanupInterval);
+            this.cleanupInterval = null;
+        }
     }
 
-    public close(): void {
-        this.gateway?.close();
-        this.client?.close();
+
+    private startCleanupInterval(): void {
+        this.cleanupInterval = setInterval(() => {
+            const now = new Date().getTime();
+            
+            for (const [label, connection] of this.connections) {
+                const age = now - connection.lastUsed.getTime();
+                if (age > this.CONNECTION_TTL_MS) {
+                    connection.gateway.close();
+                    connection.client.close();
+                    this.connections.delete(label);
+                    console.log(`Cleaned up stale connection for: ${label}`);
+                }
+            }
+        }, 5 * 60 * 1000); // Check every 5 minutes
+    }
+
+
+    public getConnectionStats(): { total: number; connections: Array<{ label: string; lastUsed: string }> } {
+        return {
+            total: this.connections.size,
+            connections: Array.from(this.connections.entries()).map(([label, conn]) => ({
+                label,
+                lastUsed: conn.lastUsed.toISOString(),
+            })),
+        };
     }
 }
 
