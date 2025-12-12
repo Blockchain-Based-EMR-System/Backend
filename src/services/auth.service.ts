@@ -13,6 +13,7 @@ import crypto from 'crypto';
 
 @Service()
 export class AuthService {
+  // TO BE EDITED
   public users = new PrismaClient().user;
   public patients = new PrismaClient().patient;
   public refreshTokens = new PrismaClient().refreshToken;
@@ -87,7 +88,7 @@ export class AuthService {
       isVerified,
       hasCompletedProfile
     };
-    
+
     const tokenResponse = await this.createTokens(findUser, userData.rememberMe);
     const cookies = this.createCookies(tokenResponse);
 
@@ -287,7 +288,7 @@ export class AuthService {
 
     await transporter.sendMail(mailOptions);
   }
-  
+
   public async getUserEmail(req: RequestWithUser): Promise<string> {
     const email = await this.users.findUnique({
       where: { id: req.user.id },
