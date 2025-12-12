@@ -5,6 +5,7 @@ import { NextFunction, Request, Response } from "express";
 import { User, UserLoginData } from "@/interfaces/users.interface";
 import { RequestWithUser } from "@/interfaces";
 import { GoogleAuthService } from "@/services/googleAuth.service";
+import { catchAsync } from "@/utils/catchAsync";
 
 export class GoogleAuthController {
     public authService = Container.get(AuthService);
@@ -35,7 +36,7 @@ export class GoogleAuthController {
 
                 // Check if it's a new user from the info object
                 const isNewUser = info?.isNewUser || false;
-                
+
                 // Redirect based on whether it's first time or not
                 if (isNewUser) {
                     res.redirect(`${process.env.FRONTEND_URL}/api/auth/google-callback`);
@@ -48,22 +49,14 @@ export class GoogleAuthController {
         })(req, res, next);
     };
 
-    public updatePhoneNumber = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
-        try {
-            const phone: string = req.body.phone;
-            await this.googleAuthService.updatePhoneNumber(req.user.id, phone);
-            res.status(200).json({ message: 'Phone Number Updated Successfully' });
-        } catch (error) {
-            next(error);
-        }
-    };
+    public updatePhoneNumber = catchAsync(async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+        const phone: string = req.body.phone;
+        await this.googleAuthService.updatePhoneNumber(req.user.id, phone);
+        res.status(200).json({ message: 'Phone Number Updated Successfully' });
+    });
 
-    public getGoogleUserData = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
-        try {
-            const googleUserData: UserLoginData = await this.googleAuthService.getGoogleUserData(req.user.id);
-            res.status(200).json({ data: googleUserData, message: 'Google User Data Retrieved Successfully' });
-        } catch (error) {
-            next(error);
-        }
-    };
+    public getGoogleUserData = catchAsync(async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+        const googleUserData: UserLoginData = await this.googleAuthService.getGoogleUserData(req.user.id);
+        res.status(200).json({ data: googleUserData, message: 'Google User Data Retrieved Successfully' });
+    });
 }

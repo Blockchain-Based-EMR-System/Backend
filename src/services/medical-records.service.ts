@@ -104,21 +104,3 @@ export class MedicalRecordService {
     // handle permissions --> fabric stuff 
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
