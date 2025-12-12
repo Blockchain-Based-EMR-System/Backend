@@ -7,4 +7,6 @@ export interface MedicalRecord {
   bloodType: string;
   ipfsCid: string;
   summary?: string;
+  ownerMsp?: string;
+  authorizedMsps?: string[];
 }

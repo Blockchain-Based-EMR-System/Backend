@@ -116,27 +116,79 @@ class FabricService {
     }
 
     public async addRecord(identityLabel: string, payload: MedicalRecord): Promise<void> {
-        const { contract } = await this.getGatewayConnection(identityLabel);
+        const { contract, identity } = await this.getGatewayConnection(identityLabel);
         console.log(`\n--> Submit Transaction: AddRecord (${identityLabel})`);
-        await contract.submitTransaction(
-            'AddRecord',
-            payload.patientId,
-            payload.firstName,
-            payload.lastName,
-            payload.dateOfBirth,
-            payload.gender,
-            payload.bloodType,
-            payload.ipfsCid,
-            '',
-        );
+        
+        await contract.submit('AddRecord', {
+            arguments: [
+                payload.patientId,
+                payload.firstName,
+                payload.lastName,
+                payload.dateOfBirth,
+                payload.gender,
+                payload.bloodType,
+                payload.summary || '',
+            ],
+            transientData: {
+                ipfsCid: Buffer.from(payload.ipfsCid)
+            },
+            endorsingOrganizations: [identity.mspId],
+        });
     }
 
     public async getRecordByPatientId(identityLabel: string, patientId: string): Promise<MedicalRecord> {
-        const { contract } = await this.getGatewayConnection(identityLabel);
+        const { contract, identity } = await this.getGatewayConnection(identityLabel);
         console.log(`\n--> Evaluate Transaction: GetRecord (${identityLabel})`);
-        const resultBytes = await contract.evaluateTransaction('GetRecord', patientId);
-        const resultJson = this.utf8Decoder.decode(resultBytes);
-        return JSON.parse(resultJson) as MedicalRecord;
+
+        // First, fetch the public metadata so we can determine the Owner MSP for this record.
+        // We don't have a separate "GetRecordPublic" chaincode function, so reuse GetAllRecords
+        // and find the single entry. For large datasets consider adding a light-weight metadata accessor.
+        const allBytes = await contract.evaluateTransaction('GetAllRecords');
+        const allJson = this.utf8Decoder.decode(allBytes);
+        const allRecords = JSON.parse(allJson) as MedicalRecord[];
+
+        const publicRecord = allRecords.find(r => r.patientId === patientId);
+        if (!publicRecord) {
+            throw new HttpException(404, `Record not found: ${patientId}`);
+        }
+
+        const ownerMsp = publicRecord.ownerMsp || publicRecord.ownerMsp?.toString();
+
+        // If caller is the owner, perform a normal evaluate (owner peer will have private data).
+        // If caller is NOT the owner, we must ensure the proposal is evaluated on the owner's peers
+        // so they can read their implicit private data collection. We instruct the gateway to target
+        // the owner's organizations for endorsement.
+        const callerMsp = identity.mspId;
+
+        try {
+            if (callerMsp === ownerMsp) {
+                const resultBytes = await contract.evaluateTransaction('GetRecord', patientId);
+                const resultJson = this.utf8Decoder.decode(resultBytes);
+                return JSON.parse(resultJson) as MedicalRecord;
+            }
+
+            // Non-owner: request evaluation targeted at owner's org so that owner's peer can access private data.
+            const resultBytes = await contract.evaluate('GetRecord', {
+                arguments: [patientId],
+                endorsingOrganizations: [ownerMsp],
+            });
+
+            const resultJson = this.utf8Decoder.decode(resultBytes);
+            return JSON.parse(resultJson) as MedicalRecord;
+        } catch (err: any) {
+            // Surface clearer error when access is denied
+            const msg = err?.message || String(err);
+            if (msg.toLowerCase().includes('not authorized') || msg.toLowerCase().includes('not authorized to access')) {
+                throw new HttpException(403, `Access denied for ${identityLabel} to record ${patientId}`, msg);
+            }
+            throw err;
+        }
+    }
+
+    public async grantAccess(identityLabel: string, patientId: string, targetMsp: string): Promise<void> {
+        const { contract } = await this.getGatewayConnection(identityLabel);
+        console.log(`\n--> Submit Transaction: GrantAccess (${identityLabel})`);
+        await contract.submitTransaction('GrantAccess', patientId, targetMsp);
     }
 
 
@@ -145,19 +197,24 @@ class FabricService {
         patientId: string,
         payload: Omit<MedicalRecord, 'patientId'>
     ): Promise<void> {
-        const { contract } = await this.getGatewayConnection(identityLabel);
+        const { contract, identity } = await this.getGatewayConnection(identityLabel);
         console.log(`\n--> Submit Transaction: UpdateRecord (${identityLabel})`);
-        await contract.submitTransaction(
-            'UpdateRecord',
-            patientId,
-            payload.firstName,
-            payload.lastName,
-            payload.dateOfBirth,
-            payload.gender,
-            payload.bloodType,
-            payload.ipfsCid,
-            '',
-        );
+        
+        await contract.submit('UpdateRecord', {
+            arguments: [
+                patientId,
+                payload.firstName,
+                payload.lastName,
+                payload.dateOfBirth,
+                payload.gender,
+                payload.bloodType,
+                payload.summary || '',
+            ],
+            transientData: {
+                ipfsCid: Buffer.from(payload.ipfsCid)
+            },
+            endorsingOrganizations: [identity.mspId],
+        });
     }
 
     public async closeConnection(identityLabel: string): Promise<void> {

@@ -7,9 +7,7 @@ import { HttpException } from '@/exceptions/HttpException';
 class FabricController {
     public fabricService = new FabricService();
 
-    /**
-     * Extract identity label from request header
-     */
+
     private getIdentityLabel(req: Request): string {
         const identityLabel = req.headers['x-fabric-identity'] as string;
         if (!identityLabel) {
@@ -18,10 +16,7 @@ class FabricController {
         return identityLabel;
     }
 
-    /**
-     * Onboard a new organization identity
-     * POST /fabric/onboard
-     */
+
     public onboardIdentity = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const input: FabricIdentityInput = req.body;
@@ -43,10 +38,7 @@ class FabricController {
         }
     };
 
-    /**
-     * List all stored identities (without sensitive data)
-     * GET /fabric/identities
-     */
+
     public listIdentities = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const identities = await identityStorage.listIdentities();
@@ -56,10 +48,7 @@ class FabricController {
         }
     };
 
-    /**
-     * Delete an identity
-     * DELETE /fabric/identities/:label
-     */
+
     public deleteIdentity = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const label = req.params.label;
@@ -76,10 +65,6 @@ class FabricController {
         }
     };
 
-    /**
-     * Get connection statistics
-     * GET /fabric/connections
-     */
     public getConnectionStats = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const stats = this.fabricService.getConnectionStats();
@@ -126,6 +111,23 @@ class FabricController {
             const patientId = req.params.patientId;
             await this.fabricService.updateRecord(identityLabel, patientId, req.body);
             res.status(200).json({ message: 'updated' });
+        } catch (error) {
+            next(error);
+        }
+    };
+
+    public grantAccess = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        try {
+            const identityLabel = this.getIdentityLabel(req);
+            const patientId = req.params.patientId;
+            const { targetMsp } = req.body;
+
+            if (!targetMsp) {
+                throw new HttpException(400, 'targetMsp is required');
+            }
+
+            await this.fabricService.grantAccess(identityLabel, patientId, targetMsp);
+            res.status(200).json({ message: 'Access granted successfully' });
         } catch (error) {
             next(error);
         }

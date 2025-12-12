@@ -160,6 +160,28 @@ export class FabricRoute implements Routes {
             ValidationMiddleware(UpdateMedicalRecordDto),
             this.fabricController.updateRecord,
         );
+
+        this.router.post(
+            '/records/:patientId/access',
+            /* 
+                #swagger.tags = ['MedicalRecords']
+                #swagger.parameters['X-Fabric-Identity'] = {
+                    in: 'header',
+                    description: 'Identity label (e.g., org1)',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['body'] = {
+                    in: 'body',
+                    description: 'Grant access to MSP',
+                    required: true,
+                    schema: {
+                        $targetMsp: 'Org2MSP'
+                    }
+                }
+            */
+            this.fabricController.grantAccess,
+        );
     }
 }
 

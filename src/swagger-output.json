@@ -117,6 +117,15 @@
           "Auth"
         ],
         "description": "",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer access token or cookie (e.g. Authorization: Bearer <token>)",
+            "required": true,
+            "type": "string"
+          }
+        ],
         "responses": {
           "default": {
             "description": ""
@@ -130,6 +139,15 @@
           "Auth"
         ],
         "description": "",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Refresh token in cookie or Authorization header. If using cookie, ensure cookies are sent.",
+            "required": true,
+            "type": "string"
+          }
+        ],
         "responses": {
           "default": {
             "description": ""
@@ -166,6 +184,13 @@
                 "date_of_birth"
               ]
             }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer access token",
+            "required": true,
+            "type": "string"
           }
         ],
         "responses": {
@@ -182,6 +207,13 @@
         ],
         "description": "",
         "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer access token",
+            "required": true,
+            "type": "string"
+          },
           {
             "name": "body",
             "in": "body",
@@ -285,6 +317,15 @@
           "Auth"
         ],
         "description": "",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer access token",
+            "required": true,
+            "type": "string"
+          }
+        ],
         "responses": {
           "default": {
             "description": ""
@@ -342,6 +383,13 @@
                 "phone"
               ]
             }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer access token",
+            "required": true,
+            "type": "string"
           }
         ],
         "responses": {
@@ -357,6 +405,15 @@
           "Auth"
         ],
         "description": "",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer access token",
+            "required": true,
+            "type": "string"
+          }
+        ],
         "responses": {
           "default": {
             "description": ""
@@ -413,7 +470,7 @@
                 },
                 "chaincodeName": {
                   "type": "string",
-                  "example": "basic"
+                  "example": "test"
                 }
               },
               "required": [
@@ -701,6 +758,52 @@
                 "gender",
                 "bloodType",
                 "ipfsCid"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/records/{patientId}/access": {
+      "post": {
+        "tags": [
+          "MedicalRecords"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "X-Fabric-Identity",
+            "in": "header",
+            "description": "Identity label (e.g., org1)",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Grant access to MSP",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "targetMsp": {
+                  "type": "string",
+                  "example": "Org2MSP"
+                }
+              },
+              "required": [
+                "targetMsp"
               ]
             }
           }
