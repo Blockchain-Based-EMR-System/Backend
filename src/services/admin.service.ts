@@ -90,6 +90,7 @@ export class AdminService {
         const doctors = await prisma.user.findMany({
             where: { role: Role.DOCTOR },
             select: {
+                id: true,
                 name: true,
                 email: true,
                 username: true,
@@ -146,6 +147,31 @@ export class AdminService {
         return doctor;
     }
 
+    public async getUnverifiedDoctors(): Promise<DoctorFromAdminResponseDto[]> {
+
+        const unverifiedDoctors = await prisma.user.findMany({
+            where: { role: Role.DOCTOR, isVerified: false },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                username: true,
+                phone: true,
+                gender: true,
+                date_of_birth: true,
+                isVerified: true,
+                photo_url: true,
+                doctor: {
+                    select: {
+                        specialization: true,
+                        avg_time: true
+                    }
+                },
+            },
+        });
+        return unverifiedDoctors
+
+    }
     public async updateDoctorVerificationStatus(doctorId: string, isVerified: boolean): Promise<void> {
 
         const doctor = await prisma.user.findUnique({

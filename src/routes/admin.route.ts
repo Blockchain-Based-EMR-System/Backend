@@ -81,7 +81,7 @@ export class AdminRoute implements Routes {
                 #swagger.responses[200] = {
                     description: 'Doctors retrieved successfully',
                     schema: {
-                        data:[ { email: 'doctor@example.com', name: 'Dr. Smith', role: 'DOCTOR', 
+                        data:[ { id: '1' , email: 'doctor@example.com', name: 'Dr. Smith', role: 'DOCTOR', 
                         username: 'smith', phone : '1234567890', gender: 'MALE', isVerified: false, hasCompletedProfile: false,
                         doctor: { specialization: {key: 'CARDIOLOGY' , value: 'Cardiology'} , avg_time: null }, photoUrl: null }],
                         message: 'Doctors retrieved successfully'
@@ -92,6 +92,23 @@ export class AdminRoute implements Routes {
             RoleMiddleware(Role.ADMIN),
             LanguageMiddleware,
             this.adminController.getAllDoctors,
+        );
+
+        this.router.get(
+            '/admin/doctors/unverified',
+            /* #swagger.tags = ['Admin'] */
+            AuthMiddleware,
+            RoleMiddleware(Role.ADMIN),
+            LanguageMiddleware,
+            this.adminController.getUnverifiedDoctors,
+        );
+
+        this.router.patch(
+            '/admin/doctors/verify/:id',
+            /* #swagger.tags = ['Admin'] */
+            AuthMiddleware,
+            RoleMiddleware(Role.ADMIN),
+            this.adminController.updateDoctorVerificationStatus,
         );
 
         this.router.get(
@@ -130,14 +147,6 @@ export class AdminRoute implements Routes {
             RoleMiddleware(Role.ADMIN),
             LanguageMiddleware,
             this.adminController.getDoctorById,
-        );
-
-        this.router.patch(
-            '/admin/doctors/:id',
-            /* #swagger.tags = ['Admin'] */
-            AuthMiddleware,
-            RoleMiddleware(Role.ADMIN),
-            this.adminController.updateDoctorVerificationStatus,
         );
     }
 }

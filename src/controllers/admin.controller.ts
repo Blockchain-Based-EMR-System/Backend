@@ -76,6 +76,27 @@ export class AdminController {
         });
     }
 
+    public getUnverifiedDoctors = async (req: RequestWithLanguage, res: Response, next: NextFunction): Promise<void> => {
+
+        const unverifiedDoctors = await this.adminService.getUnverifiedDoctors();
+        const language = req.language;
+        // Format specializations based on language preference
+        const formattedDoctors = unverifiedDoctors.map(doctor => ({
+            ...doctor,
+            doctor: doctor.doctor ? {
+                ...doctor.doctor,
+                specialization: formatSpecializationResponse(
+                    doctor.doctor.specialization as SpecializationKey,
+                    language
+                ),
+            } : null,
+        }));
+        res.status(200).json({
+            data: formattedDoctors,
+            message: 'Unverified doctors retrieved successfully'
+        });
+    }
+
     public updateDoctorVerificationStatus = async (req: RequestWithLanguage, res: Response, next: NextFunction): Promise<void> => {
 
         const doctorId = req.params.id;

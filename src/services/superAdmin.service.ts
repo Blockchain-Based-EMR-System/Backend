@@ -67,6 +67,7 @@ export class SuperAdminService {
         const admins = await prisma.user.findMany({
             where: { role: Role.ADMIN },
             select: {
+                id: true,
                 email: true,
                 name: true,
                 username: true,

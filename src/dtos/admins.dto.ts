@@ -35,9 +35,9 @@ export class DoctorFromAdminResponseDto {
     public phone: string;
     public gender: Gender;
     public date_of_birth: Date;
-    public role: Role;
+    public role?: Role;
     public isVerified: boolean;
-    public hasCompletedProfile: boolean
+    public hasCompletedProfile?: boolean
     public photoUrl?: string;
     public doctor?: {
         specialization: string;

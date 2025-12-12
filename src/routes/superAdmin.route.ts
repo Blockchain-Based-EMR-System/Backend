@@ -84,6 +84,7 @@ export class SuperAdminRoute implements Routes {
                     description: 'Admins retrieved successfully',
                     schema: {
                         data: [{
+                            id: '1',
                             email: 'admin@example.com',
                             name: 'Jane Smith',
                             role: 'ADMIN',
@@ -209,7 +210,7 @@ export class SuperAdminRoute implements Routes {
                 #swagger.responses[200] = {
                     description: 'Doctors retrieved successfully',
                     schema: {
-                        data: [{ email: 'doctor@example.com', name: 'Dr. Smith', role: 'DOCTOR', 
+                        data: [{ id: '1', email: 'doctor@example.com', name: 'Dr. Smith', role: 'DOCTOR', 
                         username: 'smith', phone : '1234567890', gender: 'MALE', isVerified: false, hasCompletedProfile: false,
                         doctor: { specialization: {key: 'CARDIOLOGY' , value: 'Cardiology'} , avg_time: null }, photoUrl: null }],
                         message: 'Doctors retrieved successfully'
