@@ -137,7 +137,7 @@ export class AdminRoute implements Routes {
             /* #swagger.tags = ['Admin'] */
             AuthMiddleware,
             RoleMiddleware(Role.ADMIN),
-            // this.adminController.updateDoctorVerificationStatus,
+            this.adminController.updateDoctorVerificationStatus,
         );
     }
 }

@@ -76,4 +76,13 @@ export class AdminController {
         });
     }
 
+    public updateDoctorVerificationStatus = async (req: RequestWithLanguage, res: Response, next: NextFunction): Promise<void> => {
+
+        const doctorId = req.params.id;
+        const { isVerified } = req.body;
+        await this.adminService.updateDoctorVerificationStatus(doctorId, isVerified);      
+        res.status(200).json({
+            message: 'Doctor verification status updated successfully'
+        });
+    }
 }

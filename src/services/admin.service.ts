@@ -146,4 +146,18 @@ export class AdminService {
         return doctor;
     }
 
+    public async updateDoctorVerificationStatus(doctorId: string, isVerified: boolean): Promise<void> {
+
+        const doctor = await prisma.user.findUnique({
+            where: { id: doctorId, role: Role.DOCTOR },
+        });
+        if (!doctor) {
+            const error = createBilingualError(404, ErrorMessages.USER_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+        await prisma.user.update({
+            where: { id: doctorId },
+            data: { isVerified },
+        });
+    }
 }

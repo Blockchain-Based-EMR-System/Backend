@@ -1,5 +1,7 @@
 import { AddAdminFromSuperAdminDto, AdminFromSuperAdminResponseDto } from "@/dtos/superAdmins.dto";
+import { HttpException } from "@/exceptions/HttpException";
 import { User } from "@/interfaces";
+import { createBilingualError, ErrorMessages } from "@/utils/errorMessages";
 import { PrismaClient, Role } from "@prisma/client";
 import { hash } from "bcrypt";
 import { Service } from "typedi";
@@ -16,7 +18,8 @@ export class SuperAdminService {
             where: { email: adminData.email }
         });
         if (existingUser) {
-            throw new Error('Email already exists');
+            const err = createBilingualError(409, ErrorMessages.EMAIL_EXISTS);
+            throw new HttpException(err.status, err.message, err.messageAr);
         }
         const username = adminData.email.split('@')[0];
 
@@ -25,7 +28,8 @@ export class SuperAdminService {
             where: { username }
         });
         if (existingUsername) {
-            throw new Error('Username already exists');
+            const err = createBilingualError(409, ErrorMessages.USERNAME_EXISTS);
+            throw new HttpException(err.status, err.message, err.messageAr);
         }
 
         const hashedPassword = await hash(adminData.password, 10);
