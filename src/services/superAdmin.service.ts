@@ -1,4 +1,5 @@
-import { AddAdminFromSuperAdminDto } from "@/dtos/superAdmins.dto";
+import { AddAdminFromSuperAdminDto, AdminFromSuperAdminResponseDto } from "@/dtos/superAdmins.dto";
+import { User } from "@/interfaces";
 import { PrismaClient, Role } from "@prisma/client";
 import { hash } from "bcrypt";
 import { Service } from "typedi";
@@ -8,7 +9,7 @@ const prisma = new PrismaClient();
 @Service()
 export class SuperAdminService {
 
-    public async addAdmin(adminData: AddAdminFromSuperAdminDto): Promise<any> {
+    public async addAdmin(adminData: AddAdminFromSuperAdminDto): Promise<AdminFromSuperAdminResponseDto> {
         // Logic to add a new admin
         // Check if email already exists
         const existingUser = await prisma.user.findUnique({
@@ -41,8 +42,59 @@ export class SuperAdminService {
                 isVerified: true,
                 hasCompletedProfile: true,
                 date_of_birth: new Date(adminData.date_of_birth),
+            },
+            select: {
+                email: true,
+                name: true,
+                username: true,
+                phone: true,
+                role: true,
+                gender: true,
+                isVerified: true,
+                hasCompletedProfile: true,
+                date_of_birth: true,
+                photo_url: true,
             }
         });
         return newAdmin;
     }
+
+    public async getAllAdmins(): Promise<AdminFromSuperAdminResponseDto[]> {
+        const admins = await prisma.user.findMany({
+            where: { role: Role.ADMIN },
+            select: {
+                email: true,
+                name: true,
+                username: true,
+                phone: true,
+                role: true,
+                gender: true,
+                isVerified: true,
+                hasCompletedProfile: true,
+                date_of_birth: true,
+                photo_url: true,
+            }
+        });
+        return admins;
+    }
+
+    public async getAdminById(adminId: string): Promise<AdminFromSuperAdminResponseDto | null> {
+        const admin = await prisma.user.findUnique({
+            where: { id: adminId, role: Role.ADMIN },
+            select: {
+                email: true,
+                name: true,
+                username: true,
+                phone: true,
+                role: true,
+                gender: true,
+                isVerified: true,
+                hasCompletedProfile: true,
+                date_of_birth: true,
+                photo_url: true,
+            }
+        });
+        return admin;
+    }
+
 }

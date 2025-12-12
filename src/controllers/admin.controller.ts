@@ -11,17 +11,21 @@ export class AdminController {
     public adminService = Container.get(AdminService);
 
     public addDoctor = async (req: RequestWithLanguage, res: Response, next: NextFunction): Promise<void> => {
-        try {
-            const doctorData: AddDoctorFromAdminDto = req.body;
-            const newDoctor = await this.adminService.addDoctor(doctorData);
+        const doctorData: AddDoctorFromAdminDto = req.body;
+        const newDoctor = await this.adminService.addDoctor(doctorData);
 
-            res.status(201).json({
-                data: newDoctor,
-                message: 'Doctor added successfully'
-            });
-        } catch (error) {
-            next(error);
-        }
+        const formattedNewDoctor = newDoctor.doctor ? {
+            ...newDoctor.doctor,
+            specialization: formatSpecializationResponse(
+                newDoctor.doctor.specialization as SpecializationKey,
+                req.language
+            ),
+        } : null;
+
+        res.status(201).json({
+            data: formattedNewDoctor,
+            message: 'Doctor added successfully'
+        });
     };
 
     public getAllDoctors = async (req: RequestWithLanguage, res: Response, next: NextFunction): Promise<void> => {

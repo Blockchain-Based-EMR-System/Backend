@@ -15,4 +15,21 @@ export class SuperAdminController {
             message: 'Admin added successfully'
         });
     }
+
+    public getAllAdmins = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        const admins = await this.superAdminService.getAllAdmins();
+        res.status(200).json({
+            data: admins,
+            message: 'Admins retrieved successfully'
+        });
+    }
+
+    public getAdminById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        const adminId: string = req.params.id;
+        const admin = await this.superAdminService.getAdminById(adminId);
+        res.status(200).json({
+            data: admin,
+            message: 'Admin retrieved successfully'
+        });
+    }
 }

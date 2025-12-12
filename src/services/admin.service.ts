@@ -1,7 +1,7 @@
 import { PrismaClient, Role } from '@prisma/client';
 import { hash } from 'bcrypt';
 import { Service } from 'typedi';
-import { AddDoctorFromAdminDto } from '@/dtos/admins.dto';
+import { AddDoctorFromAdminDto, DoctorFromAdminResponseDto } from '@/dtos/admins.dto';
 import { HttpException } from '@/exceptions/HttpException';
 import { ErrorMessages, createBilingualError } from '@/utils/errorMessages';
 import { User } from '@/interfaces';
@@ -11,7 +11,7 @@ const prisma = new PrismaClient();
 
 @Service()
 export class AdminService {
-    public async addDoctor(doctorData: AddDoctorFromAdminDto): Promise<User> {
+    public async addDoctor(doctorData: AddDoctorFromAdminDto): Promise<DoctorFromAdminResponseDto> {
         // Check if email already exists
         const existingUser = await prisma.user.findUnique({
             where: { email: doctorData.email }
@@ -52,6 +52,24 @@ export class AdminService {
                 role: Role.DOCTOR,
                 isVerified: true,
                 hasCompletedProfile: false,
+            },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                username: true,
+                phone: true,
+                gender: true,
+                date_of_birth: true,
+                role: true,
+                isVerified: true,
+                hasCompletedProfile: true,
+                photo_url: true,
+                doctor: {
+                    select: {
+                        specialization: true,
+                    }
+                },
             }
         });
 
@@ -62,31 +80,62 @@ export class AdminService {
                 specialization: doctorData.specialization, // This is now the KEY (e.g., "CARDIOLOGY")
             }
         });
-
-        return createdUser;
+        const { id, ...createdDoctor } = createdUser;
+        return createdDoctor;
 
     }
 
-    public async getAllDoctors() {
+    public async getAllDoctors(): Promise<DoctorFromAdminResponseDto[]> {
 
         const doctors = await prisma.user.findMany({
             where: { role: Role.DOCTOR },
-            include: {
-                doctor: true,
-            },
+            select: {
+                name: true,
+                email: true,
+                username: true,
+                phone: true,
+                gender: true,
+                date_of_birth: true,
+                role: true,
+                isVerified: true,
+                hasCompletedProfile: true,
+                photo_url: true,
+                doctor: {
+                    select: {
+                        specialization: true,
+                        avg_time: true
+                    }
+                },
+            }
         });
 
         return doctors;
 
     }
 
-    public async getDoctorById(id: string) {
+    public async getDoctorById(id: string): Promise<DoctorFromAdminResponseDto> {
 
         const doctor = await prisma.user.findUnique({
             where: { id, role: Role.DOCTOR },
-            include: {
-                doctor: true,
-            },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                username: true,
+                phone: true,
+                gender: true,
+                date_of_birth: true,
+                role: true,
+                isVerified: true,
+                hasCompletedProfile: true,
+                photo_url: true,
+                doctor: {
+                    select: {
+                        specialization: true,
+                        avg_time: true
+                    }
+                },
+            }
         });
 
         if (!doctor) {
