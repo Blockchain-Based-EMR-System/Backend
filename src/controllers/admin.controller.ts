@@ -22,8 +22,12 @@ export class AdminController {
             ),
         } : null;
 
+        const doctorResponse = {
+            ...newDoctor,
+            doctor: formattedNewDoctor,
+        };
         res.status(201).json({
-            data: formattedNewDoctor,
+            data: doctorResponse,
             message: 'Doctor added successfully'
         });
     };

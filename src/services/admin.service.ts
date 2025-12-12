@@ -53,6 +53,17 @@ export class AdminService {
                 isVerified: true,
                 hasCompletedProfile: false,
             },
+        });
+
+        // Create doctor profile
+        await prisma.doctor.create({
+            data: {
+                id: createdUser.id,
+                specialization: doctorData.specialization, // This is now the KEY (e.g., "CARDIOLOGY")
+            }
+        });
+        const createdDoctor = await prisma.user.findUnique({
+            where: { id: createdUser.id },
             select: {
                 id: true,
                 name: true,
@@ -72,15 +83,7 @@ export class AdminService {
                 },
             }
         });
-
-        // Create doctor profile
-        await prisma.doctor.create({
-            data: {
-                id: createdUser.id,
-                specialization: doctorData.specialization, // This is now the KEY (e.g., "CARDIOLOGY")
-            }
-        });
-        const { id, ...createdDoctor } = createdUser;
+        
         return createdDoctor;
 
     }
