@@ -4,7 +4,7 @@ import { HttpException } from "@/exceptions/HttpException";
 
 
 const storage = multer.memoryStorage();
-const allowed_file_types = [
+const AllowedFileTypes = [
     'application/pdf',
     'image/jpeg',
     'image/jpg',
@@ -17,7 +17,7 @@ const allowed_file_types = [
 
 
 const fileFilter = (req: Request, file: Express.Multer.File, cb: FileFilterCallback) => {
-    if (allowed_file_types.includes(file.mimetype)) {
+    if (AllowedFileTypes.includes(file.mimetype)) {
         cb(null, true);
     }
     else {
