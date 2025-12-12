@@ -9,8 +9,11 @@ const doc = {
   schemes: ['http'],
   tags: [
     { name: 'Auth', description: 'Authentication and account endpoints' },
+    { name: 'Admin', description: 'Admin endpoints' },
+    { name: 'Super Admin', description: 'Super Admin endpoints' },
     { name: 'MedicalRecords', description: 'Hyperledger Fabric medical record endpoints' },
   ],
+  
 };
 
 const outputFile = './swagger-output.json';

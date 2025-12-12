@@ -23,107 +23,81 @@ export class SuperAdminRoute implements Routes {
 
         // ADMIN ROUTES
         this.router.post(
-            `${this.path}/admins`,
-            /* #swagger.tags = ['Super Admin']
-               #swagger.summary = 'Add a new admin'
-               #swagger.description = 'Super admin endpoint to add a new admin to the system'
-               #swagger.security = [{ "bearerAuth": [] }, { cookieAuth: [] }]
-               #swagger.requestBody = {
-                   required: true,
-                   content: {
-                       "application/json": {
-                           schema: {
-                               type: "object",
-                               required: ["email", "name", "password", "phone", "gender", "date_of_birth"],
-                               properties: {
-                                   email: { type: "string", format: "email", example: "admin@example.com" },
-                                   name: { type: "string", example: "Jane Smith" },
-                                   password: { type: "string", format: "password", example: "SecurePass123!" },
-                                   phone: { type: "string", example: "+1234567890" },
-                                   gender: { type: "string", enum: ["MALE", "FEMALE"], example: "FEMALE" },
-                                   date_of_birth: { type: "string", format: "date", example: "1990-01-01" }
-                               }
-                           }
-                       }
-                   }
-               }
-               #swagger.responses[201] = {
-                   description: "Admin added successfully",
-                   content: {
-                       "application/json": {
-                           schema: {
-                               type: "object",
-                               properties: {
-                                   data: {
-                                       type: "object",
-                                       properties: {
-                                           email: { type: "string" },
-                                           name: { type: "string" },
-                                           username: { type: "string" },
-                                           phone: { type: "string" },
-                                           role: { type: "string" },
-                                           gender: { type: "string", enum: ["MALE", "FEMALE"] },
-                                           isVerified: { type: "boolean" },
-                                           hasCompletedProfile: { type: "boolean" },
-                                           date_of_birth: { type: "string", format: "date-time" },
-                                           photo_url: { type: "string", nullable: true }
-                                       }
-                                   },
-                                   message: { type: "string", example: "Admin added successfully" }
-                               }
-                           }
-                       }
-                   }
-               }
-               #swagger.responses[400] = { description: "Bad request - Invalid input data" }
-               #swagger.responses[401] = { description: "Unauthorized - Invalid or missing token" }
-               #swagger.responses[403] = { description: "Forbidden - Insufficient permissions" }
+            '/super-admin/admins',
+            /* 
+                #swagger.tags = ['Super Admin']
+                #swagger.parameters['body'] = {
+                    in: 'body',
+                    description: 'Admin data',
+                    required: true,
+                    schema: {
+                        $email: 'admin@example.com',
+                        $name: 'Jane Smith',
+                        $password: 'SecurePass123!',
+                        $phone: '1234567890',
+                        $gender: 'MALE or FEMALE',
+                        $date_of_birth: '1990-01-01'
+                    }
+                }
+                #swagger.parameters['Authorization'] = {
+                    in: 'header',
+                    description: 'Bearer access token (sent via Authorization cookie or Authorization header)',
+                    required: false,
+                    type: 'string'
+                }
+                #swagger.responses[201] = {
+                    description: 'Admin added successfully',
+                    schema: {
+                        data: {
+                            email: 'admin@example.com',
+                            name: 'Jane Smith',
+                            role: 'ADMIN',
+                            username: 'janesmith',
+                            phone: '1234567890',
+                            gender: 'FEMALE',
+                            date_of_birth: '1990-01-01T00:00:00.000Z',
+                            photo_url: null,
+                            isVerified: true,
+                            hasCompletedProfile: true
+                        },
+                        message: 'Admin added successfully'
+                    }
+                }
             */
             AuthMiddleware,
             RoleMiddleware(Role.SUPER_ADMIN),
             ValidationMiddleware(AddAdminFromSuperAdminDto),
             this.superAdminController.addAdmin,
         );
-        
+
         this.router.get(
-            `${this.path}/admins`,
-            /* #swagger.tags = ['Super Admin']
-               #swagger.summary = 'Get all admins'
-               #swagger.description = 'Retrieve a list of all admins in the system'
-               #swagger.security = [{ "bearerAuth": [] }, { cookieAuth: [] }]
-               #swagger.responses[200] = {
-                   description: "Admins retrieved successfully",
-                   content: {
-                       "application/json": {
-                           schema: {
-                               type: "object",
-                               properties: {
-                                   data: {
-                                       type: "array",
-                                       items: {
-                                           type: "object",
-                                           properties: {
-                                               email: { type: "string" },
-                                               name: { type: "string" },
-                                               username: { type: "string" },
-                                               phone: { type: "string" },
-                                               role: { type: "string" },
-                                               gender: { type: "string", enum: ["MALE", "FEMALE"] },
-                                               isVerified: { type: "boolean" },
-                                               hasCompletedProfile: { type: "boolean" },
-                                               date_of_birth: { type: "string", format: "date-time" },
-                                               photo_url: { type: "string", nullable: true }
-                                           }
-                                       }
-                                   },
-                                   message: { type: "string", example: "Admins retrieved successfully" }
-                               }
-                           }
-                       }
-                   }
-               }
-               #swagger.responses[401] = { description: "Unauthorized - Invalid or missing token" }
-               #swagger.responses[403] = { description: "Forbidden - Insufficient permissions" }
+            '/super-admin/admins',
+            /* 
+                #swagger.tags = ['Super Admin']
+                #swagger.parameters['Authorization'] = {
+                    in: 'header',
+                    description: 'Bearer access token (sent via Authorization cookie or Authorization header)',
+                    required: false,
+                    type: 'string'
+                }
+                #swagger.responses[200] = {
+                    description: 'Admins retrieved successfully',
+                    schema: {
+                        data: [{
+                            email: 'admin@example.com',
+                            name: 'Jane Smith',
+                            role: 'ADMIN',
+                            username: 'janesmith',
+                            phone: '1234567890',
+                            gender: 'FEMALE',
+                            date_of_birth: '1990-01-01T00:00:00.000Z',
+                            photo_url: null,
+                            isVerified: true,
+                            hasCompletedProfile: true
+                        }],
+                        message: 'Admins retrieved successfully'
+                    }
+                }
             */
             AuthMiddleware,
             RoleMiddleware(Role.SUPER_ADMIN),
@@ -131,48 +105,39 @@ export class SuperAdminRoute implements Routes {
         );
 
         this.router.get(
-            `${this.path}/admins/:id`,
-            /* #swagger.tags = ['Super Admin']
-               #swagger.summary = 'Get admin by ID'
-               #swagger.description = 'Retrieve a specific admin\'s details by their ID'
-               #swagger.security = [{ "bearerAuth": [] }, { cookieAuth: [] }]
-               #swagger.parameters['id'] = {
-                   in: 'path',
-                   description: 'Admin ID',
-                   required: true,
-                   type: 'string'
-               }
-               #swagger.responses[200] = {
-                   description: "Admin retrieved successfully",
-                   content: {
-                       "application/json": {
-                           schema: {
-                               type: "object",
-                               properties: {
-                                   data: {
-                                       type: "object",
-                                       properties: {
-                                           email: { type: "string" },
-                                           name: { type: "string" },
-                                           username: { type: "string" },
-                                           phone: { type: "string" },
-                                           role: { type: "string" },
-                                           gender: { type: "string", enum: ["MALE", "FEMALE"] },
-                                           isVerified: { type: "boolean" },
-                                           hasCompletedProfile: { type: "boolean" },
-                                           date_of_birth: { type: "string", format: "date-time" },
-                                           photo_url: { type: "string", nullable: true }
-                                       }
-                                   },
-                                   message: { type: "string", example: "Admin retrieved successfully" }
-                               }
-                           }
-                       }
-                   }
-               }
-               #swagger.responses[401] = { description: "Unauthorized - Invalid or missing token" }
-               #swagger.responses[403] = { description: "Forbidden - Insufficient permissions" }
-               #swagger.responses[404] = { description: "Admin not found" }
+            '/super-admin/admins/:id',
+            /* 
+                #swagger.tags = ['Super Admin']
+                #swagger.parameters['id'] = {
+                    in: 'path',
+                    description: 'Admin ID',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['Authorization'] = {
+                    in: 'header',
+                    description: 'Bearer access token (sent via Authorization cookie or Authorization header)',
+                    required: false,
+                    type: 'string'
+                }
+                #swagger.responses[200] = {
+                    description: 'Admin retrieved successfully',
+                    schema: {
+                        data: {
+                            email: 'admin@example.com',
+                            name: 'Jane Smith',
+                            role: 'ADMIN',
+                            username: 'janesmith',
+                            phone: '1234567890',
+                            gender: 'FEMALE',
+                            date_of_birth: '1990-01-01T00:00:00.000Z',
+                            photo_url: null,
+                            isVerified: true,
+                            hasCompletedProfile: true
+                        },
+                        message: 'Admin retrieved successfully'
+                    }
+                }
             */
             AuthMiddleware,
             RoleMiddleware(Role.SUPER_ADMIN),
@@ -181,74 +146,42 @@ export class SuperAdminRoute implements Routes {
 
         // DOCTOR ROUTES
         this.router.post(
-            `${this.path}/doctors`,
-            /* #swagger.tags = ['Super Admin']
-               #swagger.summary = 'Add a new doctor'
-               #swagger.description = 'Super admin endpoint to add a new doctor to the system'
-               #swagger.security = [{ "bearerAuth": [] }, { cookieAuth: [] }]
-               #swagger.requestBody = {
-                   required: true,
-                   content: {
-                       "application/json": {
-                           schema: {
-                               type: "object",
-                               required: ["email", "name", "phone", "gender", "specialization"],
-                               properties: {
-                                   email: { type: "string", format: "email", example: "doctor@example.com" },
-                                   name: { type: "string", example: "John Doe" },
-                                   phone: { type: "string", example: "+1234567890" },
-                                   gender: { type: "string", enum: ["MALE", "FEMALE"], example: "MALE" },
-                                   specialization: { type: "string", example: "CARDIOLOGY" }
-                               }
-                           }
-                       }
-                   }
-               }
-               #swagger.responses[201] = {
-                   description: "Doctor added successfully",
-                   content: {
-                       "application/json": {
-                           schema: {
-                               type: "object",
-                               properties: {
-                                   data: {
-                                       type: "object",
-                                       properties: {
-                                           email: { type: "string" },
-                                           name: { type: "string" },
-                                           username: { type: "string" },
-                                           phone: { type: "string" },
-                                           gender: { type: "string" },
-                                           role: { type: "string" },
-                                           date_of_birth: { type: "string", format: "date-time" },
-                                           isVerified: { type: "boolean" },
-                                           hasCompletedProfile: { type: "boolean" },
-                                           photoUrl: { type: "string", nullable: true },
-                                           doctor: {
-                                               type: "object",
-                                               nullable: true,
-                                               properties: {
-                                                   specialization: { 
-                                                       type: "object",
-                                                       properties: {
-                                                           key: { type: "string" },
-                                                           value: { type: "string" }
-                                                       }
-                                                   },
-                                                   avg_time: { type: "number", nullable: true }
-                                               }
-                                           }
-                                       }
-                                   },
-                                   message: { type: "string", example: "Doctor added successfully" }
-                               }
-                           }
-                       }
-                   }
-               }
-               #swagger.responses[400] = { description: "Bad request - Invalid input data" }
-               #swagger.responses[401] = { description: "Unauthorized - Invalid or missing token" }
-               #swagger.responses[403] = { description: "Forbidden - Insufficient permissions" }
+            '/super-admin/doctors',
+            /* 
+                #swagger.tags = ['Super Admin']
+                #swagger.parameters['body'] = {
+                    in: 'body',
+                    description: 'Doctor data',
+                    required: true,
+                    schema: {
+                        $email: 'doctor@example.com',
+                        $name: 'Dr. John Doe',
+                        $phone: '1234567890',
+                        $gender: 'MALE or FEMALE',
+                        $specialization: 'CARDIOLOGY or امراض القلب or Cardiology'
+                    }
+                }
+                #swagger.parameters['Authorization'] = {
+                    in: 'header',
+                    description: 'Bearer access token (sent via Authorization cookie or Authorization header)',
+                    required: false,
+                    type: 'string'
+                }
+                #swagger.parameters['accept-language'] = {
+                    in: 'header',
+                    description: 'Language preference (en or ar)',
+                    required: false,
+                    type: 'string'
+                }
+                #swagger.responses[201] = {
+                    description: 'Doctor added successfully',
+                    schema: {
+                        data: { email: 'doctor@example.com', name: 'Dr. Smith', role: 'DOCTOR', 
+                        username: 'smith', phone : '1234567890', gender: 'MALE', isVerified: false, hasCompletedProfile: false,
+                        doctor: { specialization: {key: 'CARDIOLOGY' , value: 'Cardiology'} , avg_time: null }, photoUrl: null },
+                        message: 'Doctor added successfully'
+                    }
+                }
             */
             AuthMiddleware,
             RoleMiddleware(Role.SUPER_ADMIN),
@@ -258,65 +191,30 @@ export class SuperAdminRoute implements Routes {
         );
 
         this.router.get(
-            `${this.path}/doctors`,
-            /* #swagger.tags = ['Super Admin']
-               #swagger.summary = 'Get all doctors'
-               #swagger.description = 'Retrieve a list of all doctors in the system'
-               #swagger.security = [{ "bearerAuth": [] }, { cookieAuth: [] }]
-               #swagger.parameters['accept-language'] = {
-                   in: 'header',
-                   description: 'Language preference (en or ar)',
-                   required: false,
-                   type: 'string',
-                   example: 'en'
-               }
-               #swagger.responses[200] = {
-                   description: "Doctors retrieved successfully",
-                   content: {
-                       "application/json": {
-                           schema: {
-                               type: "object",
-                               properties: {
-                                   data: {
-                                       type: "array",
-                                       items: {
-                                           type: "object",
-                                           properties: {
-                                               name: { type: "string" },
-                                               email: { type: "string" },
-                                               username: { type: "string" },
-                                               phone: { type: "string" },
-                                               gender: { type: "string", enum: ["MALE", "FEMALE"] },
-                                               date_of_birth: { type: "string", format: "date-time" },
-                                               role: { type: "string" },
-                                               isVerified: { type: "boolean" },
-                                               hasCompletedProfile: { type: "boolean" },
-                                               photo_url: { type: "string", nullable: true },
-                                               doctor: {
-                                                   type: "object",
-                                                   nullable: true,
-                                                   properties: {
-                                                       specialization: { 
-                                                           type: "object",
-                                                           properties: {
-                                                               key: { type: "string" },
-                                                               value: { type: "string" }
-                                                           }
-                                                       },
-                                                       avg_time: { type: "number", nullable: true }
-                                                   }
-                                               }
-                                           }
-                                       }
-                                   },
-                                   message: { type: "string", example: "Doctors retrieved successfully" }
-                               }
-                           }
-                       }
-                   }
-               }
-               #swagger.responses[401] = { description: "Unauthorized - Invalid or missing token" }
-               #swagger.responses[403] = { description: "Forbidden - Insufficient permissions" }
+            '/super-admin/doctors',
+            /* 
+                #swagger.tags = ['Super Admin']
+                #swagger.parameters['Authorization'] = {
+                    in: 'header',
+                    description: 'Bearer access token (sent via Authorization cookie or Authorization header)',
+                    required: false,
+                    type: 'string'
+                }
+                #swagger.parameters['accept-language'] = {
+                    in: 'header',
+                    description: 'Language preference (en or ar)',
+                    required: false,
+                    type: 'string'
+                }
+                #swagger.responses[200] = {
+                    description: 'Doctors retrieved successfully',
+                    schema: {
+                        data: [{ email: 'doctor@example.com', name: 'Dr. Smith', role: 'DOCTOR', 
+                        username: 'smith', phone : '1234567890', gender: 'MALE', isVerified: false, hasCompletedProfile: false,
+                        doctor: { specialization: {key: 'CARDIOLOGY' , value: 'Cardiology'} , avg_time: null }, photoUrl: null }],
+                        message: 'Doctors retrieved successfully'
+                    }
+                }
             */
             AuthMiddleware,
             RoleMiddleware(Role.SUPER_ADMIN),
@@ -325,69 +223,36 @@ export class SuperAdminRoute implements Routes {
         );
 
         this.router.get(
-            `${this.path}/doctors/:id`,
-            /* #swagger.tags = ['Super Admin']
-               #swagger.summary = 'Get doctor by ID'
-               #swagger.description = 'Retrieve a specific doctor\'s details by their ID'
-               #swagger.security = [{ "bearerAuth": [] }, { cookieAuth: [] }]
-               #swagger.parameters['id'] = {
-                   in: 'path',
-                   description: 'Doctor ID',
-                   required: true,
-                   type: 'string'
-               }
-               #swagger.parameters['accept-language'] = {
-                   in: 'header',
-                   description: 'Language preference (en or ar)',
-                   required: false,
-                   type: 'string',
-                   example: 'en'
-               }
-               #swagger.responses[200] = {
-                   description: "Doctor retrieved successfully",
-                   content: {
-                       "application/json": {
-                           schema: {
-                               type: "object",
-                               properties: {
-                                   data: {
-                                       type: "object",
-                                       properties: {
-                                           name: { type: "string" },
-                                           email: { type: "string" },
-                                           username: { type: "string" },
-                                           phone: { type: "string" },
-                                           gender: { type: "string", enum: ["MALE", "FEMALE"] },
-                                           date_of_birth: { type: "string", format: "date-time" },
-                                           role: { type: "string" },
-                                           isVerified: { type: "boolean" },
-                                           hasCompletedProfile: { type: "boolean" },
-                                           photo_url: { type: "string", nullable: true },
-                                           doctor: {
-                                               type: "object",
-                                               nullable: true,
-                                               properties: {
-                                                   specialization: { 
-                                                       type: "object",
-                                                       properties: {
-                                                           key: { type: "string" },
-                                                           value: { type: "string" }
-                                                       }
-                                                   },
-                                                   avg_time: { type: "number", nullable: true }
-                                               }
-                                           }
-                                       }
-                                   },
-                                   message: { type: "string", example: "Doctor retrieved successfully" }
-                               }
-                           }
-                       }
-                   }
-               }
-               #swagger.responses[401] = { description: "Unauthorized - Invalid or missing token" }
-               #swagger.responses[403] = { description: "Forbidden - Insufficient permissions" }
-               #swagger.responses[404] = { description: "Doctor not found" }
+            '/super-admin/doctors/:id',
+            /* 
+                #swagger.tags = ['Super Admin']
+                #swagger.parameters['id'] = {
+                    in: 'path',
+                    description: 'Doctor ID',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['Authorization'] = {
+                    in: 'header',
+                    description: 'Bearer access token (sent via Authorization cookie or Authorization header)',
+                    required: false,
+                    type: 'string'
+                }
+                #swagger.parameters['accept-language'] = {
+                    in: 'header',
+                    description: 'Language preference (en or ar)',
+                    required: false,
+                    type: 'string'
+                }
+                #swagger.responses[200] = {
+                    description: 'Doctor retrieved successfully',
+                    schema: {
+                        data: { email: 'doctor@example.com', name: 'Dr. Smith', role: 'DOCTOR', 
+                        username: 'smith', phone : '1234567890', gender: 'MALE', isVerified: false, hasCompletedProfile: false,
+                        doctor: { specialization: {key: 'CARDIOLOGY' , value: 'Cardiology'} , avg_time: null }, photoUrl: null },
+                        message: 'Doctor retrieved successfully'
+                    }
+                }
             */
             AuthMiddleware,
             RoleMiddleware(Role.SUPER_ADMIN),

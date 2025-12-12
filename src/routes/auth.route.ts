@@ -21,35 +21,136 @@ export class AuthRoute implements Routes {
   private initializeRoutes() {
     this.router.post(
       `/auth/signup`,
-      /* #swagger.tags = ['Auth'] */
+      /* 
+        #swagger.tags = ['Auth']
+        #swagger.parameters['body'] = {
+            in: 'body',
+            description: 'User signup data',
+            required: true,
+            schema: {
+                $email: 'user@example.com',
+                $name: 'John Doe',
+                $phone: '1234567890',
+                $password: 'password123'
+            }
+        }
+        #swagger.responses[201] = {
+            description: 'User successfully created',
+            schema: {
+                data: {
+                    id: 1,
+                    email: 'user@example.com',
+                    name: 'John Doe',
+                    phone: '1234567890',
+                    isEmailVerified: false,
+                    hasCompletedProfile: false,
+                    gender: null,
+                    date_of_birth: null,
+                    role: 'PATIENT',
+                    photoUrl: null
+                },
+                message: 'Signed Up Successfully'
+            }
+        }
+      */
       ValidationMiddleware(CreateUserDto),
       this.auth.signUp,
     );
 
     this.router.post(
       `/auth/login`,
-      /* #swagger.tags = ['Auth'] */
+      /* 
+        #swagger.tags = ['Auth']
+        #swagger.parameters['body'] = {
+            in: 'body',
+            description: 'User login data',
+            required: true,
+            schema: {
+                $emailOrUsername: 'user@example.com',
+                $password: 'password123',
+                rememberMe: false
+            }
+        }
+        #swagger.responses[200] = {
+            description: 'Login successful',
+            schema: {
+                data: { id: 1, email: 'user@example.com', name: 'John Doe' },
+                message: 'Logged In Successfully'
+            }
+        }
+      */
       ValidationMiddleware(LoginUserDto),
       this.auth.logIn,
     );
 
     this.router.post(
       `/auth/logout`,
-      /* #swagger.tags = ['Auth'] */
+      /* 
+        #swagger.tags = ['Auth']
+        #swagger.parameters['Authorization'] = {
+            in: 'header',
+            description: 'Bearer access token (sent via Authorization cookie or Authorization header)',
+            required: false,
+            type: 'string'
+        }
+        #swagger.responses[200] = {
+            description: 'Logout successful',
+            schema: { message: 'Logged Out Successfully' }
+        }
+      */
       AuthMiddleware,
       this.auth.logOut,
     );
 
     this.router.post(
       `/auth/refresh`,
-      /* #swagger.tags = ['Auth'] */
+      /* 
+        #swagger.tags = ['Auth']
+        #swagger.parameters['RefreshToken'] = {
+            in: 'header',
+            description: 'Refresh token (sent via RefreshToken cookie or Authorization header)',
+            required: false,
+            type: 'string'
+        }
+        #swagger.responses[200] = {
+            description: 'Token refreshed successfully',
+            schema: {
+                data: { user: {}, accessToken: { expiresIn: 3600, expiresAt: '2025-12-12T12:00:00.000Z' } },
+                message: 'Token Refreshed Successfully'
+            }
+        }
+      */
       AuthMiddleware,
       this.auth.refresh,
     );
 
     this.router.patch(
       `/auth/complete-profile-info`,
-      /* #swagger.tags = ['Auth'] */
+      /* 
+        #swagger.tags = ['Auth']
+        #swagger.parameters['body'] = {
+            in: 'body',
+            description: 'Complete user profile',
+            required: true,
+            schema: {
+                $gender: 'Male',
+                $date_of_birth: '1990-01-01'
+            }
+        }
+        #swagger.parameters['Authorization'] = {
+            in: 'header',
+            description: 'Bearer access token (sent via Authorization cookie or Authorization header)',
+            required: false,
+            type: 'string'
+        }
+        #swagger.responses[200] = {
+            description: 'Profile completed successfully',
+            schema: {
+                data: { id: 1, hasCompletedProfile: true },
+                message: 'Profile Completed Successfully'
+            }
+        }
+      */
       ValidationMiddleware(CompleteUserProfileDto),
       AuthMiddleware,
       this.auth.completeProfile,
@@ -57,46 +158,137 @@ export class AuthRoute implements Routes {
 
     this.router.patch(
       `/auth/verify-otp`,
-      /* #swagger.tags = ['Auth'] */
+      /* 
+        #swagger.tags = ['Auth']
+        #swagger.parameters['body'] = {
+            in: 'body',
+            description: 'Verify OTP',
+            required: true,
+            schema: { $otp: '123456' }
+        }
+        #swagger.parameters['Authorization'] = {
+            in: 'header',
+            description: 'Bearer access token (sent via Authorization cookie or Authorization header)',
+            required: false,
+            type: 'string'
+        }
+        #swagger.responses[200] = {
+            description: 'OTP verified successfully',
+            schema: {
+                data: true,
+                message: 'OTP Verified Successfully'
+            }
+        }
+      */
       AuthMiddleware,
       this.auth.verifyOTP,
     );
 
     this.router.post(
       `/auth/forget-password`,
-      /* #swagger.tags = ['Auth'] */
+      /* 
+        #swagger.tags = ['Auth']
+        #swagger.parameters['body'] = {
+            in: 'body',
+            description: 'Request password reset',
+            required: true,
+            schema: { $email: 'user@example.com' }
+        }
+        #swagger.responses[200] = {
+            description: 'Password reset email sent',
+            schema: { message: 'Password Reset Email Sent Successfully' }
+        }
+      */
       this.auth.forgetPassword,
     );
 
     this.router.post(
       `/auth/reset-password`,
-      /* #swagger.tags = ['Auth'] */
+      /* 
+        #swagger.tags = ['Auth']
+        #swagger.parameters['body'] = {
+            in: 'body',
+            description: 'Reset password',
+            required: true,
+            schema: {
+                $token: 'reset-token',
+                $newPassword: 'newPassword123'
+            }
+        }
+        #swagger.responses[200] = {
+            description: 'Password reset successfully',
+            schema: { message: 'Password Reset Successfully' }
+        }
+      */
       ValidationMiddleware(ResetPasswordDto),
       this.auth.resetPassword,
     );
 
     this.router.post(
       `/auth/resend-otp`,
-      /* #swagger.tags = ['Auth'] */
+      /* 
+        #swagger.tags = ['Auth']
+        #swagger.parameters['Authorization'] = {
+            in: 'header',
+            description: 'Bearer access token (sent via Authorization cookie or Authorization header)',
+            required: false,
+            type: 'string'
+        }
+        #swagger.responses[200] = {
+            description: 'OTP resent successfully',
+            schema: { message: 'OTP Resent Successfully' }
+        }
+      */
       AuthMiddleware,
       this.auth.resendOTP,
     );
 
     this.router.get(
       `/auth/google`,
-      /* #swagger.tags = ['Auth'] */
+      /* 
+        #swagger.tags = ['Auth']
+        #swagger.responses[302] = {
+            description: 'Redirects to Google OAuth consent page'
+        }
+      */
       this.googleAuth.googleOAuth,
     );
 
     this.router.get(
       `/auth/google/callback`,
-      /* #swagger.tags = ['Auth'] */
+      /* 
+        #swagger.tags = ['Auth']
+        #swagger.responses[302] = {
+            description: 'Redirects after Google authentication'
+        }
+      */
       this.googleAuth.googleOAuthCallback,
     );
 
     this.router.patch(
       `/auth/google/update-phone`,
-      /* #swagger.tags = ['Auth'] */
+      /* 
+        #swagger.tags = ['Auth']
+        #swagger.parameters['body'] = {
+            in: 'body',
+            description: 'Update Google user phone',
+            required: true,
+            schema: { $phone: '1234567890' }
+        }
+        #swagger.parameters['Authorization'] = {
+            in: 'header',
+            description: 'Bearer access token (sent via Authorization cookie or Authorization header)',
+            required: false,
+            type: 'string'
+        }
+        #swagger.responses[200] = {
+            description: 'Phone number updated successfully',
+            schema: {
+                data: { phone: '1234567890' },
+                message: 'Phone number updated successfully'
+            }
+        }
+      */
       ValidationMiddleware(UpdateGoogleUserPhoneDto),
       AuthMiddleware,
       this.googleAuth.updatePhoneNumber,
@@ -104,7 +296,22 @@ export class AuthRoute implements Routes {
 
     this.router.get(
       `/auth/google/userData`,
-      /* #swagger.tags = ['Auth'] */
+      /* 
+        #swagger.tags = ['Auth']
+        #swagger.parameters['Authorization'] = {
+            in: 'header',
+            description: 'Bearer access token (sent via Authorization cookie or Authorization header)',
+            required: false,
+            type: 'string'
+        }
+        #swagger.responses[200] = {
+            description: 'User data retrieved successfully',
+            schema: {
+                data: { email: 'user@example.com', name: 'John Doe', username: 'johndoe', phone: '1234567890', gender: 'MALE' , date_of_birth: '1990-01-01', isVerified: false, hasCompletedProfile: false },
+                message: 'User data retrieved successfully'
+            }
+        }
+      */
       AuthMiddleware,
       this.googleAuth.getGoogleUserData,
     );
