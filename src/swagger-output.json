@@ -184,6 +184,19 @@
                     "role": {
                       "type": "string",
                       "example": "PATIENT"
+                    },
+                    "doctor": {
+                      "type": "object",
+                      "properties": {
+                        "specialization": {
+                          "type": "string",
+                          "example": "Cardiology"
+                        },
+                        "account_status": {
+                          "type": "string",
+                          "example": "APPROVED"
+                        }
+                      }
                     }
                   }
                 },

@@ -77,7 +77,7 @@ export class AuthService {
       throw new HttpException(error.status, error.message, error.messageAr);
     }
 
-    const { name, gender, date_of_birth, email, isVerified, username, phone,role, hasCompletedProfile } = findUser;
+    const { name, gender, date_of_birth, email, isVerified, username, phone, role, hasCompletedProfile, doctor } = findUser;
     const patientLoginData: UserLoginData = {
       name,
       email,
@@ -87,7 +87,11 @@ export class AuthService {
       date_of_birth,
       role,
       isVerified,
-      hasCompletedProfile
+      hasCompletedProfile,
+      doctor: doctor ? {
+        specialization: doctor.specialization,
+        account_status: doctor.account_status
+      } : undefined
     };
 
     const tokenResponse = await this.createTokens(findUser, userData.rememberMe);
