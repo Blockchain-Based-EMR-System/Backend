@@ -35,7 +35,7 @@ export class AdminRoute implements Routes {
                 }
                 #swagger.parameters['Authorization'] = {
                     in: 'header',
-                    description: 'Bearer access token (sent via Authorization cookie or Authorization header)',
+                    description: 'Bearer access token (sent via Authorization cookie)',
                     required: false,
                     type: 'string'
                 }
@@ -68,7 +68,7 @@ export class AdminRoute implements Routes {
                 #swagger.tags = ['Admin']
                 #swagger.parameters['Authorization'] = {
                     in: 'header',
-                    description: 'Bearer access token (sent via Authorization cookie or Authorization header)',
+                    description: 'Bearer access token (sent via Authorization cookie)',
                     required: false,
                     type: 'string'
                 }
@@ -96,7 +96,30 @@ export class AdminRoute implements Routes {
 
         this.router.get(
             '/admin/doctors/unverified',
-            /* #swagger.tags = ['Admin'] */
+            /* 
+                #swagger.tags = ['Admin']
+                #swagger.parameters['Authorization'] = {
+                    in: 'header',
+                    description: 'Bearer access token (sent via Authorization cookie)',
+                    required: false,
+                    type: 'string'
+                }
+                #swagger.parameters['accept-language'] = {
+                    in: 'header',
+                    description: 'Language preference (en or ar)',
+                    required: false,
+                    type: 'string'
+                }
+                #swagger.responses[200] = {
+                    description: 'Unverified doctors retrieved successfully',
+                    schema: {
+                        data:[ { id: '1' , email: 'doctor@example.com', name: 'Dr. Smith', 
+                        username: 'smith', phone : '1234567890', gender: 'MALE', isVerified: false, date_of_birth: '1990-01-01', photoUrl: null,
+                        doctor: { specialization: {key: 'CARDIOLOGY' , value: 'Cardiology'} , avg_time: null } }],
+                        message: 'Unverified doctors retrieved successfully'
+                    }
+                }
+            */
             AuthMiddleware,
             RoleMiddleware(Role.ADMIN),
             LanguageMiddleware,
@@ -105,7 +128,35 @@ export class AdminRoute implements Routes {
 
         this.router.patch(
             '/admin/doctors/verify/:id',
-            /* #swagger.tags = ['Admin'] */
+            /* 
+                #swagger.tags = ['Admin']
+                #swagger.parameters['id'] = {
+                    in: 'path',
+                    description: 'Doctor ID',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['body'] = {
+                    in: 'body',
+                    description: 'Verification status',
+                    required: true,
+                    schema: {
+                        $isVerified: true
+                    }
+                }
+                #swagger.parameters['Authorization'] = {
+                    in: 'header',
+                    description: 'Bearer access token (sent via Authorization cookie or Authorization header)',
+                    required: false,
+                    type: 'string'
+                }
+                #swagger.responses[200] = {
+                    description: 'Doctor verification status updated successfully',
+                    schema: {
+                        message: 'Doctor verification status updated successfully'
+                    }
+                }
+            */
             AuthMiddleware,
             RoleMiddleware(Role.ADMIN),
             this.adminController.updateDoctorVerificationStatus,

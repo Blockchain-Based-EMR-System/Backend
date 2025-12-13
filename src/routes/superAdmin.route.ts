@@ -41,7 +41,7 @@ export class SuperAdminRoute implements Routes {
                 }
                 #swagger.parameters['Authorization'] = {
                     in: 'header',
-                    description: 'Bearer access token (sent via Authorization cookie or Authorization header)',
+                    description: 'Bearer access token (sent via Authorization cookie)',
                     required: false,
                     type: 'string'
                 }
@@ -76,7 +76,7 @@ export class SuperAdminRoute implements Routes {
                 #swagger.tags = ['Super Admin']
                 #swagger.parameters['Authorization'] = {
                     in: 'header',
-                    description: 'Bearer access token (sent via Authorization cookie or Authorization header)',
+                    description: 'Bearer access token (sent via Authorization cookie)',
                     required: false,
                     type: 'string'
                 }
@@ -117,7 +117,7 @@ export class SuperAdminRoute implements Routes {
                 }
                 #swagger.parameters['Authorization'] = {
                     in: 'header',
-                    description: 'Bearer access token (sent via Authorization cookie or Authorization header)',
+                    description: 'Bearer access token (sent via Authorization cookie)',
                     required: false,
                     type: 'string'
                 }
@@ -164,7 +164,7 @@ export class SuperAdminRoute implements Routes {
                 }
                 #swagger.parameters['Authorization'] = {
                     in: 'header',
-                    description: 'Bearer access token (sent via Authorization cookie or Authorization header)',
+                    description: 'Bearer access token (sent via Authorization cookie)',
                     required: false,
                     type: 'string'
                 }
@@ -197,7 +197,7 @@ export class SuperAdminRoute implements Routes {
                 #swagger.tags = ['Super Admin']
                 #swagger.parameters['Authorization'] = {
                     in: 'header',
-                    description: 'Bearer access token (sent via Authorization cookie or Authorization header)',
+                    description: 'Bearer access token (sent via Authorization cookie)',
                     required: false,
                     type: 'string'
                 }
@@ -235,7 +235,7 @@ export class SuperAdminRoute implements Routes {
                 }
                 #swagger.parameters['Authorization'] = {
                     in: 'header',
-                    description: 'Bearer access token (sent via Authorization cookie or Authorization header)',
+                    description: 'Bearer access token (sent via Authorization cookie)',
                     required: false,
                     type: 'string'
                 }

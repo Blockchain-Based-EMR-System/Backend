@@ -206,7 +206,7 @@
           {
             "name": "Authorization",
             "in": "header",
-            "description": "Bearer access token (sent via Authorization cookie or Authorization header)",
+            "description": "Bearer access token (sent via Authorization cookie)",
             "required": false,
             "type": "string"
           }
@@ -240,7 +240,7 @@
           {
             "name": "RefreshToken",
             "in": "header",
-            "description": "Refresh token (sent via RefreshToken cookie or Authorization header)",
+            "description": "Refresh token (sent via RefreshToken cookie)",
             "required": false,
             "type": "string"
           }
@@ -319,7 +319,7 @@
           {
             "name": "Authorization",
             "in": "header",
-            "description": "Bearer access token (sent via Authorization cookie or Authorization header)",
+            "description": "Bearer access token (sent via Authorization cookie)",
             "required": false,
             "type": "string"
           }
@@ -384,7 +384,7 @@
           {
             "name": "Authorization",
             "in": "header",
-            "description": "Bearer access token (sent via Authorization cookie or Authorization header)",
+            "description": "Bearer access token (sent via Authorization cookie or)",
             "required": false,
             "type": "string"
           }
@@ -517,7 +517,7 @@
           {
             "name": "Authorization",
             "in": "header",
-            "description": "Bearer access token (sent via Authorization cookie or Authorization header)",
+            "description": "Bearer access token (sent via Authorization cooki)",
             "required": false,
             "type": "string"
           }
@@ -595,7 +595,7 @@
           {
             "name": "Authorization",
             "in": "header",
-            "description": "Bearer access token (sent via Authorization cookie or Authorization header)",
+            "description": "Bearer access token (sent via Authorization cookie or)",
             "required": false,
             "type": "string"
           }
@@ -638,7 +638,7 @@
           {
             "name": "Authorization",
             "in": "header",
-            "description": "Bearer access token (sent via Authorization cookie or Authorization header)",
+            "description": "Bearer access token (sent via Authorization cookie)",
             "required": false,
             "type": "string"
           }
@@ -824,7 +824,7 @@
           {
             "name": "Authorization",
             "in": "header",
-            "description": "Bearer access token (sent via Authorization cookie or Authorization header)",
+            "description": "Bearer access token (sent via Authorization cookie)",
             "required": false,
             "type": "string"
           },
@@ -920,7 +920,7 @@
           {
             "name": "Authorization",
             "in": "header",
-            "description": "Bearer access token (sent via Authorization cookie or Authorization header)",
+            "description": "Bearer access token (sent via Authorization cookie)",
             "required": false,
             "type": "string"
           },
@@ -943,6 +943,10 @@
                   "items": {
                     "type": "object",
                     "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "1"
+                      },
                       "email": {
                         "type": "string",
                         "example": "doctor@example.com"
@@ -1001,6 +1005,166 @@
                 "message": {
                   "type": "string",
                   "example": "Doctors retrieved successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/doctors/unverified": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer access token (sent via Authorization cookie)",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "accept-language",
+            "in": "header",
+            "description": "Language preference (en or ar)",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Unverified doctors retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "1"
+                      },
+                      "email": {
+                        "type": "string",
+                        "example": "doctor@example.com"
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "Dr. Smith"
+                      },
+                      "username": {
+                        "type": "string",
+                        "example": "smith"
+                      },
+                      "phone": {
+                        "type": "string",
+                        "example": "1234567890"
+                      },
+                      "gender": {
+                        "type": "string",
+                        "example": "MALE"
+                      },
+                      "isVerified": {
+                        "type": "boolean",
+                        "example": false
+                      },
+                      "date_of_birth": {
+                        "type": "string",
+                        "example": "1990-01-01"
+                      },
+                      "photoUrl": {},
+                      "doctor": {
+                        "type": "object",
+                        "properties": {
+                          "specialization": {
+                            "type": "object",
+                            "properties": {
+                              "key": {
+                                "type": "string",
+                                "example": "CARDIOLOGY"
+                              },
+                              "value": {
+                                "type": "string",
+                                "example": "Cardiology"
+                              }
+                            }
+                          },
+                          "avg_time": {}
+                        }
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Unverified doctors retrieved successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/doctors/verify/{id}": {
+      "patch": {
+        "tags": [
+          "Admin"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Doctor ID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Verification status",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "isVerified": {
+                  "type": "boolean",
+                  "example": true
+                }
+              },
+              "required": [
+                "isVerified"
+              ]
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer access token (sent via Authorization cookie or Authorization header)",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Doctor verification status updated successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Doctor verification status updated successfully"
                 }
               },
               "xml": {
@@ -1114,25 +1278,6 @@
             }
           }
         }
-      },
-      "patch": {
-        "tags": [
-          "Admin"
-        ],
-        "description": "",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": ""
-          }
-        }
       }
     },
     "/super-admin/admins": {
@@ -1188,7 +1333,7 @@
           {
             "name": "Authorization",
             "in": "header",
-            "description": "Bearer access token (sent via Authorization cookie or Authorization header)",
+            "description": "Bearer access token (sent via Authorization cookie)",
             "required": false,
             "type": "string"
           }
@@ -1262,7 +1407,7 @@
           {
             "name": "Authorization",
             "in": "header",
-            "description": "Bearer access token (sent via Authorization cookie or Authorization header)",
+            "description": "Bearer access token (sent via Authorization cookie)",
             "required": false,
             "type": "string"
           }
@@ -1278,6 +1423,10 @@
                   "items": {
                     "type": "object",
                     "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "1"
+                      },
                       "email": {
                         "type": "string",
                         "example": "admin@example.com"
@@ -1348,7 +1497,7 @@
           {
             "name": "Authorization",
             "in": "header",
-            "description": "Bearer access token (sent via Authorization cookie or Authorization header)",
+            "description": "Bearer access token (sent via Authorization cookie)",
             "required": false,
             "type": "string"
           }
@@ -1462,7 +1611,7 @@
           {
             "name": "Authorization",
             "in": "header",
-            "description": "Bearer access token (sent via Authorization cookie or Authorization header)",
+            "description": "Bearer access token (sent via Authorization cookie)",
             "required": false,
             "type": "string"
           },
@@ -1558,7 +1707,7 @@
           {
             "name": "Authorization",
             "in": "header",
-            "description": "Bearer access token (sent via Authorization cookie or Authorization header)",
+            "description": "Bearer access token (sent via Authorization cookie)",
             "required": false,
             "type": "string"
           },
@@ -1581,6 +1730,10 @@
                   "items": {
                     "type": "object",
                     "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "1"
+                      },
                       "email": {
                         "type": "string",
                         "example": "doctor@example.com"
@@ -1666,7 +1819,7 @@
           {
             "name": "Authorization",
             "in": "header",
-            "description": "Bearer access token (sent via Authorization cookie or Authorization header)",
+            "description": "Bearer access token (sent via Authorization cookie)",
             "required": false,
             "type": "string"
           },
@@ -1744,6 +1897,80 @@
                 "message": {
                   "type": "string",
                   "example": "Doctor retrieved successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/doctors/signup": {
+      "post": {
+        "tags": [
+          "Doctors"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Doctor signup data",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "example": "doctor@example.com"
+                },
+                "name": {
+                  "type": "string",
+                  "example": "Dr. Smith"
+                },
+                "phone": {
+                  "type": "string",
+                  "example": "1234567890"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "SecurePassword123"
+                },
+                "gender": {
+                  "type": "string",
+                  "example": "MALE or FEMALE"
+                },
+                "date_of_birth": {
+                  "type": "string",
+                  "example": "1990-01-01"
+                },
+                "specialization": {
+                  "type": "string",
+                  "example": "CARDIOLOGY or امراض القلب or Cardiology"
+                }
+              },
+              "required": [
+                "email",
+                "name",
+                "phone",
+                "password",
+                "gender",
+                "specialization"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Doctor signup successful",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Doctor registered successfully"
                 }
               },
               "xml": {

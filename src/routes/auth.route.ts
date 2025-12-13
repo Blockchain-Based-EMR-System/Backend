@@ -89,7 +89,7 @@ export class AuthRoute implements Routes {
         #swagger.tags = ['Auth']
         #swagger.parameters['Authorization'] = {
             in: 'header',
-            description: 'Bearer access token (sent via Authorization cookie or Authorization header)',
+            description: 'Bearer access token (sent via Authorization cookie)',
             required: false,
             type: 'string'
         }
@@ -108,7 +108,7 @@ export class AuthRoute implements Routes {
         #swagger.tags = ['Auth']
         #swagger.parameters['RefreshToken'] = {
             in: 'header',
-            description: 'Refresh token (sent via RefreshToken cookie or Authorization header)',
+            description: 'Refresh token (sent via RefreshToken cookie)',
             required: false,
             type: 'string'
         }
@@ -139,7 +139,7 @@ export class AuthRoute implements Routes {
         }
         #swagger.parameters['Authorization'] = {
             in: 'header',
-            description: 'Bearer access token (sent via Authorization cookie or Authorization header)',
+            description: 'Bearer access token (sent via Authorization cookie)',
             required: false,
             type: 'string'
         }
@@ -168,7 +168,7 @@ export class AuthRoute implements Routes {
         }
         #swagger.parameters['Authorization'] = {
             in: 'header',
-            description: 'Bearer access token (sent via Authorization cookie or Authorization header)',
+            description: 'Bearer access token (sent via Authorization cookie or)',
             required: false,
             type: 'string'
         }
@@ -230,7 +230,7 @@ export class AuthRoute implements Routes {
         #swagger.tags = ['Auth']
         #swagger.parameters['Authorization'] = {
             in: 'header',
-            description: 'Bearer access token (sent via Authorization cookie or Authorization header)',
+            description: 'Bearer access token (sent via Authorization cooki)',
             required: false,
             type: 'string'
         }
@@ -277,7 +277,7 @@ export class AuthRoute implements Routes {
         }
         #swagger.parameters['Authorization'] = {
             in: 'header',
-            description: 'Bearer access token (sent via Authorization cookie or Authorization header)',
+            description: 'Bearer access token (sent via Authorization cookie or)',
             required: false,
             type: 'string'
         }
@@ -300,7 +300,7 @@ export class AuthRoute implements Routes {
         #swagger.tags = ['Auth']
         #swagger.parameters['Authorization'] = {
             in: 'header',
-            description: 'Bearer access token (sent via Authorization cookie or Authorization header)',
+            description: 'Bearer access token (sent via Authorization cookie)',
             required: false,
             type: 'string'
         }
