@@ -45,7 +45,7 @@ export class DoctorService {
                 username,
                 phone: doctorData.phone,
                 gender: doctorData.gender,
-                date_of_birth: doctorData.date_of_birth,
+                date_of_birth: new Date(doctorData.date_of_birth),
                 password_hash: hashedPassword,
                 role: Role.DOCTOR,
                 isVerified: false,
