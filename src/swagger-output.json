@@ -1815,7 +1815,11 @@
                               }
                             }
                           },
-                          "avg_time": {}
+                          "avg_time": {},
+                          "account_status": {
+                            "type": "string",
+                            "example": "Approved"
+                          }
                         }
                       },
                       "photoUrl": {}
@@ -1921,7 +1925,11 @@
                             }
                           }
                         },
-                        "avg_time": {}
+                        "avg_time": {},
+                        "account_status": {
+                          "type": "string",
+                          "example": "Approved"
+                        }
                       }
                     },
                     "photoUrl": {}

@@ -212,7 +212,7 @@ export class SuperAdminRoute implements Routes {
                     schema: {
                         data: [{ id: '1', email: 'doctor@example.com', name: 'Dr. Smith', role: 'DOCTOR', 
                         username: 'smith', phone : '1234567890', gender: 'MALE', isVerified: false, hasCompletedProfile: false,
-                        doctor: { specialization: {key: 'CARDIOLOGY' , value: 'Cardiology'} , avg_time: null }, photoUrl: null }],
+                        doctor: { specialization: {key: 'CARDIOLOGY' , value: 'Cardiology'} , avg_time: null, account_status:'Approved' }, photoUrl: null }],
                         message: 'Doctors retrieved successfully'
                     }
                 }
@@ -250,7 +250,7 @@ export class SuperAdminRoute implements Routes {
                     schema: {
                         data: { email: 'doctor@example.com', name: 'Dr. Smith', role: 'DOCTOR', 
                         username: 'smith', phone : '1234567890', gender: 'MALE', isVerified: false, hasCompletedProfile: false,
-                        doctor: { specialization: {key: 'CARDIOLOGY' , value: 'Cardiology'} , avg_time: null }, photoUrl: null },
+                        doctor: { specialization: {key: 'CARDIOLOGY' , value: 'Cardiology'} , avg_time: null, account_status:'Approved' }, photoUrl: null },
                         message: 'Doctor retrieved successfully'
                     }
                 }
