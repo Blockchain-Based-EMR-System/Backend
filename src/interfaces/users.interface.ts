@@ -60,6 +60,7 @@ export interface UserLoginData {
   phone: string,
   gender: Gender,
   date_of_birth: Date,
+  role: Role,
   isVerified: Boolean,
   hasCompletedProfile: Boolean,
 }

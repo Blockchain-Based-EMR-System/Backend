@@ -1,4 +1,4 @@
-import { Gender, Role } from "@prisma/client";
+import { DoctorAccountStatus, Gender, Role } from "@prisma/client";
 import { IsEmail, IsNotEmpty, IsString } from "class-validator";
 import { IsValidSpecialization } from "@/validators/specialization.validator";
 import { TransformSpecialization } from "@/utils/specializationTransform";
@@ -42,5 +42,6 @@ export class DoctorFromAdminResponseDto {
     public doctor?: {
         specialization: string;
         avg_time?: Date;
+        account_status?: DoctorAccountStatus;
     };
 }

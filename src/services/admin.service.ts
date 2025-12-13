@@ -1,4 +1,4 @@
-import { PrismaClient, Role } from '@prisma/client';
+import { DoctorAccountStatus, PrismaClient, Role } from '@prisma/client';
 import { hash } from 'bcrypt';
 import { Service } from 'typedi';
 import { AddDoctorFromAdminDto, DoctorFromAdminResponseDto } from '@/dtos/admins.dto';
@@ -60,6 +60,7 @@ export class AdminService {
             data: {
                 id: createdUser.id,
                 specialization: doctorData.specialization, // This is now the KEY (e.g., "CARDIOLOGY")
+                account_status: DoctorAccountStatus.APPROVED,
             }
         });
         const createdDoctor = await prisma.user.findUnique({
@@ -83,7 +84,7 @@ export class AdminService {
                 },
             }
         });
-        
+
         return createdDoctor;
 
     }
@@ -107,7 +108,8 @@ export class AdminService {
                 doctor: {
                     select: {
                         specialization: true,
-                        avg_time: true
+                        avg_time: true,
+                        account_status: true
                     }
                 },
             }
@@ -136,7 +138,8 @@ export class AdminService {
                 doctor: {
                     select: {
                         specialization: true,
-                        avg_time: true
+                        avg_time: true,
+                        account_status: true
                     }
                 },
             }
@@ -153,7 +156,7 @@ export class AdminService {
     public async getUnverifiedDoctors(): Promise<DoctorFromAdminResponseDto[]> {
 
         const unverifiedDoctors = await prisma.user.findMany({
-            where: { role: Role.DOCTOR, isVerified: false },
+            where: { role: Role.DOCTOR, doctor: { account_status: DoctorAccountStatus.PENDING } },
             select: {
                 id: true,
                 name: true,
@@ -167,7 +170,8 @@ export class AdminService {
                 doctor: {
                     select: {
                         specialization: true,
-                        avg_time: true
+                        avg_time: true,
+                        account_status: true
                     }
                 },
             },
@@ -175,7 +179,7 @@ export class AdminService {
         return unverifiedDoctors
 
     }
-    public async updateDoctorVerificationStatus(doctorId: string, isVerified: boolean): Promise<void> {
+    public async updateDoctorVerificationStatus(doctorId: string, isApproved: boolean): Promise<void> {
 
         const doctor = await prisma.user.findUnique({
             where: { id: doctorId, role: Role.DOCTOR },
@@ -186,7 +190,13 @@ export class AdminService {
         }
         await prisma.user.update({
             where: { id: doctorId },
-            data: { isVerified },
+            data: {
+                doctor: {
+                    update: {
+                        account_status: isApproved ? DoctorAccountStatus.APPROVED : DoctorAccountStatus.REJECTED,
+                    }
+                }
+            }
         });
     }
 }

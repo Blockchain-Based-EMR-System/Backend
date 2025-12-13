@@ -50,7 +50,7 @@ export class AdminRoute implements Routes {
                     schema: {
                         data: { email: 'doctor@example.com', name: 'Dr. Smith', role: 'DOCTOR', 
                         username: 'smith', phone : '1234567890', gender: 'MALE', isVerified: false, hasCompletedProfile: false,
-                        doctor: { specialization: {key: 'CARDIOLOGY' , value: 'Cardiology'} , avg_time: null }, photoUrl: null },
+                        doctor: { specialization: {key: 'CARDIOLOGY' , value: 'Cardiology'} , avg_time: null, account_status: 'PENDING' }, photoUrl: null },
                         message: 'Doctor added successfully'
                     }
                 }
@@ -83,7 +83,7 @@ export class AdminRoute implements Routes {
                     schema: {
                         data:[ { id: '1' , email: 'doctor@example.com', name: 'Dr. Smith', role: 'DOCTOR', 
                         username: 'smith', phone : '1234567890', gender: 'MALE', isVerified: false, hasCompletedProfile: false,
-                        doctor: { specialization: {key: 'CARDIOLOGY' , value: 'Cardiology'} , avg_time: null }, photoUrl: null }],
+                        doctor: { specialization: {key: 'CARDIOLOGY' , value: 'Cardiology'} , avg_time: null , account_status: 'APPROVED' }, photoUrl: null }],
                         message: 'Doctors retrieved successfully'
                     }
                 }
@@ -115,7 +115,7 @@ export class AdminRoute implements Routes {
                     schema: {
                         data:[ { id: '1' , email: 'doctor@example.com', name: 'Dr. Smith', 
                         username: 'smith', phone : '1234567890', gender: 'MALE', isVerified: false, date_of_birth: '1990-01-01', photoUrl: null,
-                        doctor: { specialization: {key: 'CARDIOLOGY' , value: 'Cardiology'} , avg_time: null } }],
+                        doctor: { specialization: {key: 'CARDIOLOGY' , value: 'Cardiology'} , avg_time: null , account_status: 'APPROVED' } }],
                         message: 'Unverified doctors retrieved successfully'
                     }
                 }
@@ -141,7 +141,7 @@ export class AdminRoute implements Routes {
                     description: 'Verification status',
                     required: true,
                     schema: {
-                        $isVerified: true
+                        $isApproved: true
                     }
                 }
                 #swagger.parameters['Authorization'] = {
@@ -174,7 +174,7 @@ export class AdminRoute implements Routes {
                 }
                 #swagger.parameters['Authorization'] = {
                     in: 'header',
-                    description: 'Bearer access token (sent via Authorization cookie or Authorization header)',
+                    description: 'Bearer access token (sent via Authorization cookie)',
                     required: false,
                     type: 'string'
                 }
@@ -189,7 +189,7 @@ export class AdminRoute implements Routes {
                     schema: {
                         data: { email: 'doctor@example.com', name: 'Dr. Smith', role: 'DOCTOR', 
                         username: 'smith', phone : '1234567890', gender: 'MALE', isVerified: false, hasCompletedProfile: false,
-                        doctor: { specialization: {key: 'CARDIOLOGY' , value: 'Cardiology'} , avg_time: null }, photoUrl: null },
+                        doctor: { specialization: {key: 'CARDIOLOGY' , value: 'Cardiology'} , avg_time: null, account_status: 'APPROVED' }, photoUrl: null },
                         message: 'Doctor retrieved successfully'
                     }
                 }

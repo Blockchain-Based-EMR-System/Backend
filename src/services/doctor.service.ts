@@ -2,7 +2,7 @@ import { DoctorSignupRequestDto } from "@/dtos/doctors.dto";
 import { Service } from "typedi";
 import { HttpException } from "@/exceptions/HttpException";
 import { ErrorMessages, createBilingualError } from "@/utils/errorMessages";
-import { PrismaClient, Role } from "@prisma/client";
+import { DoctorAccountStatus, PrismaClient, Role } from "@prisma/client";
 import { hash } from "bcrypt";
 
 // TO BE CHANGED
@@ -57,6 +57,7 @@ export class DoctorService {
             data: {
                 id: createdUser.id,
                 specialization: doctorData.specialization,
+                account_status: DoctorAccountStatus.PENDING,
             },
         });
     }

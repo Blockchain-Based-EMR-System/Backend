@@ -180,6 +180,10 @@
                     "name": {
                       "type": "string",
                       "example": "John Doe"
+                    },
+                    "role": {
+                      "type": "string",
+                      "example": "PATIENT"
                     }
                   }
                 },
@@ -893,7 +897,11 @@
                             }
                           }
                         },
-                        "avg_time": {}
+                        "avg_time": {},
+                        "account_status": {
+                          "type": "string",
+                          "example": "PENDING"
+                        }
                       }
                     },
                     "photoUrl": {}
@@ -995,7 +1003,11 @@
                               }
                             }
                           },
-                          "avg_time": {}
+                          "avg_time": {},
+                          "account_status": {
+                            "type": "string",
+                            "example": "APPROVED"
+                          }
                         }
                       },
                       "photoUrl": {}
@@ -1097,7 +1109,11 @@
                               }
                             }
                           },
-                          "avg_time": {}
+                          "avg_time": {},
+                          "account_status": {
+                            "type": "string",
+                            "example": "APPROVED"
+                          }
                         }
                       }
                     }
@@ -1138,13 +1154,13 @@
             "schema": {
               "type": "object",
               "properties": {
-                "isVerified": {
+                "isApproved": {
                   "type": "boolean",
                   "example": true
                 }
               },
               "required": [
-                "isVerified"
+                "isApproved"
               ]
             }
           },
@@ -1192,7 +1208,7 @@
           {
             "name": "Authorization",
             "in": "header",
-            "description": "Bearer access token (sent via Authorization cookie or Authorization header)",
+            "description": "Bearer access token (sent via Authorization cookie)",
             "required": false,
             "type": "string"
           },
@@ -1261,7 +1277,11 @@
                             }
                           }
                         },
-                        "avg_time": {}
+                        "avg_time": {},
+                        "account_status": {
+                          "type": "string",
+                          "example": "APPROVED"
+                        }
                       }
                     },
                     "photoUrl": {}
