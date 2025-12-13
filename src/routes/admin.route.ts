@@ -30,6 +30,7 @@ export class AdminRoute implements Routes {
                         $name: 'Dr. Smith',
                         $phone: '1234567890',
                         $gender: 'MALE or FEMALE',
+                        $date_of_birth: '1990-01-01',
                         $specialization: 'CARDIOLOGY or امراض القلب or Cardiology'
                     }
                 }

@@ -47,7 +47,7 @@ export class AdminService {
                 username,
                 phone: doctorData.phone,
                 gender: doctorData.gender,
-                date_of_birth: new Date('1990-01-01'),
+                date_of_birth: doctorData.date_of_birth,
                 password_hash: hashedPassword,
                 role: Role.DOCTOR,
                 isVerified: true,

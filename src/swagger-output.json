@@ -824,6 +824,10 @@
                   "type": "string",
                   "example": "MALE or FEMALE"
                 },
+                "date_of_birth": {
+                  "type": "string",
+                  "example": "1990-01-01"
+                },
                 "specialization": {
                   "type": "string",
                   "example": "CARDIOLOGY or امراض القلب or Cardiology"
@@ -834,6 +838,7 @@
                 "name",
                 "phone",
                 "gender",
+                "date_of_birth",
                 "specialization"
               ]
             }
@@ -1627,6 +1632,10 @@
                   "type": "string",
                   "example": "MALE or FEMALE"
                 },
+                "date_of_birth": {
+                  "type": "string",
+                  "example": "1990-01-01"
+                },
                 "specialization": {
                   "type": "string",
                   "example": "CARDIOLOGY or امراض القلب or Cardiology"
@@ -1637,6 +1646,7 @@
                 "name",
                 "phone",
                 "gender",
+                "date_of_birth",
                 "specialization"
               ]
             }

@@ -16,6 +16,9 @@ export class AddDoctorFromAdminDto {
     @IsNotEmpty()
     public phone: string;
 
+    @IsNotEmpty()
+    public date_of_birth: Date;
+
     @IsString()
     public gender: Gender;
 
