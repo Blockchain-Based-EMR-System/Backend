@@ -33,3 +33,15 @@ export class DoctorSignupRequestDto {
     })
     public specialization: string;
 }
+
+export class DoctorLoginRequestDto {
+    @IsNotEmpty()
+    public emailOrUsername: string;
+
+    @IsString()
+    @IsNotEmpty()
+    public password: string;
+
+    @IsString()
+    public rememberMe?: boolean;
+}

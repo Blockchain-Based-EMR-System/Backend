@@ -80,6 +80,12 @@ export const ErrorMessages = {
         ar: 'خطأ في المصادقة عبر Google',
     },
 
+    //Doctor specific errors
+    DOCTOR_ACCOUNT_NOT_APPROVED: {
+        en: 'Doctor account is not approved yet',
+        ar: 'حساب الطبيب غير مفعل بعد',
+    },
+
     // Generic errors
     SOMETHING_WENT_WRONG: {
         en: 'Something went wrong',

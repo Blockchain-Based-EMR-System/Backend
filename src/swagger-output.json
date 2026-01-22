@@ -23,6 +23,10 @@
     {
       "name": "MedicalRecords",
       "description": "Hyperledger Fabric medical record endpoints"
+    },
+    {
+      "name": "Doctors",
+      "description": "Doctor account endpoints"
     }
   ],
   "schemes": [
@@ -2022,6 +2026,103 @@
                 "message": {
                   "type": "string",
                   "example": "Doctor registered successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/doctors/login": {
+      "post": {
+        "tags": [
+          "Doctors"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Doctor login data",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "emailOrUsername": {
+                  "type": "string",
+                  "example": "doctor@example.com"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "SecurePassword123"
+                },
+                "rememberMe": {
+                  "type": "string",
+                  "example": "true"
+                }
+              },
+              "required": [
+                "emailOrUsername",
+                "password",
+                "rememberMe"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Doctor login successful",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "email": {
+                      "type": "string",
+                      "example": "test@example.com"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Dr. Smith"
+                    },
+                    "username": {
+                      "type": "string",
+                      "example": "drsmith"
+                    },
+                    "phone": {
+                      "type": "string",
+                      "example": "1234567890"
+                    },
+                    "gender": {
+                      "type": "string",
+                      "example": "MALE"
+                    },
+                    "doctor": {
+                      "type": "object",
+                      "properties": {
+                        "specialization": {
+                          "type": "string",
+                          "example": "CARDIOLOGY"
+                        },
+                        "account_status": {
+                          "type": "string",
+                          "example": "APPROVED"
+                        }
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Doctor logged in successfully"
                 }
               },
               "xml": {

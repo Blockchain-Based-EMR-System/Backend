@@ -12,6 +12,7 @@ const doc = {
     { name: 'Admin', description: 'Admin endpoints' },
     { name: 'Super Admin', description: 'Super Admin endpoints' },
     { name: 'MedicalRecords', description: 'Hyperledger Fabric medical record endpoints' },
+    { name: 'Doctors', description: 'Doctor account endpoints' },
   ],
   
 };

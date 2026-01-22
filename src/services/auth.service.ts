@@ -136,7 +136,7 @@ export class AuthService {
   }
 
 
-  public async createTokens(user: User, rememberMe: boolean = false): Promise<TokenResponse> {
+  public async createTokens(user: Partial<User>, rememberMe: boolean = false): Promise<TokenResponse> {
     const accessToken = this.createAccessToken(user);
 
     if (rememberMe) {
@@ -147,7 +147,7 @@ export class AuthService {
     return { accessToken };
   }
 
-  public createAccessToken(user: User): AccessTokenData {
+  public createAccessToken(user: Partial<User>): AccessTokenData {
     const dataStoredInToken: DataStoredInToken = { id: user.id };
     const secretKey: string = SECRET_KEY;
     const expiresIn: number = this.parseTimeToSeconds(ACCESS_TOKEN_EXPIRY);
@@ -155,7 +155,7 @@ export class AuthService {
     return { expiresIn, token: sign(dataStoredInToken, secretKey, { expiresIn }) };
   }
 
-  public async createRefreshToken(user: User): Promise<RefreshTokenData> {
+  public async createRefreshToken(user: Partial<User>): Promise<RefreshTokenData> {
     const dataStoredInToken: DataStoredInToken = { id: user.id };
     const secretKey: string = REFRESH_TOKEN_SECRET;
     const expiresIn: number = this.parseTimeToSeconds(REFRESH_TOKEN_EXPIRY);

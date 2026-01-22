@@ -1,8 +1,9 @@
 import { DoctorController } from "@/controllers/doctor.controller";
-import { DoctorSignupRequestDto } from "@/dtos/doctors.dto";
+import { DoctorLoginRequestDto, DoctorSignupRequestDto } from "@/dtos/doctors.dto";
 import { Routes } from "@/interfaces";
 import { ValidationMiddleware } from "@/middlewares/validation.middleware";
 import { Router } from "express";
+import { errorWrapper } from "@/utils/errorWrapper";
 
 
 export class DoctorsRoute implements Routes {
@@ -40,7 +41,44 @@ export class DoctorsRoute implements Routes {
                 }
             */
             ValidationMiddleware(DoctorSignupRequestDto),
-            this.doctorsController.doctorSignup
+            errorWrapper(this.doctorsController.doctorSignup)
+        );
+
+        this.router.post(
+            `/doctors/login`,
+            /* 
+                #swagger.tags = ['Doctors']
+                #swagger.parameters['body'] = {
+                    in: 'body',
+                    description: 'Doctor login data',
+                    required: true,
+                    schema: {
+                        $emailOrUsername: 'doctor@example.com',
+                        $password: 'SecurePassword123',
+                        $rememberMe: "true"
+                    }
+                }
+                #swagger.responses[200] = {
+                    description: 'Doctor login successful',
+                    schema: {
+                        data: {
+                            id: 1,
+                            email: 'test@example.com',
+                            name: 'Dr. Smith',
+                            username: 'drsmith',
+                            phone: '1234567890',
+                            gender: 'MALE',
+                            doctor: {
+                                specialization: 'CARDIOLOGY',
+                                account_status: 'APPROVED'
+                            }
+                        },
+                        message: 'Doctor logged in successfully'
+                    }
+                }
+            */
+            ValidationMiddleware(DoctorLoginRequestDto),
+            errorWrapper(this.doctorsController.doctorLogin)
         );
     }
 }

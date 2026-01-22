@@ -62,6 +62,7 @@ export class GoogleAuthService {
                     name: true,
                     username: true,
                     phone: true,
+                    role: true,
                     gender: true,
                     date_of_birth: true,
                     isVerified: true,

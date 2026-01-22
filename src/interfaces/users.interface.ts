@@ -22,7 +22,7 @@ export interface User {
   deleted_at?: Date;
 
   patient?: Patient;
-  doctor?: Doctor;
+  doctor?: Partial<Doctor>;
   appointments_as_patient?: Appointment[];
   appointments_as_doctor?: Appointment[];
   medications_as_patient?: Medication[];
