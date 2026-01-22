@@ -135,4 +135,12 @@ export class DoctorService {
 
         return { cookies, doctorAccountData };
     }
+
+    public async setPassword(doctorId: string, password: string): Promise<void> {
+        const hashedPassword = await hash(password, 10);
+        await prisma.user.update({
+            where: {id: doctorId},
+            data: {password_hash: hashedPassword}
+        });
+    }
 }

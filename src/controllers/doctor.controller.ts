@@ -1,6 +1,5 @@
 
-import { DoctorLoginRequestDto, DoctorSignupRequestDto } from "@/dtos/doctors.dto";
-import { RequestWithLanguage } from "@/middlewares/language.middleware";
+import { DoctorLoginRequestDto, DoctorSetPasswordRequestDto, DoctorSignupRequestDto } from "@/dtos/doctors.dto";
 import { DoctorService } from "@/services/doctor.service";
 import { NextFunction, Request, Response } from "express";
 import { Container } from "typedi";
@@ -27,5 +26,12 @@ export class DoctorController {
             res.setHeader('Set-Cookie', cookies);
             res.status(200).json({ data: doctorAccountData, message: 'Doctor logged in successfully' });
         }
+    }
+
+    public doctorSetPassword = async (req: Request, res: Response, next: NextFunction) => {
+        const doctorId= req.params.id;
+        const { password } : DoctorSetPasswordRequestDto = req.body;
+        await this.doctorService.setPassword(doctorId, password);
+        res.status(200).json({ message: 'Password set successfully' });
     }
 }

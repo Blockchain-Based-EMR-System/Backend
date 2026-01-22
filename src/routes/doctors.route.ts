@@ -1,9 +1,10 @@
 import { DoctorController } from "@/controllers/doctor.controller";
-import { DoctorLoginRequestDto, DoctorSignupRequestDto } from "@/dtos/doctors.dto";
+import { DoctorLoginRequestDto, DoctorSetPasswordRequestDto, DoctorSignupRequestDto } from "@/dtos/doctors.dto";
 import { Routes } from "@/interfaces";
 import { ValidationMiddleware } from "@/middlewares/validation.middleware";
 import { Router } from "express";
 import { errorWrapper } from "@/utils/errorWrapper";
+import { AuthMiddleware } from "@/middlewares/auth.middleware";
 
 
 export class DoctorsRoute implements Routes {
@@ -79,6 +80,30 @@ export class DoctorsRoute implements Routes {
             */
             ValidationMiddleware(DoctorLoginRequestDto),
             errorWrapper(this.doctorsController.doctorLogin)
+        );
+        this.router.patch(
+            `/doctors/:id/set-password`,
+            /* 
+                #swagger.tags = ['Doctors']
+                #swagger.parameters['id'] = { description: 'Doctor ID' }
+                #swagger.parameters['body'] = {
+                    in: 'body',
+                    description: 'New password data',
+                    required: true,
+                    schema: {
+                        $password: 'NewSecurePassword123'
+                    }
+                }
+                #swagger.responses[200] = {
+                    description: 'Password set successfully',
+                    schema: {
+                        message: 'Password updated successfully'
+                    }
+                }
+            */
+            ValidationMiddleware(DoctorSetPasswordRequestDto),
+            AuthMiddleware,
+            errorWrapper(this.doctorsController.doctorSetPassword)
         );
     }
 }

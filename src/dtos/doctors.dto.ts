@@ -45,3 +45,9 @@ export class DoctorLoginRequestDto {
     @IsString()
     public rememberMe?: boolean;
 }
+
+export class DoctorSetPasswordRequestDto {
+    @IsString()
+    @IsNotEmpty()
+    public password: string;
+}
