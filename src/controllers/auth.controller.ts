@@ -4,6 +4,8 @@ import { RequestWithUser } from '@interfaces/auth.interface';
 import { User } from '@interfaces/users.interface';
 import { AuthService } from '@services/auth.service';
 import { CompleteUserProfileDto, CreateUserDto, LoginUserDto, ResetPasswordDto } from '@/dtos/users.dto';
+import { createBilingualError, ErrorMessages } from '@/utils/errorMessages';
+import { HttpException } from '@/exceptions/HttpException';
 
 export class AuthController {
   public auth = Container.get(AuthService);
@@ -89,7 +91,8 @@ export class AuthController {
       const email = await this.auth.getUserEmail(req)
       const { otp } = req.body;
       if (!otp) {
-        throw new Error('OTP is required');
+        const error = createBilingualError(400, ErrorMessages.OTP_REQUIRED);
+        throw new HttpException(error.status , error.message, error.messageAr);
       }
       const isSuccessful = await this.auth.verifyEmailOtp(email, otp);
       res.status(200).json({ data: isSuccessful, message: 'OTP Verified Successfully' });
@@ -102,7 +105,8 @@ export class AuthController {
     try {
       const email = req.body.email;
       if (!email) {
-        throw new Error('Email is required');
+        const error = createBilingualError(400, ErrorMessages.EMAIL_REQUIRED);
+        throw new HttpException(error.status , error.message, error.messageAr);
       }
       await this.auth.sendPasswordResetEmail(email);
       res.status(200).json({ message: 'Password Reset Email Sent Successfully' });

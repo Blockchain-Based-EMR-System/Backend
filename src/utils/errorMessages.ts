@@ -37,6 +37,11 @@ export const ErrorMessages = {
         en: 'User email not found',
         ar: 'البريد الإلكتروني للمستخدم غير موجود',
     },
+
+    OTP_REQUIRED: {
+        en: 'OTP is required',
+        ar: 'رمز التحقق مطلوب',
+    },
     INVALID_OTP: {
         en: 'Invalid OTP',
         ar: 'رمز التحقق غير صالح',
@@ -52,6 +57,11 @@ export const ErrorMessages = {
     INVALID_PASSWORD_RESET_TOKEN: {
         en: 'Invalid or expired password reset token',
         ar: 'رمز إعادة تعيين كلمة المرور غير صالح أو منتهي الصلاحية',
+    },
+
+    EMAIL_REQUIRED: {
+        en: 'Email is required',
+        ar: 'البريد الإلكتروني مطلوب',
     },
 
     // Authentication middleware errors
