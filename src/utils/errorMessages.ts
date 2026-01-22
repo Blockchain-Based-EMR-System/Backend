@@ -95,6 +95,10 @@ export const ErrorMessages = {
         en: 'Doctor account is not approved yet',
         ar: 'حساب الطبيب غير مفعل بعد',
     },
+    DOCTOR_PASSWORD_ALREADY_SET: {
+        en: 'Password has already been set',
+        ar: 'تم تعيين كلمة المرور بالفعل',
+    },
 
     // Generic errors
     SOMETHING_WENT_WRONG: {

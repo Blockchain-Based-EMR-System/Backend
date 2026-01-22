@@ -138,9 +138,24 @@ export class DoctorService {
 
     public async setPassword(doctorId: string, password: string): Promise<void> {
         const hashedPassword = await hash(password, 10);
+        const doctorUserData = await prisma.user.findUnique({
+            where: { id: doctorId },
+            select: { hasCompletedProfile: true }
+        });
+        if (!doctorUserData) {
+            const error = createBilingualError(404, ErrorMessages.USER_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+        if (doctorUserData.hasCompletedProfile) {
+            const error = createBilingualError(400, ErrorMessages.DOCTOR_PASSWORD_ALREADY_SET);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
         await prisma.user.update({
-            where: {id: doctorId},
-            data: {password_hash: hashedPassword}
+            where: { id: doctorId },
+            data: {
+                password_hash: hashedPassword,
+                hasCompletedProfile: true
+            }
         });
     }
 }
