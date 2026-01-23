@@ -109,6 +109,12 @@ export class DoctorsRoute implements Routes {
             /*
                 #swagger.tags = ['Doctors']
                 #swagger.consumes = ['multipart/form-data']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
                 #swagger.parameters['profilePicture'] = {
                     in: 'formData',
                     type: 'file',
@@ -118,7 +124,8 @@ export class DoctorsRoute implements Routes {
                 #swagger.responses[200] = {
                     description: 'Profile picture updated successfully',
                     schema: {
-                        message: 'Profile picture updated successfully',
+                        message: 'Profile picture updated successfully'
+                    }
                 }
             */
             AuthMiddleware,
