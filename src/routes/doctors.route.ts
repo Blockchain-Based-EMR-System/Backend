@@ -126,5 +126,48 @@ export class DoctorsRoute implements Routes {
             ValidationMiddleware(null, false, false, false, true),
             errorWrapper(this.doctorsController.updateProfilePicture)
         );
+        this.router.get(
+            `/doctors/profile-picture`,
+            /*
+                #swagger.tags = ['Doctors']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.responses[200] = {
+                    description: 'Get profile picture successful',
+                    schema: {
+                        data: {
+                            url: 'https://res.cloudinary.com/your-cloud-name/image/upload/v1696543210/doctors/profile_pictures/doctor_1_profile_picture_1696543210.jpg'
+                        },
+                        message: 'Profile picture retrieved successfully'
+                    }
+                }
+            */
+            AuthMiddleware,
+            errorWrapper(this.doctorsController.getProfilePicture)
+        )
+        this.router.delete(
+            `/doctors/profile-picture`,
+            /*
+                #swagger.tags = ['Doctors']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.responses[200] = {
+                    description: 'Profile picture deleted successfully',
+                    schema: {
+                        message: 'Profile picture deleted successfully'
+                    }
+                }
+            */
+            AuthMiddleware,
+            errorWrapper(this.doctorsController.deleteProfilePicture)
+        );
     }
 }

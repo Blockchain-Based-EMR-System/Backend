@@ -109,6 +109,10 @@ export const ErrorMessages = {
         en: 'Unsupported file format. Only JPEG and PNG allowed.',
         ar: 'تنسيق ملف غير مدعوم. يُسمح فقط بملفات JPEG و PNG.',
     },
+    NO_PROFILE_PICTURE: {
+        en: 'No profile picture found',
+        ar: 'لم يتم العثور على صورة الملف الشخصي',
+    },
     // Generic errors
     SOMETHING_WENT_WRONG: {
         en: 'Something went wrong',

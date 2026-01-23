@@ -56,4 +56,19 @@ export class DoctorController {
         
     }
 
+    public getProfilePicture = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+        const doctorId = req.user?.id;
+        const profilePictureUrl = await this.userService.getUserProfilePicture(doctorId);
+        if(!profilePictureUrl) {
+            const error = createBilingualError(404, ErrorMessages.NO_PROFILE_PICTURE);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+        res.status(200).json({ data: { url: profilePictureUrl }, message: 'Profile picture retrieved successfully' });
+    }
+
+    public deleteProfilePicture = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+        const doctorId = req.user?.id;
+        await this.userService.deleteProfilePicture(doctorId);
+        res.status(200).json({ message: 'Profile picture deleted successfully' });
+    }
 }
