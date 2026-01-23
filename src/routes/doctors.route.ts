@@ -1,10 +1,11 @@
 import { DoctorController } from "@/controllers/doctor.controller";
-import { DoctorLoginRequestDto, DoctorSetPasswordRequestDto, DoctorSignupRequestDto } from "@/dtos/doctors.dto";
+import { DoctorLoginRequestDto, DoctorProfilePictureRequestDto, DoctorSetPasswordRequestDto, DoctorSignupRequestDto } from "@/dtos/doctors.dto";
 import { Routes } from "@/interfaces";
 import { ValidationMiddleware } from "@/middlewares/validation.middleware";
 import { Router } from "express";
 import { errorWrapper } from "@/utils/errorWrapper";
 import { AuthMiddleware } from "@/middlewares/auth.middleware";
+import upload from "@/middlewares/multer.middleware";
 
 
 export class DoctorsRoute implements Routes {
@@ -44,7 +45,6 @@ export class DoctorsRoute implements Routes {
             ValidationMiddleware(DoctorSignupRequestDto),
             errorWrapper(this.doctorsController.doctorSignup)
         );
-
         this.router.post(
             `/doctors/login`,
             /* 
@@ -82,10 +82,9 @@ export class DoctorsRoute implements Routes {
             errorWrapper(this.doctorsController.doctorLogin)
         );
         this.router.patch(
-            `/doctors/:id/set-password`,
+            `/doctors/set-password`,
             /* 
                 #swagger.tags = ['Doctors']
-                #swagger.parameters['id'] = { description: 'Doctor ID' }
                 #swagger.parameters['body'] = {
                     in: 'body',
                     description: 'New password data',
@@ -104,6 +103,28 @@ export class DoctorsRoute implements Routes {
             ValidationMiddleware(DoctorSetPasswordRequestDto),
             AuthMiddleware,
             errorWrapper(this.doctorsController.doctorSetPassword)
+        );
+        this.router.patch(
+            `/doctors/profile-picture`,
+            /*
+                #swagger.tags = ['Doctors']
+                #swagger.consumes = ['multipart/form-data']
+                #swagger.parameters['profilePicture'] = {
+                    in: 'formData',
+                    type: 'file',
+                    required: true,
+                    description: 'Profile picture file'
+                }
+                #swagger.responses[200] = {
+                    description: 'Profile picture updated successfully',
+                    schema: {
+                        message: 'Profile picture updated successfully',
+                }
+            */
+            AuthMiddleware,
+            upload.single('profilePicture'),
+            ValidationMiddleware(null, false, false, false, true),
+            errorWrapper(this.doctorsController.updateProfilePicture)
         );
     }
 }

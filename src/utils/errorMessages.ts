@@ -100,6 +100,15 @@ export const ErrorMessages = {
         ar: 'تم تعيين كلمة المرور بالفعل',
     },
 
+    // File upload errors
+    NO_FILE_UPLOADED: {
+        en: 'No file uploaded',
+        ar: 'لم يتم تحميل أي ملف',
+    },
+    UNSUPPORTED_FILE_FORMAT: {
+        en: 'Unsupported file format. Only JPEG and PNG allowed.',
+        ar: 'تنسيق ملف غير مدعوم. يُسمح فقط بملفات JPEG و PNG.',
+    },
     // Generic errors
     SOMETHING_WENT_WRONG: {
         en: 'Something went wrong',

@@ -51,3 +51,7 @@ export class DoctorSetPasswordRequestDto {
     @IsNotEmpty()
     public password: string;
 }
+
+export class DoctorProfilePictureRequestDto {
+    profilePicture: Express.Multer.File;
+}

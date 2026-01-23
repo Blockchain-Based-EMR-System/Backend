@@ -158,4 +158,14 @@ export class DoctorService {
             }
         });
     }
+
+    public async updateDoctorProfilePicture(doctorId: string, photoUrl: string, photoPublicId: string): Promise<void> {
+        await prisma.user.update({
+            where: { id: doctorId },
+            data: {
+                photo_url: photoUrl,
+                photo_public_id: photoPublicId
+            }
+        });
+    }
 }
