@@ -4,8 +4,9 @@ import { Routes } from "@/interfaces";
 import { ValidationMiddleware } from "@/middlewares/validation.middleware";
 import { Router } from "express";
 import { errorWrapper } from "@/utils/errorWrapper";
-import { AuthMiddleware } from "@/middlewares/auth.middleware";
+import { AuthMiddleware, RoleMiddleware } from "@/middlewares/auth.middleware";
 import upload from "@/middlewares/multer.middleware";
+import { Role } from "@prisma/client";
 
 
 export class DoctorsRoute implements Routes {
@@ -102,6 +103,7 @@ export class DoctorsRoute implements Routes {
             */
             ValidationMiddleware(DoctorSetPasswordRequestDto),
             AuthMiddleware,
+            RoleMiddleware(Role.DOCTOR),
             errorWrapper(this.doctorsController.doctorSetPassword)
         );
         this.router.patch(
@@ -129,6 +131,7 @@ export class DoctorsRoute implements Routes {
                 }
             */
             AuthMiddleware,
+            RoleMiddleware(Role.DOCTOR),
             upload.single('profilePicture'),
             ValidationMiddleware(null, false, false, false, true),
             errorWrapper(this.doctorsController.updateProfilePicture)
@@ -174,6 +177,7 @@ export class DoctorsRoute implements Routes {
                 }
             */
             AuthMiddleware,
+            RoleMiddleware(Role.DOCTOR),
             errorWrapper(this.doctorsController.deleteProfilePicture)
         );
     }

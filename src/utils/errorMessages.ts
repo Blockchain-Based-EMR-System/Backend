@@ -99,7 +99,10 @@ export const ErrorMessages = {
         en: 'Password has already been set',
         ar: 'تم تعيين كلمة المرور بالفعل',
     },
-
+    MAX_CLINICS_REACHED: {
+        en: 'Maximum number of created clinics reached',
+        ar: 'تم الوصول إلى الحد الأقصى لعدد العيادات',
+    },
     // File upload errors
     NO_FILE_UPLOADED: {
         en: 'No file uploaded',
@@ -113,6 +116,7 @@ export const ErrorMessages = {
         en: 'No profile picture found',
         ar: 'لم يتم العثور على صورة الملف الشخصي',
     },
+
     // Generic errors
     SOMETHING_WENT_WRONG: {
         en: 'Something went wrong',
