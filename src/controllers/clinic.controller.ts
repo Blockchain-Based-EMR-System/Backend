@@ -24,4 +24,16 @@ export class ClinicController {
 
         res.status(201).json({ message: 'Clinic created successfully' });
     }
+
+    public getClinicById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        const clinicId = req.params.id;
+
+        const clinic = await this.clinicService.getClinicById(clinicId);
+        if (!clinic) {
+            const error = createBilingualError(404, ErrorMessages.CLINIC_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        res.status(200).json({ message: 'Clinic retrieved successfully', data: clinic });
+    }
 }

@@ -22,5 +22,11 @@ export class ClinicRoute implements Routes {
             ValidationMiddleware(CreateClinicRequestDto),
             this.clinicController.createClinic
         );
+
+        this.router.get(
+            `${this.path}/:id`,
+            AuthMiddleware, // To be Discussed: Should patients be able to view clinic details?
+            this.clinicController.getClinicById
+        );
     }
 }

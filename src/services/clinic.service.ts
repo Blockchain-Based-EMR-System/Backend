@@ -1,6 +1,7 @@
 import { CreateClinicRequestDto } from "@/dtos/clinics.dto";
 import { Service } from "typedi";
 import prisma from "@/config/prisma";
+import { Clinic } from "@/interfaces";
 
 @Service()
 export class ClinicService {
@@ -61,5 +62,26 @@ export class ClinicService {
                 }
             }
         });
+    }
+
+    public async getClinicById(clinicId: string): Promise<Partial<Clinic> | null> {
+        const clinic = await prisma.clinic.findUnique({
+            where: {
+                id: clinicId,
+            },
+            select: {
+                id: true,
+                is_active: true,
+                opening_at: true,
+                closing_at: true,
+                address: true,
+                address_maps_link: true,
+                phone: true,
+                canPayOnline: true,
+                created_at: true,
+            }
+        });
+
+        return clinic;
     }
 }

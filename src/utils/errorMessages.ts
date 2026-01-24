@@ -117,6 +117,12 @@ export const ErrorMessages = {
         ar: 'لم يتم العثور على صورة الملف الشخصي',
     },
 
+    // Clinic errors
+    CLINIC_NOT_FOUND: {
+        en: 'Clinic not found',
+        ar: 'العيادة غير موجودة',
+    },
+
     // Generic errors
     SOMETHING_WENT_WRONG: {
         en: 'Something went wrong',
