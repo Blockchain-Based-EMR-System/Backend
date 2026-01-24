@@ -122,7 +122,10 @@ export const ErrorMessages = {
         en: 'Clinic not found',
         ar: 'العيادة غير موجودة',
     },
-
+    UNAUTHORIZED_CLINIC_DELETION: {
+        en: 'You are not authorized to delete this clinic',
+        ar: 'ليس لديك صلاحية لحذف هذه العيادة',
+    },
     // Generic errors
     SOMETHING_WENT_WRONG: {
         en: 'Something went wrong',

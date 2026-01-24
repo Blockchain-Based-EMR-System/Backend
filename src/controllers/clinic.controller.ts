@@ -42,12 +42,26 @@ export class ClinicController {
         const clinicUpdateData: CreateUpdateClinicRequestDto = req.body;
 
         const isClinicUpdated = await this.clinicService.updateClinic(clinicId, clinicUpdateData);
-        
+
         if (!isClinicUpdated) {
             const error = createBilingualError(404, ErrorMessages.CLINIC_NOT_FOUND);
             throw new HttpException(error.status, error.message, error.messageAr);
         }
 
         res.status(200).json({ message: 'Clinic updated successfully' });
+    }
+
+    public deleteClinicById = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+        const clinicId = req.params.id;
+
+        const isCreatingDoctor = await this.clinicService.isCreatingDoctorOfClinic(req.user.id, clinicId);
+
+        if (!isCreatingDoctor) {
+            const error = createBilingualError(403, ErrorMessages.UNAUTHORIZED_CLINIC_DELETION);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+        await this.clinicService.deleteClinic(clinicId);
+
+        res.status(200).json({ message: 'Clinic deleted successfully' });
     }
 }

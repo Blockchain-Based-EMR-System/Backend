@@ -36,5 +36,12 @@ export class ClinicRoute implements Routes {
             ValidationMiddleware(CreateUpdateClinicRequestDto, true),
             this.clinicController.updateClinicById
         );
+
+        this.router.delete(
+            `${this.path}/:id`,
+            AuthMiddleware,
+            RoleMiddleware(Role.DOCTOR),
+            this.clinicController.deleteClinicById
+        );
     }
 }

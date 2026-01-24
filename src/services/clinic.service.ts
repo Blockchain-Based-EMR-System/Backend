@@ -96,4 +96,59 @@ export class ClinicService {
         });
         return updatedClinic !== null;
     }
+
+    public async isCreatingDoctorOfClinic(doctorId: string, clinicId: string): Promise<boolean> {
+        const clinic = await prisma.clinic.findUnique({
+            where: {
+                id: clinicId,
+            },
+            select: {
+                created_by: true,
+            }
+        });
+        if (!clinic) {
+            return false;
+        }
+        return clinic.created_by === doctorId;
+    }
+
+    public async deleteClinic(clinicId: string): Promise<void> {
+        const clinicDoctors = await prisma.clinicDoctor.findMany({
+            where: {
+                clinic_id: clinicId,
+            },
+            select: {
+                doctor_id: true,
+            }
+        });
+        const deletedClinic = await prisma.$transaction(async (tx) => {
+            await tx.clinicDoctor.deleteMany({
+                where: {
+                    clinic_id: clinicId,
+                },
+            });
+            await tx.clinicNurse.deleteMany({
+                where: {
+                    clinic_id: clinicId,
+                }
+            });
+            await tx.clinic.delete({
+                where: {
+                    id: clinicId,
+                }
+            });
+            await Promise.all(clinicDoctors.map(async (cd) => {
+                await tx.doctor.update({
+                    where: {
+                        id: cd.doctor_id,
+                    },
+                    data: {
+                        num_of_created_clinics: {
+                            decrement: 1,
+                        }
+                    }
+                });
+            }));
+        });
+    }
 }
