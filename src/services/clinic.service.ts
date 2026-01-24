@@ -1,4 +1,4 @@
-import { CreateClinicRequestDto } from "@/dtos/clinics.dto";
+import { CreateUpdateClinicRequestDto } from "@/dtos/clinics.dto";
 import { Service } from "typedi";
 import prisma from "@/config/prisma";
 import { Clinic } from "@/interfaces";
@@ -22,7 +22,7 @@ export class ClinicService {
         return doctor.num_of_created_clinics <= this.MAX_CLINICS_PER_DOCTOR;
     }
 
-    public async createClinic(doctorId: string, clinicData: CreateClinicRequestDto): Promise<string> {
+    public async createClinic(doctorId: string, clinicData: CreateUpdateClinicRequestDto): Promise<string> {
 
         const createdClinic = await prisma.clinic.create({
             data: {
@@ -83,5 +83,17 @@ export class ClinicService {
         });
 
         return clinic;
+    }
+
+    public async updateClinic(clinicId: string, clinicData: CreateUpdateClinicRequestDto): Promise<boolean> {
+        const updatedClinic = await prisma.clinic.update({
+            where: {
+                id: clinicId,
+            },
+            data: {
+                ...clinicData,
+            },
+        });
+        return updatedClinic !== null;
     }
 }

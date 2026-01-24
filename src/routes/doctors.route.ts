@@ -18,6 +18,8 @@ export class DoctorsRoute implements Routes {
     }
 
     private initializeRoutes() {
+
+        // Doctor Signup Route
         this.router.post(
             `/doctors/signup`,
             /* 
@@ -46,6 +48,8 @@ export class DoctorsRoute implements Routes {
             ValidationMiddleware(DoctorSignupRequestDto),
             errorWrapper(this.doctorsController.doctorSignup)
         );
+
+        // Doctor Login Route
         this.router.post(
             `/doctors/login`,
             /* 
@@ -82,6 +86,8 @@ export class DoctorsRoute implements Routes {
             ValidationMiddleware(DoctorLoginRequestDto),
             errorWrapper(this.doctorsController.doctorLogin)
         );
+
+        // Doctor Set Password Route
         this.router.patch(
             `/doctors/set-password`,
             /* 
@@ -106,6 +112,8 @@ export class DoctorsRoute implements Routes {
             RoleMiddleware(Role.DOCTOR),
             errorWrapper(this.doctorsController.doctorSetPassword)
         );
+
+        // Doctor Profile Picture Routes
         this.router.patch(
             `/doctors/profile-picture`,
             /*

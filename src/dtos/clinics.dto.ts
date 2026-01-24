@@ -1,6 +1,6 @@
 import { IsBoolean, IsDate, IsNotEmpty, IsNumber, IsOptional, IsString, Matches } from "class-validator";
 
-export class CreateClinicRequestDto {
+export class CreateUpdateClinicRequestDto {
     @IsString()
     @IsNotEmpty()
     public name: string;

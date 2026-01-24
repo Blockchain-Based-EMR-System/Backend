@@ -1,5 +1,5 @@
 import { ClinicController } from "@/controllers/clinic.controller";
-import { CreateClinicRequestDto } from "@/dtos/clinics.dto";
+import {  CreateUpdateClinicRequestDto } from "@/dtos/clinics.dto";
 import { Routes } from "@/interfaces";
 import { AuthMiddleware, RoleMiddleware } from "@/middlewares/auth.middleware";
 import { ValidationMiddleware } from "@/middlewares/validation.middleware";
@@ -19,14 +19,22 @@ export class ClinicRoute implements Routes {
             `${this.path}`,
             AuthMiddleware,
             RoleMiddleware(Role.DOCTOR),
-            ValidationMiddleware(CreateClinicRequestDto),
+            ValidationMiddleware(CreateUpdateClinicRequestDto),
             this.clinicController.createClinic
         );
 
         this.router.get(
             `${this.path}/:id`,
             AuthMiddleware, // To be Discussed: Should patients be able to view clinic details?
-            this.clinicController.getClinicById
+            this.clinicController.createClinic
+        );
+
+        this.router.patch(
+            `${this.path}/:id`,
+            AuthMiddleware,
+            RoleMiddleware(Role.DOCTOR),
+            ValidationMiddleware(CreateUpdateClinicRequestDto, true),
+            this.clinicController.updateClinicById
         );
     }
 }

@@ -1,4 +1,4 @@
-import { CreateClinicRequestDto } from "@/dtos/clinics.dto";
+import { CreateUpdateClinicRequestDto } from "@/dtos/clinics.dto";
 import { HttpException } from "@/exceptions/HttpException";
 import { RequestWithUser } from "@/interfaces";
 import { ClinicService } from "@/services/clinic.service";
@@ -10,7 +10,7 @@ export class ClinicController {
     public clinicService = Container.get(ClinicService);
 
     public createClinic = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
-        const clinicData: CreateClinicRequestDto = req.body;
+        const clinicData: CreateUpdateClinicRequestDto = req.body;
 
         const isAllowedToCreateClinic = await this.clinicService.isDoctorAllowedToCreateClinic(req.user.id);
         if (!isAllowedToCreateClinic) {
@@ -35,5 +35,19 @@ export class ClinicController {
         }
 
         res.status(200).json({ message: 'Clinic retrieved successfully', data: clinic });
+    }
+
+    public updateClinicById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        const clinicId = req.params.id;
+        const clinicUpdateData: CreateUpdateClinicRequestDto = req.body;
+
+        const isClinicUpdated = await this.clinicService.updateClinic(clinicId, clinicUpdateData);
+        
+        if (!isClinicUpdated) {
+            const error = createBilingualError(404, ErrorMessages.CLINIC_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        res.status(200).json({ message: 'Clinic updated successfully' });
     }
 }
