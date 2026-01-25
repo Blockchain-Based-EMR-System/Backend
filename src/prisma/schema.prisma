@@ -26,36 +26,39 @@ model User {
   email_OTP_expires_at            DateTime?
   password_reset_token            String?   @db.VarChar(255)
   password_reset_token_expires_at DateTime?
+  photo_url                       String?   @db.VarChar(500)
+  photo_public_id                 String?   @db.VarChar(500)
   created_at                      DateTime  @default(now())
   modified_at                     DateTime  @updatedAt
   deleted_at                      DateTime?
 
   // Relations
-  patient                 Patient?       @relation("UserAsPatient")
-  doctor                  Doctor?        @relation("UserAsDoctor")
-  appointments_as_patient Appointment[]  @relation("PatientAppointments")
-  appointments_as_doctor  Appointment[]  @relation("DoctorAppointments")
-  medications_as_patient  Medication[]   @relation("PatientMedications")
-  medications_as_doctor   Medication[]   @relation("DoctorMedications")
-  scans_labs_as_patient   ScanLab[]      @relation("PatientScansLabs")
-  scans_labs_as_doctor    ScanLab[]      @relation("DoctorScansLabs")
-  clinics_as_nurse        ClinicNurse[]  @relation("NurseClinics")
-  audit_logs              AuditLog[]     @relation("UserAuditLogs")
-  controlled_patients     Patient[]      @relation("ControllingNurse")
-  refresh_tokens          RefreshToken[] @relation("UserRefreshTokens")
-  medical_records_as_patient MedicalRecord[]  @relation("PatientMedicalRecords")
+  patient                    Patient?        @relation("UserAsPatient")
+  doctor                     Doctor?         @relation("UserAsDoctor")
+  appointments_as_patient    Appointment[]   @relation("PatientAppointments")
+  appointments_as_doctor     Appointment[]   @relation("DoctorAppointments")
+  medications_as_patient     Medication[]    @relation("PatientMedications")
+  medications_as_doctor      Medication[]    @relation("DoctorMedications")
+  scans_labs_as_patient      ScanLab[]       @relation("PatientScansLabs")
+  scans_labs_as_doctor       ScanLab[]       @relation("DoctorScansLabs")
+  clinics_as_nurse           ClinicNurse[]   @relation("NurseClinics")
+  audit_logs                 AuditLog[]      @relation("UserAuditLogs")
+  controlled_patients        Patient[]       @relation("ControllingNurse")
+  refresh_tokens             RefreshToken[]  @relation("UserRefreshTokens")
+  medical_records_as_patient MedicalRecord[] @relation("PatientMedicalRecords")
 
   @@map("Users")
 }
 
 model Doctor {
-  id             String    @id @default(uuid())
-  specialization String    @db.VarChar(255)
-  avg_time       DateTime? @db.Time(0)
-
+  id                     String              @id @default(uuid())
+  specialization         String              @db.VarChar(255)
+  avg_time               DateTime?           @db.Time(0)
+  account_status         DoctorAccountStatus @default(PENDING)
+  num_of_created_clinics Int                 @default(0)
   // Relations
-  user           User           @relation("UserAsDoctor", fields: [id], references: [id], onDelete: Cascade)
-  clinic_doctors ClinicDoctor[]
+  user                   User                @relation("UserAsDoctor", fields: [id], references: [id], onDelete: Cascade)
+  clinic_doctors         ClinicDoctor[]
 
   @@map("Doctor")
 }
@@ -144,14 +147,19 @@ model ScanLab {
 }
 
 model Clinic {
-  id          String    @id @default(uuid())
-  is_active   Boolean   @default(true)
-  opening_at  DateTime  @db.Time(0)
-  closing_at  DateTime  @db.Time(0)
-  address     String    @db.VarChar(300)
-  created_at  DateTime  @default(now())
-  modified_at DateTime  @updatedAt
-  deleted_at  DateTime?
+  id                String    @id @default(uuid())
+  name              String    @db.VarChar(255)
+  is_active         Boolean   @default(true)
+  opening_at        String    @db.VarChar(12)
+  closing_at        String    @db.VarChar(12)
+  address           String    @db.VarChar(300)
+  address_maps_link String?   @db.VarChar(500)
+  phone             String    @db.VarChar(20)
+  canPayOnline      Boolean   @default(false)
+  created_by        String    @db.VarChar(255)
+  created_at        DateTime  @default(now())
+  modified_at       DateTime  @updatedAt
+  deleted_at        DateTime?
 
   // Relations
   clinic_nurses  ClinicNurse[]
@@ -178,6 +186,7 @@ model ClinicDoctor {
   id        String @id @default(uuid())
   clinic_id String
   doctor_id String
+  fees      Float
 
   // Relations
   clinic Clinic @relation(fields: [clinic_id], references: [id], onDelete: Cascade)
@@ -206,9 +215,9 @@ model AuditLog {
 model MedicalRecord {
   id          String     @id @default(uuid())
   patient_id  String
-  doctor_id   String?    
+  doctor_id   String?
   name        String     @db.VarChar(255)
-  cid         String     @unique @db.VarChar(255)  
+  cid         String     @unique @db.VarChar(255)
   type        RecordType
   created_at  DateTime   @default(now())
   modified_at DateTime   @updatedAt
@@ -217,7 +226,7 @@ model MedicalRecord {
   patient User @relation("PatientMedicalRecords", fields: [patient_id], references: [id], onDelete: Restrict)
 
   @@index([patient_id])
-  @@index([doctor_id])  
+  @@index([doctor_id])
   @@index([cid])
   @@map("MedicalRecords")
 }
@@ -267,16 +276,22 @@ enum Gender {
 }
 
 enum Role {
+  SUPER_ADMIN
   ADMIN
   DOCTOR
   NURSE
   PATIENT
 }
 
-
 enum RecordType {
   LAB_RESULT
   SCAN
   DIAGNOSIS
   VISIT_SUMMARY
+}
+
+enum DoctorAccountStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }

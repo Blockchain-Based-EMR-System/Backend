@@ -1,49 +1,46 @@
 import { promises } from 'dns';
 import { port } from 'envalid'
-import {create, IPFSHTTPClient} from 'ipfs-http-client'
+import { create, IPFSHTTPClient } from 'ipfs-http-client'
 import { HttpException } from '@/exceptions/HttpException';
-
-// temp --> selecting the pinning service (4EVERLAND)
-const ipfs_client: IPFSHTTPClient = create({
-    host: process.env.IPFS_HOST,
-    port: parseInt(process.env.IPFS_PORT),
-    protocol: process.env.IPFS_PROTOCOL
-});
+import { Service } from 'typedi';
 
 
-// upload med file to IPFS --> generate and return CID
-export const uploadFile = async(fileData: Buffer, fileName: string): Promise<string> => {
-    try{
-        const result = await ipfs_client.add({
+@Service()
+export class IpfsService {
+    private ipfsClient: IPFSHTTPClient;
+
+    constructor() {
+        // temp --> selecting the pinning service (4EVERLAND)
+        this.ipfsClient = create({
+            host: process.env.IPFS_HOST,
+            port: parseInt(process.env.IPFS_PORT),
+            protocol: process.env.IPFS_PROTOCOL
+        });
+    }
+
+    // upload med file to IPFS --> generate and return CID
+    public async uploadFile(fileData: Buffer, fileName: string): Promise<string> {
+        const result = await this.ipfsClient.add({
             path: fileName,
             content: fileData,
         });
         const cid = result.cid.toString();
         return cid
-    }
-    catch(e){
-        console.error('failed to upload to IPFS', e);
-        throw new HttpException(500, 'failed to upload to IPFS');
-    }
-};
+    };
 
-
-// get file using CID
-export const getFile = async (cid: string): Promise<Buffer> => {
-    try{
+    // get file using CID
+    public async getFile(cid: string): Promise<Buffer> {
         // note --> each chunk in ipfs is Uint8Array
         const chunks: Uint8Array[] = [];
 
-        for await (const chunk of ipfs_client.cat(cid)){
+        for await (const chunk of this.ipfsClient.cat(cid)) {
             chunks.push(chunk);
         }
         const fileData = Buffer.concat(chunks);
         return fileData;
     }
-    catch(e){
-        console.error('failed to retrieve from IPFS:', e)
-        throw new HttpException(404, 'file not found')
-    }
-}
 
-// pin management --> TBD
+    // pin management --> TBD
+
+
+}

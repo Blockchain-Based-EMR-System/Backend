@@ -1,0 +1,35 @@
+const prisma = new PrismaClient();
+
+export default prisma;
+prisma.service.ts
+prisma.TABLENAME
+
+
+catchAsync--> to reduce try catch 
+
+name of db fields to be snake Case
+
+Handle Image for user as general
+
+JIRA
+
+Admin: 
+- Create doctor
+- Create Clinic
+- Get all existing clinics to see if to link directly
+- Link doctor to Clinic
+
+doctor:
+- first time login to change password that is default
+- according to clinic id , make the doctor schedule
+
+- Patient:
+- Get all doctors with their clinic details respectively
+- get the doctors schedule that is free and reserved
+- each patient select one reservation per day
+- Look for cancellation policy
+
+Clinic: 
+add clinic name
+add location link as google maps
+

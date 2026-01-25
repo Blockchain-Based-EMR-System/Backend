@@ -77,7 +77,7 @@ export class AuthService {
       throw new HttpException(error.status, error.message, error.messageAr);
     }
 
-    const { name, gender, date_of_birth, email, isVerified, username, phone, hasCompletedProfile } = findUser;
+    const { name, gender, date_of_birth, email, isVerified, username, phone, role, hasCompletedProfile, doctor } = findUser;
     const patientLoginData: UserLoginData = {
       name,
       email,
@@ -85,10 +85,15 @@ export class AuthService {
       phone,
       gender,
       date_of_birth,
+      role,
       isVerified,
-      hasCompletedProfile
+      hasCompletedProfile,
+      doctor: doctor ? {
+        specialization: doctor.specialization,
+        account_status: doctor.account_status
+      } : undefined
     };
-    
+
     const tokenResponse = await this.createTokens(findUser, userData.rememberMe);
     const cookies = this.createCookies(tokenResponse);
 
@@ -131,7 +136,7 @@ export class AuthService {
   }
 
 
-  public async createTokens(user: User, rememberMe: boolean = false): Promise<TokenResponse> {
+  public async createTokens(user: Partial<User>, rememberMe: boolean = false): Promise<TokenResponse> {
     const accessToken = this.createAccessToken(user);
 
     if (rememberMe) {
@@ -142,7 +147,7 @@ export class AuthService {
     return { accessToken };
   }
 
-  public createAccessToken(user: User): AccessTokenData {
+  public createAccessToken(user: Partial<User>): AccessTokenData {
     const dataStoredInToken: DataStoredInToken = { id: user.id };
     const secretKey: string = SECRET_KEY;
     const expiresIn: number = this.parseTimeToSeconds(ACCESS_TOKEN_EXPIRY);
@@ -150,7 +155,7 @@ export class AuthService {
     return { expiresIn, token: sign(dataStoredInToken, secretKey, { expiresIn }) };
   }
 
-  public async createRefreshToken(user: User): Promise<RefreshTokenData> {
+  public async createRefreshToken(user: Partial<User>): Promise<RefreshTokenData> {
     const dataStoredInToken: DataStoredInToken = { id: user.id };
     const secretKey: string = REFRESH_TOKEN_SECRET;
     const expiresIn: number = this.parseTimeToSeconds(REFRESH_TOKEN_EXPIRY);
@@ -191,45 +196,40 @@ export class AuthService {
       throw new HttpException(error.status, error.message, error.messageAr);
     }
 
-    try {
-      // Verify the refresh token
-      const secretKey: string = REFRESH_TOKEN_SECRET;
-      const decoded = verify(refreshToken, secretKey) as DataStoredInToken;
+    // Verify the refresh token
+    const secretKey: string = REFRESH_TOKEN_SECRET;
+    const decoded = verify(refreshToken, secretKey) as DataStoredInToken;
 
-      // Hash the token to compare with stored hash
-      const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+    // Hash the token to compare with stored hash
+    const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
 
-      // Check if refresh token exists and is not revoked
-      const storedToken = await this.refreshTokens.findFirst({
-        where: {
-          token_hash: tokenHash,
-          user_id: decoded.id,
-          is_revoked: false,
-          expires_at: { gt: new Date() },
-        },
-      });
+    // Check if refresh token exists and is not revoked
+    const storedToken = await this.refreshTokens.findFirst({
+      where: {
+        token_hash: tokenHash,
+        user_id: decoded.id,
+        is_revoked: false,
+        expires_at: { gt: new Date() },
+      },
+    });
 
-      if (!storedToken) {
-        const error = createBilingualError(401, ErrorMessages.INVALID_REFRESH_TOKEN);
-        throw new HttpException(error.status, error.message, error.messageAr);
-      }
-
-      // Get user
-      const user = await this.users.findUnique({ where: { id: decoded.id } });
-      if (!user) {
-        const error = createBilingualError(401, ErrorMessages.USER_NOT_EXIST);
-        throw new HttpException(error.status, error.message, error.messageAr);
-      }
-
-      // Create new access token
-      const accessToken = this.createAccessToken(user);
-      const cookies = this.createCookies({ accessToken });
-
-      return { cookies, user, accessToken };
-    } catch (error) {
-      const err = createBilingualError(401, ErrorMessages.INVALID_REFRESH_TOKEN);
-      throw new HttpException(err.status, err.message, err.messageAr);
+    if (!storedToken) {
+      const error = createBilingualError(401, ErrorMessages.INVALID_REFRESH_TOKEN);
+      throw new HttpException(error.status, error.message, error.messageAr);
     }
+
+    // Get user
+    const user = await this.users.findUnique({ where: { id: decoded.id } });
+    if (!user) {
+      const error = createBilingualError(401, ErrorMessages.USER_NOT_EXIST);
+      throw new HttpException(error.status, error.message, error.messageAr);
+    }
+
+    // Create new access token
+    const accessToken = this.createAccessToken(user);
+    const cookies = this.createCookies({ accessToken });
+
+    return { cookies, user, accessToken };
   }
 
   // public async revokeRefreshToken(refreshToken: string): Promise<void> {    
@@ -288,7 +288,7 @@ export class AuthService {
 
     await transporter.sendMail(mailOptions);
   }
-  
+
   public async getUserEmail(req: RequestWithUser): Promise<string> {
     const email = await this.users.findUnique({
       where: { id: req.user.id },

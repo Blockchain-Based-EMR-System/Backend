@@ -37,6 +37,11 @@ export const ErrorMessages = {
         en: 'User email not found',
         ar: 'البريد الإلكتروني للمستخدم غير موجود',
     },
+
+    OTP_REQUIRED: {
+        en: 'OTP is required',
+        ar: 'رمز التحقق مطلوب',
+    },
     INVALID_OTP: {
         en: 'Invalid OTP',
         ar: 'رمز التحقق غير صالح',
@@ -52,6 +57,11 @@ export const ErrorMessages = {
     INVALID_PASSWORD_RESET_TOKEN: {
         en: 'Invalid or expired password reset token',
         ar: 'رمز إعادة تعيين كلمة المرور غير صالح أو منتهي الصلاحية',
+    },
+
+    EMAIL_REQUIRED: {
+        en: 'Email is required',
+        ar: 'البريد الإلكتروني مطلوب',
     },
 
     // Authentication middleware errors
@@ -80,6 +90,42 @@ export const ErrorMessages = {
         ar: 'خطأ في المصادقة عبر Google',
     },
 
+    //Doctor specific errors
+    DOCTOR_ACCOUNT_NOT_APPROVED: {
+        en: 'Doctor account is not approved yet',
+        ar: 'حساب الطبيب غير مفعل بعد',
+    },
+    DOCTOR_PASSWORD_ALREADY_SET: {
+        en: 'Password has already been set',
+        ar: 'تم تعيين كلمة المرور بالفعل',
+    },
+    MAX_CLINICS_REACHED: {
+        en: 'Maximum number of created clinics reached',
+        ar: 'تم الوصول إلى الحد الأقصى لعدد العيادات',
+    },
+    // File upload errors
+    NO_FILE_UPLOADED: {
+        en: 'No file uploaded',
+        ar: 'لم يتم تحميل أي ملف',
+    },
+    UNSUPPORTED_FILE_FORMAT: {
+        en: 'Unsupported file format. Only JPEG and PNG allowed.',
+        ar: 'تنسيق ملف غير مدعوم. يُسمح فقط بملفات JPEG و PNG.',
+    },
+    NO_PROFILE_PICTURE: {
+        en: 'No profile picture found',
+        ar: 'لم يتم العثور على صورة الملف الشخصي',
+    },
+
+    // Clinic errors
+    CLINIC_NOT_FOUND: {
+        en: 'Clinic not found',
+        ar: 'العيادة غير موجودة',
+    },
+    UNAUTHORIZED_CLINIC_DELETION: {
+        en: 'You are not authorized to delete this clinic',
+        ar: 'ليس لديك صلاحية لحذف هذه العيادة',
+    },
     // Generic errors
     SOMETHING_WENT_WRONG: {
         en: 'Something went wrong',

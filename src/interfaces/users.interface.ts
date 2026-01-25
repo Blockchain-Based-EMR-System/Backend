@@ -3,7 +3,7 @@ import { Medication } from './medications.interface';
 import { ScanLab } from './scans-labs.interface';
 import { ClinicNurse, ClinicDoctor } from './clinics.interface';
 import { AuditLog } from './audit-logs.interface';
-import { Gender, Role } from '@prisma/client';
+import { DoctorAccountStatus, Gender, Role } from '@prisma/client';
 
 export interface User {
   id: string;
@@ -22,7 +22,7 @@ export interface User {
   deleted_at?: Date;
 
   patient?: Patient;
-  doctor?: Doctor;
+  doctor?: Partial<Doctor>;
   appointments_as_patient?: Appointment[];
   appointments_as_doctor?: Appointment[];
   medications_as_patient?: Medication[];
@@ -48,6 +48,7 @@ export interface Doctor {
   id: string;
   specialization: string;
   avg_time?: Date;
+  account_status: DoctorAccountStatus;
 
   user: User;
   clinic_doctors?: ClinicDoctor[];
@@ -60,6 +61,11 @@ export interface UserLoginData {
   phone: string,
   gender: Gender,
   date_of_birth: Date,
+  role: Role,
   isVerified: Boolean,
   hasCompletedProfile: Boolean,
+  doctor?: {
+    specialization: string;
+    account_status: DoctorAccountStatus;
+  }
 }

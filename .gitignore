@@ -142,3 +142,11 @@ vite.config.ts.timestamp-*
 
 # fabric files
 fabric-identities.json
+
+# fabric files
+fabric-identities.json
+
+# Temporary folders
+docker-compose-local.yml
+docs
+uploads
