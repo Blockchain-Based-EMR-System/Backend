@@ -52,14 +52,14 @@ export class DoctorController {
 
         await this.doctorService.updateDoctorProfilePicture(doctorId, uploadResult.url, uploadResult.publicId);
 
-        res.status(200).json({ message: 'Profile picture updated successfully'});
-        
+        res.status(200).json({ message: 'Profile picture updated successfully' });
+
     }
 
     public getProfilePicture = async (req: RequestWithUser, res: Response, next: NextFunction) => {
         const doctorId = req.user?.id;
         const profilePictureUrl = await this.userService.getUserProfilePicture(doctorId);
-        if(!profilePictureUrl) {
+        if (!profilePictureUrl) {
             const error = createBilingualError(404, ErrorMessages.NO_PROFILE_PICTURE);
             throw new HttpException(error.status, error.message, error.messageAr);
         }
@@ -70,5 +70,11 @@ export class DoctorController {
         const doctorId = req.user?.id;
         await this.userService.deleteProfilePicture(doctorId);
         res.status(200).json({ message: 'Profile picture deleted successfully' });
+    }
+
+    public getDoctorClinics = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+        const doctorId = req.user?.id;
+        const clinics = await this.doctorService.getDoctorClinics(doctorId);
+        res.status(200).json({ data: clinics, message: 'Doctor clinics retrieved successfully' });
     }
 }

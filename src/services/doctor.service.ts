@@ -6,6 +6,7 @@ import { DoctorAccountStatus, PrismaClient, Role } from "@prisma/client";
 import { hash, compare } from "bcrypt";
 import { DoctorLoginData } from "@/interfaces/doctors.interface";
 import { AuthService } from "./auth.service";
+import { Clinic } from "@/interfaces";
 
 // TO BE CHANGED
 const prisma = new PrismaClient();
@@ -167,5 +168,35 @@ export class DoctorService {
                 photo_public_id: photoPublicId
             }
         });
+    }
+
+    public async getDoctorClinics(doctorId: string): Promise<Partial<Clinic>[]> {
+        const clinics = await prisma.clinicDoctor.findMany({
+            where: {
+                doctor_id: doctorId
+            },
+            select: {
+                clinic: {
+                    select: {
+                        id: true,
+                        name: true,
+                        opening_at: true,
+                        closing_at: true,
+                        address: true,
+                        address_maps_link: true,
+                        phone: true,
+                        is_active: true,
+                        canPayOnline: true,
+                        created_at: true,
+                    }
+                },
+                fees: true
+            }
+        });
+
+        return clinics.map(c => ({
+            ...c.clinic,
+            fees: c.fees
+        }));
     }
 }

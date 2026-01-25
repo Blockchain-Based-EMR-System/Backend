@@ -71,6 +71,7 @@ export class ClinicService {
             },
             select: {
                 id: true,
+                name: true,
                 is_active: true,
                 opening_at: true,
                 closing_at: true,
