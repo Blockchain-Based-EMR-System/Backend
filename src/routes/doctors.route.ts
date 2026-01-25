@@ -92,6 +92,12 @@ export class DoctorsRoute implements Routes {
             `/doctors/set-password`,
             /* 
                 #swagger.tags = ['Doctors']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
                 #swagger.parameters['body'] = {
                     in: 'body',
                     description: 'New password data',
