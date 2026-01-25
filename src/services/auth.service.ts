@@ -1,4 +1,4 @@
-import { PrismaClient, Role } from '@prisma/client';
+import { Role } from '@prisma/client';
 import { compare, hash } from 'bcrypt';
 import { sign, verify } from 'jsonwebtoken';
 import { Service } from 'typedi';
@@ -10,13 +10,13 @@ import { UserLoginData, User } from '@interfaces/users.interface';
 import { transporter } from '@/utils/nodeMailerService';
 import { ErrorMessages, createBilingualError } from '@/utils/errorMessages';
 import crypto from 'crypto';
+import prisma from '@/config/prisma';
 
 @Service()
 export class AuthService {
-  // TO BE EDITED
-  public users = new PrismaClient().user;
-  public patients = new PrismaClient().patient;
-  public refreshTokens = new PrismaClient().refreshToken;
+  public users = prisma.user;
+  public patients = prisma.patient;
+  public refreshTokens = prisma.refreshToken;
 
   public async signup(userData: CreateUserDto): Promise<{ createdUserData: User; cookies: string[] }> {
     const findUserSameEmail: User = await this.users.findUnique({ where: { email: userData.email } });
@@ -196,45 +196,40 @@ export class AuthService {
       throw new HttpException(error.status, error.message, error.messageAr);
     }
 
-    try {
-      // Verify the refresh token
-      const secretKey: string = REFRESH_TOKEN_SECRET;
-      const decoded = verify(refreshToken, secretKey) as DataStoredInToken;
+    // Verify the refresh token
+    const secretKey: string = REFRESH_TOKEN_SECRET;
+    const decoded = verify(refreshToken, secretKey) as DataStoredInToken;
 
-      // Hash the token to compare with stored hash
-      const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
+    // Hash the token to compare with stored hash
+    const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
 
-      // Check if refresh token exists and is not revoked
-      const storedToken = await this.refreshTokens.findFirst({
-        where: {
-          token_hash: tokenHash,
-          user_id: decoded.id,
-          is_revoked: false,
-          expires_at: { gt: new Date() },
-        },
-      });
+    // Check if refresh token exists and is not revoked
+    const storedToken = await this.refreshTokens.findFirst({
+      where: {
+        token_hash: tokenHash,
+        user_id: decoded.id,
+        is_revoked: false,
+        expires_at: { gt: new Date() },
+      },
+    });
 
-      if (!storedToken) {
-        const error = createBilingualError(401, ErrorMessages.INVALID_REFRESH_TOKEN);
-        throw new HttpException(error.status, error.message, error.messageAr);
-      }
-
-      // Get user
-      const user = await this.users.findUnique({ where: { id: decoded.id } });
-      if (!user) {
-        const error = createBilingualError(401, ErrorMessages.USER_NOT_EXIST);
-        throw new HttpException(error.status, error.message, error.messageAr);
-      }
-
-      // Create new access token
-      const accessToken = this.createAccessToken(user);
-      const cookies = this.createCookies({ accessToken });
-
-      return { cookies, user, accessToken };
-    } catch (error) {
-      const err = createBilingualError(401, ErrorMessages.INVALID_REFRESH_TOKEN);
-      throw new HttpException(err.status, err.message, err.messageAr);
+    if (!storedToken) {
+      const error = createBilingualError(401, ErrorMessages.INVALID_REFRESH_TOKEN);
+      throw new HttpException(error.status, error.message, error.messageAr);
     }
+
+    // Get user
+    const user = await this.users.findUnique({ where: { id: decoded.id } });
+    if (!user) {
+      const error = createBilingualError(401, ErrorMessages.USER_NOT_EXIST);
+      throw new HttpException(error.status, error.message, error.messageAr);
+    }
+
+    // Create new access token
+    const accessToken = this.createAccessToken(user);
+    const cookies = this.createCookies({ accessToken });
+
+    return { cookies, user, accessToken };
   }
 
   // public async revokeRefreshToken(refreshToken: string): Promise<void> {    

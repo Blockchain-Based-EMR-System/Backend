@@ -18,3 +18,10 @@ export enum Action {
   LOGIN = 'LOGIN',
   LOGOUT = 'LOGOUT',
 }
+
+export enum RecordType {
+  LAB_RESULT = 'LAB_RESULT',
+  SCAN = 'SCAN',
+  DIAGNOSIS = 'DIAGNOSIS',
+  VISIT_SUMMARY = 'VISIT_SUMMARY'
+}
