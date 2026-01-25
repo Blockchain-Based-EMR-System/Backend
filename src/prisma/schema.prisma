@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,41 +8,39 @@ datasource db {
 }
 
 model User {
-  id                              String    @id @default(uuid())
-  name                            String    @db.VarChar(255)
-  email                           String    @unique @db.VarChar(255)
-  username                        String    @unique @db.VarChar(255)
-  phone                           String    @db.VarChar(20)
-  password_hash                   String    @db.VarChar(255)
+  id                              String          @id @default(uuid())
+  name                            String          @db.VarChar(255)
+  email                           String          @unique @db.VarChar(255)
+  username                        String          @unique @db.VarChar(255)
+  phone                           String          @db.VarChar(20)
+  password_hash                   String          @db.VarChar(255)
   gender                          Gender
   date_of_birth                   DateTime
-  role                            Role      @default(PATIENT)
-  isVerified                      Boolean   @default(false)
-  hasCompletedProfile             Boolean   @default(false)
-  email_OTP                       String?   @db.VarChar(6)
-  email_OTP_expires_at            DateTime?
-  password_reset_token            String?   @db.VarChar(255)
-  password_reset_token_expires_at DateTime?
-  photo_url                       String?   @db.VarChar(500)
-  photo_public_id                 String?   @db.VarChar(500)
-  created_at                      DateTime  @default(now())
-  modified_at                     DateTime  @updatedAt
+  created_at                      DateTime        @default(now())
+  modified_at                     DateTime        @updatedAt
   deleted_at                      DateTime?
-
-  // Relations
-  patient                    Patient?        @relation("UserAsPatient")
-  doctor                     Doctor?         @relation("UserAsDoctor")
-  appointments_as_patient    Appointment[]   @relation("PatientAppointments")
-  appointments_as_doctor     Appointment[]   @relation("DoctorAppointments")
-  medications_as_patient     Medication[]    @relation("PatientMedications")
-  medications_as_doctor      Medication[]    @relation("DoctorMedications")
-  scans_labs_as_patient      ScanLab[]       @relation("PatientScansLabs")
-  scans_labs_as_doctor       ScanLab[]       @relation("DoctorScansLabs")
-  clinics_as_nurse           ClinicNurse[]   @relation("NurseClinics")
-  audit_logs                 AuditLog[]      @relation("UserAuditLogs")
-  controlled_patients        Patient[]       @relation("ControllingNurse")
-  refresh_tokens             RefreshToken[]  @relation("UserRefreshTokens")
-  medical_records_as_patient MedicalRecord[] @relation("PatientMedicalRecords")
+  email_OTP                       String?         @db.VarChar(6)
+  email_OTP_expires_at            DateTime?
+  isVerified                      Boolean         @default(false)
+  password_reset_token            String?         @db.VarChar(255)
+  password_reset_token_expires_at DateTime?
+  role                            Role            @default(PATIENT)
+  hasCompletedProfile             Boolean         @default(false)
+  photo_public_id                 String?         @db.VarChar(500)
+  photo_url                       String?         @db.VarChar(500)
+  appointments_as_doctor          Appointment[]   @relation("DoctorAppointments")
+  appointments_as_patient         Appointment[]   @relation("PatientAppointments")
+  audit_logs                      AuditLog[]      @relation("UserAuditLogs")
+  clinics_as_nurse                ClinicNurse[]   @relation("NurseClinics")
+  doctor                          Doctor?         @relation("UserAsDoctor")
+  medical_records_as_patient      MedicalRecord[] @relation("PatientMedicalRecords")
+  medications_as_doctor           Medication[]    @relation("DoctorMedications")
+  medications_as_patient          Medication[]    @relation("PatientMedications")
+  controlled_patients             Patient[]       @relation("ControllingNurse")
+  patient                         Patient?        @relation("UserAsPatient")
+  refresh_tokens                  RefreshToken[]  @relation("UserRefreshTokens")
+  scans_labs_as_doctor            ScanLab[]       @relation("DoctorScansLabs")
+  scans_labs_as_patient           ScanLab[]       @relation("PatientScansLabs")
 
   @@map("Users")
 }
@@ -56,45 +51,51 @@ model Doctor {
   avg_time               DateTime?           @db.Time(0)
   account_status         DoctorAccountStatus @default(PENDING)
   num_of_created_clinics Int                 @default(0)
-  // Relations
-  user                   User                @relation("UserAsDoctor", fields: [id], references: [id], onDelete: Cascade)
+  availability_type      AvailabilityType    @default(UNSET)
+  present                Boolean             @default(true)
   clinic_doctors         ClinicDoctor[]
+  user                   User                @relation("UserAsDoctor", fields: [id], references: [id], onDelete: Cascade)
+  doctorSchedules        DoctorSchedule[]
 
   @@map("Doctor")
 }
 
 model Patient {
-  id                   String  @id @default(uuid())
-  bc_address           String  @db.VarChar(255)
-  consent              Boolean @default(false)
-  controlling_nurse_id String?
-
-  // Relations
-  user                   User  @relation("UserAsPatient", fields: [id], references: [id], onDelete: Cascade)
-  controlling_nurse_user User? @relation("ControllingNurse", fields: [controlling_nurse_id], references: [id], onDelete: SetNull)
+  id                     String  @id @default(uuid())
+  bc_address             String  @db.VarChar(255)
+  consent                Boolean @default(false)
+  controlling_nurse_id   String?
+  controlling_nurse_user User?   @relation("ControllingNurse", fields: [controlling_nurse_id], references: [id])
+  user                   User    @relation("UserAsPatient", fields: [id], references: [id], onDelete: Cascade)
 
   @@map("Patient")
 }
 
 model Appointment {
-  id             String    @id @default(uuid())
+  id             String            @id @default(uuid())
   patient_id     String?
   doctor_id      String?
   scheduled_time DateTime
-  is_online      Boolean   @default(false)
-  is_completed   Boolean   @default(false)
+  is_online      Boolean           @default(false)
+  is_completed   Boolean           @default(false)
   estimated_time Float?
-  created_at     DateTime  @default(now())
-  modified_at    DateTime  @updatedAt
+  created_at     DateTime          @default(now())
+  modified_at    DateTime          @updatedAt
   deleted_at     DateTime?
-
-  // Relations
-  patient User? @relation("PatientAppointments", fields: [patient_id], references: [id], onDelete: Restrict)
-  doctor  User? @relation("DoctorAppointments", fields: [doctor_id], references: [id], onDelete: Restrict)
+  cancelled_by   String?
+  clinic_id      String?
+  end_time       DateTime
+  slot_duration  DateTime
+  status         AppointmentStatus @default(CONFIRMED)
+  clinic         Clinic?           @relation(fields: [clinic_id], references: [id])
+  doctor         User?             @relation("DoctorAppointments", fields: [doctor_id], references: [id], onDelete: Restrict)
+  patient        User?             @relation("PatientAppointments", fields: [patient_id], references: [id], onDelete: Restrict)
 
   @@index([patient_id])
   @@index([doctor_id])
   @@index([scheduled_time])
+  @@index([clinic_id])
+  @@index([status])
   @@map("Appointments")
 }
 
@@ -108,14 +109,12 @@ model Medication {
   medication_start_time DateTime  @db.Time(0)
   frequency             Int
   period                Period
-  description           String?   @db.Text
+  description           String?
   created_at            DateTime  @default(now())
   modified_at           DateTime  @updatedAt
   deleted_at            DateTime?
-
-  // Relations
-  patient User @relation("PatientMedications", fields: [patient_id], references: [id], onDelete: Restrict)
-  doctor  User @relation("DoctorMedications", fields: [doctor_id], references: [id], onDelete: Restrict)
+  doctor                User      @relation("DoctorMedications", fields: [doctor_id], references: [id])
+  patient               User      @relation("PatientMedications", fields: [patient_id], references: [id])
 
   @@index([patient_id])
   @@index([doctor_id])
@@ -131,15 +130,13 @@ model ScanLab {
   scheduled_time DateTime?   @db.Time(0)
   frequency      Int?
   period         Period?
-  description    String?     @db.Text
+  description    String?
   type           ScanLabType
   created_at     DateTime    @default(now())
   modified_at    DateTime    @updatedAt
   deleted_at     DateTime?
-
-  // Relations
-  patient User @relation("PatientScansLabs", fields: [patient_id], references: [id], onDelete: Restrict)
-  doctor  User @relation("DoctorScansLabs", fields: [doctor_id], references: [id], onDelete: Restrict)
+  doctor         User        @relation("DoctorScansLabs", fields: [doctor_id], references: [id])
+  patient        User        @relation("PatientScansLabs", fields: [patient_id], references: [id])
 
   @@index([patient_id])
   @@index([doctor_id])
@@ -147,23 +144,23 @@ model ScanLab {
 }
 
 model Clinic {
-  id                String    @id @default(uuid())
-  name              String    @db.VarChar(255)
-  is_active         Boolean   @default(true)
-  opening_at        String    @db.VarChar(12)
-  closing_at        String    @db.VarChar(12)
-  address           String    @db.VarChar(300)
-  address_maps_link String?   @db.VarChar(500)
-  phone             String    @db.VarChar(20)
-  canPayOnline      Boolean   @default(false)
-  created_by        String    @db.VarChar(255)
-  created_at        DateTime  @default(now())
-  modified_at       DateTime  @updatedAt
+  id                String           @id @default(uuid())
+  is_active         Boolean          @default(true)
+  address           String           @db.VarChar(300)
+  created_at        DateTime         @default(now())
+  modified_at       DateTime         @updatedAt
   deleted_at        DateTime?
-
-  // Relations
-  clinic_nurses  ClinicNurse[]
-  clinic_doctors ClinicDoctor[]
+  address_maps_link String?          @db.VarChar(500)
+  canPayOnline      Boolean          @default(false)
+  phone             String           @db.VarChar(20)
+  created_by        String           @db.VarChar(255)
+  name              String           @db.VarChar(255)
+  opening_at        String           @db.VarChar(12)
+  closing_at        String           @db.VarChar(12)
+  appointments      Appointment[]
+  clinic_doctors    ClinicDoctor[]
+  clinic_nurses     ClinicNurse[]
+  doctorSchedules   DoctorSchedule[]
 
   @@map("Clinic")
 }
@@ -172,10 +169,8 @@ model ClinicNurse {
   id        String @id @default(uuid())
   clinic_id String
   nurse_id  String
-
-  // Relations
-  clinic Clinic @relation(fields: [clinic_id], references: [id], onDelete: Cascade)
-  nurse  User   @relation("NurseClinics", fields: [nurse_id], references: [id], onDelete: Cascade)
+  clinic    Clinic @relation(fields: [clinic_id], references: [id], onDelete: Cascade)
+  nurse     User   @relation("NurseClinics", fields: [nurse_id], references: [id], onDelete: Cascade)
 
   @@unique([clinic_id, nurse_id])
   @@index([nurse_id])
@@ -183,14 +178,13 @@ model ClinicNurse {
 }
 
 model ClinicDoctor {
-  id        String @id @default(uuid())
-  clinic_id String
-  doctor_id String
-  fees      Float
-
-  // Relations
-  clinic Clinic @relation(fields: [clinic_id], references: [id], onDelete: Cascade)
-  doctor Doctor @relation(fields: [doctor_id], references: [id], onDelete: Cascade)
+  id           String  @id @default(uuid())
+  clinic_id    String
+  doctor_id    String
+  fees         Float
+  is_accepting Boolean @default(true)
+  clinic       Clinic  @relation(fields: [clinic_id], references: [id], onDelete: Cascade)
+  doctor       Doctor  @relation(fields: [doctor_id], references: [id], onDelete: Cascade)
 
   @@unique([clinic_id, doctor_id])
   @@index([doctor_id])
@@ -203,9 +197,7 @@ model AuditLog {
   action     Action
   bc_hash    String   @db.VarChar(255)
   created_at DateTime @default(now())
-
-  // Relations
-  user User @relation("UserAuditLogs", fields: [user_id], references: [id], onDelete: Restrict)
+  user       User     @relation("UserAuditLogs", fields: [user_id], references: [id])
 
   @@index([user_id])
   @@index([created_at])
@@ -222,8 +214,7 @@ model MedicalRecord {
   created_at  DateTime   @default(now())
   modified_at DateTime   @updatedAt
   deleted_at  DateTime?
-
-  patient User @relation("PatientMedicalRecords", fields: [patient_id], references: [id], onDelete: Restrict)
+  patient     User       @relation("PatientMedicalRecords", fields: [patient_id], references: [id])
 
   @@index([patient_id])
   @@index([doctor_id])
@@ -239,14 +230,34 @@ model RefreshToken {
   is_revoked Boolean   @default(false)
   created_at DateTime  @default(now())
   revoked_at DateTime?
-
-  // Relations
-  user User @relation("UserRefreshTokens", fields: [user_id], references: [id], onDelete: Cascade)
+  user       User      @relation("UserRefreshTokens", fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([user_id])
   @@index([token_hash])
   @@index([expires_at])
   @@map("RefreshTokens")
+}
+
+model DoctorSchedule {
+  id            String    @id @default(uuid())
+  doctor_id     String
+  clinic_id     String?
+  day_of_week   DayOfWeek
+  start_time    DateTime  @db.Time(0)
+  end_time      DateTime  @db.Time(0)
+  slot_duration Int
+  buffer_time   Int       @default(0)
+  is_active     Boolean   @default(true)
+  created_at    DateTime  @default(now())
+  modified_at   DateTime  @updatedAt
+  deleted_at    DateTime?
+  clinic        Clinic?   @relation(fields: [clinic_id], references: [id], onDelete: Cascade)
+  doctor        Doctor    @relation(fields: [doctor_id], references: [id], onDelete: Cascade)
+
+  @@unique([doctor_id, clinic_id, day_of_week])
+  @@index([doctor_id])
+  @@index([clinic_id])
+  @@map("DoctorSchedules")
 }
 
 enum ScanLabType {
@@ -276,11 +287,11 @@ enum Gender {
 }
 
 enum Role {
-  SUPER_ADMIN
   ADMIN
   DOCTOR
   NURSE
   PATIENT
+  SUPER_ADMIN
 }
 
 enum RecordType {
@@ -294,4 +305,28 @@ enum DoctorAccountStatus {
   PENDING
   APPROVED
   REJECTED
+}
+
+enum AvailabilityType {
+  UNSET
+  ONLINE
+  OFFLINE
+  BOTH
+}
+
+enum DayOfWeek {
+  SUNDAY
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+}
+
+enum AppointmentStatus {
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
 }

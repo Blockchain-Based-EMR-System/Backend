@@ -27,3 +27,9 @@ export * from './audit-logs.interface';
 
 // Medical Records
 export * from './medical-records.interface';
+
+// Appointments
+export * from './appointments.interface';
+
+// Doctor Schedule
+export * from './doctor-schedule.interface';
