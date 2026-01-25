@@ -171,5 +171,44 @@ export class ClinicRoute implements Routes {
             RoleMiddleware(Role.DOCTOR),
             this.clinicController.deleteClinicById
         );
+
+        this.router.get(
+            `${this.path}`,
+            /* 
+                #swagger.path = '/clinics'
+                #swagger.method = 'get'
+                #swagger.tags = ['Clinics']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.responses[200] = {
+                    description: 'Get doctor clinics successful',
+                    schema: {
+                        data: [
+                            {
+                                id: 'clinic-uuid',
+                                name: 'Clinic Name',
+                                address: '123 Main St, City, Country',
+                                address_maps_link: 'https://maps.google.com/?q=123+Main+St,+City,+Country',
+                                phone: '1234567890',
+                                opening_at: '09:00',
+                                closing_at: '17:00',
+                                canPayOnline: true,
+                                is_active: true,
+                                created_at: '2024-01-01T00:00:00.000Z',
+                                fees: 100
+                            }
+                        ],
+                        message: "Doctor's clinics retrieved successfully"
+                    }
+                }
+            */
+            AuthMiddleware,
+            RoleMiddleware(Role.DOCTOR),
+            this.clinicController.getDoctorClinics
+        );
     }
 }

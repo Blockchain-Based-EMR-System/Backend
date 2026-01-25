@@ -64,4 +64,10 @@ export class ClinicController {
 
         res.status(200).json({ message: 'Clinic deleted successfully' });
     }
+
+    public getDoctorClinics = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+        const doctorId = req.user?.id;
+        const clinics = await this.clinicService.getDoctorClinics(doctorId);
+        res.status(200).json({ data: clinics, message: 'Doctor clinics retrieved successfully' });
+    }
 }

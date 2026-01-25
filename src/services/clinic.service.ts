@@ -152,4 +152,34 @@ export class ClinicService {
             }));
         });
     }
+
+    public async getDoctorClinics(doctorId: string): Promise<Partial<Clinic>[]> {
+        const clinics = await prisma.clinicDoctor.findMany({
+            where: {
+                doctor_id: doctorId
+            },
+            select: {
+                clinic: {
+                    select: {
+                        id: true,
+                        name: true,
+                        opening_at: true,
+                        closing_at: true,
+                        address: true,
+                        address_maps_link: true,
+                        phone: true,
+                        is_active: true,
+                        canPayOnline: true,
+                        created_at: true,
+                    }
+                },
+                fees: true
+            }
+        });
+
+        return clinics.map(c => ({
+            ...c.clinic,
+            fees: c.fees
+        }));
+    }
 }

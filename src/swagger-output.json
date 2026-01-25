@@ -2299,92 +2299,6 @@
         }
       }
     },
-    "/doctors/clinics": {
-      "get": {
-        "tags": [
-          "Doctors"
-        ],
-        "description": "",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "cookie",
-            "description": "Bearer token for authentication",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Get doctor clinics successful",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "id": {
-                        "type": "string",
-                        "example": "clinic-uuid"
-                      },
-                      "name": {
-                        "type": "string",
-                        "example": "Clinic Name"
-                      },
-                      "address": {
-                        "type": "string",
-                        "example": "123 Main St, City, Country"
-                      },
-                      "address_maps_link": {
-                        "type": "string",
-                        "example": "https://maps.google.com/?q=123+Main+St,+City,+Country"
-                      },
-                      "phone": {
-                        "type": "string",
-                        "example": "1234567890"
-                      },
-                      "opening_at": {
-                        "type": "string",
-                        "example": "09:00"
-                      },
-                      "closing_at": {
-                        "type": "string",
-                        "example": "17:00"
-                      },
-                      "canPayOnline": {
-                        "type": "boolean",
-                        "example": true
-                      },
-                      "is_active": {
-                        "type": "boolean",
-                        "example": true
-                      },
-                      "created_at": {
-                        "type": "string",
-                        "example": "2024-01-01T00:00:00.000Z"
-                      },
-                      "fees": {
-                        "type": "number",
-                        "example": 100
-                      }
-                    }
-                  }
-                },
-                "message": {
-                  "type": "string",
-                  "example": "Doctor's clinics retrieved successfully"
-                }
-              },
-              "xml": {
-                "name": "main"
-              }
-            }
-          }
-        }
-      }
-    },
     "/clinics": {
       "post": {
         "tags": [
@@ -2460,6 +2374,90 @@
                 "message": {
                   "type": "string",
                   "example": "Clinic created successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Clinics"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get doctor clinics successful",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "clinic-uuid"
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "Clinic Name"
+                      },
+                      "address": {
+                        "type": "string",
+                        "example": "123 Main St, City, Country"
+                      },
+                      "address_maps_link": {
+                        "type": "string",
+                        "example": "https://maps.google.com/?q=123+Main+St,+City,+Country"
+                      },
+                      "phone": {
+                        "type": "string",
+                        "example": "1234567890"
+                      },
+                      "opening_at": {
+                        "type": "string",
+                        "example": "09:00"
+                      },
+                      "closing_at": {
+                        "type": "string",
+                        "example": "17:00"
+                      },
+                      "canPayOnline": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "is_active": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "created_at": {
+                        "type": "string",
+                        "example": "2024-01-01T00:00:00.000Z"
+                      },
+                      "fees": {
+                        "type": "number",
+                        "example": 100
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Doctor's clinics retrieved successfully"
                 }
               },
               "xml": {

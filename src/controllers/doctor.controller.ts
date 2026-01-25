@@ -71,10 +71,4 @@ export class DoctorController {
         await this.userService.deleteProfilePicture(doctorId);
         res.status(200).json({ message: 'Profile picture deleted successfully' });
     }
-
-    public getDoctorClinics = async (req: RequestWithUser, res: Response, next: NextFunction) => {
-        const doctorId = req.user?.id;
-        const clinics = await this.doctorService.getDoctorClinics(doctorId);
-        res.status(200).json({ data: clinics, message: 'Doctor clinics retrieved successfully' });
-    }
 }
