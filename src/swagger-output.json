@@ -1,0 +1,3003 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "My API",
+    "description": "Description",
+    "version": "1.0.0"
+  },
+  "host": "localhost:3000",
+  "basePath": "/",
+  "tags": [
+    {
+      "name": "Auth",
+      "description": "Authentication and account endpoints"
+    },
+    {
+      "name": "Admin",
+      "description": "Admin endpoints"
+    },
+    {
+      "name": "Super Admin",
+      "description": "Super Admin endpoints"
+    },
+    {
+      "name": "MedicalRecords",
+      "description": "Hyperledger Fabric medical record endpoints"
+    },
+    {
+      "name": "Doctors",
+      "description": "Doctor account endpoints"
+    },
+    {
+      "name": "Clinics",
+      "description": "Clinic endpoints"
+    }
+  ],
+  "schemes": [
+    "http"
+  ],
+  "paths": {
+    "/auth/signup": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "User signup data",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "example": "user@example.com"
+                },
+                "name": {
+                  "type": "string",
+                  "example": "John Doe"
+                },
+                "phone": {
+                  "type": "string",
+                  "example": "1234567890"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "password123"
+                }
+              },
+              "required": [
+                "email",
+                "name",
+                "phone",
+                "password"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "User successfully created",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "email": {
+                      "type": "string",
+                      "example": "user@example.com"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "John Doe"
+                    },
+                    "phone": {
+                      "type": "string",
+                      "example": "1234567890"
+                    },
+                    "isEmailVerified": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "hasCompletedProfile": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "gender": {},
+                    "date_of_birth": {},
+                    "role": {
+                      "type": "string",
+                      "example": "PATIENT"
+                    },
+                    "photoUrl": {}
+                  }
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Signed Up Successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "User login data",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "emailOrUsername": {
+                  "type": "string",
+                  "example": "user@example.com"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "password123"
+                },
+                "rememberMe": {
+                  "type": "boolean",
+                  "example": false
+                }
+              },
+              "required": [
+                "emailOrUsername",
+                "password"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Login successful",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "email": {
+                      "type": "string",
+                      "example": "user@example.com"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "John Doe"
+                    },
+                    "role": {
+                      "type": "string",
+                      "example": "PATIENT"
+                    },
+                    "doctor": {
+                      "type": "object",
+                      "properties": {
+                        "specialization": {
+                          "type": "string",
+                          "example": "Cardiology"
+                        },
+                        "account_status": {
+                          "type": "string",
+                          "example": "APPROVED"
+                        }
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Logged In Successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/logout": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer access token (sent via Authorization cookie)",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Logout successful",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Logged Out Successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/refresh": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "RefreshToken",
+            "in": "header",
+            "description": "Refresh token (sent via RefreshToken cookie)",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Token refreshed successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "user": {
+                      "type": "object",
+                      "properties": {}
+                    },
+                    "accessToken": {
+                      "type": "object",
+                      "properties": {
+                        "expiresIn": {
+                          "type": "number",
+                          "example": 3600
+                        },
+                        "expiresAt": {
+                          "type": "string",
+                          "example": "2025-12-12T12:00:00.000Z"
+                        }
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Token Refreshed Successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/complete-profile-info": {
+      "patch": {
+        "tags": [
+          "Auth"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Complete user profile",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "gender": {
+                  "type": "string",
+                  "example": "Male"
+                },
+                "date_of_birth": {
+                  "type": "string",
+                  "example": "1990-01-01"
+                }
+              },
+              "required": [
+                "gender",
+                "date_of_birth"
+              ]
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer access token",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Profile completed successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "hasCompletedProfile": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Profile Completed Successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/verify-otp": {
+      "patch": {
+        "tags": [
+          "Auth"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Verify OTP",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "otp": {
+                  "type": "string",
+                  "example": "123456"
+                }
+              },
+              "required": [
+                "otp"
+              ]
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer access token (sent via Authorization cookie or)",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OTP verified successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "OTP Verified Successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/forget-password": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Request password reset",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "example": "user@example.com"
+                }
+              },
+              "required": [
+                "email"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Password reset email sent",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Password Reset Email Sent Successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/reset-password": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Reset password",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "token": {
+                  "type": "string",
+                  "example": "reset-token"
+                },
+                "newPassword": {
+                  "type": "string",
+                  "example": "newPassword123"
+                }
+              },
+              "required": [
+                "token",
+                "newPassword"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Password reset successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Password Reset Successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/resend-otp": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer access token (sent via Authorization cooki)",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OTP resent successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "OTP Resent Successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/google": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "description": "",
+        "responses": {
+          "302": {
+            "description": "Redirects to Google OAuth consent page"
+          }
+        }
+      }
+    },
+    "/auth/google/callback": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "description": "",
+        "responses": {
+          "302": {
+            "description": "Redirects after Google authentication"
+          }
+        }
+      }
+    },
+    "/auth/google/update-phone": {
+      "patch": {
+        "tags": [
+          "Auth"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Update Google user phone",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "phone": {
+                  "type": "string",
+                  "example": "1234567890"
+                }
+              },
+              "required": [
+                "phone"
+              ]
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer access token",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Phone number updated successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "phone": {
+                      "type": "string",
+                      "example": "1234567890"
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Phone number updated successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/auth/google/userData": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer access token (sent via Authorization cookie)",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User data retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "email": {
+                      "type": "string",
+                      "example": "user@example.com"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "John Doe"
+                    },
+                    "username": {
+                      "type": "string",
+                      "example": "johndoe"
+                    },
+                    "phone": {
+                      "type": "string",
+                      "example": "1234567890"
+                    },
+                    "gender": {
+                      "type": "string",
+                      "example": "MALE"
+                    },
+                    "date_of_birth": {
+                      "type": "string",
+                      "example": "1990-01-01"
+                    },
+                    "isVerified": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "hasCompletedProfile": {
+                      "type": "boolean",
+                      "example": false
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string",
+                  "example": "User data retrieved successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fabric/onboard": {
+      "post": {
+        "tags": [
+          "FabricIdentity"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Identity onboarding data",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "label": {
+                  "type": "string",
+                  "example": "org1"
+                },
+                "mspId": {
+                  "type": "string",
+                  "example": "Org1MSP"
+                },
+                "certificate": {
+                  "type": "string",
+                  "example": "PEM certificate"
+                },
+                "privateKey": {
+                  "type": "string",
+                  "example": "PEM private key"
+                },
+                "peerEndpoint": {
+                  "type": "string",
+                  "example": "localhost:7051"
+                },
+                "peerHostAlias": {
+                  "type": "string",
+                  "example": "peer0.org1.example.com"
+                },
+                "tlsCertificate": {
+                  "type": "string",
+                  "example": "PEM TLS certificate"
+                },
+                "channelName": {
+                  "type": "string",
+                  "example": "mychannel"
+                },
+                "chaincodeName": {
+                  "type": "string",
+                  "example": "test"
+                }
+              },
+              "required": [
+                "label",
+                "mspId",
+                "certificate",
+                "privateKey",
+                "peerEndpoint",
+                "peerHostAlias",
+                "tlsCertificate"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/fabric/identities": {
+      "get": {
+        "tags": [
+          "FabricIdentity"
+        ],
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/fabric/identities/{label}": {
+      "delete": {
+        "tags": [
+          "FabricIdentity"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "label",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/fabric/connections": {
+      "get": {
+        "tags": [
+          "FabricIdentity"
+        ],
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/fabric/init-ledger": {
+      "post": {
+        "tags": [
+          "FabricIdentity"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "X-Fabric-Identity",
+            "in": "header",
+            "description": "Identity label (e.g., org1)",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/records": {
+      "get": {
+        "tags": [
+          "MedicalRecords"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "X-Fabric-Identity",
+            "in": "header",
+            "description": "Identity label (e.g., org1)",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "MedicalRecords"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "X-Fabric-Identity",
+            "in": "header",
+            "description": "Identity label (e.g., org1)",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Medical record data",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "patientId": {
+                  "type": "string",
+                  "example": "P12345"
+                },
+                "firstName": {
+                  "type": "string",
+                  "example": "John"
+                },
+                "lastName": {
+                  "type": "string",
+                  "example": "Doe"
+                },
+                "dateOfBirth": {
+                  "type": "string",
+                  "example": "1990-01-01"
+                },
+                "gender": {
+                  "type": "string",
+                  "example": "Male"
+                },
+                "bloodType": {
+                  "type": "string",
+                  "example": "O+"
+                },
+                "ipfsCid": {
+                  "type": "string",
+                  "example": "Qm..."
+                },
+                "summary": {
+                  "type": "string",
+                  "example": "Optional summary"
+                }
+              },
+              "required": [
+                "patientId",
+                "firstName",
+                "lastName",
+                "dateOfBirth",
+                "gender",
+                "bloodType",
+                "ipfsCid"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/records/health": {
+      "get": {
+        "tags": [
+          "MedicalRecords"
+        ],
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/records/{patientId}": {
+      "get": {
+        "tags": [
+          "MedicalRecords"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "X-Fabric-Identity",
+            "in": "header",
+            "description": "Identity label (e.g., org1)",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "MedicalRecords"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "X-Fabric-Identity",
+            "in": "header",
+            "description": "Identity label (e.g., org1)",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Update medical record data",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "firstName": {
+                  "type": "string",
+                  "example": "John"
+                },
+                "lastName": {
+                  "type": "string",
+                  "example": "Doe"
+                },
+                "dateOfBirth": {
+                  "type": "string",
+                  "example": "1990-01-01"
+                },
+                "gender": {
+                  "type": "string",
+                  "example": "Male"
+                },
+                "bloodType": {
+                  "type": "string",
+                  "example": "O+"
+                },
+                "ipfsCid": {
+                  "type": "string",
+                  "example": "Qm..."
+                },
+                "summary": {
+                  "type": "string",
+                  "example": "Optional summary"
+                }
+              },
+              "required": [
+                "firstName",
+                "lastName",
+                "dateOfBirth",
+                "gender",
+                "bloodType",
+                "ipfsCid"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/records/{patientId}/access": {
+      "post": {
+        "tags": [
+          "MedicalRecords"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "X-Fabric-Identity",
+            "in": "header",
+            "description": "Identity label (e.g., org1)",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Grant access to MSP",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "targetMsp": {
+                  "type": "string",
+                  "example": "Org2MSP"
+                }
+              },
+              "required": [
+                "targetMsp"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/admin/doctors": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Doctor data",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "example": "doctor@example.com"
+                },
+                "name": {
+                  "type": "string",
+                  "example": "Dr. Smith"
+                },
+                "phone": {
+                  "type": "string",
+                  "example": "1234567890"
+                },
+                "gender": {
+                  "type": "string",
+                  "example": "MALE or FEMALE"
+                },
+                "date_of_birth": {
+                  "type": "string",
+                  "example": "1990-01-01"
+                },
+                "specialization": {
+                  "type": "string",
+                  "example": "CARDIOLOGY or امراض القلب or Cardiology"
+                }
+              },
+              "required": [
+                "email",
+                "name",
+                "phone",
+                "gender",
+                "date_of_birth",
+                "specialization"
+              ]
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer access token (sent via Authorization cookie)",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "accept-language",
+            "in": "header",
+            "description": "Language preference (en or ar)",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Doctor added successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "email": {
+                      "type": "string",
+                      "example": "doctor@example.com"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Dr. Smith"
+                    },
+                    "role": {
+                      "type": "string",
+                      "example": "DOCTOR"
+                    },
+                    "username": {
+                      "type": "string",
+                      "example": "smith"
+                    },
+                    "phone": {
+                      "type": "string",
+                      "example": "1234567890"
+                    },
+                    "gender": {
+                      "type": "string",
+                      "example": "MALE"
+                    },
+                    "isVerified": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "hasCompletedProfile": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "doctor": {
+                      "type": "object",
+                      "properties": {
+                        "specialization": {
+                          "type": "object",
+                          "properties": {
+                            "key": {
+                              "type": "string",
+                              "example": "CARDIOLOGY"
+                            },
+                            "value": {
+                              "type": "string",
+                              "example": "Cardiology"
+                            }
+                          }
+                        },
+                        "avg_time": {},
+                        "account_status": {
+                          "type": "string",
+                          "example": "PENDING"
+                        }
+                      }
+                    },
+                    "photoUrl": {}
+                  }
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Doctor added successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer access token (sent via Authorization cookie)",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "accept-language",
+            "in": "header",
+            "description": "Language preference (en or ar)",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Doctors retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "1"
+                      },
+                      "email": {
+                        "type": "string",
+                        "example": "doctor@example.com"
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "Dr. Smith"
+                      },
+                      "role": {
+                        "type": "string",
+                        "example": "DOCTOR"
+                      },
+                      "username": {
+                        "type": "string",
+                        "example": "smith"
+                      },
+                      "phone": {
+                        "type": "string",
+                        "example": "1234567890"
+                      },
+                      "gender": {
+                        "type": "string",
+                        "example": "MALE"
+                      },
+                      "isVerified": {
+                        "type": "boolean",
+                        "example": false
+                      },
+                      "hasCompletedProfile": {
+                        "type": "boolean",
+                        "example": false
+                      },
+                      "doctor": {
+                        "type": "object",
+                        "properties": {
+                          "specialization": {
+                            "type": "object",
+                            "properties": {
+                              "key": {
+                                "type": "string",
+                                "example": "CARDIOLOGY"
+                              },
+                              "value": {
+                                "type": "string",
+                                "example": "Cardiology"
+                              }
+                            }
+                          },
+                          "avg_time": {},
+                          "account_status": {
+                            "type": "string",
+                            "example": "APPROVED"
+                          }
+                        }
+                      },
+                      "photoUrl": {}
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Doctors retrieved successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/doctors/unverified": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer access token (sent via Authorization cookie)",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "accept-language",
+            "in": "header",
+            "description": "Language preference (en or ar)",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Unverified doctors retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "1"
+                      },
+                      "email": {
+                        "type": "string",
+                        "example": "doctor@example.com"
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "Dr. Smith"
+                      },
+                      "username": {
+                        "type": "string",
+                        "example": "smith"
+                      },
+                      "phone": {
+                        "type": "string",
+                        "example": "1234567890"
+                      },
+                      "gender": {
+                        "type": "string",
+                        "example": "MALE"
+                      },
+                      "isVerified": {
+                        "type": "boolean",
+                        "example": false
+                      },
+                      "date_of_birth": {
+                        "type": "string",
+                        "example": "1990-01-01"
+                      },
+                      "photoUrl": {},
+                      "doctor": {
+                        "type": "object",
+                        "properties": {
+                          "specialization": {
+                            "type": "object",
+                            "properties": {
+                              "key": {
+                                "type": "string",
+                                "example": "CARDIOLOGY"
+                              },
+                              "value": {
+                                "type": "string",
+                                "example": "Cardiology"
+                              }
+                            }
+                          },
+                          "avg_time": {},
+                          "account_status": {
+                            "type": "string",
+                            "example": "APPROVED"
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Unverified doctors retrieved successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/doctors/verify/{id}": {
+      "patch": {
+        "tags": [
+          "Admin"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Doctor ID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Verification status",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "isApproved": {
+                  "type": "boolean",
+                  "example": true
+                }
+              },
+              "required": [
+                "isApproved"
+              ]
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer access token (sent via Authorization cookie or Authorization header)",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Doctor verification status updated successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Doctor verification status updated successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/doctors/{id}": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Doctor ID"
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer access token (sent via Authorization cookie)",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "accept-language",
+            "in": "header",
+            "description": "Language preference (en or ar)",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Doctor retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "email": {
+                      "type": "string",
+                      "example": "doctor@example.com"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Dr. Smith"
+                    },
+                    "role": {
+                      "type": "string",
+                      "example": "DOCTOR"
+                    },
+                    "username": {
+                      "type": "string",
+                      "example": "smith"
+                    },
+                    "phone": {
+                      "type": "string",
+                      "example": "1234567890"
+                    },
+                    "gender": {
+                      "type": "string",
+                      "example": "MALE"
+                    },
+                    "isVerified": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "hasCompletedProfile": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "doctor": {
+                      "type": "object",
+                      "properties": {
+                        "specialization": {
+                          "type": "object",
+                          "properties": {
+                            "key": {
+                              "type": "string",
+                              "example": "CARDIOLOGY"
+                            },
+                            "value": {
+                              "type": "string",
+                              "example": "Cardiology"
+                            }
+                          }
+                        },
+                        "avg_time": {},
+                        "account_status": {
+                          "type": "string",
+                          "example": "APPROVED"
+                        }
+                      }
+                    },
+                    "photoUrl": {}
+                  }
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Doctor retrieved successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/super-admin/admins": {
+      "post": {
+        "tags": [
+          "Super Admin"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Admin data",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "example": "admin@example.com"
+                },
+                "name": {
+                  "type": "string",
+                  "example": "Jane Smith"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "SecurePass123!"
+                },
+                "phone": {
+                  "type": "string",
+                  "example": "1234567890"
+                },
+                "gender": {
+                  "type": "string",
+                  "example": "MALE or FEMALE"
+                },
+                "date_of_birth": {
+                  "type": "string",
+                  "example": "1990-01-01"
+                }
+              },
+              "required": [
+                "email",
+                "name",
+                "password",
+                "phone",
+                "gender",
+                "date_of_birth"
+              ]
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer access token (sent via Authorization cookie)",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Admin added successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "email": {
+                      "type": "string",
+                      "example": "admin@example.com"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Jane Smith"
+                    },
+                    "role": {
+                      "type": "string",
+                      "example": "ADMIN"
+                    },
+                    "username": {
+                      "type": "string",
+                      "example": "janesmith"
+                    },
+                    "phone": {
+                      "type": "string",
+                      "example": "1234567890"
+                    },
+                    "gender": {
+                      "type": "string",
+                      "example": "FEMALE"
+                    },
+                    "date_of_birth": {
+                      "type": "string",
+                      "example": "1990-01-01T00:00:00.000Z"
+                    },
+                    "photo_url": {},
+                    "isVerified": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "hasCompletedProfile": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Admin added successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Super Admin"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer access token (sent via Authorization cookie)",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Admins retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "1"
+                      },
+                      "email": {
+                        "type": "string",
+                        "example": "admin@example.com"
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "Jane Smith"
+                      },
+                      "role": {
+                        "type": "string",
+                        "example": "ADMIN"
+                      },
+                      "username": {
+                        "type": "string",
+                        "example": "janesmith"
+                      },
+                      "phone": {
+                        "type": "string",
+                        "example": "1234567890"
+                      },
+                      "gender": {
+                        "type": "string",
+                        "example": "FEMALE"
+                      },
+                      "date_of_birth": {
+                        "type": "string",
+                        "example": "1990-01-01T00:00:00.000Z"
+                      },
+                      "photo_url": {},
+                      "isVerified": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "hasCompletedProfile": {
+                        "type": "boolean",
+                        "example": true
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Admins retrieved successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/super-admin/admins/{id}": {
+      "get": {
+        "tags": [
+          "Super Admin"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Admin ID"
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer access token (sent via Authorization cookie)",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Admin retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "email": {
+                      "type": "string",
+                      "example": "admin@example.com"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Jane Smith"
+                    },
+                    "role": {
+                      "type": "string",
+                      "example": "ADMIN"
+                    },
+                    "username": {
+                      "type": "string",
+                      "example": "janesmith"
+                    },
+                    "phone": {
+                      "type": "string",
+                      "example": "1234567890"
+                    },
+                    "gender": {
+                      "type": "string",
+                      "example": "FEMALE"
+                    },
+                    "date_of_birth": {
+                      "type": "string",
+                      "example": "1990-01-01T00:00:00.000Z"
+                    },
+                    "photo_url": {},
+                    "isVerified": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "hasCompletedProfile": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Admin retrieved successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/super-admin/doctors": {
+      "post": {
+        "tags": [
+          "Super Admin"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Doctor data",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "example": "doctor@example.com"
+                },
+                "name": {
+                  "type": "string",
+                  "example": "Dr. John Doe"
+                },
+                "phone": {
+                  "type": "string",
+                  "example": "1234567890"
+                },
+                "gender": {
+                  "type": "string",
+                  "example": "MALE or FEMALE"
+                },
+                "date_of_birth": {
+                  "type": "string",
+                  "example": "1990-01-01"
+                },
+                "specialization": {
+                  "type": "string",
+                  "example": "CARDIOLOGY or امراض القلب or Cardiology"
+                }
+              },
+              "required": [
+                "email",
+                "name",
+                "phone",
+                "gender",
+                "date_of_birth",
+                "specialization"
+              ]
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer access token (sent via Authorization cookie)",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "accept-language",
+            "in": "header",
+            "description": "Language preference (en or ar)",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Doctor added successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "email": {
+                      "type": "string",
+                      "example": "doctor@example.com"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Dr. Smith"
+                    },
+                    "role": {
+                      "type": "string",
+                      "example": "DOCTOR"
+                    },
+                    "username": {
+                      "type": "string",
+                      "example": "smith"
+                    },
+                    "phone": {
+                      "type": "string",
+                      "example": "1234567890"
+                    },
+                    "gender": {
+                      "type": "string",
+                      "example": "MALE"
+                    },
+                    "isVerified": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "hasCompletedProfile": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "doctor": {
+                      "type": "object",
+                      "properties": {
+                        "specialization": {
+                          "type": "object",
+                          "properties": {
+                            "key": {
+                              "type": "string",
+                              "example": "CARDIOLOGY"
+                            },
+                            "value": {
+                              "type": "string",
+                              "example": "Cardiology"
+                            }
+                          }
+                        },
+                        "avg_time": {}
+                      }
+                    },
+                    "photoUrl": {}
+                  }
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Doctor added successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Super Admin"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer access token (sent via Authorization cookie)",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "accept-language",
+            "in": "header",
+            "description": "Language preference (en or ar)",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Doctors retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "1"
+                      },
+                      "email": {
+                        "type": "string",
+                        "example": "doctor@example.com"
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "Dr. Smith"
+                      },
+                      "role": {
+                        "type": "string",
+                        "example": "DOCTOR"
+                      },
+                      "username": {
+                        "type": "string",
+                        "example": "smith"
+                      },
+                      "phone": {
+                        "type": "string",
+                        "example": "1234567890"
+                      },
+                      "gender": {
+                        "type": "string",
+                        "example": "MALE"
+                      },
+                      "isVerified": {
+                        "type": "boolean",
+                        "example": false
+                      },
+                      "hasCompletedProfile": {
+                        "type": "boolean",
+                        "example": false
+                      },
+                      "doctor": {
+                        "type": "object",
+                        "properties": {
+                          "specialization": {
+                            "type": "object",
+                            "properties": {
+                              "key": {
+                                "type": "string",
+                                "example": "CARDIOLOGY"
+                              },
+                              "value": {
+                                "type": "string",
+                                "example": "Cardiology"
+                              }
+                            }
+                          },
+                          "avg_time": {},
+                          "account_status": {
+                            "type": "string",
+                            "example": "Approved"
+                          }
+                        }
+                      },
+                      "photoUrl": {}
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Doctors retrieved successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/super-admin/doctors/{id}": {
+      "get": {
+        "tags": [
+          "Super Admin"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Doctor ID"
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer access token (sent via Authorization cookie)",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "accept-language",
+            "in": "header",
+            "description": "Language preference (en or ar)",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Doctor retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "email": {
+                      "type": "string",
+                      "example": "doctor@example.com"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Dr. Smith"
+                    },
+                    "role": {
+                      "type": "string",
+                      "example": "DOCTOR"
+                    },
+                    "username": {
+                      "type": "string",
+                      "example": "smith"
+                    },
+                    "phone": {
+                      "type": "string",
+                      "example": "1234567890"
+                    },
+                    "gender": {
+                      "type": "string",
+                      "example": "MALE"
+                    },
+                    "isVerified": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "hasCompletedProfile": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "doctor": {
+                      "type": "object",
+                      "properties": {
+                        "specialization": {
+                          "type": "object",
+                          "properties": {
+                            "key": {
+                              "type": "string",
+                              "example": "CARDIOLOGY"
+                            },
+                            "value": {
+                              "type": "string",
+                              "example": "Cardiology"
+                            }
+                          }
+                        },
+                        "avg_time": {},
+                        "account_status": {
+                          "type": "string",
+                          "example": "Approved"
+                        }
+                      }
+                    },
+                    "photoUrl": {}
+                  }
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Doctor retrieved successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/doctors/signup": {
+      "post": {
+        "tags": [
+          "Doctors"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Doctor signup data",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "example": "doctor@example.com"
+                },
+                "name": {
+                  "type": "string",
+                  "example": "Dr. Smith"
+                },
+                "phone": {
+                  "type": "string",
+                  "example": "1234567890"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "SecurePassword123"
+                },
+                "gender": {
+                  "type": "string",
+                  "example": "MALE or FEMALE"
+                },
+                "date_of_birth": {
+                  "type": "string",
+                  "example": "1990-01-01"
+                },
+                "specialization": {
+                  "type": "string",
+                  "example": "CARDIOLOGY or امراض القلب or Cardiology"
+                }
+              },
+              "required": [
+                "email",
+                "name",
+                "phone",
+                "password",
+                "gender",
+                "specialization"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Doctor signup successful",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Doctor registered successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/doctors/login": {
+      "post": {
+        "tags": [
+          "Doctors"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Doctor login data",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "emailOrUsername": {
+                  "type": "string",
+                  "example": "doctor@example.com"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "SecurePassword123"
+                },
+                "rememberMe": {
+                  "type": "string",
+                  "example": "true"
+                }
+              },
+              "required": [
+                "emailOrUsername",
+                "password",
+                "rememberMe"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Doctor login successful",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "email": {
+                      "type": "string",
+                      "example": "test@example.com"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Dr. Smith"
+                    },
+                    "username": {
+                      "type": "string",
+                      "example": "drsmith"
+                    },
+                    "phone": {
+                      "type": "string",
+                      "example": "1234567890"
+                    },
+                    "gender": {
+                      "type": "string",
+                      "example": "MALE"
+                    },
+                    "doctor": {
+                      "type": "object",
+                      "properties": {
+                        "specialization": {
+                          "type": "string",
+                          "example": "CARDIOLOGY"
+                        },
+                        "account_status": {
+                          "type": "string",
+                          "example": "APPROVED"
+                        }
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Doctor logged in successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/doctors/set-password": {
+      "patch": {
+        "tags": [
+          "Doctors"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "New password data",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "password": {
+                  "type": "string",
+                  "example": "NewSecurePassword123"
+                }
+              },
+              "required": [
+                "password"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Password set successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Password updated successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/doctors/profile-picture": {
+      "patch": {
+        "tags": [
+          "Doctors"
+        ],
+        "description": "",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "profilePicture",
+            "in": "formData",
+            "type": "file",
+            "required": true,
+            "description": "Profile picture file"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Profile picture updated successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Profile picture updated successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Doctors"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get profile picture successful",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string",
+                      "example": "https://res.cloudinary.com/your-cloud-name/image/upload/v1696543210/doctors/profile_pictures/doctor_1_profile_picture_1696543210.jpg"
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Profile picture retrieved successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Doctors"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Profile picture deleted successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Profile picture deleted successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/clinics": {
+      "post": {
+        "tags": [
+          "Clinics"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Clinic creation data",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "Downtown Medical Clinic"
+                },
+                "opening_at": {
+                  "type": "string",
+                  "example": "09:00"
+                },
+                "closing_at": {
+                  "type": "string",
+                  "example": "17:00"
+                },
+                "address": {
+                  "type": "string",
+                  "example": "123 Main Street, City Center"
+                },
+                "address_maps_link": {
+                  "type": "string",
+                  "example": "https://maps.google.com/?q=123+Main+Street"
+                },
+                "phone": {
+                  "type": "string",
+                  "example": "+1234567890"
+                },
+                "canPayOnline": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "fees": {
+                  "type": "number",
+                  "example": 100
+                }
+              },
+              "required": [
+                "name",
+                "opening_at",
+                "closing_at",
+                "address",
+                "phone",
+                "fees"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Clinic created successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Clinic created successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Clinics"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get doctor clinics successful",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "clinic-uuid"
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "Clinic Name"
+                      },
+                      "address": {
+                        "type": "string",
+                        "example": "123 Main St, City, Country"
+                      },
+                      "address_maps_link": {
+                        "type": "string",
+                        "example": "https://maps.google.com/?q=123+Main+St,+City,+Country"
+                      },
+                      "phone": {
+                        "type": "string",
+                        "example": "1234567890"
+                      },
+                      "opening_at": {
+                        "type": "string",
+                        "example": "09:00"
+                      },
+                      "closing_at": {
+                        "type": "string",
+                        "example": "17:00"
+                      },
+                      "canPayOnline": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "is_active": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "created_at": {
+                        "type": "string",
+                        "example": "2024-01-01T00:00:00.000Z"
+                      },
+                      "fees": {
+                        "type": "number",
+                        "example": 100
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Doctor's clinics retrieved successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/clinics/{id}": {
+      "get": {
+        "tags": [
+          "Clinics"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the clinic"
+          },
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Clinic details retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "clinic-uuid-123"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Downtown Medical Clinic"
+                    },
+                    "is_active": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "opening_at": {
+                      "type": "string",
+                      "example": "09:00"
+                    },
+                    "closing_at": {
+                      "type": "string",
+                      "example": "17:00"
+                    },
+                    "address": {
+                      "type": "string",
+                      "example": "123 Main Street, City Center"
+                    },
+                    "address_maps_link": {
+                      "type": "string",
+                      "example": "https://maps.google.com/?q=123+Main+Street"
+                    },
+                    "phone": {
+                      "type": "string",
+                      "example": "+1234567890"
+                    },
+                    "canPayOnline": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "created_at": {
+                      "type": "string",
+                      "example": "2024-01-01T00:00:00.000Z"
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Clinic retrieved successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Clinics"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the clinic to update"
+          },
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Clinic update data (all fields are optional)",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "Downtown Medical Clinic - Updated"
+                },
+                "opening_at": {
+                  "type": "string",
+                  "example": "08:00"
+                },
+                "closing_at": {
+                  "type": "string",
+                  "example": "18:00"
+                },
+                "address": {
+                  "type": "string",
+                  "example": "456 New Street, City Center"
+                },
+                "address_maps_link": {
+                  "type": "string",
+                  "example": "https://maps.google.com/?q=456+New+Street"
+                },
+                "phone": {
+                  "type": "string",
+                  "example": "+1234567891"
+                },
+                "canPayOnline": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "fees": {
+                  "type": "number",
+                  "example": 150
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Clinic updated successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Clinic updated successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Clinics"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the clinic to delete"
+          },
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Clinic deleted successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Clinic deleted successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
