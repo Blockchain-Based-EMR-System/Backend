@@ -85,7 +85,7 @@ model Appointment {
   cancelled_by   String?
   clinic_id      String?
   end_time       DateTime
-  slot_duration  DateTime
+  slot_duration  Int
   status         AppointmentStatus @default(CONFIRMED)
   clinic         Clinic?           @relation(fields: [clinic_id], references: [id])
   doctor         User?             @relation("DoctorAppointments", fields: [doctor_id], references: [id], onDelete: Restrict)

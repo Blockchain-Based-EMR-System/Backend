@@ -31,6 +31,10 @@
     {
       "name": "Clinics",
       "description": "Clinic endpoints"
+    },
+    {
+      "name": "Appointments",
+      "description": "Appointment endpoints"
     }
   ],
   "schemes": [
@@ -2989,6 +2993,71 @@
                 "message": {
                   "type": "string",
                   "example": "Clinic deleted successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/appointments/clinics": {
+      "get": {
+        "tags": [
+          "Appointments"
+        ],
+        "description": "Get all clinics available for booking appointments",
+        "responses": {
+          "200": {
+            "description": "Active clinics retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "clinic-uuid"
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "New Cairo Medical Clinic"
+                      },
+                      "opening_at": {
+                        "type": "string",
+                        "example": "10:00"
+                      },
+                      "closing_at": {
+                        "type": "string",
+                        "example": "17:00"
+                      },
+                      "address": {
+                        "type": "string",
+                        "example": "123 Main Street, Medical Park"
+                      },
+                      "address_maps_link": {
+                        "type": "string",
+                        "example": "https://maps.google.com/?q=123+Main+Street"
+                      },
+                      "phone": {
+                        "type": "string",
+                        "example": "+1234567890"
+                      },
+                      "canPayOnline": {
+                        "type": "boolean",
+                        "example": true
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Clinics retrieved successfully"
                 }
               },
               "xml": {

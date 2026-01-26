@@ -182,4 +182,26 @@ export class ClinicService {
             fees: c.fees
         }));
     }
+
+    public async getActiveClinics(): Promise<Partial<Clinic>[]> {
+        const clinics = await prisma.clinic.findMany({
+            where:{
+                is_active: true,
+                deleted_at: null,
+            },
+            select:{
+                id: true,
+                name: true,
+                opening_at: true,
+                closing_at: true,
+                address: true,
+                address_maps_link: true,
+                phone: true,
+                canPayOnline: true,
+            }
+        });
+        return clinics.map(c => ({
+            ...c
+        }));
+    }
 }

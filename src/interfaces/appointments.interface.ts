@@ -22,6 +22,9 @@ export interface Appointment {
     doctor: User;
 }
 
+export interface AvailableDays{
+  dates: string[]; 
+}
 
 export interface AvailableDay {
   date: string;

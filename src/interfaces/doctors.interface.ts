@@ -1,4 +1,13 @@
-import { DoctorAccountStatus } from "@prisma/client";
+import { DoctorAccountStatus, AvailabilityType } from "@prisma/client";
+
+export interface Doctor {
+  id: string;
+  avg_time?: Date | null;
+  account_status: DoctorAccountStatus;
+  num_of_created_clinics: number;
+  availability_type: AvailabilityType;
+  present: boolean;
+}
 
 export interface DoctorLoginData {
     id: string,

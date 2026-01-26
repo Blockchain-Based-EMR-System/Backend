@@ -3,8 +3,8 @@ import { User, Doctor } from './users.interface';
 export interface Clinic {
   id: string;
   is_active: boolean;
-  opening_at: Date;
-  closing_at: Date;
+  opening_at: string;
+  closing_at: string;
   address: string;
   created_at: Date;
   modified_at: Date;
