@@ -3003,6 +3003,47 @@
         }
       }
     },
+    "/appointments/online-doctors": {
+      "get": {
+        "tags": [
+          "Appointments"
+        ],
+        "description": "Get all available online doctors",
+        "responses": {
+          "200": {
+            "description": "Online doctors retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "doctor-uuid"
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "House"
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Online doctors retrieved successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
     "/appointments/clinics": {
       "get": {
         "tags": [
@@ -3058,6 +3099,56 @@
                 "message": {
                   "type": "string",
                   "example": "Clinics retrieved successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/appointments/clinic/{clinicId}/doctors": {
+      "get": {
+        "tags": [
+          "Appointments"
+        ],
+        "description": "Get all doctors who are accepting appointments at a selected clinic",
+        "parameters": [
+          {
+            "name": "clinicId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Clinic ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Clinic doctors retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "clinic-uuid"
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "House"
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Clinic doctors retrieved successfully"
                 }
               },
               "xml": {

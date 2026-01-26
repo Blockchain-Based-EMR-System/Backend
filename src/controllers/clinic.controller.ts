@@ -71,6 +71,13 @@ export class ClinicController {
         res.status(200).json({ data: clinics, message: 'Doctor clinics retrieved successfully' });
     }
 
+    public getClinicDoctors = async (req: Request, res: Response, next: NextFunction) => {
+        const {clinicId} = req.params;
+        const doctors = await this.clinicService.getClinicDoctors(clinicId);
+        res.status(200).json({ data: doctors, message: 'Clinic doctors retrieved successfully' });
+
+    }
+
     public getActiveClinics = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         const clinics = await this.clinicService.getActiveClinics();
         res.status(200).json({ data: clinics, message: 'Clinics retrieved successfully' });

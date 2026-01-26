@@ -71,4 +71,10 @@ export class DoctorController {
         await this.userService.deleteProfilePicture(doctorId);
         res.status(200).json({ message: 'Profile picture deleted successfully' });
     }
+
+    public getOnlineDoctors = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        const doctors = await this.doctorService.getOnlineDoctors();
+        res.status(200).json({ data: doctors, message: 'Online doctors retrieved successfully' });
+    }
+
 }

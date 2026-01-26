@@ -1,22 +1,42 @@
 import { Routes } from "@/interfaces";
 import { Router } from "express";
 import { ClinicController } from "@/controllers/clinic.controller";
-
+import { DoctorController } from "@/controllers/doctor.controller";
 
 export class AppointmentRoute implements Routes {
     public path = '/appointments';
     public router = Router();
     clinicController = new ClinicController();
+    doctorController = new DoctorController();
 
     constructor() {
         this.initializeRoutes();
     }
 
     private initializeRoutes() {
-        // // get online doctors
-        // this.router.get(
-        //     `${this.path}/online-doctors`
-        // );
+        // get online doctors
+        this.router.get(
+            `${this.path}/online-doctors`,
+            /* 
+            #swagger.path = '/appointments/online-doctors'
+            #swagger.method = 'get'
+            #swagger.tags = ['Appointments']
+            #swagger.description = 'Get all available online doctors'
+            #swagger.responses[200] = {
+                description: 'Online doctors retrieved successfully',
+                schema: {
+                    data: [
+                        {
+                            id: 'doctor-uuid',
+                            name: 'House'
+                        }
+                    ],
+                    message: 'Online doctors retrieved successfully'
+                }
+            }
+        */
+            this.doctorController.getOnlineDoctors
+        );
 
         // get all clinics
         this.router.get(
@@ -48,10 +68,35 @@ export class AppointmentRoute implements Routes {
             this.clinicController.getActiveClinics
         );
 
-        // // get all doctors in a clinic
-        // this.router.get(
-        //     `${this.path}/clinic/:clinicId/doctors`,
-        // );
+        // get all doctors in a clinic
+        this.router.get(
+            `${this.path}/clinic/:clinicId/doctors`,
+            /* 
+            #swagger.path = '/appointments/clinic/{clinicId}/doctors'
+            #swagger.method = 'get'
+            #swagger.tags = ['Appointments']
+            #swagger.description = 'Get all doctors who are accepting appointments at a selected clinic'
+            #swagger.parameters['clinicId'] = {
+                in: 'path',
+                description: 'Clinic ID',
+                required: true,
+                type: 'string'
+            }
+            #swagger.responses[200] = {
+                description: 'Clinic doctors retrieved successfully',
+                schema: {
+                    data: [
+                        {
+                            id: 'clinic-uuid',
+                            name: 'House'
+                        }
+                    ],
+                    message: 'Clinic doctors retrieved successfully'
+                }
+            }
+        */
+            this.clinicController.getClinicDoctors
+        );
 
         // // get available days
         // this.router.get(
