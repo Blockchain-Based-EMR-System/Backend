@@ -35,7 +35,6 @@ export class DoctorsRoute implements Routes {
                         $password: 'SecurePassword123',
                         $gender: 'MALE or FEMALE',
                         date_of_birth: '1990-01-01',
-                        $specialization: 'CARDIOLOGY or امراض القلب or Cardiology'
                     }
                 }
                 #swagger.responses[201] = {

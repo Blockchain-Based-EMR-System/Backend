@@ -1156,10 +1156,6 @@
                 "date_of_birth": {
                   "type": "string",
                   "example": "1990-01-01"
-                },
-                "specialization": {
-                  "type": "string",
-                  "example": "CARDIOLOGY or امراض القلب or Cardiology"
                 }
               },
               "required": [
@@ -1167,8 +1163,7 @@
                 "name",
                 "phone",
                 "gender",
-                "date_of_birth",
-                "specialization"
+                "date_of_birth"
               ]
             }
           },
@@ -1964,10 +1959,6 @@
                 "date_of_birth": {
                   "type": "string",
                   "example": "1990-01-01"
-                },
-                "specialization": {
-                  "type": "string",
-                  "example": "CARDIOLOGY or امراض القلب or Cardiology"
                 }
               },
               "required": [
@@ -1975,8 +1966,7 @@
                 "name",
                 "phone",
                 "gender",
-                "date_of_birth",
-                "specialization"
+                "date_of_birth"
               ]
             }
           },
@@ -2325,10 +2315,6 @@
                 "date_of_birth": {
                   "type": "string",
                   "example": "1990-01-01"
-                },
-                "specialization": {
-                  "type": "string",
-                  "example": "CARDIOLOGY or امراض القلب or Cardiology"
                 }
               },
               "required": [
@@ -2336,8 +2322,7 @@
                 "name",
                 "phone",
                 "password",
-                "gender",
-                "specialization"
+                "gender"
               ]
             }
           }
