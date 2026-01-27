@@ -28,9 +28,15 @@ export interface AvailableDay {
   displayDate: string; 
 }
 
-export interface AvailableSlot {
-  start_time: string; 
-  end_time: string;   
+// export interface AvailableSlot {
+//   start_time: string; 
+//   end_time: string;   
+// }
+
+export interface TimeSlot {
+    start: string; 
+    end: string;
+    available: boolean;
 }
 
 

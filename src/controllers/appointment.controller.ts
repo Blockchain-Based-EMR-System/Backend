@@ -1,20 +1,37 @@
 import { Request, Response, NextFunction } from "express";
+import { RequestWithUser } from "@/interfaces";
 import { HttpException } from "@/exceptions/HttpException";
 import { catchAsync } from '@/utils/catchAsync';
-
-
+import { AppointmentService } from "@/services/appointment.service"
+import Container from "typedi";
 
 export class AppointmentController {
 
-    // get all clinics --> clinic crud
+    public appointmentService = Container.get(AppointmentService);
 
-    // get all doctors in a clinic --> clinic crud
+    public getAvailableDays = catchAsync(async (req: Request, res: Response): Promise<void> => {
+        const { doctorId } = req.params;
+        const { clinicId } = req.query;
 
-    // get online doctors --> doctors crud
+        const availableDays = await this.appointmentService.getAvailableDays(doctorId, clinicId as string || null)
+        res.status(200).json({
+            data: availableDays,
+            // message: 'Available days retrieved successfully',
+        });
 
-    // get available days (at least one slot)
+    });
 
-    // get available slots for a selected day
+    public getAvailableSlots = catchAsync(async (req: Request, res: Response): Promise<void> => {
+        const { doctorId } = req.params;
+        const { date, clinicId } = req.query;
+
+        const availableSlots = await this.appointmentService.getAvailableSlots(doctorId, clinicId as string || null, date as string)
+        res.status(200).json({
+            data: availableSlots,
+            // message: 'Available slots retrieved successfully',
+        });
+
+    });
 
     // book a new appointment 
 

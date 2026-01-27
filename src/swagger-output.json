@@ -3158,6 +3158,141 @@
           }
         }
       }
+    },
+    "/appointments/doctor/{doctorId}/available-days": {
+      "get": {
+        "tags": [
+          "Appointments"
+        ],
+        "description": "Get all available days for a doctor that have at least one available slot",
+        "parameters": [
+          {
+            "name": "doctorId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Doctor ID"
+          },
+          {
+            "name": "clinicId",
+            "in": "query",
+            "description": "Clinic ID (required for offline appointments)",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Available days retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "date": {
+                        "type": "string",
+                        "example": "2026-02-10"
+                      },
+                      "dayOfWeek": {
+                        "type": "string",
+                        "example": "MONDAY"
+                      },
+                      "displayDate": {
+                        "type": "string",
+                        "example": "Monday, February 10, 2026"
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Available days retrieved successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - missing required parameters"
+          },
+          "404": {
+            "description": "Doctor not found or not available"
+          }
+        }
+      }
+    },
+    "/appointments/doctor/{doctorId}/available-slots": {
+      "get": {
+        "tags": [
+          "Appointments"
+        ],
+        "description": "Get all available time slots for a doctor on a specific date",
+        "parameters": [
+          {
+            "name": "doctorId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Doctor ID"
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "description": "Date in YYYY-MM-DD format",
+            "required": true,
+            "type": "string",
+            "example": "2026-02-03"
+          },
+          {
+            "name": "clinicId",
+            "in": "query",
+            "description": "Clinic ID (required for offline appointments)",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Available slots retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "start": {
+                        "type": "string",
+                        "example": "10:30"
+                      },
+                      "end": {
+                        "type": "string",
+                        "example": "10:50"
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Available slots retrieved successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - missing required parameters or invalid date"
+          }
+        }
+      }
     }
   }
 }
