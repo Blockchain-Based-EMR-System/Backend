@@ -59,7 +59,7 @@ export class AdminService {
         await prisma.doctor.create({
             data: {
                 id: createdUser.id,
-                specialization: doctorData.specialization, // This is now the KEY (e.g., "CARDIOLOGY")
+                specialization: "IMMUNOLOGY", // This is now the KEY (e.g., "IMMUNOLOGY")
                 account_status: DoctorAccountStatus.APPROVED,
             }
         });

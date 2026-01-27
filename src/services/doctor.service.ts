@@ -60,7 +60,7 @@ export class DoctorService {
         await prisma.doctor.create({
             data: {
                 id: createdUser.id,
-                specialization: doctorData.specialization,
+                specialization: "IMMUNOLOGY",
                 account_status: DoctorAccountStatus.PENDING,
             },
         });
