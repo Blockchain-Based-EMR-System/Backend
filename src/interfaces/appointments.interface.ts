@@ -1,5 +1,5 @@
 import { User } from './users.interface';
-import {AppointmentStatus} from '@prisma/client'
+import {AppointmentStatus, DayOfWeek} from '@prisma/client'
 
 export interface Appointment {
     id: string;
@@ -22,14 +22,10 @@ export interface Appointment {
     doctor: User;
 }
 
-export interface AvailableDays{
-  dates: string[]; 
-}
-
 export interface AvailableDay {
-  date: string;
-  day_of_week: string;
-  available_slots_count: number;
+  date: string; 
+  dayOfWeek: DayOfWeek;
+  displayDate: string; 
 }
 
 export interface AvailableSlot {

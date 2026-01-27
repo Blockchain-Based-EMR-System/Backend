@@ -114,7 +114,5 @@ export class AppointmentRoute implements Routes {
         //     `${this.path}/book-appointment`
         // )
     }
-
-
 }
 
