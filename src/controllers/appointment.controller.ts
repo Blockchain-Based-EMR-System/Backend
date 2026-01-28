@@ -117,4 +117,25 @@ export class AppointmentController {
             data: appointment,
         });
     });
+
+    public rescheduleAppointmentByPatient = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
+        const patientId = req.user.id;
+        const { appointmentId } = req.params;
+        const { newScheduledTime } = req.body;
+
+        if (!patientId) {
+            const error = createBilingualError(400, ErrorMessages.PATIENT_ID_REQUIRED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        if (!newScheduledTime) {
+            const error = createBilingualError(400, ErrorMessages.SCHEDULED_TIME_REQUIRED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        await this.appointmentService.rescheduleAppointmentByPatient(patientId, appointmentId, new Date(newScheduledTime));
+        res.status(200).json({
+            message: 'Appointment rescheduled successfully',
+        });
+    });
 }

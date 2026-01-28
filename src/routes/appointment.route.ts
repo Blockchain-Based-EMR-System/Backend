@@ -309,7 +309,7 @@ export class AppointmentRoute implements Routes {
                     required: true,
                     type: 'string'
                 }
-                #swagger.description = 'Get all appointments for a specific patient'
+                #swagger.description = 'Get all appointments for a specific patient. Note: clinic_name and clinic_address will be null for online appointments'
                 #swagger.parameters['patientId'] = {
                     in: 'path',
                     description: 'Patient ID',
@@ -331,6 +331,18 @@ export class AppointmentRoute implements Routes {
                                 end_time: '09:20',
                                 clinic_name: 'Medical Park Clinic',
                                 clinic_address: '123 Main Street, New Cairo'
+                            },
+                            {
+                                id: 'appointment-uuid-2',
+                                status: 'CONFIRMED',
+                                is_online: true,
+                                slot_duration: 30,
+                                doctor_name: 'Wilson',
+                                appointment_date: '2026-02-05',
+                                start_time: '14:00',
+                                end_time: '14:30',
+                                clinic_name: null,
+                                clinic_address: null
                             }
                         ],
                         message: 'Patient appointments retrieved successfully'
@@ -359,7 +371,7 @@ export class AppointmentRoute implements Routes {
                     required: true,
                     type: 'string'
                 }
-                #swagger.description = 'Get details of a specific appointment for a patient'
+                #swagger.description = 'Get details of a specific appointment for a patient. Note: clinic_name and clinic_address will be null for online appointments'
                 #swagger.parameters['patientId'] = {
                     in: 'path',
                     description: 'Patient ID',
@@ -399,6 +411,63 @@ export class AppointmentRoute implements Routes {
             */
             AuthMiddleware,
             this.appointmentController.getPatientSelectedAppointment
+        );
+
+        this.router.patch(
+            `${this.path}/patient/:patientId/appointment/:appointmentId/reschedule`,
+            /* 
+                #swagger.path = '/appointments/patient/{patientId}/appointment/{appointmentId}/reschedule'
+                #swagger.method = 'patch'
+                #swagger.tags = ['Appointments']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.description = 'Reschedule an existing appointment to a new time slot'
+                #swagger.parameters['patientId'] = {
+                    in: 'path',
+                    description: 'Patient ID',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['appointmentId'] = {
+                    in: 'path',
+                    description: 'Appointment ID to reschedule',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['body'] = {
+                    in: 'body',
+                    description: 'New scheduled time for the appointment',
+                    required: true,
+                    schema: {
+                        newScheduledTime: '2026-02-05T11:00:00.000Z'
+                    }
+                }
+                #swagger.responses[200] = {
+                    description: 'Appointment rescheduled successfully',
+                    schema: {
+                        message: 'Appointment rescheduled successfully'
+                    }
+                }
+                #swagger.responses[400] = {
+                    description: 'Bad request - invalid time or slot not available',
+                    schema: {
+                        message: 'Error message describing the issue'
+                    }
+                }
+                #swagger.responses[401] = {
+                    description: 'Unauthorized - user not authenticated'
+                }
+                #swagger.responses[404] = {
+                    description: 'Appointment not found'
+                }
+            */
+            
+            AuthMiddleware,
+            this.appointmentController.rescheduleAppointmentByPatient
         );
     }
 }

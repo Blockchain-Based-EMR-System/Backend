@@ -3418,7 +3418,7 @@
         "tags": [
           "Appointments"
         ],
-        "description": "Get all appointments for a specific patient",
+        "description": "Get all appointments for a specific patient. Note: clinic_name and clinic_address will be null for online appointments",
         "parameters": [
           {
             "name": "patientId",
@@ -3448,7 +3448,7 @@
                     "properties": {
                       "id": {
                         "type": "string",
-                        "example": "appointment-uuid"
+                        "example": "appointment-uuid-2"
                       },
                       "status": {
                         "type": "string",
@@ -3460,32 +3460,26 @@
                       },
                       "slot_duration": {
                         "type": "number",
-                        "example": 20
+                        "example": 30
                       },
                       "doctor_name": {
                         "type": "string",
-                        "example": "House"
+                        "example": "Wilson"
                       },
                       "appointment_date": {
                         "type": "string",
-                        "example": "2026-02-03"
+                        "example": "2026-02-05"
                       },
                       "start_time": {
                         "type": "string",
-                        "example": "09:00"
+                        "example": "14:00"
                       },
                       "end_time": {
                         "type": "string",
-                        "example": "09:20"
+                        "example": "14:30"
                       },
-                      "clinic_name": {
-                        "type": "string",
-                        "example": "Medical Park Clinic"
-                      },
-                      "clinic_address": {
-                        "type": "string",
-                        "example": "123 Main Street, New Cairo"
-                      }
+                      "clinic_name": {},
+                      "clinic_address": {}
                     }
                   }
                 },
@@ -3513,7 +3507,7 @@
         "tags": [
           "Appointments"
         ],
-        "description": "Get details of a specific appointment for a patient",
+        "description": "Get details of a specific appointment for a patient. Note: clinic_name and clinic_address will be null for online appointments",
         "parameters": [
           {
             "name": "patientId",
@@ -3591,6 +3585,90 @@
                 "message": {
                   "type": "string",
                   "example": "Appointment details retrieved successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - user not authenticated"
+          },
+          "404": {
+            "description": "Appointment not found"
+          }
+        }
+      }
+    },
+    "/appointments/patient/{patientId}/appointment/{appointmentId}/reschedule": {
+      "patch": {
+        "tags": [
+          "Appointments"
+        ],
+        "description": "Reschedule an existing appointment to a new time slot",
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Patient ID"
+          },
+          {
+            "name": "appointmentId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Appointment ID to reschedule"
+          },
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "New scheduled time for the appointment",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "newScheduledTime": {
+                  "type": "string",
+                  "example": "2026-02-05T11:00:00.000Z"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Appointment rescheduled successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Appointment rescheduled successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid time or slot not available",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Error message describing the issue"
                 }
               },
               "xml": {

@@ -290,6 +290,32 @@ export class AppointmentService {
         };
     }
 
+    public async rescheduleAppointmentByPatient(patientId: string, appointmentId: string, newScheduledTime: Date): Promise<void> {
+        const slotDuration = await prisma.appointment.findUnique({
+            where: {
+                id: appointmentId,
+                patient_id: patientId,
+            },
+            select: {
+                slot_duration: true,
+            },
+        });
+        const newEndTime = new Date(newScheduledTime.getTime() + slotDuration.slot_duration * 60000);
+
+        await prisma.appointment.update({
+            where: {
+                id: appointmentId,
+                patient_id: patientId,
+            },
+            data: {
+                scheduled_time: newScheduledTime,
+                end_time: newEndTime,
+            }
+        });
+
+        // penalty to be added later
+    }
+
     private generateTimeSlots(startTime: Date, endTime: Date, slotDuration: number, bufferTime: number): Omit<TimeSlot, 'available'>[]{
         const slots: Omit<TimeSlot, 'available'>[] = [];
         const start = new Date(startTime);
