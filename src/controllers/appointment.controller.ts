@@ -102,4 +102,19 @@ export class AppointmentController {
             data: appointments,
         });
     });
+
+    public getPatientSelectedAppointment = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
+        const patientId = req.user.id;
+        const { appointmentId } = req.params;
+
+        if (!patientId) {
+            const error = createBilingualError(400, ErrorMessages.PATIENT_ID_REQUIRED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const appointment = await this.appointmentService.getPatientSelectedAppointment(appointmentId, patientId);
+        res.status(200).json({
+            data: appointment,
+        });
+    });
 }

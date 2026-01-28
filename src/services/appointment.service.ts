@@ -246,6 +246,50 @@ export class AppointmentService {
         }));
     }
 
+    public async getPatientSelectedAppointment(appointmentId: string, patientId: string): Promise<PatientAppointment | null> {
+        const appointment = await prisma.appointment.findFirst({
+            where: {
+                id: appointmentId,
+                patient_id: patientId,
+            },
+            select: {
+                id: true,
+                scheduled_time: true,
+                status: true,
+                is_online: true,
+                slot_duration: true,
+                end_time: true,
+                doctor: {
+                    select: {
+                        name: true,
+                    }
+                },
+                clinic: {
+                    select: {
+                        name: true,
+                        address: true,
+                    }
+                }
+            }
+        });
+        if (!appointment) {
+            return null;
+        }
+
+        return {
+            id: appointment.id,
+            status: appointment.status,
+            is_online: appointment.is_online,
+            slot_duration: appointment.slot_duration,
+            doctor_name: appointment.doctor.name,
+            appointment_date: this.formatDate(appointment.scheduled_time),
+            start_time: this.formatTime(appointment.scheduled_time),
+            end_time: this.formatTime(appointment.end_time),
+            clinic_name: appointment.clinic ? appointment.clinic.name : null,
+            clinic_address: appointment.clinic ? appointment.clinic.address : null,
+        };
+    }
+
     private generateTimeSlots(startTime: Date, endTime: Date, slotDuration: number, bufferTime: number): Omit<TimeSlot, 'available'>[]{
         const slots: Omit<TimeSlot, 'available'>[] = [];
         const start = new Date(startTime);

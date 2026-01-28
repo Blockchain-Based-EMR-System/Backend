@@ -3507,6 +3507,105 @@
           }
         }
       }
+    },
+    "/appointments/patient/{patientId}/appointment/{appointmentId}": {
+      "get": {
+        "tags": [
+          "Appointments"
+        ],
+        "description": "Get details of a specific appointment for a patient",
+        "parameters": [
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Patient ID"
+          },
+          {
+            "name": "appointmentId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Appointment ID"
+          },
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Appointment details retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "appointment-uuid"
+                    },
+                    "status": {
+                      "type": "string",
+                      "example": "CONFIRMED"
+                    },
+                    "is_online": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "slot_duration": {
+                      "type": "number",
+                      "example": 20
+                    },
+                    "doctor_name": {
+                      "type": "string",
+                      "example": "House"
+                    },
+                    "appointment_date": {
+                      "type": "string",
+                      "example": "2026-02-03"
+                    },
+                    "start_time": {
+                      "type": "string",
+                      "example": "09:00"
+                    },
+                    "end_time": {
+                      "type": "string",
+                      "example": "09:20"
+                    },
+                    "clinic_name": {
+                      "type": "string",
+                      "example": "Medical Park Clinic"
+                    },
+                    "clinic_address": {
+                      "type": "string",
+                      "example": "123 Main Street, New Cairo"
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Appointment details retrieved successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - user not authenticated"
+          },
+          "404": {
+            "description": "Appointment not found"
+          }
+        }
+      }
     }
   }
 }
