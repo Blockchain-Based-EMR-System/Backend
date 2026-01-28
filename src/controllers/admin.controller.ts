@@ -6,6 +6,7 @@ import { AddDoctorFromAdminDto } from '@/dtos/admins.dto';
 import { RequestWithLanguage } from '@/middlewares/language.middleware';
 import { formatSpecializationResponse } from '@/utils/specializationTransform';
 import { SpecializationKey } from '@/constants/specializations';
+import { createMultiLangMessage, SuccessResponseMessages } from '@/utils/responseMessages';
 
 export class AdminController {
     public adminService = Container.get(AdminService);
@@ -26,9 +27,11 @@ export class AdminController {
             ...newDoctor,
             doctor: formattedNewDoctor,
         };
+        const responseMessage = createMultiLangMessage(SuccessResponseMessages.DOCTOR_CREATED);
         res.status(201).json({
             data: doctorResponse,
-            message: 'Doctor added successfully'
+            messageEn: responseMessage.messageEn,
+            messageAr: responseMessage.messageAr,
         });
     };
 
@@ -48,10 +51,11 @@ export class AdminController {
                 ),
             } : null,
         }));
-
+        const responseMessage = createMultiLangMessage(SuccessResponseMessages.DOCTORS_RETRIEVED);
         res.status(200).json({
             data: formattedDoctors,
-            message: 'Doctors retrieved successfully'
+            messageEn: responseMessage.messageEn,
+            messageAr: responseMessage.messageAr,
         });
     }
 
@@ -73,10 +77,12 @@ export class AdminController {
                 ),
             } : null,
         };
+        const responseMessage = createMultiLangMessage(SuccessResponseMessages.DOCTOR_RETRIEVED);
 
         res.status(200).json({
             data: formattedDoctor,
-            message: 'Doctor retrieved successfully'
+            messageEn: responseMessage.messageEn,
+            messageAr: responseMessage.messageAr,
         });
     }
 
@@ -95,9 +101,11 @@ export class AdminController {
                 ),
             } : null,
         }));
+        const responseMessage = createMultiLangMessage(SuccessResponseMessages.UNVERIFIED_DOCTORS_RETRIEVED);
         res.status(200).json({
             data: formattedDoctors,
-            message: 'Unverified doctors retrieved successfully'
+            messageEn: responseMessage.messageEn,
+            messageAr: responseMessage.messageAr,
         });
     }
 
@@ -105,9 +113,11 @@ export class AdminController {
 
         const doctorId = req.params.id;
         const { isVerified } = req.body;
-        await this.adminService.updateDoctorVerificationStatus(doctorId, isVerified);      
+        await this.adminService.updateDoctorVerificationStatus(doctorId, isVerified);
+        const responseMessage = createMultiLangMessage(SuccessResponseMessages.DOCTOR_VERIFICATION_STATUS_UPDATED);
         res.status(200).json({
-            message: 'Doctor verification status updated successfully'
+            messageEn: responseMessage.messageEn,
+            messageAr: responseMessage.messageAr,
         });
     }
 }
