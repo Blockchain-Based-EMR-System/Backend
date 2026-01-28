@@ -1,28 +1,41 @@
-import { IsDateString, IsEnum, IsNotEmpty, IsString, Validate, ValidateIf } from "class-validator";
+import { IsString, IsNotEmpty, IsDateString, IsOptional, IsUUID } from 'class-validator';
+
+
+export class BookAppointmentDto {
+    @IsUUID()
+    @IsNotEmpty()
+    doctorId: string;
+
+    @IsUUID()
+    @IsOptional()
+    clinicId?: string;
+
+    @IsDateString()
+    @IsNotEmpty()
+    scheduledTime: string;
+}
+
 
 export class GetAvailableDaysDto {
-    @IsEnum(['ONLINE', 'OFFLINE'])
+    @IsUUID()
     @IsNotEmpty()
-    appointment_type: 'ONLINE' | 'OFFLINE';
+    doctorId: string;
 
-    @ValidateIf(o => o.appointment_type == 'OFFLINE')
-    @IsString()
-    @IsNotEmpty()
-    clinic_id?: string;
-
-    @IsString()
-    @IsNotEmpty()
-    doctor_id?: string;
+    @IsUUID()
+    @IsOptional()
+    clinicId?: string;
 }
 
 export class GetAvailableSlotsDto {
+    @IsUUID()
+    @IsNotEmpty()
+    doctorId: string;
+
     @IsDateString()
     @IsNotEmpty()
     date: string;
-}
 
-export class CreateAppointmentDto {
-    @IsDateString()
-    @IsNotEmpty()
-    scheduled_time: string;
+    @IsUUID()
+    @IsOptional()
+    clinicId?: string;
 }

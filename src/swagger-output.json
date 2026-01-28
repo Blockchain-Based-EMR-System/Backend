@@ -3009,6 +3009,15 @@
           "Appointments"
         ],
         "description": "Get all available online doctors",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Online doctors retrieved successfully",
@@ -3050,6 +3059,15 @@
           "Appointments"
         ],
         "description": "Get all clinics available for booking appointments",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Active clinics retrieved successfully",
@@ -3122,6 +3140,13 @@
             "required": true,
             "type": "string",
             "description": "Clinic ID"
+          },
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
           }
         ],
         "responses": {
@@ -3172,6 +3197,13 @@
             "required": true,
             "type": "string",
             "description": "Doctor ID"
+          },
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
           },
           {
             "name": "clinicId",
@@ -3241,6 +3273,13 @@
             "description": "Doctor ID"
           },
           {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          },
+          {
             "name": "date",
             "in": "query",
             "description": "Date in YYYY-MM-DD format",
@@ -3292,6 +3331,86 @@
             "description": "Bad request - missing required parameters or invalid date"
           }
         }
+      }
+    },
+    "/appointments/book": {
+      "post": {
+        "tags": [
+          "Appointments"
+        ],
+        "description": "Book a new appointment with a doctor",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Appointment booking details",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "doctorId": {
+                  "type": "string",
+                  "example": "doctor-uuid"
+                },
+                "clinicId": {
+                  "type": "string",
+                  "example": "clinic-uuid"
+                },
+                "scheduledTime": {
+                  "type": "string",
+                  "example": "2026-02-03T09:00:00.000Z"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Appointment booked successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Appointment booked successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid data or slot not available",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Error message describing the issue"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - user not authenticated"
+          }
+        },
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ]
       }
     }
   }

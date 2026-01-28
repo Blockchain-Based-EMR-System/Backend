@@ -7,7 +7,7 @@ export interface Appointment {
     doctor_id: string;
     clinic_id: string | null;
     scheduled_time: Date;
-    slot_duration: Date;
+    slot_duration: number;
     end_time: Date;
     is_online: boolean;
     is_completed: boolean;
@@ -27,11 +27,6 @@ export interface AvailableDay {
   dayOfWeek: DayOfWeek;
   displayDate: string; 
 }
-
-// export interface AvailableSlot {
-//   start_time: string; 
-//   end_time: string;   
-// }
 
 export interface TimeSlot {
     start: string; 

@@ -122,9 +122,46 @@ export const ErrorMessages = {
         en: 'Clinic not found',
         ar: 'العيادة غير موجودة',
     },
+    CLINIC_REQUIRED_FOR_OFFLINE: {
+        en: 'Clinic ID is required for offline appointments',
+        ar: 'معرف العيادة مطلوب للمواعيد غير المتصلة بالإنترنت',
+    },
     UNAUTHORIZED_CLINIC_DELETION: {
         en: 'You are not authorized to delete this clinic',
         ar: 'ليس لديك صلاحية لحذف هذه العيادة',
+    },
+    // appointments 
+    DOCTOR_ID_REQUIRED: {
+        en: 'Doctor ID is required',
+        ar: 'معرف الطبيب مطلوب',
+    },
+    SCHEDULED_TIME_REQUIRED: {
+        en: 'Scheduled time is required',
+        ar: 'وقت الموعد مطلوب',
+    },
+    INVALID_SCHEDULED_TIME: {
+        en: 'Invalid scheduled time format',
+        ar: 'تنسيق وقت الموعد غير صالح',
+    },
+    DATE_REQUIRED: {
+        en: 'Date is required',
+        ar: 'التاريخ مطلوب',
+    },
+    INVALID_DATE_FORMAT: {
+        en: 'Invalid date format. Please use YYYY-MM-DD',
+        ar: 'تنسيق التاريخ غير صالح. يرجى استخدام YYYY-MM-DD',
+    },
+    NO_AVAILABLE_DAYS: {
+        en: 'No available days found for this doctor',
+        ar: 'لم يتم العثور على أيام متاحة لهذا الطبيب',
+    },
+    SLOT_NOT_AVAILABLE: {
+        en: 'This time slot is not available',
+        ar: 'هذا الوقت غير متاح',
+    },
+    APPOINTMENT_IN_PAST: {
+        en: 'Cannot book appointment in the past',
+        ar: 'لا يمكن حجز موعد في الماضي',
     },
     // Generic errors
     SOMETHING_WENT_WRONG: {

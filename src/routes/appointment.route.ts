@@ -3,6 +3,9 @@ import { Router } from "express";
 import { ClinicController } from "@/controllers/clinic.controller";
 import { DoctorController } from "@/controllers/doctor.controller";
 import { AppointmentController } from "@/controllers/appointment.controller";
+import { ValidationMiddleware } from "@/middlewares/validation.middleware";
+import { AuthMiddleware } from "@/middlewares/auth.middleware";
+import { BookAppointmentDto } from "@/dtos/appointments.dto";
 
 export class AppointmentRoute implements Routes {
     public path = '/appointments';
@@ -23,6 +26,12 @@ export class AppointmentRoute implements Routes {
                 #swagger.path = '/appointments/online-doctors'
                 #swagger.method = 'get'
                 #swagger.tags = ['Appointments']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
                 #swagger.description = 'Get all available online doctors'
                 #swagger.responses[200] = {
                     description: 'Online doctors retrieved successfully',
@@ -37,6 +46,7 @@ export class AppointmentRoute implements Routes {
                     }
                 }
             */
+            AuthMiddleware,
             this.doctorController.getOnlineDoctors
         );
 
@@ -47,6 +57,12 @@ export class AppointmentRoute implements Routes {
                 #swagger.path = '/appointments/clinics'
                 #swagger.method = 'get'
                 #swagger.tags = ['Appointments']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
                 #swagger.description = 'Get all clinics available for booking appointments'
                 #swagger.responses[200] = {
                     description: 'Active clinics retrieved successfully',
@@ -67,6 +83,7 @@ export class AppointmentRoute implements Routes {
                     }
                 }
             */
+            AuthMiddleware,
             this.clinicController.getActiveClinics
         );
 
@@ -77,6 +94,12 @@ export class AppointmentRoute implements Routes {
                 #swagger.path = '/appointments/clinic/{clinicId}/doctors'
                 #swagger.method = 'get'
                 #swagger.tags = ['Appointments']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
                 #swagger.description = 'Get all doctors who are accepting appointments at a selected clinic'
                 #swagger.parameters['clinicId'] = {
                     in: 'path',
@@ -97,6 +120,7 @@ export class AppointmentRoute implements Routes {
                     }
                 }
             */
+            AuthMiddleware,
             this.clinicController.getClinicDoctors
         );
 
@@ -107,6 +131,12 @@ export class AppointmentRoute implements Routes {
                 #swagger.path = '/appointments/doctor/{doctorId}/available-days'
                 #swagger.method = 'get'
                 #swagger.tags = ['Appointments']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
                 #swagger.description = 'Get all available days for a doctor that have at least one available slot'
                 #swagger.parameters['doctorId'] = {
                     in: 'path',
@@ -150,6 +180,7 @@ export class AppointmentRoute implements Routes {
                     description: 'Doctor not found or not available'
                 }
             */
+            AuthMiddleware,
             this.appointmentController.getAvailableDays
         );
 
@@ -160,6 +191,12 @@ export class AppointmentRoute implements Routes {
                 #swagger.path = '/appointments/doctor/{doctorId}/available-slots'
                 #swagger.method = 'get'
                 #swagger.tags = ['Appointments']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
                 #swagger.description = 'Get all available time slots for a doctor on a specific date'
                 #swagger.parameters['doctorId'] = {
                     in: 'path',
@@ -208,13 +245,57 @@ export class AppointmentRoute implements Routes {
                     description: 'Bad request - missing required parameters or invalid date'
                 }
             */
+            AuthMiddleware,
             this.appointmentController.getAvailableSlots
         );
 
-        // // book appointment
-        // this.router.post(
-        //     `${this.path}/book-appointment`
-        // )
+        // book appointment
+        this.router.post(
+            `${this.path}/book`,
+            /* 
+                #swagger.path = '/appointments/book'
+                #swagger.method = 'post'
+                #swagger.tags = ['Appointments']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.description = 'Book a new appointment with a doctor'
+                #swagger.security = [{
+                    bearerAuth: []
+                }]
+                #swagger.parameters['body'] = {
+                    in: 'body',
+                    description: 'Appointment booking details',
+                    required: true,
+                    schema: {
+                        doctorId: 'doctor-uuid',
+                        clinicId: 'clinic-uuid',
+                        scheduledTime: '2026-02-03T09:00:00.000Z'
+                    }
+                }
+                #swagger.responses[201] = {
+                    description: 'Appointment booked successfully',
+                    schema: {
+                        message: 'Appointment booked successfully'
+                    }
+                }
+                #swagger.responses[400] = {
+                    description: 'Bad request - invalid data or slot not available',
+                    schema: {
+                        message: 'Error message describing the issue'
+                    }
+                }
+                #swagger.responses[401] = {
+                    description: 'Unauthorized - user not authenticated'
+                }
+            */
+            AuthMiddleware,
+            ValidationMiddleware(BookAppointmentDto),
+            this.appointmentController.bookAppointment
+        );
     }
 }
 

@@ -3,16 +3,21 @@ import { DayOfWeek } from '@prisma/client';
 import { AvailableDay } from '@/interfaces';
 import { Service } from 'typedi'; 
 import { TimeSlot } from '@/interfaces';
-import { logger } from '@/utils/logger';
-
+import { HttpException } from "@/exceptions/HttpException";
+import { createBilingualError, ErrorMessages } from '@/utils/errorMessages';
 
 @Service()
 export class AppointmentService {
-
+    
     public async getAvailableDays(doctorId: string, clinicId: string | null): Promise<AvailableDay[]>{
         const daysAhead = 30
         const availableDays: AvailableDay[] = [];
-        const isOnline = true;
+        const isOnline = await this.doctorIsOnline(doctorId);
+
+        if (!isOnline && !clinicId) {
+            const error = createBilingualError(400, ErrorMessages.CLINIC_REQUIRED_FOR_OFFLINE);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
 
         const schedules = await prisma.doctorSchedule.findMany({
             where:{
@@ -78,7 +83,22 @@ export class AppointmentService {
     public async getAvailableSlots(doctorId: string, clinicId: string | null, date: string): Promise<Omit<TimeSlot, 'available'>[]>{
         const requestedDate = new Date(date);
         const dayOfWeek = this.getDayOfWeek(requestedDate.getDay());
-        const isOnline = true;
+        const isOnline = await this.doctorIsOnline(doctorId);
+
+        if (!isOnline && !clinicId) {
+            const error = createBilingualError(400, ErrorMessages.CLINIC_REQUIRED_FOR_OFFLINE);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const requestedDateOnly = new Date(requestedDate);
+        requestedDateOnly.setHours(0, 0, 0, 0);
+        
+        if (requestedDateOnly < today) {
+            const error = createBilingualError(400, ErrorMessages.APPOINTMENT_IN_PAST);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
 
         const schedule = await prisma.doctorSchedule.findFirst({
             where:{
@@ -146,6 +166,44 @@ export class AppointmentService {
         });
 
         return availableSlots;
+    }
+
+    public async bookAppointment(patientId: string, doctorId: string, clinicId: string | null, scheduledTime: Date): Promise<void>{
+        const isOnline = await this.doctorIsOnline(doctorId);
+        if (!isOnline && !clinicId) {
+            const error = createBilingualError(400, ErrorMessages.CLINIC_REQUIRED_FOR_OFFLINE);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const schedule = await prisma.doctorSchedule.findFirst({
+            where:{
+                doctor_id: doctorId,
+                clinic_id: isOnline ? null : clinicId,
+                is_active: true,
+                deleted_at: null,
+                day_of_week: this.getDayOfWeek(scheduledTime.getDay()),
+            },
+            select:{
+                slot_duration: true,
+            }
+        });
+
+        const endTime = new Date(scheduledTime.getTime() + schedule.slot_duration * 60000); 
+
+        const appointment = await prisma.appointment.create({
+            data:{
+                patient_id: patientId,
+                doctor_id: doctorId,
+                clinic_id: isOnline ? null : clinicId,
+                scheduled_time: scheduledTime,
+                slot_duration: schedule.slot_duration,        
+                end_time: endTime,
+                is_online: isOnline,
+                estimated_time: schedule.slot_duration,       
+            }
+        });
+        
+        console.log('Appointment booked:', appointment);
     }
 
     private generateTimeSlots(startTime: Date, endTime: Date, slotDuration: number, bufferTime: number): Omit<TimeSlot, 'available'>[]{
@@ -221,5 +279,17 @@ export class AppointmentService {
 
     private doesSlotOverlap(slotStart: Date, slotEnd: Date, appointmentStart: Date, appointmentEnd: Date): boolean {
         return (slotStart < appointmentEnd && slotEnd > appointmentStart);
+    }
+
+    private async doctorIsOnline(doctorId: string): Promise<boolean> {
+        const { availability_type } = await prisma.doctor.findUnique({
+            where: {
+                id: doctorId,
+            },
+            select: {
+                availability_type: true,
+            }
+        });
+        return availability_type === 'ONLINE' || availability_type === 'BOTH';
     }
 }
