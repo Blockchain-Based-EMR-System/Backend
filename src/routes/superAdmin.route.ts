@@ -60,7 +60,8 @@ export class SuperAdminRoute implements Routes {
                             isVerified: true,
                             hasCompletedProfile: true
                         },
-                        message: 'Admin added successfully'
+                        messageEn: 'Admin added successfully',
+                        messageAr: "تم إضافة المسؤول بنجاح"
                     }
                 }
             */
@@ -96,7 +97,8 @@ export class SuperAdminRoute implements Routes {
                             isVerified: true,
                             hasCompletedProfile: true
                         }],
-                        message: 'Admins retrieved successfully'
+                        messageEn: 'Admins retrieved successfully',
+                        messageAr: "تم استرجاع المسؤولين بنجاح"
                     }
                 }
             */
@@ -136,7 +138,8 @@ export class SuperAdminRoute implements Routes {
                             isVerified: true,
                             hasCompletedProfile: true
                         },
-                        message: 'Admin retrieved successfully'
+                        messageEn: 'Admin retrieved successfully',
+                        messageAr: "تم استرجاع المسؤول بنجاح"
                     }
                 }
             */
@@ -180,7 +183,8 @@ export class SuperAdminRoute implements Routes {
                         data: { email: 'doctor@example.com', name: 'Dr. Smith', role: 'DOCTOR', 
                         username: 'smith', phone : '1234567890', gender: 'MALE', isVerified: false, hasCompletedProfile: false,
                         doctor: { specialization: {key: 'CARDIOLOGY' , value: 'Cardiology'} , avg_time: null }, photoUrl: null },
-                        message: 'Doctor added successfully'
+                        messageEn: 'Doctor added successfully',
+                        messageAr: "تم إضافة الطبيب بنجاح"
                     }
                 }
             */
@@ -213,7 +217,8 @@ export class SuperAdminRoute implements Routes {
                         data: [{ id: '1', email: 'doctor@example.com', name: 'Dr. Smith', role: 'DOCTOR', 
                         username: 'smith', phone : '1234567890', gender: 'MALE', isVerified: false, hasCompletedProfile: false,
                         doctor: { specialization: {key: 'CARDIOLOGY' , value: 'Cardiology'} , avg_time: null, account_status:'Approved' }, photoUrl: null }],
-                        message: 'Doctors retrieved successfully'
+                        messageEn: 'Doctors retrieved successfully',
+                        messageAr: "تم استرجاع الأطباء بنجاح"
                     }
                 }
             */
@@ -251,7 +256,8 @@ export class SuperAdminRoute implements Routes {
                         data: { email: 'doctor@example.com', name: 'Dr. Smith', role: 'DOCTOR', 
                         username: 'smith', phone : '1234567890', gender: 'MALE', isVerified: false, hasCompletedProfile: false,
                         doctor: { specialization: {key: 'CARDIOLOGY' , value: 'Cardiology'} , avg_time: null, account_status:'Approved' }, photoUrl: null },
-                        message: 'Doctor retrieved successfully'
+                        messageEn: 'Doctor retrieved successfully',
+                        messageAr: "تم استرجاع الطبيب بنجاح"
                     }
                 }
             */

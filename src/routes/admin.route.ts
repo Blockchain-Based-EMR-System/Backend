@@ -51,7 +51,8 @@ export class AdminRoute implements Routes {
                         data: { email: 'doctor@example.com', name: 'Dr. Smith', role: 'DOCTOR', 
                         username: 'smith', phone : '1234567890', gender: 'MALE', isVerified: false, hasCompletedProfile: false,
                         doctor: { specialization: {key: 'CARDIOLOGY' , value: 'Cardiology'} , avg_time: null, account_status: 'PENDING' }, photoUrl: null },
-                        message: 'Doctor added successfully'
+                        messageEn: "Doctor account created successfully.",
+                        messageAr: ".تم إنشاء حساب الطبيب بنجاح"
                     }
                 }
             */
@@ -84,7 +85,8 @@ export class AdminRoute implements Routes {
                         data:[ { id: '1' , email: 'doctor@example.com', name: 'Dr. Smith', role: 'DOCTOR', 
                         username: 'smith', phone : '1234567890', gender: 'MALE', isVerified: false, hasCompletedProfile: false,
                         doctor: { specialization: {key: 'CARDIOLOGY' , value: 'Cardiology'} , avg_time: null , account_status: 'APPROVED' }, photoUrl: null }],
-                        message: 'Doctors retrieved successfully'
+                        messageEn: 'Doctors retrieved successfully',
+                        messageAr: "تم استرجاع بيانات الأطباء بنجاح."
                     }
                 }
             */
@@ -116,7 +118,8 @@ export class AdminRoute implements Routes {
                         data:[ { id: '1' , email: 'doctor@example.com', name: 'Dr. Smith', 
                         username: 'smith', phone : '1234567890', gender: 'MALE', isVerified: false, date_of_birth: '1990-01-01', photoUrl: null,
                         doctor: { specialization: {key: 'CARDIOLOGY' , value: 'Cardiology'} , avg_time: null , account_status: 'APPROVED' } }],
-                        message: 'Unverified doctors retrieved successfully'
+                        messageEn: 'Unverified doctors retrieved successfully',
+                        messageAr: "تم استرجاع بيانات الأطباء غير المعتمدين بنجاح."
                     }
                 }
             */
@@ -153,7 +156,8 @@ export class AdminRoute implements Routes {
                 #swagger.responses[200] = {
                     description: 'Doctor verification status updated successfully',
                     schema: {
-                        message: 'Doctor verification status updated successfully'
+                        messageEn: 'Doctor verification status updated successfully',
+                        messageAr: "تم تحديث حالة اعتماد الطبيب بنجاح."
                     }
                 }
             */
@@ -190,7 +194,8 @@ export class AdminRoute implements Routes {
                         data: { email: 'doctor@example.com', name: 'Dr. Smith', role: 'DOCTOR', 
                         username: 'smith', phone : '1234567890', gender: 'MALE', isVerified: false, hasCompletedProfile: false,
                         doctor: { specialization: {key: 'CARDIOLOGY' , value: 'Cardiology'} , avg_time: null, account_status: 'APPROVED' }, photoUrl: null },
-                        message: 'Doctor retrieved successfully'
+                        messageEn: 'Doctor retrieved successfully',
+                        messageAr: "تم استرجاع بيانات الطبيب بنجاح."
                     }
                 }
             */

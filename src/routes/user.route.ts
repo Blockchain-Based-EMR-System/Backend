@@ -37,7 +37,8 @@ export class UsersRoute implements Routes {
                 #swagger.responses[200] = {
                     description: 'Profile picture updated successfully',
                     schema: {
-                        message: 'Profile picture updated successfully'
+                        messageEn: 'Profile picture updated successfully',
+                        messageAr: "تم تحديث صورة الملف الشخصي بنجاح"
                     }
                 }
             */
@@ -63,7 +64,8 @@ export class UsersRoute implements Routes {
                         data: {
                             url: 'https://res.cloudinary.com/your-cloud-name/image/upload/v1696543210/doctors/profile_pictures/doctor_1_profile_picture_1696543210.jpg'
                         },
-                        message: 'Profile picture retrieved successfully'
+                        messageEn: 'Profile picture retrieved successfully',
+                        messageAr: "تم استرجاع صورة الملف الشخصي بنجاح"
                     }
                 }
             */
@@ -84,7 +86,8 @@ export class UsersRoute implements Routes {
                 #swagger.responses[200] = {
                     description: 'Profile picture deleted successfully',
                     schema: {
-                        message: 'Profile picture deleted successfully'
+                        messageEn: 'Profile picture deleted successfully',
+                        messageAr: "تم حذف صورة الملف الشخصي بنجاح"
                     }
                 }
             */

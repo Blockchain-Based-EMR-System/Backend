@@ -124,9 +124,13 @@
                     "photoUrl": {}
                   }
                 },
-                "message": {
+                "messageEn": {
                   "type": "string",
                   "example": "Signed Up Successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم انشاء الحساب بنجاح"
                 }
               },
               "xml": {
@@ -212,9 +216,13 @@
                     }
                   }
                 },
-                "message": {
+                "messageEn": {
                   "type": "string",
                   "example": "Logged In Successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم تسجيل الدخول بنجاح"
                 }
               },
               "xml": {
@@ -246,9 +254,13 @@
             "schema": {
               "type": "object",
               "properties": {
-                "message": {
+                "messageEn": {
                   "type": "string",
                   "example": "Logged Out Successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم تسجيل الخروج بنجاح"
                 }
               },
               "xml": {
@@ -302,9 +314,13 @@
                     }
                   }
                 },
-                "message": {
+                "messageEn": {
                   "type": "string",
                   "example": "Token Refreshed Successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم تحديث الرمز بنجاح"
                 }
               },
               "xml": {
@@ -372,9 +388,13 @@
                     }
                   }
                 },
-                "message": {
+                "messageEn": {
                   "type": "string",
                   "example": "Profile Completed Successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم إكمال الملف الشخصي بنجاح"
                 }
               },
               "xml": {
@@ -428,9 +448,13 @@
                   "type": "boolean",
                   "example": true
                 },
-                "message": {
+                "messageEn": {
                   "type": "string",
                   "example": "OTP Verified Successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم التحقق من رمز التحقق بنجاح"
                 }
               },
               "xml": {
@@ -473,9 +497,13 @@
             "schema": {
               "type": "object",
               "properties": {
-                "message": {
+                "messageEn": {
                   "type": "string",
                   "example": "Password Reset Email Sent Successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم إرسال بريد إعادة تعيين كلمة المرور بنجاح"
                 }
               },
               "xml": {
@@ -523,9 +551,13 @@
             "schema": {
               "type": "object",
               "properties": {
-                "message": {
+                "messageEn": {
                   "type": "string",
                   "example": "Password Reset Successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم إعادة تعيين كلمة المرور بنجاح"
                 }
               },
               "xml": {
@@ -557,9 +589,13 @@
             "schema": {
               "type": "object",
               "properties": {
-                "message": {
+                "messageEn": {
                   "type": "string",
                   "example": "OTP Resent Successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم إعادة إرسال رمز التحقق بنجاح"
                 }
               },
               "xml": {
@@ -644,9 +680,13 @@
                     }
                   }
                 },
-                "message": {
+                "messageEn": {
                   "type": "string",
                   "example": "Phone number updated successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم تحديث رقم الهاتف بنجاح"
                 }
               },
               "xml": {
@@ -715,9 +755,13 @@
                     }
                   }
                 },
-                "message": {
+                "messageEn": {
                   "type": "string",
                   "example": "User data retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع بيانات المستخدم بنجاح"
                 }
               },
               "xml": {
@@ -1249,9 +1293,13 @@
                     "photoUrl": {}
                   }
                 },
-                "message": {
+                "messageEn": {
                   "type": "string",
-                  "example": "Doctor added successfully"
+                  "example": "Doctor account created successfully."
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": ".تم إنشاء حساب الطبيب بنجاح"
                 }
               },
               "xml": {
@@ -1356,9 +1404,13 @@
                     }
                   }
                 },
-                "message": {
+                "messageEn": {
                   "type": "string",
                   "example": "Doctors retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع بيانات الأطباء بنجاح."
                 }
               },
               "xml": {
@@ -1461,9 +1513,13 @@
                     }
                   }
                 },
-                "message": {
+                "messageEn": {
                   "type": "string",
                   "example": "Unverified doctors retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع بيانات الأطباء غير المعتمدين بنجاح."
                 }
               },
               "xml": {
@@ -1520,9 +1576,13 @@
             "schema": {
               "type": "object",
               "properties": {
-                "message": {
+                "messageEn": {
                   "type": "string",
                   "example": "Doctor verification status updated successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم تحديث حالة اعتماد الطبيب بنجاح."
                 }
               },
               "xml": {
@@ -1629,9 +1689,13 @@
                     "photoUrl": {}
                   }
                 },
-                "message": {
+                "messageEn": {
                   "type": "string",
                   "example": "Doctor retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع بيانات الطبيب بنجاح."
                 }
               },
               "xml": {
@@ -1748,9 +1812,13 @@
                     }
                   }
                 },
-                "message": {
+                "messageEn": {
                   "type": "string",
                   "example": "Admin added successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم إضافة المسؤول بنجاح"
                 }
               },
               "xml": {
@@ -1829,9 +1897,13 @@
                     }
                   }
                 },
-                "message": {
+                "messageEn": {
                   "type": "string",
                   "example": "Admins retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع المسؤولين بنجاح"
                 }
               },
               "xml": {
@@ -1912,9 +1984,13 @@
                     }
                   }
                 },
-                "message": {
+                "messageEn": {
                   "type": "string",
                   "example": "Admin retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع المسؤول بنجاح"
                 }
               },
               "xml": {
@@ -2048,9 +2124,13 @@
                     "photoUrl": {}
                   }
                 },
-                "message": {
+                "messageEn": {
                   "type": "string",
                   "example": "Doctor added successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم إضافة الطبيب بنجاح"
                 }
               },
               "xml": {
@@ -2155,9 +2235,13 @@
                     }
                   }
                 },
-                "message": {
+                "messageEn": {
                   "type": "string",
                   "example": "Doctors retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع الأطباء بنجاح"
                 }
               },
               "xml": {
@@ -2264,9 +2348,13 @@
                     "photoUrl": {}
                   }
                 },
-                "message": {
+                "messageEn": {
                   "type": "string",
                   "example": "Doctor retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع الطبيب بنجاح"
                 }
               },
               "xml": {
@@ -2333,9 +2421,13 @@
             "schema": {
               "type": "object",
               "properties": {
-                "message": {
+                "messageEn": {
                   "type": "string",
                   "example": "Doctor registered successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم تسجيل الطبيب بنجاح"
                 }
               },
               "xml": {
@@ -2430,9 +2522,13 @@
                     }
                   }
                 },
-                "message": {
+                "messageEn": {
                   "type": "string",
                   "example": "Doctor logged in successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم تسجيل دخول الطبيب بنجاح"
                 }
               },
               "xml": {
@@ -2482,9 +2578,13 @@
             "schema": {
               "type": "object",
               "properties": {
-                "message": {
+                "messageEn": {
                   "type": "string",
                   "example": "Password updated successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم تحديث كلمة المرور بنجاح"
                 }
               },
               "xml": {
@@ -2567,9 +2667,13 @@
             "schema": {
               "type": "object",
               "properties": {
-                "message": {
+                "messageEn": {
                   "type": "string",
                   "example": "Clinic created successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم إنشاء العيادة بنجاح"
                 }
               },
               "xml": {
@@ -2651,9 +2755,13 @@
                     }
                   }
                 },
-                "message": {
+                "messageEn": {
                   "type": "string",
                   "example": "Doctor's clinics retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع عيادات الطبيب بنجاح"
                 }
               },
               "xml": {
@@ -2737,9 +2845,13 @@
                     }
                   }
                 },
-                "message": {
+                "messageEn": {
                   "type": "string",
                   "example": "Clinic retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع بيانات العيادة بنجاح"
                 }
               },
               "xml": {
@@ -2819,9 +2931,13 @@
             "schema": {
               "type": "object",
               "properties": {
-                "message": {
+                "messageEn": {
                   "type": "string",
                   "example": "Clinic updated successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم تحديث العيادة بنجاح"
                 }
               },
               "xml": {
@@ -2858,9 +2974,13 @@
             "schema": {
               "type": "object",
               "properties": {
-                "message": {
+                "messageEn": {
                   "type": "string",
                   "example": "Clinic deleted successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم حذف العيادة بنجاح"
                 }
               },
               "xml": {
@@ -2902,9 +3022,13 @@
             "schema": {
               "type": "object",
               "properties": {
-                "message": {
+                "messageEn": {
                   "type": "string",
                   "example": "Profile picture updated successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم تحديث صورة الملف الشخصي بنجاح"
                 }
               },
               "xml": {
@@ -2943,9 +3067,13 @@
                     }
                   }
                 },
-                "message": {
+                "messageEn": {
                   "type": "string",
                   "example": "Profile picture retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع صورة الملف الشخصي بنجاح"
                 }
               },
               "xml": {
@@ -2975,9 +3103,13 @@
             "schema": {
               "type": "object",
               "properties": {
-                "message": {
+                "messageEn": {
                   "type": "string",
                   "example": "Profile picture deleted successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم حذف صورة الملف الشخصي بنجاح"
                 }
               },
               "xml": {

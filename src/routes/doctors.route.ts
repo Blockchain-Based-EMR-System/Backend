@@ -5,7 +5,6 @@ import { ValidationMiddleware } from "@/middlewares/validation.middleware";
 import { Router } from "express";
 import { errorWrapper } from "@/utils/errorWrapper";
 import { AuthMiddleware, RoleMiddleware } from "@/middlewares/auth.middleware";
-import upload from "@/middlewares/multer.middleware";
 import { Role } from "@prisma/client";
 
 
@@ -40,7 +39,8 @@ export class DoctorsRoute implements Routes {
                 #swagger.responses[201] = {
                     description: 'Doctor signup successful',
                     schema: {
-                        message: 'Doctor registered successfully'
+                        messageEn: 'Doctor registered successfully',
+                        messageAr: "تم تسجيل الطبيب بنجاح"
                     }
                 }
             */
@@ -78,7 +78,8 @@ export class DoctorsRoute implements Routes {
                                 account_status: 'APPROVED'
                             }
                         },
-                        message: 'Doctor logged in successfully'
+                        messageEn: 'Doctor logged in successfully',
+                        messageAr: "تم تسجيل دخول الطبيب بنجاح"
                     }
                 }
             */
@@ -108,7 +109,8 @@ export class DoctorsRoute implements Routes {
                 #swagger.responses[200] = {
                     description: 'Password set successfully',
                     schema: {
-                        message: 'Password updated successfully'
+                        messageEn: 'Password updated successfully',
+                        messageAr: "تم تحديث كلمة المرور بنجاح"
                     }
                 }
             */

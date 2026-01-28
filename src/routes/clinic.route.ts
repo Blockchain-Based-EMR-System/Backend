@@ -45,7 +45,8 @@ export class ClinicRoute implements Routes {
                 #swagger.responses[201] = {
                     description: 'Clinic created successfully',
                     schema: {
-                        message: 'Clinic created successfully'
+                        messageEn: 'Clinic created successfully',
+                        messageAr: "تم إنشاء العيادة بنجاح"
                     }
                 }
             */
@@ -88,7 +89,8 @@ export class ClinicRoute implements Routes {
                             canPayOnline: true,
                             created_at: '2024-01-01T00:00:00.000Z'
                         },
-                        message: 'Clinic retrieved successfully'
+                        messageEn: 'Clinic retrieved successfully',
+                        messageAr: "تم استرجاع بيانات العيادة بنجاح"
                     }
                 }
             */
@@ -132,7 +134,8 @@ export class ClinicRoute implements Routes {
                 #swagger.responses[200] = {
                     description: 'Clinic updated successfully',
                     schema: {
-                        message: 'Clinic updated successfully'
+                        messageEn: 'Clinic updated successfully',
+                        messageAr: "تم تحديث العيادة بنجاح"
                     }
                 }
             */
@@ -163,7 +166,8 @@ export class ClinicRoute implements Routes {
                 #swagger.responses[200] = {
                     description: 'Clinic deleted successfully',
                     schema: {
-                        message: 'Clinic deleted successfully'
+                        messageEn: 'Clinic deleted successfully',
+                        messageAr: "تم حذف العيادة بنجاح"
                     }
                 }
             */
@@ -202,7 +206,8 @@ export class ClinicRoute implements Routes {
                                 fees: 100
                             }
                         ],
-                        message: "Doctor's clinics retrieved successfully"
+                        messageEn: "Doctor's clinics retrieved successfully",
+                        messageAr: "تم استرجاع عيادات الطبيب بنجاح"
                     }
                 }
             */
