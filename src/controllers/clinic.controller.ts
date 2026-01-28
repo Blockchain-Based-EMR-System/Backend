@@ -3,6 +3,7 @@ import { HttpException } from "@/exceptions/HttpException";
 import { RequestWithUser } from "@/interfaces";
 import { ClinicService } from "@/services/clinic.service";
 import { createBilingualError, ErrorMessages } from "@/utils/errorMessages";
+import { createMultiLangMessage, SuccessResponseMessages } from "@/utils/responseMessages";
 import { NextFunction, Request, Response } from "express";
 import Container from "typedi";
 
@@ -22,7 +23,9 @@ export class ClinicController {
 
         this.clinicService.linkDoctorToClinic(req.user.id, createdClinic, clinicData.fees);
 
-        res.status(201).json({ message: 'Clinic created successfully' });
+        const responseMessage = createMultiLangMessage(SuccessResponseMessages.CLINIC_CREATED_SUCCESSFULLY);
+
+        res.status(201).json({ messageEn: responseMessage.messageEn, messageAr: responseMessage.messageAr });
     }
 
     public getClinicById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -33,8 +36,8 @@ export class ClinicController {
             const error = createBilingualError(404, ErrorMessages.CLINIC_NOT_FOUND);
             throw new HttpException(error.status, error.message, error.messageAr);
         }
-
-        res.status(200).json({ message: 'Clinic retrieved successfully', data: clinic });
+        const responseMessage = createMultiLangMessage(SuccessResponseMessages.CLINIC_RETRIEVED);
+        res.status(200).json({ messageEn: responseMessage.messageEn, messageAr: responseMessage.messageAr, data: clinic });
     }
 
     public updateClinicById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -47,8 +50,8 @@ export class ClinicController {
             const error = createBilingualError(404, ErrorMessages.CLINIC_NOT_FOUND);
             throw new HttpException(error.status, error.message, error.messageAr);
         }
-
-        res.status(200).json({ message: 'Clinic updated successfully' });
+        const responseMessage = createMultiLangMessage(SuccessResponseMessages.CLINIC_UPDATED_SUCCESSFULLY);
+        res.status(200).json({ messageEn: responseMessage.messageEn, messageAr: responseMessage.messageAr });
     }
 
     public deleteClinicById = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
@@ -61,13 +64,18 @@ export class ClinicController {
             throw new HttpException(error.status, error.message, error.messageAr);
         }
         await this.clinicService.deleteClinic(clinicId);
-
-        res.status(200).json({ message: 'Clinic deleted successfully' });
+        const responseMessage = createMultiLangMessage(SuccessResponseMessages.CLINIC_DELETED_SUCCESSFULLY);
+        res.status(200).json({ messageEn: responseMessage.messageEn, messageAr: responseMessage.messageAr });
     }
 
     public getDoctorClinics = async (req: RequestWithUser, res: Response, next: NextFunction) => {
         const doctorId = req.user?.id;
         const clinics = await this.clinicService.getDoctorClinics(doctorId);
-        res.status(200).json({ data: clinics, message: 'Doctor clinics retrieved successfully' });
+        const responseMessage = createMultiLangMessage(SuccessResponseMessages.CLINIC_DOCTORS_RETRIEVED);
+        res.status(200).json({
+            data: clinics,
+            messageEn: responseMessage.messageEn,
+            messageAr: responseMessage.messageAr
+        });
     }
 }
