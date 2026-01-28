@@ -5,10 +5,11 @@ import { Service } from 'typedi';
 import { TimeSlot } from '@/interfaces';
 import { HttpException } from "@/exceptions/HttpException";
 import { createBilingualError, ErrorMessages } from '@/utils/errorMessages';
+import { PatientAppointment } from '@/interfaces/appointments.interface';
 
 @Service()
 export class AppointmentService {
-    
+
     public async getAvailableDays(doctorId: string, clinicId: string | null): Promise<AvailableDay[]>{
         const daysAhead = 30
         const availableDays: AvailableDay[] = [];
@@ -204,6 +205,45 @@ export class AppointmentService {
         });
         
         console.log('Appointment booked:', appointment);
+    }
+
+    public async getPatientAppointments(patientId: string): Promise<PatientAppointment[]> {
+        const appointments = await prisma.appointment.findMany({
+            where: {
+                patient_id: patientId,
+            },
+            select: {
+                id: true,
+                scheduled_time: true,
+                status: true,
+                is_online: true,
+                slot_duration: true,
+                end_time: true,
+                doctor: {
+                    select: {
+                        name: true,
+                    }
+                },
+                clinic: {
+                    select: {
+                        name: true,
+                        address: true,
+                    }
+                }
+            }
+        });
+        return appointments.map(appointment => ({
+            id: appointment.id,
+            status: appointment.status,
+            is_online: appointment.is_online,
+            slot_duration: appointment.slot_duration,
+            doctor_name: appointment.doctor.name,
+            appointment_date: this.formatDate(appointment.scheduled_time),
+            start_time: this.formatTime(appointment.scheduled_time),
+            end_time: this.formatTime(appointment.end_time),
+            clinic_name: appointment.clinic ? appointment.clinic.name : null,
+            clinic_address: appointment.clinic ? appointment.clinic.address : null,
+        }));
     }
 
     private generateTimeSlots(startTime: Date, endTime: Date, slotDuration: number, bufferTime: number): Omit<TimeSlot, 'available'>[]{

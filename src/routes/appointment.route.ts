@@ -296,6 +296,56 @@ export class AppointmentRoute implements Routes {
             ValidationMiddleware(BookAppointmentDto),
             this.appointmentController.bookAppointment
         );
+
+        this.router.get(
+            `${this.path}/patient/:patientId/appointments`,
+            /* 
+                #swagger.path = '/appointments/patient/{patientId}/appointments'
+                #swagger.method = 'get'
+                #swagger.tags = ['Appointments']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.description = 'Get all appointments for a specific patient'
+                #swagger.parameters['patientId'] = {
+                    in: 'path',
+                    description: 'Patient ID',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.responses[200] = {
+                    description: 'Patient appointments retrieved successfully',
+                    schema: {
+                        data: [
+                            {
+                                id: 'appointment-uuid',
+                                status: 'CONFIRMED',
+                                is_online: true,
+                                slot_duration: 20,
+                                doctor_name: 'House',
+                                appointment_date: '2026-02-03',
+                                start_time: '09:00',
+                                end_time: '09:20',
+                                clinic_name: 'Medical Park Clinic',
+                                clinic_address: '123 Main Street, New Cairo'
+                            }
+                        ],
+                        message: 'Patient appointments retrieved successfully'
+                    }
+                }
+                #swagger.responses[401] = {
+                    description: 'Unauthorized - user not authenticated'
+                }
+                #swagger.responses[404] = {
+                    description: 'Patient not found'
+                }
+            */
+            AuthMiddleware,
+            this.appointmentController.getPatientAppointments
+        );
     }
 }
 

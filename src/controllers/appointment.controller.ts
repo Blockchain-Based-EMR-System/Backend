@@ -88,4 +88,18 @@ export class AppointmentController {
             message: 'Appointment booked successfully',
         });
     });
+
+    public getPatientAppointments = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
+        const patientId = req.user.id;
+
+        if (!patientId) {
+            const error = createBilingualError(400, ErrorMessages.PATIENT_ID_REQUIRED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const appointments = await this.appointmentService.getPatientAppointments(patientId);
+        res.status(200).json({
+            data: appointments,
+        });
+    });
 }

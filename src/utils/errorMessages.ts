@@ -135,6 +135,10 @@ export const ErrorMessages = {
         en: 'Doctor ID is required',
         ar: 'معرف الطبيب مطلوب',
     },
+    PATIENT_ID_REQUIRED: {
+        en: 'Patient ID is required',
+        ar: 'معرف المريض مطلوب',
+    },
     SCHEDULED_TIME_REQUIRED: {
         en: 'Scheduled time is required',
         ar: 'وقت الموعد مطلوب',
