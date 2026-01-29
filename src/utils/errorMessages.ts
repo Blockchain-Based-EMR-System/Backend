@@ -120,6 +120,10 @@ export const ErrorMessages = {
         en: 'No profile picture found',
         ar: 'لم يتم العثور على صورة الملف الشخصي',
     },
+    UNKNOWN_FILE_FIELDNAME: {
+        en: 'Unknown file fieldname',
+        ar: 'اسم حقل الملف غير معروف',
+    },
 
     // Clinic errors
     CLINIC_NOT_FOUND: {

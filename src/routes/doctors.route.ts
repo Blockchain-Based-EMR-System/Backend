@@ -6,6 +6,7 @@ import { Router } from "express";
 import { errorWrapper } from "@/utils/errorWrapper";
 import { AuthMiddleware, RoleMiddleware } from "@/middlewares/auth.middleware";
 import { Role } from "@prisma/client";
+import { uploadPdf } from "@/middlewares/multer.middleware";
 
 
 export class DoctorsRoute implements Routes {
@@ -44,7 +45,15 @@ export class DoctorsRoute implements Routes {
                     }
                 }
             */
-            ValidationMiddleware(DoctorSignupRequestDto),
+            uploadPdf.fields([
+                { name: 'graduationCertificate', maxCount: 1 },
+                { name: 'membershipCard', maxCount: 1 },
+                { name: 'professionalPracticeCard', maxCount: 1 },
+                { name: 'mastersCertificate', maxCount: 1 },
+                { name: 'fellowshipCertificate', maxCount: 1 },
+                { name: 'unionSpecializationCertificate', maxCount: 1 },
+            ]),
+            ValidationMiddleware(DoctorSignupRequestDto, false, false, false, true),
             errorWrapper(this.doctorsController.doctorSignup)
         );
 

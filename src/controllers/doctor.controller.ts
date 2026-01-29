@@ -14,7 +14,8 @@ export class DoctorController {
 
     public doctorSignup = async (req: Request, res: Response, next: NextFunction) => {
         const doctorData: DoctorSignupRequestDto = req.body;
-        await this.doctorService.signup(doctorData);
+        const doctorFiles = req.files as Express.Multer.File[];
+        await this.doctorService.signup(doctorData , doctorFiles);
         const responseMessage = createMultiLangMessage(SuccessResponseMessages.DOCTOR_CREATED_WAITING_VERIFICATION);
         res.status(201).json({ messageEn: responseMessage.messageEn, messageAr: responseMessage.messageAr });
     };

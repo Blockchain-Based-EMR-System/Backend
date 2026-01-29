@@ -25,3 +25,12 @@ export enum RecordType {
   DIAGNOSIS = 'DIAGNOSIS',
   VISIT_SUMMARY = 'VISIT_SUMMARY'
 }
+
+export enum DOCTOR_FILES {
+  GRADUATION_CERTIFICATE = 'graduationCertificate',
+  MEMBERSHIP_CARD = 'membershipCard',
+  PROFESSIONAL_PRACTICE_CARD = 'professionalPracticeCard',
+  MASTERS_CERTIFICATE = 'mastersCertificate',
+  FELLOWSHIP_CERTIFICATE = 'fellowshipCertificate',
+  UNION_SPECIALIZATION_CERTIFICATE = 'unionSpecializationCertificate',
+}
