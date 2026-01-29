@@ -17,23 +17,39 @@ const storage = multer.diskStorage({
 });
 
 // 2. Filter to accept ONLY images
-const fileFilter = (req: Request, file: Express.Multer.File, cb: (error: Error | null, acceptFile: boolean) => void) => {
+const imageFilter = (req: Request, file: Express.Multer.File, cb: (error: Error | null, acceptFile: boolean) => void) => {
     if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png') {
         cb(null, true); // Accept file
     } else {
-        const bilingualError = createBilingualError(400, ErrorMessages.UNSUPPORTED_FILE_FORMAT);
+        const bilingualError = createBilingualError(400, ErrorMessages.UNSUPPORTED_IMAGE_FILE_FORMAT);
+        const error = new HttpException(bilingualError.status, bilingualError.message, bilingualError.messageAr);
+        cb(error, false); // Reject file
+    }
+};
+
+const pdfFilter = (req: Request, file: Express.Multer.File, cb: (error: Error | null, acceptFile: boolean) => void) => {
+    if (file.mimetype === 'application/pdf') {
+        cb(null, true); // Accept file
+    } else {
+        const bilingualError = createBilingualError(400, ErrorMessages.UNSUPPORTED_FILE_FORMAT_PDF);
         const error = new HttpException(bilingualError.status, bilingualError.message, bilingualError.messageAr);
         cb(error, false); // Reject file
     }
 };
 
 // 3. Initialize Multer with limits
-const upload = multer({
+export const uploadImage = multer({
     storage: storage,
-    fileFilter: fileFilter,
+    fileFilter: imageFilter,
     limits: {
         fileSize: 1024 * 1024 * 3 // Limit file size to 3MB
     }
 });
 
-export default upload;
+export const uploadPdf = multer({
+    storage: storage,
+    fileFilter: pdfFilter,
+    limits: {
+        fileSize: 1024 * 1024 * 10 // Limit file size to 10MB
+    }
+});

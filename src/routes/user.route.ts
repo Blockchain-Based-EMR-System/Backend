@@ -1,7 +1,7 @@
 import { UsersController } from "@/controllers/user.controller";
 import { Routes } from "@/interfaces";
 import { AuthMiddleware } from "@/middlewares/auth.middleware";
-import upload from "@/middlewares/multer.middleware";
+import {uploadImage} from "@/middlewares/multer.middleware";
 import { ValidationMiddleware } from "@/middlewares/validation.middleware";
 import { errorWrapper } from "@/utils/errorWrapper";
 import { Router } from "express";
@@ -43,7 +43,7 @@ export class UsersRoute implements Routes {
                 }
             */
             AuthMiddleware,
-            upload.single('profilePicture'),
+            uploadImage.single('profilePicture'),
             ValidationMiddleware(null, false, false, false, true),
             errorWrapper(this.usersController.updateProfilePicture)
         );

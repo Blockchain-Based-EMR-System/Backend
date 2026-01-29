@@ -108,9 +108,13 @@ export const ErrorMessages = {
         en: 'No file uploaded',
         ar: 'لم يتم تحميل أي ملف',
     },
-    UNSUPPORTED_FILE_FORMAT: {
+    UNSUPPORTED_IMAGE_FILE_FORMAT: {
         en: 'Unsupported file format. Only JPEG and PNG allowed.',
         ar: 'تنسيق ملف غير مدعوم. يُسمح فقط بملفات JPEG و PNG.',
+    },
+    UNSUPPORTED_FILE_FORMAT_PDF: {
+        en: 'Unsupported file format. Only PDF allowed.',
+        ar: 'تنسيق ملف غير مدعوم. يُسمح فقط بملفات PDF.',
     },
     NO_PROFILE_PICTURE: {
         en: 'No profile picture found',
