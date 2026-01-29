@@ -27,6 +27,15 @@ export class DoctorSignupRequestDto {
     @IsString()
     public date_of_birth?: Date;
 
+    graduationCertificate: Express.Multer.File;
+    membershipCard: Express.Multer.File;
+    professionalPracticeCard: Express.Multer.File;
+
+    mastersCertificate: Express.Multer.File;
+    fellowshipCertificate: Express.Multer.File;
+    unionSpecializationCertificate: Express.Multer.File;
+    
+
 }
 
 export class DoctorLoginRequestDto {

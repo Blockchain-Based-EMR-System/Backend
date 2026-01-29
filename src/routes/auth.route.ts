@@ -123,7 +123,6 @@ export class AuthRoute implements Routes {
             }
         }
       */
-      AuthMiddleware,
       this.auth.refresh,
     );
 
