@@ -1,5 +1,5 @@
 import { DoctorController } from "@/controllers/doctor.controller";
-import { DoctorLoginRequestDto, DoctorProfilePictureRequestDto, DoctorSetPasswordRequestDto, DoctorSignupRequestDto } from "@/dtos/doctors.dto";
+import { DoctorLoginRequestDto, DoctorSetPasswordRequestDto, DoctorSignupRequestDto } from "@/dtos/doctors.dto";
 import { Routes } from "@/interfaces";
 import { ValidationMiddleware } from "@/middlewares/validation.middleware";
 import { Router } from "express";
@@ -24,18 +24,79 @@ export class DoctorsRoute implements Routes {
             `/doctors/signup`,
             /* 
                 #swagger.tags = ['Doctors']
-                #swagger.parameters['body'] = {
-                    in: 'body',
-                    description: 'Doctor signup data',
+                #swagger.consumes = ['multipart/form-data']
+                #swagger.parameters['email'] = {
+                    in: 'formData',
+                    description: 'Doctor email address',
                     required: true,
-                    schema: {
-                        $email: 'doctor@example.com',
-                        $name: 'Dr. Smith',
-                        $phone: '1234567890',
-                        $password: 'SecurePassword123',
-                        $gender: 'MALE or FEMALE',
-                        date_of_birth: '1990-01-01',
-                    }
+                    type: 'string'
+                }
+                #swagger.parameters['name'] = {
+                    in: 'formData',
+                    description: 'Doctor full name',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['phone'] = {
+                    in: 'formData',
+                    description: 'Doctor phone number',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['password'] = {
+                    in: 'formData',
+                    description: 'Doctor password',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['gender'] = {
+                    in: 'formData',
+                    description: 'Doctor gender (MALE or FEMALE)',
+                    required: true,
+                    type: 'string',
+                    enum: ['MALE', 'FEMALE']
+                }
+                #swagger.parameters['date_of_birth'] = {
+                    in: 'formData',
+                    description: 'Doctor date of birth (YYYY-MM-DD)',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['graduationCertificate'] = {
+                    in: 'formData',
+                    description: 'Graduation certificate PDF',
+                    required: true,
+                    type: 'file'
+                }
+                #swagger.parameters['membershipCard'] = {
+                    in: 'formData',
+                    description: 'Membership card PDF',
+                    required: true,
+                    type: 'file'
+                }
+                #swagger.parameters['professionalPracticeCard'] = {
+                    in: 'formData',
+                    description: 'Professional practice card PDF',
+                    required: true,
+                    type: 'file'
+                }
+                #swagger.parameters['mastersCertificate'] = {
+                    in: 'formData',
+                    description: 'Masters certificate PDF',
+                    required: true,
+                    type: 'file'
+                }
+                #swagger.parameters['fellowshipCertificate'] = {
+                    in: 'formData',
+                    description: 'Fellowship certificate PDF',
+                    required: true,
+                    type: 'file'
+                }
+                #swagger.parameters['unionSpecializationCertificate'] = {
+                    in: 'formData',
+                    description: 'Union specialization certificate PDF',
+                    required: true,
+                    type: 'file'
                 }
                 #swagger.responses[201] = {
                     description: 'Doctor signup successful',

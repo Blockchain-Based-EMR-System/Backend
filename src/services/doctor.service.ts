@@ -8,7 +8,6 @@ import { DoctorLoginData } from "@/interfaces/doctors.interface";
 import { AuthService } from "./auth.service";
 import prisma from "@/config/prisma";
 import cloudinary from "@/utils/cloudinary";
-import { UploadApiResponse } from "cloudinary";
 import { DOCTOR_FILES } from "@/interfaces";
 import  fs  from "fs";
 
@@ -71,12 +70,9 @@ export class DoctorService {
             return createdUser.id;
         });
 
-        // Upload files and update doctor record with files urls
-        console.log(doctorFiles);        
-        
+        // Upload files and update doctor record with files urls        
         if (doctorFiles && Object.keys(doctorFiles).length > 0) {
             const doctorFilesArray = Object.values(doctorFiles).flat() as Express.Multer.File[];
-            console.log(doctorFilesArray);
             
             await this._uploadFiles(doctorFilesArray, createdUserId);
         }

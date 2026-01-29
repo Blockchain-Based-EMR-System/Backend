@@ -117,7 +117,12 @@ export class AdminRoute implements Routes {
                     schema: {
                         data:[ { id: '1' , email: 'doctor@example.com', name: 'Dr. Smith', 
                         username: 'smith', phone : '1234567890', gender: 'MALE', isVerified: false, date_of_birth: '1990-01-01', photoUrl: null,
-                        doctor: { specialization: {key: 'CARDIOLOGY' , value: 'Cardiology'} , avg_time: null , account_status: 'APPROVED' } }],
+                        doctor: { 
+                        specialization: {key: 'CARDIOLOGY' , value: 'Cardiology'} , avg_time: null , account_status: 'APPROVED',
+                        mastersCertificateUrl: '', graduationCertificateUrl: '', fellowshipCertificateUrl: '', professionalPracticeCardUrl: '', membershipCardUrl: '', unionSpecializationCertificateUrl: ''
+                        } 
+                        }
+                        ],
                         messageEn: 'Unverified doctors retrieved successfully',
                         messageAr: "تم استرجاع بيانات الأطباء غير المعتمدين بنجاح."
                     }

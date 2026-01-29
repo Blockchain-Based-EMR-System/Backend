@@ -38,5 +38,11 @@ export class DoctorFromAdminResponseDto {
         specialization: string;
         avg_time?: Date;
         account_status?: DoctorAccountStatus;
+        fellowshipCertificateUrl?: string;
+        graduationCertificateUrl?: string;
+        mastersCertificateUrl?: string;
+        membershipCardUrl?: string;
+        unionSpecializationCertificateUrl?: string;
+        professionalPracticeCardUrl?: string;
     };
 }
