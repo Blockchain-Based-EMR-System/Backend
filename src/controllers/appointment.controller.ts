@@ -148,4 +148,30 @@ export class AppointmentController {
             message: 'Appointment cancelled successfully',
         });
     });
+
+    public rescheduleAppointmentByDoctor = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
+        const doctorId = req.user.id;
+        const { appointmentId } = req.params;
+        const { minutes, newScheduledTime } = req.body;
+
+        if (!doctorId) {
+            const error = createBilingualError(400, ErrorMessages.DOCTOR_ID_REQUIRED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        if (!minutes && !newScheduledTime) {
+            const error = createBilingualError(400, ErrorMessages.INVALID_RESCHEDULE_PARAMETERS);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        if (minutes && newScheduledTime) {
+            const error = createBilingualError(400, ErrorMessages.EITHER_MINUTES_OR_NEW_TIME);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        await this.appointmentService.rescheduleAppointmentByDoctor(doctorId, appointmentId, minutes, newScheduledTime ? new Date(newScheduledTime) : undefined);
+        res.status(200).json({
+            message: 'Appointment rescheduled successfully',
+        });
+    });
 }

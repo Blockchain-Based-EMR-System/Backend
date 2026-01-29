@@ -519,6 +519,62 @@ export class AppointmentRoute implements Routes {
             AuthMiddleware,
             this.appointmentController.cancelAppointment
         );
+
+        this.router.patch(
+            `${this.path}/doctor/:appointmentId/reschedule`,
+            /* 
+                #swagger.path = '/appointments/doctor/{appointmentId}/reschedule'
+                #swagger.method = 'patch'
+                #swagger.tags = ['Appointments']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication (doctor)',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.description = 'Reschedule an appointment by the doctor. Doctor can either shift the appointment by a number of minutes or set a new scheduled time (but not both)'
+                #swagger.parameters['appointmentId'] = {
+                    in: 'path',
+                    description: 'Appointment ID to reschedule',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['body'] = {
+                    in: 'body',
+                    description: 'Reschedule parameters (provide either minutes OR newScheduledTime)',
+                    required: true,
+                    schema: {
+                        minutes: 15,
+                        newScheduledTime: '2026-02-05T11:30:00.000Z'
+                    }
+                }
+                #swagger.responses[200] = {
+                    description: 'Appointment rescheduled successfully',
+                    schema: {
+                        message: 'Appointment rescheduled successfully'
+                    }
+                }
+                #swagger.responses[400] = {
+                    description: 'Bad request - invalid reschedule parameters',
+                    schema: {
+                        message: 'Error message describing the issue'
+                    }
+                }
+                #swagger.responses[401] = {
+                    description: 'Unauthorized - doctor not authenticated'
+                }
+                #swagger.responses[403] = {
+                    description: 'Forbidden - appointment does not belong to the authenticated doctor'
+                }
+                #swagger.responses[404] = {
+                    description: 'Appointment not found'
+                }
+            */
+            AuthMiddleware,
+            this.appointmentController.rescheduleAppointmentByDoctor
+        );  
+
+
     }
 }
 

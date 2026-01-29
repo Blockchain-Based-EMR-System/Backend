@@ -116,6 +116,14 @@ export const ErrorMessages = {
         en: 'No profile picture found',
         ar: 'لم يتم العثور على صورة الملف الشخصي',
     },
+    DOCTOR_NOT_WORKING_ON_DAY: {
+        en: "Doctor is not available on this day",
+        ar: "الطبيب غير متاح في هذا اليوم"
+    },
+    TIME_OUTSIDE_SCHEDULE: {
+        en: "Requested time is outside doctor's working hours",
+        ar: "الوقت المطلوب خارج ساعات عمل الطبيب"
+    },
 
     // Clinic errors
     CLINIC_NOT_FOUND: {
@@ -167,6 +175,14 @@ export const ErrorMessages = {
         en: 'Cannot book appointment in the past',
         ar: 'لا يمكن حجز موعد في الماضي',
     },
+    TIME_SLOT_NOT_AVAILABLE: {
+        en: "This time slot is not available",
+        ar: "هذا الوقت غير متاح"
+    },
+    EITHER_MINUTES_OR_NEW_TIME: {
+        en: "Provide either shift minutes or new scheduled time, not both",
+        ar: "يرجى تقديم إما دقائق التغيير أو وقت موعد جديد، وليس كلاهما"
+    },
     // Generic errors
     SOMETHING_WENT_WRONG: {
         en: 'Something went wrong',
@@ -185,6 +201,10 @@ export const ErrorMessages = {
         en: "Appointment has already been deleted",
         ar: "تم حذف الموعد بالفعل"
     },
+    INVALID_RESCHEDULE_PARAMETERS: {
+        en: "Provide either new scheduled time or shift minutes",
+        ar: "يرجى تقديم وقت موعد جديد أو عدد دقائق التغيير"
+    }
 };
 
 // Helper function to create bilingual error

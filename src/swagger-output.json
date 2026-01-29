@@ -3766,6 +3766,90 @@
           }
         }
       }
+    },
+    "/appointments/doctor/{appointmentId}/reschedule": {
+      "patch": {
+        "tags": [
+          "Appointments"
+        ],
+        "description": "Reschedule an appointment by the doctor. Doctor can either shift the appointment by a number of minutes or set a new scheduled time (but not both)",
+        "parameters": [
+          {
+            "name": "appointmentId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Appointment ID to reschedule"
+          },
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication (doctor)",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Reschedule parameters (provide either minutes OR newScheduledTime)",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "minutes": {
+                  "type": "number",
+                  "example": 15
+                },
+                "newScheduledTime": {
+                  "type": "string",
+                  "example": "2026-02-05T11:30:00.000Z"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Appointment rescheduled successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Appointment rescheduled successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid reschedule parameters",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Error message describing the issue"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - doctor not authenticated"
+          },
+          "403": {
+            "description": "Forbidden - appointment does not belong to the authenticated doctor"
+          },
+          "404": {
+            "description": "Appointment not found"
+          }
+        }
+      }
     }
   }
 }
