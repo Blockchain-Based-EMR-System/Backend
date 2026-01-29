@@ -174,4 +174,29 @@ export class AppointmentController {
             message: 'Appointment rescheduled successfully',
         });
     });
+
+    public bulkRescheduleByDoctor = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
+        const doctorId = req.user.id;
+        const { appointmentIds, minutes, newScheduledTime, keepOriginalSlots } = req.body;
+
+        if (!doctorId) {
+            const error = createBilingualError(400, ErrorMessages.DOCTOR_ID_REQUIRED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        if (!minutes && !newScheduledTime) {
+            const error = createBilingualError(400, ErrorMessages.INVALID_RESCHEDULE_PARAMETERS);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        if (minutes && newScheduledTime) {
+            const error = createBilingualError(400, ErrorMessages.EITHER_MINUTES_OR_NEW_TIME);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        await this.appointmentService.bulkRescheduleByDoctor(doctorId, appointmentIds, minutes, newScheduledTime ? new Date(newScheduledTime) : undefined, keepOriginalSlots);
+        res.status(200).json({
+            message: 'Appointments rescheduled successfully',
+        });
+    });
 }

@@ -574,6 +574,66 @@ export class AppointmentRoute implements Routes {
             this.appointmentController.rescheduleAppointmentByDoctor
         );  
 
+        this.router.patch(
+            `${this.path}/doctor/bulk-reschedule`,
+            /*
+                #swagger.path = '/appointments/doctor/bulk-reschedule'
+                #swagger.method = 'patch'
+                #swagger.tags = ['Appointments']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication (doctor)',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.description = 'Bulk reschedule multiple appointments by the authenticated doctor. \
+                Rules: \
+                (1) You must provide EITHER "minutes" OR "newScheduledTime" (not both). \
+                (2) When using "minutes", all appointments are shifted by the same number of minutes. \
+                (3) When using "newScheduledTime": \
+                    - If "keepOriginalSlots" is true, appointments keep their original time-of-day but move to the new date. \
+                    - If "keepOriginalSlots" is false, appointments are reallocated sequentially based on the doctor schedule.'
+                    
+                #swagger.parameters['body'] = {
+                    in: 'body',
+                    description: 'Bulk reschedule parameters',
+                    required: true,
+                    schema: {
+                        appointmentIds: [
+                            'appointment-uuid-1',
+                            'appointment-uuid-2',
+                            'appointment-uuid-3'
+                        ],
+                        minutes: 15,
+                        newScheduledTime: '2026-02-10T09:00:00.000Z',
+                        keepOriginalSlots: true
+                    }
+                }
+                #swagger.responses[200] = {
+                    description: 'Appointments rescheduled successfully',
+                    schema: {
+                        message: 'Appointments rescheduled successfully'
+                    }
+                }
+                #swagger.responses[400] = {
+                    description: 'Bad request - invalid or conflicting reschedule parameters',
+                    schema: {
+                        message: 'Error message describing the issue'
+                    }
+                }
+                #swagger.responses[401] = {
+                    description: 'Unauthorized - doctor not authenticated'
+                }
+                #swagger.responses[403] = {
+                    description: 'Forbidden - one or more appointments do not belong to the authenticated doctor'
+                }
+                #swagger.responses[404] = {
+                    description: 'One or more appointments not found'
+                }
+            */
+            AuthMiddleware,
+            this.appointmentController.bulkRescheduleByDoctor
+        );
 
     }
 }

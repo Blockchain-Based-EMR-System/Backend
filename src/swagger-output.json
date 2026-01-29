@@ -3850,6 +3850,98 @@
           }
         }
       }
+    },
+    "/appointments/doctor/bulk-reschedule": {
+      "patch": {
+        "tags": [
+          "Appointments"
+        ],
+        "description": "Bulk reschedule multiple appointments by the authenticated doctor. \\  Rules: \\  (1) You must provide EITHER \"minutes\" OR \"newScheduledTime\" (not both). \\  (2) When using \"minutes\", all appointments are shifted by the same number of minutes. \\  (3) When using \"newScheduledTime\": \\  - If \"keepOriginalSlots\" is true, appointments keep their original time-of-day but move to the new date. \\  - If \"keepOriginalSlots\" is false, appointments are reallocated sequentially based on the doctor schedule.",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication (doctor)",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Bulk reschedule parameters",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "appointmentIds": {
+                  "type": "array",
+                  "example": [
+                    "appointment-uuid-1",
+                    "appointment-uuid-2",
+                    "appointment-uuid-3"
+                  ],
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "minutes": {
+                  "type": "number",
+                  "example": 15
+                },
+                "newScheduledTime": {
+                  "type": "string",
+                  "example": "2026-02-10T09:00:00.000Z"
+                },
+                "keepOriginalSlots": {
+                  "type": "boolean",
+                  "example": true
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Appointments rescheduled successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Appointments rescheduled successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid or conflicting reschedule parameters",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Error message describing the issue"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - doctor not authenticated"
+          },
+          "403": {
+            "description": "Forbidden - one or more appointments do not belong to the authenticated doctor"
+          },
+          "404": {
+            "description": "One or more appointments not found"
+          }
+        }
+      }
     }
   }
 }
