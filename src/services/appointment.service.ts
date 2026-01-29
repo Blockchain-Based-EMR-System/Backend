@@ -316,6 +316,49 @@ export class AppointmentService {
         // penalty to be added later
     }
 
+    public async cancelAppointment(userId: string, appointmentId: string): Promise<void> {
+        // see whether the user is patient or doctor
+        const appointment = await prisma.appointment.findUnique({
+            where: {
+                id: appointmentId,
+            },
+            select: {
+                id: true,
+                patient_id: true,
+                doctor_id: true,
+                deleted_at: true,
+            }
+        });
+
+        if (!appointment) {
+            const error = createBilingualError(404, ErrorMessages.APPOINTMENT_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        if (appointment.deleted_at) {
+            const error = createBilingualError(400, ErrorMessages.APPOINTMENT_ALREADY_DELETED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        if (appointment.patient_id !== userId && appointment.doctor_id !== userId) {
+            const error = createBilingualError(403, ErrorMessages.UNAUTHORIZED_APPOINTMENT_ACCESS);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        await prisma.appointment.update({
+            where: {
+                id: appointmentId,
+            },
+            data: {
+                cancelled_by: appointment.patient_id === userId ? 'PATIENT' : 'DOCTOR',
+                deleted_at: new Date(),
+                modified_at: new Date(), 
+                status: 'CANCELLED',
+            }
+        });
+        // penalty to be added later
+    };
+
     private generateTimeSlots(startTime: Date, endTime: Date, slotDuration: number, bufferTime: number): Omit<TimeSlot, 'available'>[]{
         const slots: Omit<TimeSlot, 'available'>[] = [];
         const start = new Date(startTime);

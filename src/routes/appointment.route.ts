@@ -469,6 +469,56 @@ export class AppointmentRoute implements Routes {
             AuthMiddleware,
             this.appointmentController.rescheduleAppointmentByPatient
         );
+
+        this.router.delete(
+            `${this.path}/:appointmentId/cancel`,
+            /* 
+                #swagger.path = '/appointments/{appointmentId}/cancel'
+                #swagger.method = 'delete'
+                #swagger.tags = ['Appointments']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.description = 'Cancel an appointment (soft delete). Can be cancelled by either patient or doctor.'
+                #swagger.parameters['appointmentId'] = {
+                    in: 'path',
+                    description: 'Appointment ID to cancel',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.responses[200] = {
+                    description: 'Appointment cancelled successfully',
+                    schema: {
+                        success: true,
+                        message: 'Appointment cancelled successfully',
+                        data: {
+                            appointmentId: 'appointment-uuid',
+                            cancelledAt: '2026-01-29T12:00:00.000Z'
+                        }
+                    }
+                }
+                #swagger.responses[400] = {
+                    description: 'Bad request - appointment already cancelled, completed, or too late to cancel',
+                    schema: {
+                        message: 'Error message describing the issue'
+                    }
+                }
+                #swagger.responses[401] = {
+                    description: 'Unauthorized - user not authenticated'
+                }
+                #swagger.responses[403] = {
+                    description: 'Forbidden - user is not the patient or doctor of this appointment'
+                }
+                #swagger.responses[404] = {
+                    description: 'Appointment not found'
+                }
+            */
+            AuthMiddleware,
+            this.appointmentController.cancelAppointment
+        );
     }
 }
 

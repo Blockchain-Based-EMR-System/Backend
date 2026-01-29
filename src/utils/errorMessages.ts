@@ -172,6 +172,19 @@ export const ErrorMessages = {
         en: 'Something went wrong',
         ar: 'حدث خطأ ما',
     },
+
+    APPOINTMENT_NOT_FOUND: {
+        en: "Appointment not found",
+        ar: "الموعد غير موجود"
+    },
+    UNAUTHORIZED_APPOINTMENT_ACCESS: {
+        en: "You are not authorized to access this appointment",
+        ar: "غير مصرح لك بالوصول إلى هذا الموعد"
+    },
+    APPOINTMENT_ALREADY_DELETED: {
+        en: "Appointment has already been deleted",
+        ar: "تم حذف الموعد بالفعل"
+    },
 };
 
 // Helper function to create bilingual error

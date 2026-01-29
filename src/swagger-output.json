@@ -3684,6 +3684,88 @@
           }
         }
       }
+    },
+    "/appointments/{appointmentId}/cancel": {
+      "delete": {
+        "tags": [
+          "Appointments"
+        ],
+        "description": "Cancel an appointment (soft delete). Can be cancelled by either patient or doctor.",
+        "parameters": [
+          {
+            "name": "appointmentId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Appointment ID to cancel"
+          },
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Appointment cancelled successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Appointment cancelled successfully"
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "appointmentId": {
+                      "type": "string",
+                      "example": "appointment-uuid"
+                    },
+                    "cancelledAt": {
+                      "type": "string",
+                      "example": "2026-01-29T12:00:00.000Z"
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - appointment already cancelled, completed, or too late to cancel",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Error message describing the issue"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - user not authenticated"
+          },
+          "403": {
+            "description": "Forbidden - user is not the patient or doctor of this appointment"
+          },
+          "404": {
+            "description": "Appointment not found"
+          }
+        }
+      }
     }
   }
 }

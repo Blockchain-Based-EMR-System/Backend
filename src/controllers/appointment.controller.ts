@@ -138,4 +138,14 @@ export class AppointmentController {
             message: 'Appointment rescheduled successfully',
         });
     });
+
+    public cancelAppointment = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
+        const userId = req.user.id;
+        const { appointmentId } = req.params;
+
+        await this.appointmentService.cancelAppointment(userId, appointmentId);
+        res.status(200).json({
+            message: 'Appointment cancelled successfully',
+        });
+    });
 }
