@@ -3942,6 +3942,87 @@
           }
         }
       }
+    },
+    "/appointments/doctor/reschedule-day": {
+      "patch": {
+        "tags": [
+          "Appointments"
+        ],
+        "description": "Reschedule all confirmed appointments of a specific day to a new date",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication (must be a doctor)",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Parameters for moving all appointments from one day to another",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "currentDate": {
+                  "type": "string",
+                  "example": "2026-02-10T09:00:00.000Z"
+                },
+                "newDate": {
+                  "type": "string",
+                  "example": "2026-02-16T09:00:00.000Z"
+                },
+                "keepOriginalSlots": {
+                  "type": "boolean",
+                  "example": true
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "All appointments for the day were successfully rescheduled",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Appointments rescheduled successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (missing/invalid dates, conflicting parameters, etc.)",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Error message describing the issue (e.g. \"Current date and new date cannot be the same\", \"Invalid date format\", etc.)"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - user not authenticated"
+          },
+          "403": {
+            "description": "Forbidden - authenticated user is not a doctor or not authorized"
+          },
+          "404": {
+            "description": "No confirmed appointments found for the specified current date"
+          }
+        }
+      }
     }
   }
 }

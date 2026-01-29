@@ -6,7 +6,6 @@ import { TimeSlot } from '@/interfaces';
 import { HttpException } from "@/exceptions/HttpException";
 import { createBilingualError, ErrorMessages } from '@/utils/errorMessages';
 import { PatientAppointment } from '@/interfaces/appointments.interface';
-import { min } from 'class-validator';
 
 @Service()
 export class AppointmentService {
@@ -204,8 +203,6 @@ export class AppointmentService {
                 estimated_time: schedule.slot_duration,       
             }
         });
-        
-        console.log('Appointment booked:', appointment);
     }
 
     public async getPatientAppointments(patientId: string): Promise<PatientAppointment[]> {
@@ -421,6 +418,36 @@ export class AppointmentService {
                 }  
             }
         }     
+    }
+
+    public async rescheduleDayAppointments(doctorId: string, currentDate: Date, newDate: Date, keepOriginalSlots: boolean): Promise<void> {
+
+        const startOfDay = new Date(currentDate);
+        startOfDay.setHours(0, 0, 0, 0);
+
+        const endOfDay = new Date(currentDate);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        const appointments = await prisma.appointment.findMany({
+            where: {
+                doctor_id: doctorId,
+                scheduled_time: {
+                    gte: startOfDay,
+                    lte: endOfDay,
+                },
+                status: { in: ['CONFIRMED'] },
+                deleted_at: null,
+            },
+            select: {
+                id: true,
+                scheduled_time: true,
+            },
+            orderBy: {
+                scheduled_time: 'asc', 
+            }
+        });
+
+        await this.bulkRescheduleByDoctor(doctorId, appointments.map(app => app.id), null, newDate, keepOriginalSlots);
     }
 
     public async cancelAppointment(userId: string, appointmentId: string): Promise<void> {

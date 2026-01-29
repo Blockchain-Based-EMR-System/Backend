@@ -593,7 +593,7 @@ export class AppointmentRoute implements Routes {
                 (3) When using "newScheduledTime": \
                     - If "keepOriginalSlots" is true, appointments keep their original time-of-day but move to the new date. \
                     - If "keepOriginalSlots" is false, appointments are reallocated sequentially based on the doctor schedule.'
-                    
+
                 #swagger.parameters['body'] = {
                     in: 'body',
                     description: 'Bulk reschedule parameters',
@@ -634,6 +634,61 @@ export class AppointmentRoute implements Routes {
             AuthMiddleware,
             this.appointmentController.bulkRescheduleByDoctor
         );
+
+        this.router.patch(
+            `${this.path}/doctor/reschedule-day`,
+            /* 
+                #swagger.path = '/appointments/doctor/reschedule-day'
+                #swagger.method = 'patch'
+                #swagger.tags = ['Appointments']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication (must be a doctor)',
+                    required: true,
+                    type: 'string'
+                }
+
+                #swagger.description = 'Reschedule all confirmed appointments of a specific day to a new date'
+                #swagger.parameters['body'] = {
+                    in: 'body',
+                    description: 'Parameters for moving all appointments from one day to another',
+                    required: true,
+                    schema: {
+                        currentDate: '2026-02-10T09:00:00.000Z',
+                        newDate: '2026-02-16T09:00:00.000Z',
+                        keepOriginalSlots: true
+                    }
+                }
+
+                #swagger.responses[200] = {
+                    description: 'All appointments for the day were successfully rescheduled',
+                    schema: {
+                        message: 'Appointments rescheduled successfully'
+                    }
+                }
+
+                #swagger.responses[400] = {
+                    description: 'Bad request (missing/invalid dates, conflicting parameters, etc.)',
+                    schema: {
+                        message: 'Error message describing the issue (e.g. "Current date and new date cannot be the same", "Invalid date format", etc.)'
+                    }
+                }
+
+                #swagger.responses[401] = {
+                    description: 'Unauthorized - user not authenticated'
+                }
+
+                #swagger.responses[403] = {
+                    description: 'Forbidden - authenticated user is not a doctor or not authorized'
+                }
+
+                #swagger.responses[404] = {
+                    description: 'No confirmed appointments found for the specified current date'
+                }
+            */
+            AuthMiddleware,
+            this.appointmentController.rescheduleDayAppointments
+        )
 
     }
 }

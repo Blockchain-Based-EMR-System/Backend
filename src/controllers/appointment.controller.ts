@@ -199,4 +199,24 @@ export class AppointmentController {
             message: 'Appointments rescheduled successfully',
         });
     });
+
+    public rescheduleDayAppointments = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
+        const doctorId = req.user.id;
+        const { currentDate, newDate, keepOriginalSlots } = req.body;
+
+        if (!doctorId) {
+            const error = createBilingualError(400, ErrorMessages.DOCTOR_ID_REQUIRED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        if (!currentDate || !newDate) {
+            const error = createBilingualError(400, ErrorMessages.DATE_REQUIRED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        await this.appointmentService.rescheduleDayAppointments(doctorId, new Date(currentDate), new Date(newDate), keepOriginalSlots);
+        res.status(200).json({
+            message: 'Appointments rescheduled successfully',
+        });
+    });
 }
