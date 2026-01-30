@@ -6,16 +6,18 @@ import { DoctorAccountStatus, PrismaClient, Role } from "@prisma/client";
 import { hash, compare } from "bcrypt";
 import { DoctorLoginData } from "@/interfaces/doctors.interface";
 import { AuthService } from "./auth.service";
-import { Clinic } from "@/interfaces";
+import prisma from "@/config/prisma";
+import cloudinary from "@/utils/cloudinary";
+import { DOCTOR_FILES } from "@/interfaces";
+import  fs  from "fs";
 
-// TO BE CHANGED
-const prisma = new PrismaClient();
+
 const authService = new AuthService();
 
 @Service()
 export class DoctorService {
 
-    public async signup(doctorData: DoctorSignupRequestDto): Promise<void> {
+    public async signup(doctorData: DoctorSignupRequestDto, doctorFiles: {}): Promise<void> {
         // Check if email already exists
         const existingUser = await prisma.user.findUnique({
             where: { email: doctorData.email }
@@ -41,29 +43,39 @@ export class DoctorService {
 
         const hashedPassword = await hash(doctorData.password, 10);
 
-        // Create user with doctor role
-        const createdUser = await prisma.user.create({
-            data: {
-                email: doctorData.email,
-                name: doctorData.name,
-                username,
-                phone: doctorData.phone,
-                gender: doctorData.gender,
-                date_of_birth: new Date(doctorData.date_of_birth),
-                password_hash: hashedPassword,
-                role: Role.DOCTOR,
-                isVerified: false,
-                hasCompletedProfile: true,
-            },
+        // Create user and doctor in a transaction
+        const createdUserId = await prisma.$transaction(async (tx) => {
+            const createdUser = await tx.user.create({
+                data: {
+                    email: doctorData.email,
+                    name: doctorData.name,
+                    username,
+                    phone: doctorData.phone,
+                    gender: doctorData.gender,
+                    date_of_birth: new Date(doctorData.date_of_birth),
+                    password_hash: hashedPassword,
+                    role: Role.DOCTOR,
+                    isVerified: false,
+                    hasCompletedProfile: true,
+                },
+            });
+
+            await tx.doctor.create({
+                data: {
+                    id: createdUser.id,
+                    specialization: "IMMUNOLOGY",
+                    account_status: DoctorAccountStatus.PENDING,
+                },
+            });
+            return createdUser.id;
         });
 
-        await prisma.doctor.create({
-            data: {
-                id: createdUser.id,
-                specialization: "IMMUNOLOGY",
-                account_status: DoctorAccountStatus.PENDING,
-            },
-        });
+        // Upload files and update doctor record with files urls        
+        if (doctorFiles && Object.keys(doctorFiles).length > 0) {
+            const doctorFilesArray = Object.values(doctorFiles).flat() as Express.Multer.File[];
+            
+            await this._uploadFiles(doctorFilesArray, createdUserId);
+        }
     }
 
 
@@ -160,4 +172,91 @@ export class DoctorService {
         });
     }
 
+
+    private async _uploadFiles(files: Express.Multer.File[], doctorId: string): Promise<void> {
+        const uploadedFiles: { public_id: string }[] = [];
+
+        try {
+            // Validate all fieldnames before uploading
+            for (const file of files) {
+                if (!Object.values(DOCTOR_FILES).includes(file.fieldname as any)) {
+                    const error = createBilingualError(400, ErrorMessages.UNKNOWN_FILE_FIELDNAME);
+                    throw new HttpException(error.status, error.message, error.messageAr);
+                }
+            }
+
+            // Upload all files to Cloudinary in parallel
+            const uploadResults = await Promise.all(
+                files.map(file =>
+                    cloudinary.uploader.upload(file.path, {
+                        folder: `DOCTORS/documents/${doctorId}`,
+                        overwrite: false,
+                        public_id: `DOCTOR_${doctorId}_${file.fieldname}_${Date.now()}`
+                    })
+                )
+            );
+
+            // Track uploaded files for potential rollback
+            uploadedFiles.push(...uploadResults.map(r => ({ public_id: r.public_id })));
+
+            // Map file fields to database columns
+            const updateData: any = {};
+            files.forEach((file, index) => {
+                const uploadResult = uploadResults[index];
+
+                switch (file.fieldname) {
+                    case DOCTOR_FILES.GRADUATION_CERTIFICATE:
+                        updateData.graduationCertificateUrl = uploadResult.secure_url;
+                        updateData.graduationCertificatePublicId = uploadResult.public_id;
+                        break;
+                    case DOCTOR_FILES.MEMBERSHIP_CARD:
+                        updateData.membershipCardUrl = uploadResult.secure_url;
+                        updateData.membershipCardPublicId = uploadResult.public_id;
+                        break;
+                    case DOCTOR_FILES.PROFESSIONAL_PRACTICE_CARD:
+                        updateData.professionalPracticeCardUrl = uploadResult.secure_url;
+                        updateData.professionalPracticeCardPublicId = uploadResult.public_id;
+                        break;
+                    case DOCTOR_FILES.MASTERS_CERTIFICATE:
+                        updateData.mastersCertificateUrl = uploadResult.secure_url;
+                        updateData.mastersCertificatePublicId = uploadResult.public_id;
+                        break;
+                    case DOCTOR_FILES.FELLOWSHIP_CERTIFICATE:
+                        updateData.fellowshipCertificateUrl = uploadResult.secure_url;
+                        updateData.fellowshipCertificatePublicId = uploadResult.public_id;
+                        break;
+                    case DOCTOR_FILES.UNION_SPECIALIZATION_CERTIFICATE:
+                        updateData.unionSpecializationCertificateUrl = uploadResult.secure_url;
+                        updateData.unionSpecializationCertificatePublicId = uploadResult.public_id;
+                        break;
+                }
+                console.log(`Deleting ${file.path}`);
+                
+                fs.unlinkSync(file.path); // Delete local file after upload
+            });
+
+            // Update database with all URLs in a single operation
+            await prisma.doctor.update({
+                where: { id: doctorId },
+                data: updateData
+            });
+
+        } catch (error) {
+            // Rollback: Delete all uploaded files from Cloudinary
+            if (uploadedFiles.length > 0) {
+                await Promise.all(
+                    uploadedFiles.map(f => cloudinary.uploader.destroy(f.public_id).catch(() => { }))
+                );
+
+            }
+
+            // Delete local files in case of error (only if they still exist)
+            files.forEach(file => {
+                if (fs.existsSync(file.path)) {
+                    fs.unlinkSync(file.path);
+                }
+            });
+            throw error;
+        }
+    }
 }

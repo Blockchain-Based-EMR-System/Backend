@@ -51,7 +51,7 @@ export class AuthService {
       }
     });
 
-    const tokenResponse = await this.createTokens(createdUserData, true);
+    const tokenResponse = await this.createTokens(createdUserData, userData.rememberMe);
     const cookies = this.createCookies(tokenResponse);
 
     return { createdUserData, cookies };
@@ -198,7 +198,14 @@ export class AuthService {
 
     // Verify the refresh token
     const secretKey: string = REFRESH_TOKEN_SECRET;
-    const decoded = verify(refreshToken, secretKey) as DataStoredInToken;
+    let decoded: DataStoredInToken;
+    
+    try {
+      decoded = verify(refreshToken, secretKey) as DataStoredInToken;
+    } catch (error) {
+      const err = createBilingualError(401, ErrorMessages.INVALID_REFRESH_TOKEN);
+      throw new HttpException(err.status, err.message, err.messageAr);
+    }
 
     // Hash the token to compare with stored hash
     const tokenHash = crypto.createHash('sha256').update(refreshToken).digest('hex');
@@ -219,15 +226,36 @@ export class AuthService {
     }
 
     // Get user
-    const user = await this.users.findUnique({ where: { id: decoded.id } });
+    const user = await this.users.findUnique({ 
+      where: { id: decoded.id },
+      include: { doctor: true } // Include doctor relation if needed
+    });
+    
     if (!user) {
       const error = createBilingualError(401, ErrorMessages.USER_NOT_EXIST);
       throw new HttpException(error.status, error.message, error.messageAr);
     }
 
+    // Revoke the old refresh token (token rotation for security)
+    await this.refreshTokens.update({
+      where: { id: storedToken.id },
+      data: { 
+        is_revoked: true, 
+        revoked_at: new Date() 
+      }
+    });
+
     // Create new access token
     const accessToken = this.createAccessToken(user);
-    const cookies = this.createCookies({ accessToken });
+    
+    // Create new refresh token (token rotation)
+    const newRefreshToken = await this.createRefreshToken(user);
+    
+    // Create cookies with both tokens
+    const cookies = this.createCookies({ 
+      accessToken,
+      refreshToken: newRefreshToken
+    });
 
     return { cookies, user, accessToken };
   }

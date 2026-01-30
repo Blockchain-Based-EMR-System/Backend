@@ -59,7 +59,9 @@ export class AuthController {
     const refreshToken = req.cookies?.RefreshToken;
     const { cookies, user, accessToken } = await this.auth.refreshAccessToken(refreshToken);
 
-    res.setHeader('Set-Cookie', cookies);
+    cookies.forEach((cookie: string) => {
+      res.append('Set-Cookie', cookie);
+    });
     const responseMessage = createMultiLangMessage(SuccessResponseMessages.TOKEN_REFRESHED_SUCCESSFULLY);
     res.status(200).json({
       data: {

@@ -1507,6 +1507,30 @@
                           "account_status": {
                             "type": "string",
                             "example": "APPROVED"
+                          },
+                          "mastersCertificateUrl": {
+                            "type": "string",
+                            "example": ""
+                          },
+                          "graduationCertificateUrl": {
+                            "type": "string",
+                            "example": ""
+                          },
+                          "fellowshipCertificateUrl": {
+                            "type": "string",
+                            "example": ""
+                          },
+                          "professionalPracticeCardUrl": {
+                            "type": "string",
+                            "example": ""
+                          },
+                          "membershipCardUrl": {
+                            "type": "string",
+                            "example": ""
+                          },
+                          "unionSpecializationCertificateUrl": {
+                            "type": "string",
+                            "example": ""
                           }
                         }
                       }
@@ -2371,48 +2395,97 @@
           "Doctors"
         ],
         "description": "",
+        "consumes": [
+          "multipart/form-data"
+        ],
         "parameters": [
           {
-            "name": "body",
-            "in": "body",
-            "description": "Doctor signup data",
+            "name": "email",
+            "in": "formData",
+            "description": "Doctor email address",
             "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "email": {
-                  "type": "string",
-                  "example": "doctor@example.com"
-                },
-                "name": {
-                  "type": "string",
-                  "example": "Dr. Smith"
-                },
-                "phone": {
-                  "type": "string",
-                  "example": "1234567890"
-                },
-                "password": {
-                  "type": "string",
-                  "example": "SecurePassword123"
-                },
-                "gender": {
-                  "type": "string",
-                  "example": "MALE or FEMALE"
-                },
-                "date_of_birth": {
-                  "type": "string",
-                  "example": "1990-01-01"
-                }
-              },
-              "required": [
-                "email",
-                "name",
-                "phone",
-                "password",
-                "gender"
-              ]
-            }
+            "type": "string"
+          },
+          {
+            "name": "name",
+            "in": "formData",
+            "description": "Doctor full name",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "phone",
+            "in": "formData",
+            "description": "Doctor phone number",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "password",
+            "in": "formData",
+            "description": "Doctor password",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "gender",
+            "in": "formData",
+            "description": "Doctor gender (MALE or FEMALE)",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "MALE",
+              "FEMALE"
+            ]
+          },
+          {
+            "name": "date_of_birth",
+            "in": "formData",
+            "description": "Doctor date of birth (YYYY-MM-DD)",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "graduationCertificate",
+            "in": "formData",
+            "description": "Graduation certificate PDF",
+            "required": true,
+            "type": "file"
+          },
+          {
+            "name": "membershipCard",
+            "in": "formData",
+            "description": "Membership card PDF",
+            "required": true,
+            "type": "file"
+          },
+          {
+            "name": "professionalPracticeCard",
+            "in": "formData",
+            "description": "Professional practice card PDF",
+            "required": true,
+            "type": "file"
+          },
+          {
+            "name": "mastersCertificate",
+            "in": "formData",
+            "description": "Masters certificate PDF",
+            "required": true,
+            "type": "file"
+          },
+          {
+            "name": "fellowshipCertificate",
+            "in": "formData",
+            "description": "Fellowship certificate PDF",
+            "required": true,
+            "type": "file"
+          },
+          {
+            "name": "unionSpecializationCertificate",
+            "in": "formData",
+            "description": "Union specialization certificate PDF",
+            "required": true,
+            "type": "file"
           }
         ],
         "responses": {
