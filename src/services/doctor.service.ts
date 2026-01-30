@@ -250,7 +250,12 @@ export class DoctorService {
 
             }
 
-            files.map(file => fs.unlinkSync(file.path)); // Delete local files in case of error
+            // Delete local files in case of error (only if they still exist)
+            files.forEach(file => {
+                if (fs.existsSync(file.path)) {
+                    fs.unlinkSync(file.path);
+                }
+            });
             throw error;
         }
     }
