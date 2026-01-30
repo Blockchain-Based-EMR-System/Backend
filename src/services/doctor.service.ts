@@ -230,6 +230,8 @@ export class DoctorService {
                         updateData.unionSpecializationCertificatePublicId = uploadResult.public_id;
                         break;
                 }
+                console.log(`Deleting ${file.path}`);
+                
                 fs.unlinkSync(file.path); // Delete local file after upload
             });
 
@@ -247,6 +249,7 @@ export class DoctorService {
                 );
 
             }
+
             files.map(file => fs.unlinkSync(file.path)); // Delete local files in case of error
             throw error;
         }

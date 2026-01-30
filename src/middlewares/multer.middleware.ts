@@ -12,7 +12,7 @@ const storage = multer.diskStorage({
     filename: (req: Request, file: Express.Multer.File, cb: (error: Error | null, filename: string) => void) => {
         // We create a unique name: "doctor-timestamp.jpg"
         const uniqueSuffix = Math.round(Math.random() * 1E9);
-        cb(null, file.fieldname + '-' + uniqueSuffix + path.extname(file.originalname));
+        cb(null, file.fieldname + path.extname(file.originalname));
     }
 });
 
