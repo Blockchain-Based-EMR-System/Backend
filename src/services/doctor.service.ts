@@ -191,7 +191,7 @@ export class DoctorService {
                     cloudinary.uploader.upload(file.path, {
                         folder: `DOCTORS/documents/${doctorId}`,
                         overwrite: false,
-                        public_id: `DOCTOR_${doctorId}_${file.originalname}_${Date.now()}`
+                        public_id: `DOCTOR_${doctorId}_${file.fieldname}_${Date.now()}`
                     })
                 )
             );

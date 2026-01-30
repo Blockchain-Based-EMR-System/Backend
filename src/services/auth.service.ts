@@ -51,7 +51,7 @@ export class AuthService {
       }
     });
 
-    const tokenResponse = await this.createTokens(createdUserData, true);
+    const tokenResponse = await this.createTokens(createdUserData, userData.rememberMe);
     const cookies = this.createCookies(tokenResponse);
 
     return { createdUserData, cookies };

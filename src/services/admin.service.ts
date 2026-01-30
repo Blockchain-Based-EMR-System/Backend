@@ -5,6 +5,8 @@ import { AddDoctorFromAdminDto, DoctorFromAdminResponseDto } from '@/dtos/admins
 import { HttpException } from '@/exceptions/HttpException';
 import { ErrorMessages, createBilingualError } from '@/utils/errorMessages';
 import { User } from '@/interfaces';
+import { SENDER_EMAIL } from '@/config';
+import { transporter } from '@/utils/nodeMailerService';
 
 // TO BE CHANGED
 const prisma = new PrismaClient();
@@ -204,5 +206,29 @@ export class AdminService {
                 }
             }
         });
+    }
+
+    public async sendVerificationStatusEmail(doctorId: string, isApproved: boolean): Promise<void> {
+        const doctor = await prisma.user.findUnique({
+            where: { id: doctorId, role: Role.DOCTOR },
+            select: { email: true, name: true }
+        });
+        if (!doctor) {
+            const error = createBilingualError(404, ErrorMessages.USER_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+        const mailOptions = {
+            from: SENDER_EMAIL,
+            to: doctor.email,
+            subject: isApproved ? 'Doctor Account Approved - MedBridge' : 'Doctor Account Rejected - MedBridge',
+            html: `
+                <p>Dear Dr. ${doctor.name},</p>
+                <p>Your account has been ${isApproved ? 'approved' : 'rejected'}.</p>
+                <p>Thank you for using our platform.</p>
+                <p>Best regards,<br/>MedicBridge Team</p>
+            `
+        };
+
+        await transporter.sendMail(mailOptions);
     }
 }

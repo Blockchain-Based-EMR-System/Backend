@@ -114,6 +114,7 @@ export class AdminController {
         const doctorId = req.params.id;
         const { isVerified } = req.body;
         await this.adminService.updateDoctorVerificationStatus(doctorId, isVerified);
+        await this.adminService.sendVerificationStatusEmail(doctorId, isVerified);
         const responseMessage = createMultiLangMessage(SuccessResponseMessages.DOCTOR_VERIFICATION_STATUS_UPDATED);
         res.status(200).json({
             messageEn: responseMessage.messageEn,
