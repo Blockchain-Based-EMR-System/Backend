@@ -35,6 +35,24 @@ export interface PatientAppointment {
     clinic_address: string | null; 
 }
 
+export interface DoctorAppointment {
+    id: string;
+    status: AppointmentStatus;  
+    slot_duration: number;
+    patient_name: string;
+    appointment_date: string;
+    start_time: string;
+    end_time: string;
+    clinic_name: string | null;
+    clinic_address: string | null;
+}
+
+export interface DoctorScheduleDay {
+    date: string; 
+    displayDate: string;
+    appointments: DoctorAppointment[];
+}
+
 export interface AvailableDay {
   date: string; 
   dayOfWeek: DayOfWeek;

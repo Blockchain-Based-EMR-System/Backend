@@ -219,4 +219,18 @@ export class AppointmentController {
             message: 'Appointments rescheduled successfully',
         });
     });
+
+    public getDoctorSchedule = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
+        const doctorId = req.user.id;
+
+        if (!doctorId) {
+            const error = createBilingualError(400, ErrorMessages.DOCTOR_ID_REQUIRED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const schedule = await this.appointmentService.getDoctorSchedule(doctorId);
+        res.status(200).json({
+            data: schedule,
+        });
+    });
 }

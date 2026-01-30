@@ -4023,6 +4023,102 @@
           }
         }
       }
+    },
+    "/appointments/doctor/schedule": {
+      "get": {
+        "tags": [
+          "Appointments"
+        ],
+        "description": "Get the doctor",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication (must be a doctor)",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Doctor schedule retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "date": {
+                        "type": "string",
+                        "example": "2026-02-05"
+                      },
+                      "displayDate": {
+                        "type": "string",
+                        "example": "Wednesday, February 5, 2026"
+                      },
+                      "appointments": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "example": "appointment-uuid-3"
+                            },
+                            "status": {
+                              "type": "string",
+                              "example": "CONFIRMED"
+                            },
+                            "slot_duration": {
+                              "type": "number",
+                              "example": 45
+                            },
+                            "patient_name": {
+                              "type": "string",
+                              "example": "Bob Johnson"
+                            },
+                            "appointment_date": {
+                              "type": "string",
+                              "example": "2026-02-05"
+                            },
+                            "start_time": {
+                              "type": "string",
+                              "example": "14:00"
+                            },
+                            "end_time": {
+                              "type": "string",
+                              "example": "14:45"
+                            },
+                            "clinic_name": {
+                              "type": "string",
+                              "example": "Downtown Health Center"
+                            },
+                            "clinic_address": {
+                              "type": "string",
+                              "example": "456 Oak Avenue"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - doctor ID missing or invalid"
+          },
+          "401": {
+            "description": "Unauthorized - doctor not authenticated"
+          }
+        }
+      }
     }
   }
 }

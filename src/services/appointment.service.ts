@@ -5,7 +5,7 @@ import { Service } from 'typedi';
 import { TimeSlot } from '@/interfaces';
 import { HttpException } from "@/exceptions/HttpException";
 import { createBilingualError, ErrorMessages } from '@/utils/errorMessages';
-import { PatientAppointment } from '@/interfaces/appointments.interface';
+import { DoctorAppointment, DoctorScheduleDay, PatientAppointment } from '@/interfaces/appointments.interface';
 
 @Service()
 export class AppointmentService {
@@ -492,6 +492,78 @@ export class AppointmentService {
         });
         // penalty to be added later
     };
+
+    public async getDoctorSchedule(doctorId: string) : Promise<DoctorScheduleDay[]> {
+        const now = new Date();
+        
+        const appointments = await prisma.appointment.findMany({
+            where: {
+                doctor_id: doctorId,
+                scheduled_time: {
+                    gte: new Date(),
+                },
+                status: { in: ['CONFIRMED', 'COMPLETED'] },
+                deleted_at: null,
+            },
+            orderBy: {
+                scheduled_time: 'asc',
+            },
+            select: {
+                id: true,
+                scheduled_time: true,
+                end_time: true,
+                slot_duration: true,
+                status: true,
+                clinic_id: true,
+                patient: {
+                    select: {
+                        name: true,
+                    }
+                },
+                clinic: {
+                    select: {
+                        name: true,
+                        address: true,
+                    }
+                }
+            }
+        });
+
+        const groupedByDate = new Map<string, DoctorAppointment[]>();
+
+        appointments.forEach(app => {
+            const dateKey = this.formatDate(app.scheduled_time);
+
+            const doctorAppointment: DoctorAppointment = {
+                id: app.id,
+                status: app.status,
+                slot_duration: app.slot_duration,
+                patient_name: app.patient.name,
+                appointment_date: dateKey,
+                start_time: this.formatTime(app.scheduled_time),
+                end_time: this.formatTime(app.end_time),
+                clinic_name: app.clinic ? app.clinic.name : null,
+                clinic_address: app.clinic ? app.clinic.address : null,
+            };
+
+            if (!groupedByDate.has(dateKey)){
+                groupedByDate.set(dateKey, []);
+            }
+            groupedByDate.get(dateKey).push(doctorAppointment);
+        });
+
+        const schedule: DoctorScheduleDay[] = [];
+        groupedByDate.forEach((appointments, dateKey) => {
+            const date = new Date(dateKey);
+            schedule.push({
+                date: dateKey,
+                displayDate: this.formatDisplayDate(date),
+                appointments: appointments,
+            });
+        });
+
+        return schedule;
+    }
 
     private generateTimeSlots(startTime: Date, endTime: Date, slotDuration: number, bufferTime: number): Omit<TimeSlot, 'available'>[]{
         const slots: Omit<TimeSlot, 'available'>[] = [];

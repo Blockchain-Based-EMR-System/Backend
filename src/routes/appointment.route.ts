@@ -690,6 +690,81 @@ export class AppointmentRoute implements Routes {
             this.appointmentController.rescheduleDayAppointments
         )
 
+        this.router.get(
+            `${this.path}/doctor/schedule`,
+            /* 
+                #swagger.path = '/appointments/doctor/schedule'
+                #swagger.method = 'get'
+                #swagger.tags = ['Appointments']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication (must be a doctor)',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.description = 'Get the doctor's complete schedule with all appointments grouped by date'
+                #swagger.responses[200] = {
+                    description: 'Doctor schedule retrieved successfully',
+                    schema: {
+                        data: [
+                            {
+                                date: '2026-02-03',
+                                displayDate: 'Monday, February 3, 2026',
+                                appointments: [
+                                    {
+                                        id: 'appointment-uuid-1',
+                                        status: 'CONFIRMED',
+                                        slot_duration: 30,
+                                        patient_name: 'John Doe',
+                                        appointment_date: '2026-02-03',
+                                        start_time: '09:00',
+                                        end_time: '09:30',
+                                        clinic_name: 'New Cairo Medical Clinic',
+                                        clinic_address: '123 Main Street, Medical Park'
+                                    },
+                                    {
+                                        id: 'appointment-uuid-2',
+                                        status: 'CONFIRMED',
+                                        slot_duration: 30,
+                                        patient_name: 'Jane Smith',
+                                        appointment_date: '2026-02-03',
+                                        start_time: '10:00',
+                                        end_time: '10:30',
+                                        clinic_name: null,
+                                        clinic_address: null
+                                    }
+                                ]
+                            },
+                            {
+                                date: '2026-02-05',
+                                displayDate: 'Wednesday, February 5, 2026',
+                                appointments: [
+                                    {
+                                        id: 'appointment-uuid-3',
+                                        status: 'CONFIRMED',
+                                        slot_duration: 45,
+                                        patient_name: 'Bob Johnson',
+                                        appointment_date: '2026-02-05',
+                                        start_time: '14:00',
+                                        end_time: '14:45',
+                                        clinic_name: 'Downtown Health Center',
+                                        clinic_address: '456 Oak Avenue'
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+                #swagger.responses[400] = {
+                    description: 'Bad request - doctor ID missing or invalid'
+                }
+                #swagger.responses[401] = {
+                    description: 'Unauthorized - doctor not authenticated'
+                }
+            */
+            AuthMiddleware,
+            this.appointmentController.getDoctorSchedule
+        );
     }
 }
 
