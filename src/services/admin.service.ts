@@ -179,7 +179,7 @@ export class AdminService {
         return unverifiedDoctors
 
     }
-    public async updateDoctorVerificationStatus(doctorId: string, isApproved: boolean): Promise<void> {
+    public async updateDoctorVerificationStatus(doctorId: string, isApproved: boolean | null): Promise<void> {
 
         const doctor = await prisma.user.findUnique({
             where: { id: doctorId, role: Role.DOCTOR },
@@ -188,12 +188,22 @@ export class AdminService {
             const error = createBilingualError(404, ErrorMessages.USER_NOT_FOUND);
             throw new HttpException(error.status, error.message, error.messageAr);
         }
+
+        let accountStatus: DoctorAccountStatus;
+        if (isApproved === true) {
+            accountStatus = DoctorAccountStatus.APPROVED;
+        } else if (isApproved === false) {
+            accountStatus = DoctorAccountStatus.REJECTED;
+        } else {
+            accountStatus = DoctorAccountStatus.PENDING;
+        }
+
         await prisma.user.update({
             where: { id: doctorId },
             data: {
                 doctor: {
                     update: {
-                        account_status: isApproved ? DoctorAccountStatus.APPROVED : DoctorAccountStatus.REJECTED,
+                        account_status: accountStatus,
                     }
                 }
             }
