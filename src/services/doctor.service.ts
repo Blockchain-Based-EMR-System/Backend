@@ -55,7 +55,7 @@ export class DoctorService {
                     date_of_birth: new Date(doctorData.date_of_birth),
                     password_hash: hashedPassword,
                     role: Role.DOCTOR,
-                    isVerified: false,
+                    isVerified: true,
                     hasCompletedProfile: true,
                 },
             });
