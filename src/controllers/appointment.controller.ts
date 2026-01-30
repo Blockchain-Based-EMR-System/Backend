@@ -5,6 +5,7 @@ import { catchAsync } from '@/utils/catchAsync';
 import { AppointmentService } from "@/services/appointment.service"
 import Container from "typedi";
 import { createBilingualError, ErrorMessages } from '@/utils/errorMessages';
+import { SuccessResponseMessages, createMultiLangMessage } from '@/utils/responseMessages';
 
 
 export class AppointmentController {
@@ -21,8 +22,10 @@ export class AppointmentController {
         }
 
         const availableDays = await this.appointmentService.getAvailableDays(doctorId, clinicId as string || null)
+        const response = createMultiLangMessage(SuccessResponseMessages.AVAILABLE_DAYS_RETRIEVED);
         res.status(200).json({
             data: availableDays,
+            ...response
         });
 
     });
@@ -55,8 +58,10 @@ export class AppointmentController {
         }
 
         const availableSlots = await this.appointmentService.getAvailableSlots(doctorId, clinicId as string || null, date as string)
+        const response = createMultiLangMessage(SuccessResponseMessages.AVAILABLE_SLOTS_RETRIEVED);
         res.status(200).json({
             data: availableSlots,
+            ...response
         });
 
     });
@@ -67,25 +72,16 @@ export class AppointmentController {
         const { doctorId, clinicId, scheduledTime } = req.body;
         const scheduledDate = new Date(scheduledTime);
 
-        if (!doctorId) {
-            const error = createBilingualError(400, ErrorMessages.DOCTOR_ID_REQUIRED);
-            throw new HttpException(error.status, error.message, error.messageAr);
-        }
-
-        if (!scheduledTime) {
-            const error = createBilingualError(400, ErrorMessages.SCHEDULED_TIME_REQUIRED);
-            throw new HttpException(error.status, error.message, error.messageAr);
-        }
-        
         if (isNaN(scheduledDate.getTime())) {
             const error = createBilingualError(400, ErrorMessages.INVALID_SCHEDULED_TIME);
             throw new HttpException(error.status, error.message, error.messageAr);
         }
 
         await this.appointmentService.bookAppointment(patientId, doctorId, clinicId || null, scheduledDate);
+        const response = createMultiLangMessage(SuccessResponseMessages.APPOINTMENT_BOOKED_SUCCESSFULLY);
 
         res.status(201).json({
-            message: 'Appointment booked successfully',
+            ...response
         });
     });
 
@@ -98,8 +94,10 @@ export class AppointmentController {
         }
 
         const appointments = await this.appointmentService.getPatientAppointments(patientId);
+        const response = createMultiLangMessage(SuccessResponseMessages.PATIENT_APPOINTMENTS_RETRIEVED);
         res.status(200).json({
             data: appointments,
+            ...response
         });
     });
 
@@ -113,8 +111,10 @@ export class AppointmentController {
         }
 
         const appointment = await this.appointmentService.getPatientSelectedAppointment(appointmentId, patientId);
+        const response = createMultiLangMessage(SuccessResponseMessages.APPOINTMENT_DETAILS_RETRIEVED);
         res.status(200).json({
             data: appointment,
+            ...response
         });
     });
 
@@ -122,20 +122,11 @@ export class AppointmentController {
         const patientId = req.user.id;
         const { appointmentId } = req.params;
         const { newScheduledTime } = req.body;
-
-        if (!patientId) {
-            const error = createBilingualError(400, ErrorMessages.PATIENT_ID_REQUIRED);
-            throw new HttpException(error.status, error.message, error.messageAr);
-        }
-
-        if (!newScheduledTime) {
-            const error = createBilingualError(400, ErrorMessages.SCHEDULED_TIME_REQUIRED);
-            throw new HttpException(error.status, error.message, error.messageAr);
-        }
-
+        
         await this.appointmentService.rescheduleAppointmentByPatient(patientId, appointmentId, new Date(newScheduledTime));
+        const response = createMultiLangMessage(SuccessResponseMessages.APPOINTMENT_RESCHEDULED_SUCCESSFULLY);
         res.status(200).json({
-            message: 'Appointment rescheduled successfully',
+            ...response
         });
     });
 
@@ -144,8 +135,9 @@ export class AppointmentController {
         const { appointmentId } = req.params;
 
         await this.appointmentService.cancelAppointment(userId, appointmentId);
+        const response = createMultiLangMessage(SuccessResponseMessages.APPOINTMENT_CANCELLED_SUCCESSFULLY);
         res.status(200).json({
-            message: 'Appointment cancelled successfully',
+            ...response
         });
     });
 
@@ -159,19 +151,15 @@ export class AppointmentController {
             throw new HttpException(error.status, error.message, error.messageAr);
         }
 
-        if (!minutes && !newScheduledTime) {
-            const error = createBilingualError(400, ErrorMessages.INVALID_RESCHEDULE_PARAMETERS);
-            throw new HttpException(error.status, error.message, error.messageAr);
-        }
-
         if (minutes && newScheduledTime) {
             const error = createBilingualError(400, ErrorMessages.EITHER_MINUTES_OR_NEW_TIME);
             throw new HttpException(error.status, error.message, error.messageAr);
         }
 
         await this.appointmentService.rescheduleAppointmentByDoctor(doctorId, appointmentId, minutes, newScheduledTime ? new Date(newScheduledTime) : undefined);
+        const response = createMultiLangMessage(SuccessResponseMessages.APPOINTMENT_RESCHEDULED_SUCCESSFULLY);
         res.status(200).json({
-            message: 'Appointment rescheduled successfully',
+            ...response
         });
     });
 
@@ -184,19 +172,15 @@ export class AppointmentController {
             throw new HttpException(error.status, error.message, error.messageAr);
         }
 
-        if (!minutes && !newScheduledTime) {
-            const error = createBilingualError(400, ErrorMessages.INVALID_RESCHEDULE_PARAMETERS);
-            throw new HttpException(error.status, error.message, error.messageAr);
-        }
-
         if (minutes && newScheduledTime) {
             const error = createBilingualError(400, ErrorMessages.EITHER_MINUTES_OR_NEW_TIME);
             throw new HttpException(error.status, error.message, error.messageAr);
         }
 
         await this.appointmentService.bulkRescheduleByDoctor(doctorId, appointmentIds, minutes, newScheduledTime ? new Date(newScheduledTime) : undefined, keepOriginalSlots);
+        const response = createMultiLangMessage(SuccessResponseMessages.APPOINTMENTS_RESCHEDULED_SUCCESSFULLY);
         res.status(200).json({
-            message: 'Appointments rescheduled successfully',
+            ...response
         });
     });
 
@@ -209,14 +193,10 @@ export class AppointmentController {
             throw new HttpException(error.status, error.message, error.messageAr);
         }
 
-        if (!currentDate || !newDate) {
-            const error = createBilingualError(400, ErrorMessages.DATE_REQUIRED);
-            throw new HttpException(error.status, error.message, error.messageAr);
-        }
-
         await this.appointmentService.rescheduleDayAppointments(doctorId, new Date(currentDate), new Date(newDate), keepOriginalSlots);
+        const response = createMultiLangMessage(SuccessResponseMessages.APPOINTMENTS_RESCHEDULED_SUCCESSFULLY);
         res.status(200).json({
-            message: 'Appointments rescheduled successfully',
+            ...response
         });
     });
 
@@ -229,8 +209,10 @@ export class AppointmentController {
         }
 
         const schedule = await this.appointmentService.getDoctorSchedule(doctorId);
+        const response = createMultiLangMessage(SuccessResponseMessages.DOCTOR_SCHEDULE_RETRIEVED);
         res.status(200).json({
             data: schedule,
+            ...response
         });
     });
 }

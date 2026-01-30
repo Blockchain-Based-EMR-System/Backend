@@ -90,6 +90,10 @@ export const SuccessResponseMessages = {
         message_en: "Password set successfully.",
         message_ar: "تم تعيين كلمة المرور بنجاح.",
     },
+    DOCTOR_SCHEDULE_RETRIEVED: {
+        message_en: "Doctor schedule retrieved successfully.",
+        message_ar: "تم استرجاع جدول الطبيب بنجاح.",
+    },
 
     // Success messages for Google Auth
     PHONE_NUMBER_UPDATED_SUCCESSFULLY: {
@@ -129,6 +133,39 @@ export const SuccessResponseMessages = {
         message_ar: "تم حذف صورة الملف الشخصي بنجاح.",
     },
 
+    // success messages for appointments
+    APPOINTMENT_BOOKED_SUCCESSFULLY: {
+        message_en: "Appointment booked successfully.",
+        message_ar: "تم حجز الموعد بنجاح.",
+    },
+    APPOINTMENT_RESCHEDULED_SUCCESSFULLY: {
+        message_en: "Appointment rescheduled successfully.",
+        message_ar: "تم إعادة جدولة الموعد بنجاح.",
+    },
+    APPOINTMENTS_RESCHEDULED_SUCCESSFULLY: {
+        message_en: "Appointments rescheduled successfully.",
+        message_ar: "تم إعادة جدولة المواعيد بنجاح.",
+    },
+    APPOINTMENT_CANCELLED_SUCCESSFULLY: {
+        message_en: "Appointment cancelled successfully.",
+        message_ar: "تم إلغاء الموعد بنجاح.",
+    },
+    AVAILABLE_DAYS_RETRIEVED: {
+        message_en: "Available days retrieved successfully.",
+        message_ar: "تم استرجاع الأيام المتاحة بنجاح.",
+    },
+    AVAILABLE_SLOTS_RETRIEVED: {
+        message_en: "Available slots retrieved successfully.",
+        message_ar: "تم استرجاع الأوقات المتاحة بنجاح.",
+    },
+    PATIENT_APPOINTMENTS_RETRIEVED: {
+        message_en: "Patient appointments retrieved successfully.",
+        message_ar: "تم استرجاع مواعيد المريض بنجاح.",
+    },
+    APPOINTMENT_DETAILS_RETRIEVED: {
+        message_en: "Appointment details retrieved successfully.",
+        message_ar: "تم استرجاع تفاصيل الموعد بنجاح.",
+    },
 }
 
 interface MultiLangMessageObj {

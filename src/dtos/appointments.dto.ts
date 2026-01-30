@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsDateString, IsOptional, IsUUID } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsDateString, IsOptional, IsUUID, IsNumber, ValidateIf, IsArray } from 'class-validator';
 
 
 export class BookAppointmentDto {
@@ -38,4 +38,53 @@ export class GetAvailableSlotsDto {
     @IsUUID()
     @IsOptional()
     clinicId?: string;
+}
+
+export class RescheduleAppointmentDto {
+    @IsDateString()
+    @IsNotEmpty()
+    newScheduledTime: string;
+}
+
+export class RescheduleAppointmentByDoctorDto {
+    @IsNumber()
+    @IsOptional()
+    minutes?: number;
+
+    @IsDateString()
+    @IsOptional()
+    newScheduledTime?: string;
+}
+
+export class BulkRescheduleDto {
+    @IsArray()
+    @IsUUID('4', { each: true })
+    @IsNotEmpty()
+    appointmentIds: string[];
+
+    @IsNumber()
+    @IsOptional()
+    minutes?: number;
+
+    @IsDateString()
+    @IsOptional()
+    newScheduledTime?: string;
+
+    @IsBoolean()
+    @IsOptional()
+    keepOriginalSlots?: boolean;
+}
+
+export class RescheduleDayDto {
+    @IsDateString()
+    @IsNotEmpty()
+    currentDate: string;
+
+    @IsDateString()
+    @IsNotEmpty()
+    newDate: string;
+
+    @IsBoolean()
+    @IsOptional()
+    keepOriginalSlots?: boolean;
 }

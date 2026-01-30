@@ -3413,24 +3413,17 @@
         ]
       }
     },
-    "/appointments/patient/{patientId}/appointments": {
+    "/appointments/patient/appointments": {
       "get": {
         "tags": [
           "Appointments"
         ],
-        "description": "Get all appointments for a specific patient. Note: clinic_name and clinic_address will be null for online appointments",
+        "description": "Get all appointments for the patient",
         "parameters": [
-          {
-            "name": "patientId",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "description": "Patient ID"
-          },
           {
             "name": "Authorization",
             "in": "cookie",
-            "description": "Bearer token for authentication",
+            "description": "Bearer token for authentication (must be a patient)",
             "required": true,
             "type": "string"
           }
@@ -3448,44 +3441,42 @@
                     "properties": {
                       "id": {
                         "type": "string",
-                        "example": "appointment-uuid-2"
+                        "example": "appointment-uuid"
                       },
                       "status": {
                         "type": "string",
                         "example": "CONFIRMED"
                       },
-                      "is_online": {
-                        "type": "boolean",
-                        "example": true
-                      },
                       "slot_duration": {
                         "type": "number",
-                        "example": 30
+                        "example": 20
                       },
                       "doctor_name": {
                         "type": "string",
-                        "example": "Wilson"
+                        "example": "Dr. House"
                       },
                       "appointment_date": {
                         "type": "string",
-                        "example": "2026-02-05"
+                        "example": "2026-03-03"
                       },
                       "start_time": {
                         "type": "string",
-                        "example": "14:00"
+                        "example": "09:00"
                       },
                       "end_time": {
                         "type": "string",
-                        "example": "14:30"
+                        "example": "09:20"
                       },
-                      "clinic_name": {},
-                      "clinic_address": {}
+                      "clinic_name": {
+                        "type": "string",
+                        "example": "New Cairo Medical Clinic"
+                      },
+                      "clinic_address": {
+                        "type": "string",
+                        "example": "123 Main Street, Medical Park"
+                      }
                     }
                   }
-                },
-                "message": {
-                  "type": "string",
-                  "example": "Patient appointments retrieved successfully"
                 }
               },
               "xml": {
@@ -3493,29 +3484,22 @@
               }
             }
           },
-          "401": {
-            "description": "Unauthorized - user not authenticated"
+          "400": {
+            "description": "Bad request - patient ID missing"
           },
-          "404": {
-            "description": "Patient not found"
+          "401": {
+            "description": "Unauthorized - patient not authenticated"
           }
         }
       }
     },
-    "/appointments/patient/{patientId}/appointment/{appointmentId}": {
+    "/appointments/patient/{appointmentId}": {
       "get": {
         "tags": [
           "Appointments"
         ],
-        "description": "Get details of a specific appointment for a patient. Note: clinic_name and clinic_address will be null for online appointments",
+        "description": "Get details of a specific appointment for the patient",
         "parameters": [
-          {
-            "name": "patientId",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "description": "Patient ID"
-          },
           {
             "name": "appointmentId",
             "in": "path",
@@ -3526,7 +3510,7 @@
           {
             "name": "Authorization",
             "in": "cookie",
-            "description": "Bearer token for authentication",
+            "description": "Bearer token for authentication (must be a patient)",
             "required": true,
             "type": "string"
           }
@@ -3548,17 +3532,13 @@
                       "type": "string",
                       "example": "CONFIRMED"
                     },
-                    "is_online": {
-                      "type": "boolean",
-                      "example": true
-                    },
                     "slot_duration": {
                       "type": "number",
-                      "example": 20
+                      "example": 30
                     },
                     "doctor_name": {
                       "type": "string",
-                      "example": "House"
+                      "example": "Dr. House"
                     },
                     "appointment_date": {
                       "type": "string",
@@ -3570,21 +3550,17 @@
                     },
                     "end_time": {
                       "type": "string",
-                      "example": "09:20"
+                      "example": "09:30"
                     },
                     "clinic_name": {
                       "type": "string",
-                      "example": "Medical Park Clinic"
+                      "example": "New Cairo Medical Clinic"
                     },
                     "clinic_address": {
                       "type": "string",
-                      "example": "123 Main Street, New Cairo"
+                      "example": "123 Main Street, Medical Park"
                     }
                   }
-                },
-                "message": {
-                  "type": "string",
-                  "example": "Appointment details retrieved successfully"
                 }
               },
               "xml": {
@@ -3592,29 +3568,25 @@
               }
             }
           },
+          "400": {
+            "description": "Bad request - patient ID missing"
+          },
           "401": {
-            "description": "Unauthorized - user not authenticated"
+            "description": "Unauthorized - patient not authenticated"
           },
           "404": {
-            "description": "Appointment not found"
+            "description": "Appointment not found or does not belong to the patient"
           }
         }
       }
     },
-    "/appointments/patient/{patientId}/appointment/{appointmentId}/reschedule": {
+    "/appointments/patient/{appointmentId}/reschedule": {
       "patch": {
         "tags": [
           "Appointments"
         ],
-        "description": "Reschedule an existing appointment to a new time slot",
+        "description": "Reschedule an appointment to a new time by the patient",
         "parameters": [
-          {
-            "name": "patientId",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "description": "Patient ID"
-          },
           {
             "name": "appointmentId",
             "in": "path",
@@ -3625,7 +3597,7 @@
           {
             "name": "Authorization",
             "in": "cookie",
-            "description": "Bearer token for authentication",
+            "description": "Bearer token for authentication (must be a patient)",
             "required": true,
             "type": "string"
           },
@@ -3639,7 +3611,7 @@
               "properties": {
                 "newScheduledTime": {
                   "type": "string",
-                  "example": "2026-02-05T11:00:00.000Z"
+                  "example": "2026-02-10T10:30:00.000Z"
                 }
               }
             }
@@ -3662,25 +3634,16 @@
             }
           },
           "400": {
-            "description": "Bad request - invalid time or slot not available",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string",
-                  "example": "Error message describing the issue"
-                }
-              },
-              "xml": {
-                "name": "main"
-              }
-            }
+            "description": "Bad request - missing or invalid parameters (patient ID, new scheduled time, etc.)"
           },
           "401": {
-            "description": "Unauthorized - user not authenticated"
+            "description": "Unauthorized - patient not authenticated"
+          },
+          "403": {
+            "description": "Forbidden - appointment does not belong to the authenticated patient"
           },
           "404": {
-            "description": "Appointment not found"
+            "description": "Appointment not found or time slot not available"
           }
         }
       }
