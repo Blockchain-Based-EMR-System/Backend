@@ -34,7 +34,7 @@ export class AuthService {
 
     const hashedPassword = await hash(userData.password, 10);
     const username = emailHandle;
-    const { password, ...userDataWithoutPassword } = userData;
+    const { rememberMe, password, ...userDataWithoutPassword } = userData;
     const createdUserData: User = await this.users.create({
       data: {
         ...userDataWithoutPassword, username, password_hash: hashedPassword,
@@ -199,7 +199,7 @@ export class AuthService {
     // Verify the refresh token
     const secretKey: string = REFRESH_TOKEN_SECRET;
     let decoded: DataStoredInToken;
-    
+
     try {
       decoded = verify(refreshToken, secretKey) as DataStoredInToken;
     } catch (error) {
@@ -226,11 +226,11 @@ export class AuthService {
     }
 
     // Get user
-    const user = await this.users.findUnique({ 
+    const user = await this.users.findUnique({
       where: { id: decoded.id },
       include: { doctor: true } // Include doctor relation if needed
     });
-    
+
     if (!user) {
       const error = createBilingualError(401, ErrorMessages.USER_NOT_EXIST);
       throw new HttpException(error.status, error.message, error.messageAr);
@@ -239,20 +239,20 @@ export class AuthService {
     // Revoke the old refresh token (token rotation for security)
     await this.refreshTokens.update({
       where: { id: storedToken.id },
-      data: { 
-        is_revoked: true, 
-        revoked_at: new Date() 
+      data: {
+        is_revoked: true,
+        revoked_at: new Date()
       }
     });
 
     // Create new access token
     const accessToken = this.createAccessToken(user);
-    
+
     // Create new refresh token (token rotation)
     const newRefreshToken = await this.createRefreshToken(user);
-    
+
     // Create cookies with both tokens
-    const cookies = this.createCookies({ 
+    const cookies = this.createCookies({
       accessToken,
       refreshToken: newRefreshToken
     });
