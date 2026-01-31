@@ -2,13 +2,36 @@ import prisma from '@/config/prisma';
 import { HttpException } from "@/exceptions/HttpException";
 import { createBilingualError, ErrorMessages } from '@/utils/errorMessages';
 import { QueuePosition } from '@/interfaces/queue.interface';
-import { AppointmentService } from './appointment.service';
+import { DayOfWeek } from '@prisma/client';
+
 
 export class QueueService {
 
-    private appointmentService = new AppointmentService();
+    public async getQueuePosition(appointmentId: string): Promise<QueuePosition> {
+        const appointment = await prisma.appointment.findUnique({
+            where: {
+                id: appointmentId,
+            },
+            select: {
+                position: true,
+                estimated_time: true,
+                patients_ahead: true,
+            }
+        });
 
-    public async calculateQueuePosition(appointmentId: string): Promise<QueuePosition> {
+        if (!appointment) {
+            const error = createBilingualError(404, ErrorMessages.APPOINTMENT_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        return {
+            position: appointment.position,
+            estimatedWaitMinutes: appointment.estimated_time,
+            patientsAhead: appointment.patients_ahead,
+        };
+    }
+
+    public async calculateQueuePosition(appointmentId: string): Promise<void> {
         const appointment = await prisma.appointment.findUnique({
             where: {
                 id: appointmentId,
@@ -26,7 +49,7 @@ export class QueueService {
             throw new HttpException(error.status, error.message, error.messageAr);
         }
 
-        const dayOfWeek = this.appointmentService.getDayOfWeek(appointment.scheduled_time.getDay());
+        const dayOfWeek = this.getDayOfWeek(appointment.scheduled_time.getDay());
 
         const schedule = await prisma.doctorSchedule.findFirst({
             where: {
@@ -81,15 +104,36 @@ export class QueueService {
 
         const patientsAhead = appointmentsAhead.length;
         const position = currentIdx + 1;
+        // NOOTEEE --> now time - scheduled time but in mins 
+
         const estimatedWaitMinutes = appointmentsAhead.reduce((total, app) => total + app.slot_duration + bufferTime, 0);
 
-        return {
-            position,
-            estimatedWaitMinutes,
-            patientsAhead,
-        };
-
-
-
+        this.updateQueueParameters(appointmentId, position, patientsAhead, estimatedWaitMinutes);
     }
+
+    private async updateQueueParameters(appointmentId: string, position: number, patientsAhead: number, estimatedWaitMinutes: number): Promise<void> {
+        await prisma.appointment.update({
+            where: {
+                id: appointmentId,
+            },
+            data: {
+                position,
+                patients_ahead: patientsAhead,
+                estimated_time: estimatedWaitMinutes,
+            },
+        });
+    }
+
+    public getDayOfWeek(jsDay: number): DayOfWeek {
+            const days: DayOfWeek[] = [
+                DayOfWeek.SUNDAY,
+                DayOfWeek.MONDAY,
+                DayOfWeek.TUESDAY,
+                DayOfWeek.WEDNESDAY,
+                DayOfWeek.THURSDAY,
+                DayOfWeek.FRIDAY,
+                DayOfWeek.SATURDAY,
+            ];
+            return days[jsDay];
+        }
 }

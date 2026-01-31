@@ -166,6 +166,14 @@ export const SuccessResponseMessages = {
         message_en: "Appointment details retrieved successfully.",
         message_ar: "تم استرجاع تفاصيل الموعد بنجاح.",
     },
+    PATIENT_TODAY_APPOINTMENT_RETRIEVED: {
+        message_en: "Patient's today appointment retrieved successfully.",
+        message_ar: "تم استرجاع موعد المريض لليوم بنجاح.",
+    },
+    QUEUE_POSITION_RETRIEVED: {
+        message_en: "Queue position retrieved successfully.",
+        message_ar: "تم استرجاع موقعك في قائمة الانتظار بنجاح.",
+    },
 }
 
 interface MultiLangMessageObj {

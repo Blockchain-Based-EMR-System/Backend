@@ -101,6 +101,22 @@ export class AppointmentController {
         });
     });
 
+    public getTodayAppointment = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
+        const patientId = req.user.id;
+
+        if (!patientId) {
+            const error = createBilingualError(400, ErrorMessages.PATIENT_ID_REQUIRED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const appointments = await this.appointmentService.getTodayAppointment(patientId);
+        const response = createMultiLangMessage(SuccessResponseMessages.PATIENT_TODAY_APPOINTMENT_RETRIEVED);
+        res.status(200).json({
+            data: appointments,
+            ...response
+        });
+    });
+
     public getPatientSelectedAppointment = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
         const patientId = req.user.id;
         const { appointmentId } = req.params;

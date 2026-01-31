@@ -193,6 +193,10 @@ export const ErrorMessages = {
         en: "Appointment not found",
         ar: "الموعد غير موجود"
     },
+    APPOINTMENT_ID_REQUIRED: {
+        en: "Appointment ID is required",
+        ar: "معرف الموعد مطلوب"
+    },
     UNAUTHORIZED_APPOINTMENT_ACCESS: {
         en: "You are not authorized to access this appointment",
         ar: "غير مصرح لك بالوصول إلى هذا الموعد"

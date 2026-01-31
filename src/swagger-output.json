@@ -3580,6 +3580,98 @@
         }
       }
     },
+    "/appointments/patient/today-appointment": {
+      "get": {
+        "tags": [
+          "Appointments"
+        ],
+        "description": "Get todays appointment for the patient, including queue position and estimated wait time",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication (must be a patient)",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Todays appointment details retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "appointment-uuid"
+                    },
+                    "status": {
+                      "type": "string",
+                      "example": "CONFIRMED"
+                    },
+                    "slot_duration": {
+                      "type": "number",
+                      "example": 30
+                    },
+                    "doctor_name": {
+                      "type": "string",
+                      "example": "Dr. House"
+                    },
+                    "appointment_date": {
+                      "type": "string",
+                      "example": "2026-02-03"
+                    },
+                    "start_time": {
+                      "type": "string",
+                      "example": "09:00"
+                    },
+                    "end_time": {
+                      "type": "string",
+                      "example": "09:30"
+                    },
+                    "clinic_name": {
+                      "type": "string",
+                      "example": "New Cairo Medical Clinic"
+                    },
+                    "clinic_address": {
+                      "type": "string",
+                      "example": "123 Main Street, Medical Park"
+                    },
+                    "position": {
+                      "type": "number",
+                      "example": 5
+                    },
+                    "estimated_time": {
+                      "type": "number",
+                      "example": 60
+                    },
+                    "patients_ahead": {
+                      "type": "number",
+                      "example": 3
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - patient ID missing"
+          },
+          "401": {
+            "description": "Unauthorized - patient not authenticated"
+          },
+          "404": {
+            "description": "No appointment found for today"
+          }
+        }
+      }
+    },
     "/appointments/patient/{appointmentId}/reschedule": {
       "patch": {
         "tags": [

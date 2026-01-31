@@ -33,6 +33,17 @@ export class SocketService {
             transports: ['websocket', 'polling'],
         });
     }
+    public isUserConnected(userId: string): boolean {
+        return this.userSocketMap.has(userId) && this.userSocketMap.get(userId).size > 0;
+    }
+
+    public getTotalConnectedUsers(): number {
+        return this.userSocketMap.size;
+    }
+
+    public getIO(): Server {
+        return this.io;
+    }
 
     private async authMiddleware(socket: AuthenticatedSocket, next: (err?: Error) => void): Promise<void> {
         try {

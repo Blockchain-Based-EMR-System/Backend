@@ -399,6 +399,52 @@ export class AppointmentRoute implements Routes {
             this.appointmentController.getPatientSelectedAppointment
         );
 
+        this.router.get(
+            `${this.path}/patient/today-appointment`,
+            /* 
+                #swagger.path = '/appointments/patient/today-appointment'
+                #swagger.method = 'get'
+                #swagger.tags = ['Appointments']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication (must be a patient)',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.description = 'Get todays appointment for the patient, including queue position and estimated wait time'
+                #swagger.responses[200] = {
+                    description: 'Todays appointment details retrieved successfully',
+                    schema: {
+                        data: {
+                            id: 'appointment-uuid',
+                            status: 'CONFIRMED',
+                            slot_duration: 30,
+                            doctor_name: 'Dr. House',
+                            appointment_date: '2026-02-03',
+                            start_time: '09:00',
+                            end_time: '09:30',
+                            clinic_name: 'New Cairo Medical Clinic',
+                            clinic_address: '123 Main Street, Medical Park',
+                            position: 5,
+                            estimated_time: 60,
+                            patients_ahead: 3
+                        }
+                    }
+                }
+                #swagger.responses[400] = {
+                    description: 'Bad request - patient ID missing'
+                }
+                #swagger.responses[401] = {
+                    description: 'Unauthorized - patient not authenticated'
+                }
+                #swagger.responses[404] = {
+                    description: 'No appointment found for today'
+                }
+            */
+            AuthMiddleware,
+            this.appointmentController.getTodayAppointment
+        );
+
         this.router.patch(
             `${this.path}/patient/:appointmentId/reschedule`,
             /* 

@@ -78,6 +78,8 @@ model Appointment {
   scheduled_time DateTime
   is_online      Boolean           @default(false)
   is_completed   Boolean           @default(false)
+  position       Int                @default(0)
+  patients_ahead Int                @default(0)
   estimated_time Float?
   created_at     DateTime          @default(now())
   modified_at    DateTime          @updatedAt

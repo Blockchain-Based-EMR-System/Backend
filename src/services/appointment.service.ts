@@ -5,10 +5,13 @@ import { Service } from 'typedi';
 import { TimeSlot } from '@/interfaces';
 import { HttpException } from "@/exceptions/HttpException";
 import { createBilingualError, ErrorMessages } from '@/utils/errorMessages';
-import { DoctorAppointment, DoctorScheduleDay, PatientAppointment } from '@/interfaces/appointments.interface';
+import { PatientTodayAppointment, DoctorAppointment, DoctorScheduleDay, PatientAppointment } from '@/interfaces/appointments.interface';
+import { QueueService } from './queue.service';
 
 @Service()
 export class AppointmentService {
+
+    private queueService = new QueueService();
 
     public async getAvailableDays(doctorId: string, clinicId: string | null): Promise<AvailableDay[]> {
         const daysAhead = 30
@@ -288,6 +291,76 @@ export class AppointmentService {
             end_time: this.formatTime(appointment.end_time),
             clinic_name: appointment.clinic ? appointment.clinic.name : null,
             clinic_address: appointment.clinic ? appointment.clinic.address : null,
+        };
+    }
+
+    public async getTodayAppointment(patientId: string): Promise<PatientTodayAppointment | null> {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const endOfToday = new Date();
+        endOfToday.setHours(23, 59, 59, 999);
+
+        const appointment = await prisma.appointment.findFirst({
+            where: {
+                patient_id: patientId,
+                scheduled_time: {
+                    gte: today,
+                    lte: endOfToday,
+                }
+            },
+            select: {
+                id: true,
+                scheduled_time: true,
+                status: true,
+                is_online: true,
+                slot_duration: true,
+                end_time: true,
+                position: true,
+                estimated_time: true,
+                patients_ahead: true,
+                doctor: {
+                    select: {
+                        name: true,
+                    }
+                },
+                clinic: {
+                    select: {
+                        name: true,
+                        address: true,
+                    }
+                }
+            }
+        });
+
+        if (!appointment) {
+            return null;
+        }
+
+        await this.queueService.calculateQueuePosition(appointment.id);
+        // other transactions could interfere so dont blame me
+        const refreshed = await prisma.appointment.findUnique({
+            where: { id: appointment.id },
+            select: {
+                position: true,
+                estimated_time: true,
+                patients_ahead: true,
+            }
+        });
+
+        return {
+            id: appointment.id,
+            status: appointment.status,
+            is_online: appointment.is_online,
+            slot_duration: appointment.slot_duration,
+            doctor_name: appointment.doctor.name,
+            appointment_date: this.formatDate(appointment.scheduled_time),
+            start_time: this.formatTime(appointment.scheduled_time),
+            end_time: this.formatTime(appointment.end_time),
+            clinic_name: appointment.clinic ? appointment.clinic.name : null,
+            clinic_address: appointment.clinic ? appointment.clinic.address : null,
+            position: refreshed.position,
+            estimatedWaitMinutes: refreshed.estimated_time,
+            patientsAhead: refreshed.patients_ahead,
         };
     }
 
