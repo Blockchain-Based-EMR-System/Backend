@@ -31,7 +31,8 @@ export class AuthRoute implements Routes {
                 $email: 'user@example.com',
                 $name: 'John Doe',
                 $phone: '1234567890',
-                $password: 'password123'
+                $password: 'password123',
+                $rememberMe: false
             }
         }
         #swagger.responses[201] = {

@@ -71,13 +71,18 @@
                 "password": {
                   "type": "string",
                   "example": "password123"
+                },
+                "rememberMe": {
+                  "type": "boolean",
+                  "example": false
                 }
               },
               "required": [
                 "email",
                 "name",
                 "phone",
-                "password"
+                "password",
+                "rememberMe"
               ]
             }
           }
