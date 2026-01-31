@@ -5,7 +5,7 @@ import { DoctorController } from "@/controllers/doctor.controller";
 import { AppointmentController } from "@/controllers/appointment.controller";
 import { ValidationMiddleware } from "@/middlewares/validation.middleware";
 import { AuthMiddleware } from "@/middlewares/auth.middleware";
-import { BookAppointmentDto, RescheduleAppointmentDto , RescheduleAppointmentByDoctorDto, BulkRescheduleDto, RescheduleDayDto} from "@/dtos/appointments.dto";
+import { BookAppointmentDto, RescheduleAppointmentDto, RescheduleAppointmentByDoctorDto, BulkRescheduleDto, RescheduleDayDto } from "@/dtos/appointments.dto";
 
 export class AppointmentRoute implements Routes {
     public path = '/appointments';
@@ -553,7 +553,7 @@ export class AppointmentRoute implements Routes {
             AuthMiddleware,
             ValidationMiddleware(RescheduleAppointmentByDoctorDto),
             this.appointmentController.rescheduleAppointmentByDoctor
-        );  
+        );
 
         this.router.patch(
             `${this.path}/doctor/bulk-reschedule`,
@@ -625,47 +625,49 @@ export class AppointmentRoute implements Routes {
                 #swagger.tags = ['Appointments']
                 #swagger.parameters['Authorization'] = {
                     in: 'cookie',
-                    description: 'Bearer token for authentication (must be a doctor)',
+                    description: 'Bearer token for authentication (doctor)',
                     required: true,
                     type: 'string'
                 }
+                #swagger.description = 'Reschedule all appointments on a specific day by the authenticated doctor. \
+                Rules: \
+                (1) You must provide EITHER "minutes" OR "newDate" (not both). \
+                (2) When using "minutes", all appointments on the specified day are shifted by the same number of minutes. \
+                (3) When using "newDate": \
+                    - If "keepOriginalSlots" is true, appointments keep their original time-of-day but move to the new date. \
+                    - If "keepOriginalSlots" is false, appointments are reallocated sequentially based on the doctor schedule.'
 
-                #swagger.description = 'Reschedule all confirmed appointments of a specific day to a new date'
                 #swagger.parameters['body'] = {
                     in: 'body',
-                    description: 'Parameters for moving all appointments from one day to another',
+                    description: 'Reschedule day parameters',
                     required: true,
                     schema: {
                         currentDate: '2026-02-10T09:00:00.000Z',
-                        newDate: '2026-02-16T09:00:00.000Z',
+                        minutes: 15,
+                        newDate: '2026-02-13T09:00:00.000Z',
                         keepOriginalSlots: true
                     }
                 }
-
                 #swagger.responses[200] = {
-                    description: 'All appointments for the day were successfully rescheduled',
+                    description: 'Appointments rescheduled successfully',
                     schema: {
                         message: 'Appointments rescheduled successfully'
                     }
                 }
-
                 #swagger.responses[400] = {
-                    description: 'Bad request (missing/invalid dates, conflicting parameters, etc.)',
+                    description: 'Bad request - invalid or conflicting reschedule parameters',
                     schema: {
-                        message: 'Error message describing the issue (e.g. "Current date and new date cannot be the same", "Invalid date format", etc.)'
+                        message: 'Error message describing the issue'
                     }
                 }
-
                 #swagger.responses[401] = {
-                    description: 'Unauthorized - user not authenticated'
+                    description: 'Unauthorized - doctor not authenticated'
                 }
-
                 #swagger.responses[403] = {
-                    description: 'Forbidden - authenticated user is not a doctor or not authorized'
+                    description: 'Forbidden - one or more appointments do not belong to the authenticated doctor'
                 }
-
                 #swagger.responses[404] = {
-                    description: 'No confirmed appointments found for the specified current date'
+                    description: 'No appointments found on the specified day'
                 }
             */
             AuthMiddleware,
@@ -750,4 +752,3 @@ export class AppointmentRoute implements Routes {
         );
     }
 }
-

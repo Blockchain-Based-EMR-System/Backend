@@ -1,7 +1,7 @@
 import prisma from '@/config/prisma';
 import { DayOfWeek } from '@prisma/client';
 import { AvailableDay } from '@/interfaces';
-import { Service } from 'typedi'; 
+import { Service } from 'typedi';
 import { TimeSlot } from '@/interfaces';
 import { HttpException } from "@/exceptions/HttpException";
 import { createBilingualError, ErrorMessages } from '@/utils/errorMessages';
@@ -10,7 +10,7 @@ import { DoctorAppointment, DoctorScheduleDay, PatientAppointment } from '@/inte
 @Service()
 export class AppointmentService {
 
-    public async getAvailableDays(doctorId: string, clinicId: string | null): Promise<AvailableDay[]>{
+    public async getAvailableDays(doctorId: string, clinicId: string | null): Promise<AvailableDay[]> {
         const daysAhead = 30
         const availableDays: AvailableDay[] = [];
         const isOnline = await this.doctorIsOnline(doctorId);
@@ -21,13 +21,13 @@ export class AppointmentService {
         }
 
         const schedules = await prisma.doctorSchedule.findMany({
-            where:{
+            where: {
                 doctor_id: doctorId,
                 clinic_id: isOnline ? null : clinicId,
                 is_active: true,
                 deleted_at: null
             },
-            select:{
+            select: {
                 day_of_week: true,
                 start_time: true,
                 end_time: true,
@@ -36,7 +36,7 @@ export class AppointmentService {
             }
         });
 
-        if (schedules.length === 0){
+        if (schedules.length === 0) {
             return [];
         }
 
@@ -53,9 +53,9 @@ export class AppointmentService {
         });
 
         const today = new Date();
-        today.setHours(0,0,0,0);
+        today.setHours(0, 0, 0, 0);
 
-        for (let i=1; i<= daysAhead; i++){
+        for (let i = 1; i <= daysAhead; i++) {
             // create a copy from today --> if we used today directly it will be modified to today + 1 --> tomorrow date
             const currentDate = new Date(today);
             currentDate.setDate(today.getDate() + i); // current day now is = today + 1 
@@ -64,13 +64,13 @@ export class AppointmentService {
             const schedule = scheduleMap.get(dayOfWeek);
 
             // skip if doctor doesnt work on this day
-            if (!schedule){
+            if (!schedule) {
                 continue;
             }
 
             const hasAvailableSlots = true;
 
-            if (hasAvailableSlots){
+            if (hasAvailableSlots) {
                 availableDays.push({
                     date: this.formatDate(currentDate),
                     dayOfWeek: dayOfWeek,
@@ -81,7 +81,7 @@ export class AppointmentService {
         return availableDays;
     }
 
-    public async getAvailableSlots(doctorId: string, clinicId: string | null, date: string): Promise<Omit<TimeSlot, 'available'>[]>{
+    public async getAvailableSlots(doctorId: string, clinicId: string | null, date: string): Promise<Omit<TimeSlot, 'available'>[]> {
         const requestedDate = new Date(date);
         const dayOfWeek = this.getDayOfWeek(requestedDate.getDay());
         const isOnline = await this.doctorIsOnline(doctorId);
@@ -95,21 +95,21 @@ export class AppointmentService {
         today.setHours(0, 0, 0, 0);
         const requestedDateOnly = new Date(requestedDate);
         requestedDateOnly.setHours(0, 0, 0, 0);
-        
+
         if (requestedDateOnly < today) {
             const error = createBilingualError(400, ErrorMessages.APPOINTMENT_IN_PAST);
             throw new HttpException(error.status, error.message, error.messageAr);
         }
 
         const schedule = await prisma.doctorSchedule.findFirst({
-            where:{
+            where: {
                 day_of_week: dayOfWeek,
                 doctor_id: doctorId,
                 clinic_id: isOnline ? null : clinicId,
                 is_active: true,
                 deleted_at: null,
             },
-            select:{
+            select: {
                 start_time: true,
                 end_time: true,
                 slot_duration: true,
@@ -150,7 +150,7 @@ export class AppointmentService {
 
         const availableSlots = allSlots.filter(slot => {
             const slotStart = this.parseTimeToDate(requestedDate, slot.start);
-            const slotEnd   = this.parseTimeToDate(requestedDate, slot.end);
+            const slotEnd = this.parseTimeToDate(requestedDate, slot.end);
 
             const isBooked = existingAppointments.some(appointment => {
                 const appointmentStart = new Date(appointment.scheduled_time);
@@ -169,7 +169,7 @@ export class AppointmentService {
         return availableSlots;
     }
 
-    public async bookAppointment(patientId: string, doctorId: string, clinicId: string | null, scheduledTime: Date): Promise<void>{
+    public async bookAppointment(patientId: string, doctorId: string, clinicId: string | null, scheduledTime: Date): Promise<void> {
         const isOnline = await this.doctorIsOnline(doctorId);
         if (!isOnline && !clinicId) {
             const error = createBilingualError(400, ErrorMessages.CLINIC_REQUIRED_FOR_OFFLINE);
@@ -177,30 +177,30 @@ export class AppointmentService {
         }
 
         const schedule = await prisma.doctorSchedule.findFirst({
-            where:{
+            where: {
                 doctor_id: doctorId,
                 clinic_id: isOnline ? null : clinicId,
                 is_active: true,
                 deleted_at: null,
                 day_of_week: this.getDayOfWeek(scheduledTime.getDay()),
             },
-            select:{
+            select: {
                 slot_duration: true,
             }
         });
 
-        const endTime = new Date(scheduledTime.getTime() + schedule.slot_duration * 60000); 
+        const endTime = new Date(scheduledTime.getTime() + schedule.slot_duration * 60000);
 
         const appointment = await prisma.appointment.create({
-            data:{
+            data: {
                 patient_id: patientId,
                 doctor_id: doctorId,
                 clinic_id: isOnline ? null : clinicId,
                 scheduled_time: scheduledTime,
-                slot_duration: schedule.slot_duration,        
+                slot_duration: schedule.slot_duration,
                 end_time: endTime,
                 is_online: isOnline,
-                estimated_time: schedule.slot_duration,       
+                estimated_time: schedule.slot_duration,
             }
         });
     }
@@ -314,13 +314,13 @@ export class AppointmentService {
         // penalty to be added later
     }
 
-    public async rescheduleAppointmentByDoctor(doctorId: string, appointmentId: string, minutes?: number, newScheduledTime?: Date)  : Promise<void> {
+    public async rescheduleAppointmentByDoctor(doctorId: string, appointmentId: string, minutes?: number, newScheduledTime?: Date, rescheduleDay?: boolean): Promise<void> {
         const appointment = await this.getAndValidateAppointment(appointmentId, doctorId);
 
         let updatedScheduledTime: Date;
         let updatedEndTime: Date;
 
-        if (minutes){
+        if (minutes) {
             updatedScheduledTime = new Date(appointment.scheduled_time.getTime() + minutes * 60000);
             updatedEndTime = new Date(appointment.end_time.getTime() + minutes * 60000);
         } else {
@@ -328,7 +328,9 @@ export class AppointmentService {
             updatedEndTime = new Date(newScheduledTime.getTime() + appointment.slot_duration * 60000);
         }
 
-        await this.validateDoctorAvailability(doctorId, appointment.clinic_id, updatedScheduledTime, updatedEndTime, appointmentId);
+        if (rescheduleDay !== true) {
+            await this.validateDoctorAvailability(doctorId, appointment.clinic_id, updatedScheduledTime, updatedEndTime, appointmentId);
+        }
 
         await prisma.appointment.update({
             where: {
@@ -382,23 +384,23 @@ export class AppointmentService {
                         clinic_id: true,
                     },
                     orderBy: {
-                        scheduled_time: 'asc', 
+                        scheduled_time: 'asc',
                     }
-                    
+
                 });
                 const dayOfWeek = this.getDayOfWeek(newBaseDate.getDay());
                 const isOnline = await this.doctorIsOnline(doctorId);
                 const clinicId = appointments[0]?.clinic_id || null;
 
                 const schedule = await prisma.doctorSchedule.findFirst({
-                    where:{
+                    where: {
                         day_of_week: dayOfWeek,
                         doctor_id: doctorId,
                         clinic_id: isOnline ? null : clinicId,
                         is_active: true,
                         deleted_at: null,
                     },
-                    select:{
+                    select: {
                         slot_duration: true,
                         buffer_time: true,
                     }
@@ -415,12 +417,14 @@ export class AppointmentService {
 
                     // move to next slot
                     currentSlotStart = new Date(currentSlotStart.getTime() + (schedule.slot_duration + schedule.buffer_time) * 60000);
-                }  
+                }
             }
-        }     
+        }
     }
 
-    public async rescheduleDayAppointments(doctorId: string, currentDate: Date, newDate: Date, keepOriginalSlots: boolean): Promise<void> {
+    public async rescheduleDayAppointments(doctorId: string, currentDate: Date, minutes?: number, newDate?: Date, keepOriginalSlots?: boolean): Promise<void> {
+
+        const rescheduleDay: boolean = true;
 
         const startOfDay = new Date(currentDate);
         startOfDay.setHours(0, 0, 0, 0);
@@ -443,11 +447,21 @@ export class AppointmentService {
                 scheduled_time: true,
             },
             orderBy: {
-                scheduled_time: 'asc', 
+                scheduled_time: 'asc',
             }
         });
 
-        await this.bulkRescheduleByDoctor(doctorId, appointments.map(app => app.id), null, newDate, keepOriginalSlots);
+        if (minutes) {
+            for (const appointment of appointments) {
+                await this.getAndValidateAppointment(appointment.id, doctorId);
+                await this.rescheduleAppointmentByDoctor(doctorId, appointment.id, minutes, undefined, rescheduleDay);
+            }
+        }
+
+        else if (newDate) {
+            await this.bulkRescheduleByDoctor(doctorId, appointments.map(app => app.id), null, newDate, keepOriginalSlots);
+        }
+
     }
 
     public async cancelAppointment(userId: string, appointmentId: string): Promise<void> {
@@ -486,16 +500,16 @@ export class AppointmentService {
             data: {
                 cancelled_by: appointment.patient_id === userId ? 'PATIENT' : 'DOCTOR',
                 deleted_at: new Date(),
-                modified_at: new Date(), 
+                modified_at: new Date(),
                 status: 'CANCELLED',
             }
         });
         // penalty to be added later
     };
 
-    public async getDoctorSchedule(doctorId: string) : Promise<DoctorScheduleDay[]> {
+    public async getDoctorSchedule(doctorId: string): Promise<DoctorScheduleDay[]> {
         const now = new Date();
-        
+
         const appointments = await prisma.appointment.findMany({
             where: {
                 doctor_id: doctorId,
@@ -546,7 +560,7 @@ export class AppointmentService {
                 clinic_address: app.clinic ? app.clinic.address : null,
             };
 
-            if (!groupedByDate.has(dateKey)){
+            if (!groupedByDate.has(dateKey)) {
                 groupedByDate.set(dateKey, []);
             }
             groupedByDate.get(dateKey).push(doctorAppointment);
@@ -565,19 +579,19 @@ export class AppointmentService {
         return schedule;
     }
 
-    private generateTimeSlots(startTime: Date, endTime: Date, slotDuration: number, bufferTime: number): Omit<TimeSlot, 'available'>[]{
+    private generateTimeSlots(startTime: Date, endTime: Date, slotDuration: number, bufferTime: number): Omit<TimeSlot, 'available'>[] {
         const slots: Omit<TimeSlot, 'available'>[] = [];
         const start = new Date(startTime);
         const end = new Date(endTime);
-        
+
         let currentTime = new Date(start);
 
-        while (currentTime < end){
-            const slotEnd = new Date(currentTime.getTime() + slotDuration * 60000); 
-            if (slotEnd <= end){
+        while (currentTime < end) {
+            const slotEnd = new Date(currentTime.getTime() + slotDuration * 60000);
+            if (slotEnd <= end) {
                 slots.push({
-                    start: this.formatTime(currentTime), 
-                    end: this.formatTime(slotEnd),      
+                    start: this.formatTime(currentTime),
+                    end: this.formatTime(slotEnd),
                 });
             }
             // move to next slot (slot duration + buffer time)
@@ -590,7 +604,7 @@ export class AppointmentService {
     // converts js representation of days (0-6) to prisma's enum
     private getDayOfWeek(jsDay: number): DayOfWeek {
         const days: DayOfWeek[] = [
-            DayOfWeek.SUNDAY, 
+            DayOfWeek.SUNDAY,
             DayOfWeek.MONDAY,
             DayOfWeek.TUESDAY,
             DayOfWeek.WEDNESDAY,
@@ -753,7 +767,7 @@ export class AppointmentService {
 
         // check for overlap
         const hasConflict = conflictingAppointments.some(existing => {
-            return this.doesSlotOverlap(newScheduledTime,newEndTime, new Date(existing.scheduled_time), new Date(existing.end_time));
+            return this.doesSlotOverlap(newScheduledTime, newEndTime, new Date(existing.scheduled_time), new Date(existing.end_time));
         });
 
         if (hasConflict) {

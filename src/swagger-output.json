@@ -3911,19 +3911,19 @@
         "tags": [
           "Appointments"
         ],
-        "description": "Reschedule all confirmed appointments of a specific day to a new date",
+        "description": "Reschedule all appointments on a specific day by the authenticated doctor. \\  Rules: \\  (1) You must provide EITHER \"minutes\" OR \"newDate\" (not both). \\  (2) When using \"minutes\", all appointments on the specified day are shifted by the same number of minutes. \\  (3) When using \"newDate\": \\  - If \"keepOriginalSlots\" is true, appointments keep their original time-of-day but move to the new date. \\  - If \"keepOriginalSlots\" is false, appointments are reallocated sequentially based on the doctor schedule.",
         "parameters": [
           {
             "name": "Authorization",
             "in": "cookie",
-            "description": "Bearer token for authentication (must be a doctor)",
+            "description": "Bearer token for authentication (doctor)",
             "required": true,
             "type": "string"
           },
           {
             "name": "body",
             "in": "body",
-            "description": "Parameters for moving all appointments from one day to another",
+            "description": "Reschedule day parameters",
             "required": true,
             "schema": {
               "type": "object",
@@ -3932,9 +3932,13 @@
                   "type": "string",
                   "example": "2026-02-10T09:00:00.000Z"
                 },
+                "minutes": {
+                  "type": "number",
+                  "example": 15
+                },
                 "newDate": {
                   "type": "string",
-                  "example": "2026-02-16T09:00:00.000Z"
+                  "example": "2026-02-13T09:00:00.000Z"
                 },
                 "keepOriginalSlots": {
                   "type": "boolean",
@@ -3946,7 +3950,7 @@
         ],
         "responses": {
           "200": {
-            "description": "All appointments for the day were successfully rescheduled",
+            "description": "Appointments rescheduled successfully",
             "schema": {
               "type": "object",
               "properties": {
@@ -3961,13 +3965,13 @@
             }
           },
           "400": {
-            "description": "Bad request (missing/invalid dates, conflicting parameters, etc.)",
+            "description": "Bad request - invalid or conflicting reschedule parameters",
             "schema": {
               "type": "object",
               "properties": {
                 "message": {
                   "type": "string",
-                  "example": "Error message describing the issue (e.g. \"Current date and new date cannot be the same\", \"Invalid date format\", etc.)"
+                  "example": "Error message describing the issue"
                 }
               },
               "xml": {
@@ -3976,13 +3980,13 @@
             }
           },
           "401": {
-            "description": "Unauthorized - user not authenticated"
+            "description": "Unauthorized - doctor not authenticated"
           },
           "403": {
-            "description": "Forbidden - authenticated user is not a doctor or not authorized"
+            "description": "Forbidden - one or more appointments do not belong to the authenticated doctor"
           },
           "404": {
-            "description": "No confirmed appointments found for the specified current date"
+            "description": "No appointments found on the specified day"
           }
         }
       }
