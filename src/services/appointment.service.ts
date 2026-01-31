@@ -228,6 +228,9 @@ export class AppointmentService {
                         address: true,
                     }
                 }
+            }, 
+            orderBy: {
+                scheduled_time: 'asc',
             }
         });
         return appointments.map(appointment => ({
@@ -602,7 +605,7 @@ export class AppointmentService {
     }
 
     // converts js representation of days (0-6) to prisma's enum
-    private getDayOfWeek(jsDay: number): DayOfWeek {
+    public getDayOfWeek(jsDay: number): DayOfWeek {
         const days: DayOfWeek[] = [
             DayOfWeek.SUNDAY,
             DayOfWeek.MONDAY,

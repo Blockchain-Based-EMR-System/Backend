@@ -1,13 +1,17 @@
-import {Server as HttpServer} from 'http';
-import {Server, Socket} from 'socket.io';
+import { Server as HttpServer } from 'http';
+import { Server, Socket } from 'socket.io';
 import { Service } from 'typedi';
 import { verify } from 'jsonwebtoken';
-import { DataStoredInToken } from '@/interfaces';
+import { SocketStoredInToken } from '@/interfaces';
 import { SECRET_KEY } from '@/config';
+import prisma from '@/config/prisma';
+import { AppointmentService } from './appointment.service';
+import { QueueService } from './queue.service';
+import { Container } from 'typedi';
 
 interface AuthenticatedSocket extends Socket {
-  userId?: string;
-  userRole?: string;
+    userId?: string;
+    userRole?: string;
 }
 
 @Service()
@@ -15,6 +19,8 @@ export class SocketService {
     private io: Server;
     // userId --> set of socketIds (each tab/device = different socketId)
     private userSocketMap: Map<string, Set<string>> = new Map();
+    private appointmentService = Container.get(AppointmentService);
+    private queueService = Container.get(QueueService);
 
     public initialize(httpServer: HttpServer): void {
         this.io = new Server(httpServer, {
@@ -35,9 +41,9 @@ export class SocketService {
                 return next(new Error('Authentication error: Token not provided'));
             }
 
-            const decoded = verify(token, SECRET_KEY) as DataStoredInToken;
+            const decoded = verify(token, SECRET_KEY) as SocketStoredInToken;
             socket.userId = decoded.id;
-            // socket.userRole = decoded.role;
+            socket.userRole = decoded.role;
             next();
         } catch (error) {
             next(new Error('Authentication error: Invalid token'));
@@ -46,6 +52,7 @@ export class SocketService {
 
     private handleConnection(socket: AuthenticatedSocket): void {
         const userId = socket.userId;
+        const userRole = socket.userRole;
 
         if (!userId) {
             socket.disconnect();
@@ -64,13 +71,16 @@ export class SocketService {
             this.handleDisconnection(socket);
         });
 
-        socket.emit('connected', { 
+        socket.emit('connected', {
             message: 'Successfully connected to socket server',
             userId: userId
         });
 
-        // this.sendInitialAppointments(userId);
-        
+        if (userRole === 'PATIENT') {
+            this.sendInitialPatientData(userId);
+        } else if (userRole === 'DOCTOR') {
+            // this.sendInitialDoctorData(userId);
+        }
 
     }
 
@@ -87,4 +97,36 @@ export class SocketService {
         }
     }
 
+    private async sendInitialPatientData(patientId: string): Promise<void> {
+        try {
+            const appointments = await this.appointmentService.getPatientAppointments(patientId);
+            const appointmentsWithQueue = await Promise.all(appointments.map(async (app) => {
+                const queuePosition = await this.queueService.calculateQueuePosition(app.id);
+                return {
+                    ...app,
+                    queuePosition,
+                };
+            }));
+            this.io.to(`user_${patientId}`).emit('initial_data', {
+                appointments: appointmentsWithQueue,
+            });
+        }
+        catch (error) {
+            console.error('error fetching initial patient data:', error);
+        }
+    }
+
+    private async sendInitialDoctorData(doctorId: string): Promise<void> {
+        try{
+            const schedule = await this.appointmentService.getDoctorSchedule(doctorId);
+            this.io.to(`user_${doctorId}`).emit('initial_data', {
+                schedule: schedule,
+            });
+        }
+        catch (error) {
+            console.error('error fetching initial doctor data:', error);
+        }
+    }
 }
+
+
