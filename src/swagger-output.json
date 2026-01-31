@@ -1377,6 +1377,7 @@
                         "type": "boolean",
                         "example": false
                       },
+                      "photoUrl": {},
                       "doctor": {
                         "type": "object",
                         "properties": {
@@ -1397,10 +1398,33 @@
                           "account_status": {
                             "type": "string",
                             "example": "APPROVED"
+                          },
+                          "mastersCertificateUrl": {
+                            "type": "string",
+                            "example": ""
+                          },
+                          "graduationCertificateUrl": {
+                            "type": "string",
+                            "example": ""
+                          },
+                          "fellowshipCertificateUrl": {
+                            "type": "string",
+                            "example": ""
+                          },
+                          "professionalPracticeCardUrl": {
+                            "type": "string",
+                            "example": ""
+                          },
+                          "membershipCardUrl": {
+                            "type": "string",
+                            "example": ""
+                          },
+                          "unionSpecializationCertificateUrl": {
+                            "type": "string",
+                            "example": ""
                           }
                         }
-                      },
-                      "photoUrl": {}
+                      }
                     }
                   }
                 },
@@ -1687,6 +1711,7 @@
                       "type": "boolean",
                       "example": false
                     },
+                    "photoUrl": {},
                     "doctor": {
                       "type": "object",
                       "properties": {
@@ -1707,10 +1732,33 @@
                         "account_status": {
                           "type": "string",
                           "example": "APPROVED"
+                        },
+                        "mastersCertificateUrl": {
+                          "type": "string",
+                          "example": ""
+                        },
+                        "graduationCertificateUrl": {
+                          "type": "string",
+                          "example": ""
+                        },
+                        "fellowshipCertificateUrl": {
+                          "type": "string",
+                          "example": ""
+                        },
+                        "professionalPracticeCardUrl": {
+                          "type": "string",
+                          "example": ""
+                        },
+                        "membershipCardUrl": {
+                          "type": "string",
+                          "example": ""
+                        },
+                        "unionSpecializationCertificateUrl": {
+                          "type": "string",
+                          "example": ""
                         }
                       }
-                    },
-                    "photoUrl": {}
+                    }
                   }
                 },
                 "messageEn": {
@@ -2232,6 +2280,7 @@
                         "type": "boolean",
                         "example": false
                       },
+                      "photoUrl": {},
                       "doctor": {
                         "type": "object",
                         "properties": {
@@ -2251,11 +2300,34 @@
                           "avg_time": {},
                           "account_status": {
                             "type": "string",
-                            "example": "Approved"
+                            "example": "APPROVED"
+                          },
+                          "mastersCertificateUrl": {
+                            "type": "string",
+                            "example": ""
+                          },
+                          "graduationCertificateUrl": {
+                            "type": "string",
+                            "example": ""
+                          },
+                          "fellowshipCertificateUrl": {
+                            "type": "string",
+                            "example": ""
+                          },
+                          "professionalPracticeCardUrl": {
+                            "type": "string",
+                            "example": ""
+                          },
+                          "membershipCardUrl": {
+                            "type": "string",
+                            "example": ""
+                          },
+                          "unionSpecializationCertificateUrl": {
+                            "type": "string",
+                            "example": ""
                           }
                         }
-                      },
-                      "photoUrl": {}
+                      }
                     }
                   }
                 },
@@ -2346,6 +2418,7 @@
                       "type": "boolean",
                       "example": false
                     },
+                    "photoUrl": {},
                     "doctor": {
                       "type": "object",
                       "properties": {
@@ -2365,11 +2438,34 @@
                         "avg_time": {},
                         "account_status": {
                           "type": "string",
-                          "example": "Approved"
+                          "example": "APPROVED"
+                        },
+                        "mastersCertificateUrl": {
+                          "type": "string",
+                          "example": ""
+                        },
+                        "graduationCertificateUrl": {
+                          "type": "string",
+                          "example": ""
+                        },
+                        "fellowshipCertificateUrl": {
+                          "type": "string",
+                          "example": ""
+                        },
+                        "professionalPracticeCardUrl": {
+                          "type": "string",
+                          "example": ""
+                        },
+                        "membershipCardUrl": {
+                          "type": "string",
+                          "example": ""
+                        },
+                        "unionSpecializationCertificateUrl": {
+                          "type": "string",
+                          "example": ""
                         }
                       }
-                    },
-                    "photoUrl": {}
+                    }
                   }
                 },
                 "messageEn": {

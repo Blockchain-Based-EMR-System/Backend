@@ -147,7 +147,13 @@ export class AdminService {
                     select: {
                         specialization: true,
                         avg_time: true,
-                        account_status: true
+                        account_status: true,
+                        fellowshipCertificateUrl: true,
+                        graduationCertificateUrl: true,
+                        mastersCertificateUrl: true,
+                        membershipCardUrl: true,
+                        unionSpecializationCertificateUrl: true,
+                        professionalPracticeCardUrl: true,
                     }
                 },
             }

@@ -84,7 +84,11 @@ export class AdminRoute implements Routes {
                     schema: {
                         data:[ { id: '1' , email: 'doctor@example.com', name: 'Dr. Smith', role: 'DOCTOR', 
                         username: 'smith', phone : '1234567890', gender: 'MALE', isVerified: false, hasCompletedProfile: false,
-                        doctor: { specialization: {key: 'CARDIOLOGY' , value: 'Cardiology'} , avg_time: null , account_status: 'APPROVED' }, photoUrl: null }],
+                        photoUrl: null,
+                        doctor: { 
+                        specialization: {key: 'CARDIOLOGY' , value: 'Cardiology'} , avg_time: null , account_status: 'APPROVED',
+                        mastersCertificateUrl: '', graduationCertificateUrl: '', fellowshipCertificateUrl: '', professionalPracticeCardUrl: '', membershipCardUrl: '', unionSpecializationCertificateUrl: ''
+                        }}] ,
                         messageEn: 'Doctors retrieved successfully',
                         messageAr: "تم استرجاع بيانات الأطباء بنجاح."
                     }
@@ -198,7 +202,11 @@ export class AdminRoute implements Routes {
                     schema: {
                         data: { email: 'doctor@example.com', name: 'Dr. Smith', role: 'DOCTOR', 
                         username: 'smith', phone : '1234567890', gender: 'MALE', isVerified: false, hasCompletedProfile: false,
-                        doctor: { specialization: {key: 'CARDIOLOGY' , value: 'Cardiology'} , avg_time: null, account_status: 'APPROVED' }, photoUrl: null },
+                        photoUrl: null ,
+                        doctor: { 
+                        specialization: {key: 'CARDIOLOGY' , value: 'Cardiology'} , avg_time: null , account_status: 'APPROVED',
+                        mastersCertificateUrl: '', graduationCertificateUrl: '', fellowshipCertificateUrl: '', professionalPracticeCardUrl: '', membershipCardUrl: '', unionSpecializationCertificateUrl: ''
+                        } },
                         messageEn: 'Doctor retrieved successfully',
                         messageAr: "تم استرجاع بيانات الطبيب بنجاح."
                     }
