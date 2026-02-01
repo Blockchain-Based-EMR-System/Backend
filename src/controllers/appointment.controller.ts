@@ -12,7 +12,7 @@ export class AppointmentController {
 
     public appointmentService = Container.get(AppointmentService);
 
-    public getAvailableDays = catchAsync(async (req: Request, res: Response): Promise<void> => {
+    public getAvailableDays = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
         const { doctorId } = req.params;
         const { clinicId } = req.query;
 
@@ -30,7 +30,7 @@ export class AppointmentController {
 
     });
 
-    public getAvailableSlots = catchAsync(async (req: Request, res: Response): Promise<void> => {
+    public getAvailableSlots = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
         const { doctorId } = req.params;
         const { date, clinicId } = req.query;
 

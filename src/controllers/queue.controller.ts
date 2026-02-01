@@ -12,8 +12,8 @@ export class QueueController {
 
     public queueService = Container.get(QueueService);
 
-    public getQueuePosition = catchAsync(async (req: Request, res: Response): Promise<void> => {
-        const { appointmentId } = req.params;
+    public getQueuePosition = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
+        const appointmentId = req.params.appointmentId as string;
 
         if (!appointmentId) {
             const error = createBilingualError(400, ErrorMessages.APPOINTMENT_ID_REQUIRED);

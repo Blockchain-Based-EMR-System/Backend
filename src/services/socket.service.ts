@@ -24,8 +24,8 @@ export class SocketService {
         this.io = new Server(httpServer, {
             cors: {
                 origin: process.env.ORIGIN,
-                // credentials: true,
-                // methods: ['GET', 'POST'], 
+                credentials: true,
+                
             },
             // polling is just a fallback if websocket fails
             transports: ['websocket', 'polling'],
@@ -148,8 +148,6 @@ export class SocketService {
         });
     }
 
-
-
     private async sendInitialPatientData(patientId: string): Promise<void> {
         try {
             const appointments = await this.appointmentService.getPatientAppointments(patientId);
@@ -169,7 +167,7 @@ export class SocketService {
             const schedule = await this.appointmentService.getDoctorSchedule(doctorId);
             this.emitToUser(doctorId, 'initial_data', { schedule });
         } catch (error) {
-            console.error('Error sending initial doctor data:', error);
+            console.error('error sending initial doctor data:', error);
         }
     }
 }

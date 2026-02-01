@@ -4178,6 +4178,73 @@
           }
         }
       }
+    },
+    "/queue/position/{appointmentId}": {
+      "get": {
+        "tags": [
+          "Queue"
+        ],
+        "description": "Get queue position, number of patients ahead, and estimated waiting time for a specific appointment",
+        "parameters": [
+          {
+            "name": "appointmentId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Appointment ID to get its queue position"
+          },
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Queue position retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "position": {
+                      "type": "number",
+                      "example": 3
+                    },
+                    "patientsAhead": {
+                      "type": "number",
+                      "example": 2
+                    },
+                    "estimatedWaitMinutes": {
+                      "type": "number",
+                      "example": 60
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Queue position retrieved successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Appointment ID is required"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Appointment not found or doctor not working on this day"
+          }
+        }
+      }
     }
   }
 }

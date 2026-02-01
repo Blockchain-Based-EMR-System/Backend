@@ -9,6 +9,7 @@ import { Service } from 'typedi';
 export class QueueService {
 
     public async getQueuePosition(appointmentId: string): Promise<QueuePosition> {
+        await this.calculateQueuePosition(appointmentId)
         const appointment = await prisma.appointment.findUnique({
             where: {
                 id: appointmentId,
@@ -55,7 +56,7 @@ export class QueueService {
         const schedule = await prisma.doctorSchedule.findFirst({
             where: {
                 doctor_id: appointment.doctor_id,
-                clinic_id: appointment.clinic_id,
+                clinic_id: appointment?.clinic_id || null,
                 day_of_week: dayOfWeek,
                 is_active: true,
                 deleted_at: null,
@@ -65,6 +66,11 @@ export class QueueService {
 
             }
         });
+
+        if (!schedule){
+            const error = createBilingualError(404, ErrorMessages.DOCTOR_NOT_WORKING_ON_DAY);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
         const bufferTime = schedule?.buffer_time || 0;
 
         const startOfDay = new Date(appointment.scheduled_time);
@@ -101,7 +107,7 @@ export class QueueService {
             throw new HttpException(error.status, error.message, error.messageAr);
         }
 
-        const appointmentsAhead = todayAppointments.slice(0, currentIdx).filter(app => app.status !== 'COMPLETED');
+        const appointmentsAhead = todayAppointments.slice(0, currentIdx).filter(app => app.status === 'CONFIRMED');
 
         const patientsAhead = appointmentsAhead.length;
         const position = currentIdx + 1;

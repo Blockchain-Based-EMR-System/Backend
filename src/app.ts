@@ -21,40 +21,46 @@ export class App {
   public app: express.Application;
   public env: string;
   public port: string | number;
-  public httpServer: HttpServer; 
-  private socketService: SocketService; 
+  public httpServer: HttpServer;
+  private socketService: SocketService;
 
   constructor(routes: Routes[]) {
     this.app = express();
     this.env = NODE_ENV || 'development';
     this.port = PORT || 3000;
     this.httpServer = createServer(this.app);
-
-
+    
     this.initializeMiddlewares();
     this.initializeRoutes(routes);
     this.initializeErrorHandling();
     this.initializeSwagger();
 
-    
-    
-    this.socketService = new SocketService(); 
+    this.socketService = new SocketService();
     this.socketService.initialize(this.httpServer);
 
   }
 
   public listen() {
-    this.httpServer.listen(this.port, () => {
+    this.httpServer.listen(this.port);
+
+    this.httpServer.on('listening', () => {
       logger.info(`=================================`);
       logger.info(`======= ENV: ${this.env} =======`);
-      logger.info(`🚀 App listening on the port ${this.port}`);
+      logger.info(`🚀 App listeningg on the port ${this.port}`);
       logger.info(`=================================`);
+    });
+
+    this.httpServer.on('error', (error: any) => {
+      logger.error('Server failed to start');
+      logger.error(error);
+      process.exit(1);
     });
   }
 
   public getServer() {
     return this.app;
   }
+
 
   private initializeMiddlewares() {
     this.app.use(morgan(LOG_FORMAT, { stream }));
