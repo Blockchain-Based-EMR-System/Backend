@@ -1,6 +1,5 @@
 import { Server as HttpServer } from 'http';
 import { Server, Socket } from 'socket.io';
-import { Service } from 'typedi';
 import { verify } from 'jsonwebtoken';
 import { SocketStoredInToken } from '@/interfaces';
 import { SECRET_KEY } from '@/config';
@@ -14,7 +13,6 @@ interface AuthenticatedSocket extends Socket {
     userRole?: string;
 }
 
-@Service()
 export class SocketService {
     private io: Server;
     // userId --> set of socketIds (each tab/device = different socketId)
@@ -26,12 +24,14 @@ export class SocketService {
         this.io = new Server(httpServer, {
             cors: {
                 origin: process.env.ORIGIN,
-                credentials: true,
+                // credentials: true,
                 // methods: ['GET', 'POST'], 
             },
             // polling is just a fallback if websocket fails
             transports: ['websocket', 'polling'],
         });
+        this.io.use(this.authMiddleware.bind(this));
+        this.io.on('connection', this.handleConnection.bind(this));
     }
     public isUserConnected(userId: string): boolean {
         return this.userSocketMap.has(userId) && this.userSocketMap.get(userId).size > 0;
@@ -90,7 +90,7 @@ export class SocketService {
         if (userRole === 'PATIENT') {
             this.sendInitialPatientData(userId);
         } else if (userRole === 'DOCTOR') {
-            // this.sendInitialDoctorData(userId);
+            this.sendInitialDoctorData(userId);
         }
 
     }
@@ -108,36 +108,68 @@ export class SocketService {
         }
     }
 
+    public emitToUser(userId: string, event: string, data: any): void {
+        if (this.isUserConnected(userId)) {
+            this.io.to(`user_${userId}`).emit(event, data);
+        }
+    }
+
+    public async emitQueueUpdatesToPatients(doctorId: string, date: Date): Promise<void> {
+        const appointments = await this.getAppointmentsForDay(doctorId, date); 
+        for (const app of appointments) {
+            const queuePosition = await this.queueService.getQueuePosition(app.id);
+            this.emitToUser(app.patient_id, 'queue_updated', queuePosition);
+        }
+    }
+
+    private async getAppointmentsForDay(doctorId: string, date: Date): Promise<{ id: string; patient_id: string }[]> {
+        const startOfDay = new Date(date);
+        startOfDay.setHours(0, 0, 0, 0);
+
+        const endOfDay = new Date(date); 
+        endOfDay.setHours(23, 59, 59, 999);
+
+
+        return prisma.appointment.findMany({
+            where: {
+                doctor_id: doctorId,
+                scheduled_time: { 
+                    gte: startOfDay, 
+                    lte: endOfDay 
+                },
+                status: { in: ['CONFIRMED'] },
+                deleted_at: null,
+            },
+            select: {
+                id: true,
+                patient_id: true
+
+            },
+        });
+    }
+
+
+
     private async sendInitialPatientData(patientId: string): Promise<void> {
         try {
             const appointments = await this.appointmentService.getPatientAppointments(patientId);
             const appointmentsWithQueue = await Promise.all(appointments.map(async (app) => {
-                const queuePosition = await this.queueService.calculateQueuePosition(app.id);
-                return {
-                    ...app,
-                    queuePosition,
-                };
+                await this.queueService.calculateQueuePosition(app.id); // Ensure up-to-date
+                const queuePosition = await this.queueService.getQueuePosition(app.id);
+                return { ...app, queuePosition };
             }));
-            this.io.to(`user_${patientId}`).emit('initial_data', {
-                appointments: appointmentsWithQueue,
-            });
-        }
-        catch (error) {
-            console.error('error fetching initial patient data:', error);
+            this.emitToUser(patientId, 'initial_data', { appointments: appointmentsWithQueue });
+        } catch (error) {
+            console.error('Error sending initial patient data:', error);
         }
     }
 
     private async sendInitialDoctorData(doctorId: string): Promise<void> {
-        try{
+        try {
             const schedule = await this.appointmentService.getDoctorSchedule(doctorId);
-            this.io.to(`user_${doctorId}`).emit('initial_data', {
-                schedule: schedule,
-            });
-        }
-        catch (error) {
-            console.error('error fetching initial doctor data:', error);
+            this.emitToUser(doctorId, 'initial_data', { schedule });
+        } catch (error) {
+            console.error('Error sending initial doctor data:', error);
         }
     }
 }
-
-

@@ -3,8 +3,9 @@ import { HttpException } from "@/exceptions/HttpException";
 import { createBilingualError, ErrorMessages } from '@/utils/errorMessages';
 import { QueuePosition } from '@/interfaces/queue.interface';
 import { DayOfWeek } from '@prisma/client';
+import { Service } from 'typedi';
 
-
+@Service()
 export class QueueService {
 
     public async getQueuePosition(appointmentId: string): Promise<QueuePosition> {

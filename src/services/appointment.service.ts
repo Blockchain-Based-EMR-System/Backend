@@ -1,7 +1,7 @@
 import prisma from '@/config/prisma';
 import { DayOfWeek } from '@prisma/client';
 import { AvailableDay } from '@/interfaces';
-import { Service } from 'typedi';
+import { Service, Container } from 'typedi';
 import { TimeSlot } from '@/interfaces';
 import { HttpException } from "@/exceptions/HttpException";
 import { createBilingualError, ErrorMessages } from '@/utils/errorMessages';
