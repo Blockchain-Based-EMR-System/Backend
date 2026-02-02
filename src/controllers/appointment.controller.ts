@@ -6,11 +6,12 @@ import { AppointmentService } from "@/services/appointment.service"
 import Container from "typedi";
 import { createBilingualError, ErrorMessages } from '@/utils/errorMessages';
 import { SuccessResponseMessages, createMultiLangMessage } from '@/utils/responseMessages';
-
+import { SocketService } from "@/services/socket.service";
 
 export class AppointmentController {
 
     public appointmentService = Container.get(AppointmentService);
+    public socketService = new SocketService();
 
     public getAvailableDays = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
         const { doctorId } = req.params;
@@ -139,7 +140,19 @@ export class AppointmentController {
         const { appointmentId } = req.params;
         const { newScheduledTime } = req.body;
 
+        // const { doctorId, scheduledTime } = await this.appointmentService.getAppointmentOwners(appointmentId);
+
         await this.appointmentService.rescheduleAppointmentByPatient(patientId, appointmentId, new Date(newScheduledTime));
+
+        // await this.socketService.emitQueueUpdatesToPatients(doctorId, new Date(scheduledTime));
+        // await this.socketService.emitQueueUpdatesToPatients(doctorId, new Date(newScheduledTime));
+
+        // this.socketService.emitToUser(doctorId, 'appointment_rescheduled_by_patient', {
+        //     appointmentId,
+        //     patientId,
+        //     oldScheduledTime: scheduledTime,
+        //     newScheduledTime: new Date(newScheduledTime).toISOString(),
+        // });
         const response = createMultiLangMessage(SuccessResponseMessages.APPOINTMENT_RESCHEDULED_SUCCESSFULLY);
         res.status(200).json({
             ...response

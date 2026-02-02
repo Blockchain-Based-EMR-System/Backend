@@ -15,6 +15,10 @@ const doc = {
     { name: 'Doctors', description: 'Doctor account endpoints' },
     { name: 'Clinics', description: 'Clinic endpoints' },
     { name: 'Users', description: 'User account endpoints' },
+    { name: 'Appointments', description: 'Appointment endpoints' },
+    { name: 'Queue', description: 'Queue endpoints' },
+
+
   ],
 
 };

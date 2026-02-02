@@ -655,6 +655,30 @@ export class AppointmentService {
         return schedule;
     }
 
+    public async getAppointmentOwners(appointmentId: string): Promise<{doctorId: string; scheduledTime: Date;}> {
+        const appointment = await prisma.appointment.findUnique({
+            where: {
+            id: appointmentId,
+            deleted_at: null,
+            },
+            select: {
+            doctor_id: true,
+            patient_id: true,
+            scheduled_time: true,
+            },
+        });
+
+        if (!appointment) {
+            const error = createBilingualError(404, ErrorMessages.APPOINTMENT_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        return {
+            doctorId: appointment.doctor_id,
+            scheduledTime: appointment.scheduled_time,
+        };
+        }
+
     private generateTimeSlots(startTime: Date, endTime: Date, slotDuration: number, bufferTime: number): Omit<TimeSlot, 'available'>[] {
         const slots: Omit<TimeSlot, 'available'>[] = [];
         const start = new Date(startTime);
