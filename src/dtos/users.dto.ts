@@ -1,5 +1,5 @@
 import { Gender } from '@prisma/client';
-import { IsEmail, IsString, IsNotEmpty, MinLength, MaxLength, IsDateString, IsBoolean, IsOptional } from 'class-validator';
+import { IsEmail, IsString, IsNotEmpty, MinLength, MaxLength, IsDateString, IsBoolean } from 'class-validator';
 
 export class CreateUserDto {
   @IsEmail()
@@ -18,6 +18,9 @@ export class CreateUserDto {
   @MinLength(8)
   @MaxLength(32)
   public password: string;
+
+  @IsBoolean()
+  public rememberMe: boolean;
 }
 
 export class LoginUserDto {

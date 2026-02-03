@@ -108,13 +108,21 @@ export const ErrorMessages = {
         en: 'No file uploaded',
         ar: 'لم يتم تحميل أي ملف',
     },
-    UNSUPPORTED_FILE_FORMAT: {
+    UNSUPPORTED_IMAGE_FILE_FORMAT: {
         en: 'Unsupported file format. Only JPEG and PNG allowed.',
         ar: 'تنسيق ملف غير مدعوم. يُسمح فقط بملفات JPEG و PNG.',
+    },
+    UNSUPPORTED_FILE_FORMAT_PDF: {
+        en: 'Unsupported file format. Only PDF allowed.',
+        ar: 'تنسيق ملف غير مدعوم. يُسمح فقط بملفات PDF.',
     },
     NO_PROFILE_PICTURE: {
         en: 'No profile picture found',
         ar: 'لم يتم العثور على صورة الملف الشخصي',
+    },
+    UNKNOWN_FILE_FIELDNAME: {
+        en: 'Unknown file fieldname',
+        ar: 'اسم حقل الملف غير معروف',
     },
     DOCTOR_NOT_WORKING_ON_DAY: {
         en: "Doctor is not available on this day",

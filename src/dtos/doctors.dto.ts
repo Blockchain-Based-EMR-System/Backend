@@ -27,11 +27,15 @@ export class DoctorSignupRequestDto {
     @IsString()
     public date_of_birth?: Date;
 
-    @TransformSpecialization() // Converts EN/AR to key before validation
-    @IsValidSpecialization({
-        message: 'Specialization must be a valid specialization (English, Arabic, or key accepted)'
-    })
-    public specialization: string;
+    graduationCertificate: Express.Multer.File;
+    membershipCard: Express.Multer.File;
+    professionalPracticeCard: Express.Multer.File;
+
+    mastersCertificate: Express.Multer.File;
+    fellowshipCertificate: Express.Multer.File;
+    unionSpecializationCertificate: Express.Multer.File;
+    
+
 }
 
 export class DoctorLoginRequestDto {

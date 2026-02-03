@@ -119,6 +119,10 @@ export const SPECIALIZATIONS = {
         en: 'Sports Medicine',
         ar: 'طب الرياضة',
     },
+    IMMUNOLOGY: {
+        en: 'Immunology',
+        ar: 'امراض المناعة',
+    },
 } as const;
 
 // Type for specialization keys

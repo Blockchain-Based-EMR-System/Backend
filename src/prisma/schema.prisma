@@ -46,16 +46,28 @@ model User {
 }
 
 model Doctor {
-  id                     String              @id @default(uuid())
-  specialization         String              @db.VarChar(255)
-  avg_time               DateTime?           @db.Time(0)
-  account_status         DoctorAccountStatus @default(PENDING)
-  num_of_created_clinics Int                 @default(0)
+  id                                     String              @id @default(uuid())
+  specialization                         String              @db.VarChar(255)
+  avg_time                               DateTime?           @db.Time(0)
+  account_status                         DoctorAccountStatus @default(PENDING)
+  num_of_created_clinics                 Int                 @default(0)
+  graduationCertificateUrl               String?             @db.VarChar(500)
+  graduationCertificatePublicId          String?             @db.VarChar(500)
+  membershipCardUrl                      String?             @db.VarChar(500)
+  membershipCardPublicId                 String?             @db.VarChar(500)
+  professionalPracticeCardUrl            String?             @db.VarChar(500)
+  professionalPracticeCardPublicId       String?             @db.VarChar(500)
+  mastersCertificateUrl                  String?             @db.VarChar(500)
+  mastersCertificatePublicId             String?             @db.VarChar(500)
+  fellowshipCertificateUrl               String?             @db.VarChar(500)
+  fellowshipCertificatePublicId          String?             @db.VarChar(500)
+  unionSpecializationCertificateUrl      String?             @db.VarChar(500)
+  unionSpecializationCertificatePublicId String?             @db.VarChar(500)
   availability_type      AvailabilityType    @default(UNSET)
   present                Boolean             @default(true)
   clinic_doctors         ClinicDoctor[]
-  user                   User                @relation("UserAsDoctor", fields: [id], references: [id], onDelete: Cascade)
-  doctorSchedules        DoctorSchedule[]
+  user                                   User                @relation("UserAsDoctor", fields: [id], references: [id], onDelete: Cascade)
+  doctorSchedules                        DoctorSchedule[]
 
   @@map("Doctor")
 }

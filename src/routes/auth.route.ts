@@ -31,7 +31,8 @@ export class AuthRoute implements Routes {
                 $email: 'user@example.com',
                 $name: 'John Doe',
                 $phone: '1234567890',
-                $password: 'password123'
+                $password: 'password123',
+                $rememberMe: false
             }
         }
         #swagger.responses[201] = {
@@ -49,7 +50,8 @@ export class AuthRoute implements Routes {
                     role: 'PATIENT',
                     photoUrl: null
                 },
-                message: 'Signed Up Successfully'
+                messageEn: 'Signed Up Successfully',
+                messageAr: "تم انشاء الحساب بنجاح"
             }
         }
       */
@@ -75,7 +77,8 @@ export class AuthRoute implements Routes {
             description: 'Login successful',
             schema: {
                 data: { id: 1, email: 'user@example.com', name: 'John Doe', role: 'PATIENT' , doctor: { specialization: 'Cardiology', account_status: 'APPROVED' } },
-                message: 'Logged In Successfully'
+                messageEn: 'Logged In Successfully',
+                messageAr: "تم تسجيل الدخول بنجاح"
             }
         }
       */
@@ -95,7 +98,7 @@ export class AuthRoute implements Routes {
         }
         #swagger.responses[200] = {
             description: 'Logout successful',
-            schema: { message: 'Logged Out Successfully' }
+            schema: { messageEn: 'Logged Out Successfully', messageAr: "تم تسجيل الخروج بنجاح" }
         }
       */
       AuthMiddleware,
@@ -116,11 +119,11 @@ export class AuthRoute implements Routes {
             description: 'Token refreshed successfully',
             schema: {
                 data: { user: {}, accessToken: { expiresIn: 3600, expiresAt: '2025-12-12T12:00:00.000Z' } },
-                message: 'Token Refreshed Successfully'
+                messageEn: 'Token Refreshed Successfully',
+                messageAr: "تم تحديث الرمز بنجاح"
             }
         }
       */
-      AuthMiddleware,
       this.auth.refresh,
     );
 
@@ -147,7 +150,8 @@ export class AuthRoute implements Routes {
             description: 'Profile completed successfully',
             schema: {
                 data: { id: 1, hasCompletedProfile: true },
-                message: 'Profile Completed Successfully'
+                messageEn: 'Profile Completed Successfully',
+                messageAr: "تم إكمال الملف الشخصي بنجاح"
             }
         }
       */
@@ -184,7 +188,8 @@ export class AuthRoute implements Routes {
             description: 'OTP verified successfully',
             schema: {
                 data: true,
-                message: 'OTP Verified Successfully'
+                messageEn: 'OTP Verified Successfully',
+                messageAr: "تم التحقق من رمز التحقق بنجاح"
             }
         }
       */
@@ -204,7 +209,7 @@ export class AuthRoute implements Routes {
         }
         #swagger.responses[200] = {
             description: 'Password reset email sent',
-            schema: { message: 'Password Reset Email Sent Successfully' }
+            schema: { messageEn: 'Password Reset Email Sent Successfully', messageAr: "تم إرسال بريد إعادة تعيين كلمة المرور بنجاح" }
         }
       */
       this.auth.forgetPassword,
@@ -225,7 +230,7 @@ export class AuthRoute implements Routes {
         }
         #swagger.responses[200] = {
             description: 'Password reset successfully',
-            schema: { message: 'Password Reset Successfully' }
+            schema: { messageEn: 'Password Reset Successfully', messageAr: "تم إعادة تعيين كلمة المرور بنجاح" }
         }
       */
       ValidationMiddleware(ResetPasswordDto),
@@ -244,7 +249,7 @@ export class AuthRoute implements Routes {
         }
         #swagger.responses[200] = {
             description: 'OTP resent successfully',
-            schema: { message: 'OTP Resent Successfully' }
+            schema: { messageEn: 'OTP Resent Successfully', messageAr: "تم إعادة إرسال رمز التحقق بنجاح" }
         }
       */
       AuthMiddleware,
@@ -293,7 +298,8 @@ export class AuthRoute implements Routes {
             description: 'Phone number updated successfully',
             schema: {
                 data: { phone: '1234567890' },
-                message: 'Phone number updated successfully'
+                messageEn: 'Phone number updated successfully',
+                messageAr: "تم تحديث رقم الهاتف بنجاح"
             }
         }
       */
@@ -324,7 +330,8 @@ export class AuthRoute implements Routes {
             description: 'User data retrieved successfully',
             schema: {
                 data: { email: 'user@example.com', name: 'John Doe', username: 'johndoe', phone: '1234567890', gender: 'MALE' , date_of_birth: '1990-01-01', isVerified: false, hasCompletedProfile: false },
-                message: 'User data retrieved successfully'
+                messageEn: 'User data retrieved successfully',
+                messageAr: "تم استرجاع بيانات المستخدم بنجاح"
             }
         }
       */

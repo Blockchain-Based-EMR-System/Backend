@@ -7,6 +7,7 @@ import { CompleteUserProfileDto, CreateUserDto, LoginUserDto, ResetPasswordDto }
 import { catchAsync } from '@/utils/catchAsync';
 import { createBilingualError, ErrorMessages } from '@/utils/errorMessages';
 import { HttpException } from '@/exceptions/HttpException';
+import { createMultiLangMessage, SuccessResponseMessages } from '@/utils/responseMessages';
 
 export class AuthController {
   public auth = Container.get(AuthService);
@@ -18,8 +19,12 @@ export class AuthController {
     res.setHeader('Set-Cookie', cookies);
 
     await this.auth.sendEmailOtp(userData.email);
-
-    res.status(201).json({ data: createdUserData, message: 'Signed Up Successfully' });
+    const responseMessage = createMultiLangMessage(SuccessResponseMessages.SIGNED_UP_SUCCESSFULLY);
+    res.status(201).json({
+      data: createdUserData,
+      messageEn: responseMessage.messageEn,
+      messageAr: responseMessage.messageAr
+    });
   });
 
   public logIn = catchAsync(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
@@ -27,7 +32,12 @@ export class AuthController {
     const { cookies, findUser } = await this.auth.login(userData);
 
     res.setHeader('Set-Cookie', cookies);
-    res.status(200).json({ data: findUser, message: 'Logged In Successfully' });
+    const responseMessage = createMultiLangMessage(SuccessResponseMessages.LOGGED_IN_SUCCESSFULLY);
+    res.status(200).json({
+      data: findUser,
+      messageEn: responseMessage.messageEn,
+      messageAr: responseMessage.messageAr
+    });
   });
 
   public logOut = catchAsync(async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
@@ -38,15 +48,21 @@ export class AuthController {
       'Authorization=; HttpOnly; Max-Age=0; Path=/; SameSite=Lax',
       'RefreshToken=; HttpOnly; Max-Age=0; Path=/; SameSite=Lax'
     ]);
-
-    res.status(200).json({ message: 'Logged Out Successfully' });
+    const responseMessage = createMultiLangMessage(SuccessResponseMessages.LOGGED_OUT_SUCCESSFULLY);
+    res.status(200).json({
+      messageEn: responseMessage.messageEn,
+      messageAr: responseMessage.messageAr
+    });
   });
 
   public refresh = catchAsync(async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const refreshToken = req.cookies?.RefreshToken;
     const { cookies, user, accessToken } = await this.auth.refreshAccessToken(refreshToken);
 
-    res.setHeader('Set-Cookie', cookies);
+    cookies.forEach((cookie: string) => {
+      res.append('Set-Cookie', cookie);
+    });
+    const responseMessage = createMultiLangMessage(SuccessResponseMessages.TOKEN_REFRESHED_SUCCESSFULLY);
     res.status(200).json({
       data: {
         user,
@@ -55,7 +71,8 @@ export class AuthController {
           expiresAt: new Date(Date.now() + accessToken.expiresIn * 1000)
         }
       },
-      message: 'Token Refreshed Successfully'
+      messageEn: responseMessage.messageEn,
+      messageAr: responseMessage.messageAr
     });
   });
 
@@ -64,7 +81,12 @@ export class AuthController {
     const profileData: CompleteUserProfileDto = req.body;
     const updatedUserData: User = await this.auth.completeProfile(userData, profileData);
 
-    res.status(200).json({ data: updatedUserData, message: 'Profile Completed Successfully' });
+    const responseMessage = createMultiLangMessage(SuccessResponseMessages.PROFILE_COMPLETED_SUCCESSFULLY);
+    res.status(200).json({
+      data: updatedUserData,
+      messageEn: responseMessage.messageEn,
+      messageAr: responseMessage.messageAr
+    });
   });
 
   public verifyOTP = catchAsync(async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
@@ -75,7 +97,12 @@ export class AuthController {
       throw new HttpException(error.status, error.message, error.messageAr);
     }
     const isSuccessful = await this.auth.verifyEmailOtp(email, otp);
-    res.status(200).json({ data: isSuccessful, message: 'OTP Verified Successfully' });
+    const responseMessage = createMultiLangMessage(SuccessResponseMessages.OTP_VERIFIED_SUCCESSFULLY);
+    res.status(200).json({
+      data: isSuccessful,
+      messageEn: responseMessage.messageEn,
+      messageAr: responseMessage.messageAr
+    });
   });
 
   public forgetPassword = catchAsync(async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
@@ -85,20 +112,32 @@ export class AuthController {
       throw new HttpException(error.status, error.message, error.messageAr);
     }
     await this.auth.sendPasswordResetEmail(email);
-    res.status(200).json({ message: 'Password Reset Email Sent Successfully' });
+    const responseMessage = createMultiLangMessage(SuccessResponseMessages.PASSWORD_RESET_EMAIL_SENT_SUCCESSFULLY);
+    res.status(200).json({
+      messageEn: responseMessage.messageEn,
+      messageAr: responseMessage.messageAr
+    });
   });
 
   public resetPassword = catchAsync(async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     const { token, newPassword }: ResetPasswordDto = req.body;
 
     await this.auth.resetPassword(token, newPassword);
-    res.status(200).json({ message: 'Password Reset Successfully' });
+    const responseMessage = createMultiLangMessage(SuccessResponseMessages.PASSWORD_RESET_SUCCESSFULLY);
+    res.status(200).json({
+      messageEn: responseMessage.messageEn,
+      messageAr: responseMessage.messageAr
+    });
   });
 
   public resendOTP = catchAsync(async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
     const email = await this.auth.getUserEmail(req)
     await this.auth.sendEmailOtp(email);
-    res.status(200).json({ message: 'OTP Resent Successfully' });
+    const responseMessage = createMultiLangMessage(SuccessResponseMessages.OTP_RESENT_SUCCESSFULLY);
+    res.status(200).json({
+      messageEn: responseMessage.messageEn,
+      messageAr: responseMessage.messageAr
+    });
   });
 }
 

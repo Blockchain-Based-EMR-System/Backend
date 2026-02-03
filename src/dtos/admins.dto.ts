@@ -21,14 +21,6 @@ export class AddDoctorFromAdminDto {
 
     @IsString()
     public gender: Gender;
-
-    @IsString()
-    @IsNotEmpty()
-    @TransformSpecialization() // Converts EN/AR to key before validation
-    @IsValidSpecialization({
-        message: 'Specialization must be a valid specialization (English, Arabic, or key accepted)'
-    })
-    public specialization: string;
 }
 
 export class DoctorFromAdminResponseDto {
@@ -46,5 +38,11 @@ export class DoctorFromAdminResponseDto {
         specialization: string;
         avg_time?: Date;
         account_status?: DoctorAccountStatus;
+        fellowshipCertificateUrl?: string;
+        graduationCertificateUrl?: string;
+        mastersCertificateUrl?: string;
+        membershipCardUrl?: string;
+        unionSpecializationCertificateUrl?: string;
+        professionalPracticeCardUrl?: string;
     };
 }

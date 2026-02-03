@@ -6,6 +6,7 @@ import { User, UserLoginData } from "@/interfaces/users.interface";
 import { RequestWithUser } from "@/interfaces";
 import { GoogleAuthService } from "@/services/googleAuth.service";
 import { catchAsync } from "@/utils/catchAsync";
+import { createMultiLangMessage, SuccessResponseMessages } from "@/utils/responseMessages";
 
 export class GoogleAuthController {
     public authService = Container.get(AuthService);
@@ -52,11 +53,13 @@ export class GoogleAuthController {
     public updatePhoneNumber = catchAsync(async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
         const phone: string = req.body.phone;
         await this.googleAuthService.updatePhoneNumber(req.user.id, phone);
-        res.status(200).json({ message: 'Phone Number Updated Successfully' });
+        const responseMessage = createMultiLangMessage(SuccessResponseMessages.PHONE_NUMBER_UPDATED_SUCCESSFULLY);
+        res.status(200).json({ messageEn: responseMessage.messageEn, messageAr: responseMessage.messageAr });
     });
 
     public getGoogleUserData = catchAsync(async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
         const googleUserData: UserLoginData = await this.googleAuthService.getGoogleUserData(req.user.id);
-        res.status(200).json({ data: googleUserData, message: 'Google User Data Retrieved Successfully' });
+        const responseMessage = createMultiLangMessage(SuccessResponseMessages.GOOGLE_USER_DATA_RETRIEVED);
+        res.status(200).json({ data: googleUserData, messageEn: responseMessage.messageEn, messageAr: responseMessage.messageAr });
     });
 }

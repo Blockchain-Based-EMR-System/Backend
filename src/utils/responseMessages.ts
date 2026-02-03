@@ -90,10 +90,6 @@ export const SuccessResponseMessages = {
         message_en: "Password set successfully.",
         message_ar: "تم تعيين كلمة المرور بنجاح.",
     },
-    DOCTOR_SCHEDULE_RETRIEVED: {
-        message_en: "Doctor schedule retrieved successfully.",
-        message_ar: "تم استرجاع جدول الطبيب بنجاح.",
-    },
 
     // Success messages for Google Auth
     PHONE_NUMBER_UPDATED_SUCCESSFULLY: {
@@ -103,10 +99,6 @@ export const SuccessResponseMessages = {
     GOOGLE_USER_DATA_RETRIEVED: {
         message_en: "Google user data retrieved successfully.",
         message_ar: "تم استرجاع بيانات مستخدم جوجل بنجاح.",
-    },
-    SCHEDULE_CREATED_SUCCESSFULLY: {
-        message_en: 'Schedule created successfully',
-        message_ar: 'تم إنشاء الجدول بنجاح'
     },
 
     // Success messages for Super Admin
@@ -136,7 +128,6 @@ export const SuccessResponseMessages = {
         message_en: "Profile picture deleted successfully.",
         message_ar: "تم حذف صورة الملف الشخصي بنجاح.",
     },
-
     // success messages for appointments
     APPOINTMENT_BOOKED_SUCCESSFULLY: {
         message_en: "Appointment booked successfully.",
@@ -178,6 +169,8 @@ export const SuccessResponseMessages = {
         message_en: "Queue position retrieved successfully.",
         message_ar: "تم استرجاع موقعك في قائمة الانتظار بنجاح.",
     },
+
+
 }
 
 interface MultiLangMessageObj {

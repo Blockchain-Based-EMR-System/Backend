@@ -1,12 +1,12 @@
 import { DoctorController } from "@/controllers/doctor.controller";
-import { DoctorLoginRequestDto, DoctorProfilePictureRequestDto, DoctorSetPasswordRequestDto, DoctorSignupRequestDto } from "@/dtos/doctors.dto";
+import { DoctorLoginRequestDto, DoctorSetPasswordRequestDto, DoctorSignupRequestDto } from "@/dtos/doctors.dto";
 import { Routes } from "@/interfaces";
 import { ValidationMiddleware } from "@/middlewares/validation.middleware";
 import { Router } from "express";
 import { errorWrapper } from "@/utils/errorWrapper";
 import { AuthMiddleware, RoleMiddleware } from "@/middlewares/auth.middleware";
-import upload from "@/middlewares/multer.middleware";
 import { Role } from "@prisma/client";
+import { uploadPdf } from "@/middlewares/multer.middleware";
 
 
 export class DoctorsRoute implements Routes {
@@ -24,28 +24,97 @@ export class DoctorsRoute implements Routes {
             `/doctors/signup`,
             /* 
                 #swagger.tags = ['Doctors']
-                #swagger.parameters['body'] = {
-                    in: 'body',
-                    description: 'Doctor signup data',
+                #swagger.consumes = ['multipart/form-data']
+                #swagger.parameters['email'] = {
+                    in: 'formData',
+                    description: 'Doctor email address',
                     required: true,
-                    schema: {
-                        $email: 'doctor@example.com',
-                        $name: 'Dr. Smith',
-                        $phone: '1234567890',
-                        $password: 'SecurePassword123',
-                        $gender: 'MALE or FEMALE',
-                        date_of_birth: '1990-01-01',
-                        $specialization: 'CARDIOLOGY or امراض القلب or Cardiology'
-                    }
+                    type: 'string'
+                }
+                #swagger.parameters['name'] = {
+                    in: 'formData',
+                    description: 'Doctor full name',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['phone'] = {
+                    in: 'formData',
+                    description: 'Doctor phone number',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['password'] = {
+                    in: 'formData',
+                    description: 'Doctor password',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['gender'] = {
+                    in: 'formData',
+                    description: 'Doctor gender (MALE or FEMALE)',
+                    required: true,
+                    type: 'string',
+                    enum: ['MALE', 'FEMALE']
+                }
+                #swagger.parameters['date_of_birth'] = {
+                    in: 'formData',
+                    description: 'Doctor date of birth (YYYY-MM-DD)',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['graduationCertificate'] = {
+                    in: 'formData',
+                    description: 'Graduation certificate PDF',
+                    required: true,
+                    type: 'file'
+                }
+                #swagger.parameters['membershipCard'] = {
+                    in: 'formData',
+                    description: 'Membership card PDF',
+                    required: true,
+                    type: 'file'
+                }
+                #swagger.parameters['professionalPracticeCard'] = {
+                    in: 'formData',
+                    description: 'Professional practice card PDF',
+                    required: true,
+                    type: 'file'
+                }
+                #swagger.parameters['mastersCertificate'] = {
+                    in: 'formData',
+                    description: 'Masters certificate PDF',
+                    required: true,
+                    type: 'file'
+                }
+                #swagger.parameters['fellowshipCertificate'] = {
+                    in: 'formData',
+                    description: 'Fellowship certificate PDF',
+                    required: true,
+                    type: 'file'
+                }
+                #swagger.parameters['unionSpecializationCertificate'] = {
+                    in: 'formData',
+                    description: 'Union specialization certificate PDF',
+                    required: true,
+                    type: 'file'
                 }
                 #swagger.responses[201] = {
                     description: 'Doctor signup successful',
                     schema: {
-                        message: 'Doctor registered successfully'
+                        messageEn: 'Doctor registered successfully',
+                        messageAr: "تم تسجيل الطبيب بنجاح"
                     }
                 }
             */
-            ValidationMiddleware(DoctorSignupRequestDto),
+            uploadPdf.fields([
+                { name: 'graduationCertificate', maxCount: 1 },
+                { name: 'membershipCard', maxCount: 1 },
+                { name: 'professionalPracticeCard', maxCount: 1 },
+                { name: 'mastersCertificate', maxCount: 1 },
+                { name: 'fellowshipCertificate', maxCount: 1 },
+                { name: 'unionSpecializationCertificate', maxCount: 1 },
+            ]),
+            ValidationMiddleware(DoctorSignupRequestDto, false, false, false, true),
             errorWrapper(this.doctorsController.doctorSignup)
         );
 
@@ -79,7 +148,8 @@ export class DoctorsRoute implements Routes {
                                 account_status: 'APPROVED'
                             }
                         },
-                        message: 'Doctor logged in successfully'
+                        messageEn: 'Doctor logged in successfully',
+                        messageAr: "تم تسجيل دخول الطبيب بنجاح"
                     }
                 }
             */
@@ -109,7 +179,8 @@ export class DoctorsRoute implements Routes {
                 #swagger.responses[200] = {
                     description: 'Password set successfully',
                     schema: {
-                        message: 'Password updated successfully'
+                        messageEn: 'Password updated successfully',
+                        messageAr: "تم تحديث كلمة المرور بنجاح"
                     }
                 }
             */
@@ -117,82 +188,6 @@ export class DoctorsRoute implements Routes {
             AuthMiddleware,
             RoleMiddleware(Role.DOCTOR),
             errorWrapper(this.doctorsController.doctorSetPassword)
-        );
-
-        // Doctor Profile Picture Routes
-        this.router.patch(
-            `/doctors/profile-picture`,
-            /*
-                #swagger.tags = ['Doctors']
-                #swagger.consumes = ['multipart/form-data']
-                #swagger.parameters['Authorization'] = {
-                    in: 'cookie',
-                    description: 'Bearer token for authentication',
-                    required: true,
-                    type: 'string'
-                }
-                #swagger.parameters['profilePicture'] = {
-                    in: 'formData',
-                    type: 'file',
-                    required: true,
-                    description: 'Profile picture file'
-                }
-                #swagger.responses[200] = {
-                    description: 'Profile picture updated successfully',
-                    schema: {
-                        message: 'Profile picture updated successfully'
-                    }
-                }
-            */
-            AuthMiddleware,
-            RoleMiddleware(Role.DOCTOR),
-            upload.single('profilePicture'),
-            ValidationMiddleware(null, false, false, false, true),
-            errorWrapper(this.doctorsController.updateProfilePicture)
-        );
-        this.router.get(
-            `/doctors/profile-picture`,
-            /*
-                #swagger.tags = ['Doctors']
-                #swagger.parameters['Authorization'] = {
-                    in: 'cookie',
-                    description: 'Bearer token for authentication',
-                    required: true,
-                    type: 'string'
-                }
-                #swagger.responses[200] = {
-                    description: 'Get profile picture successful',
-                    schema: {
-                        data: {
-                            url: 'https://res.cloudinary.com/your-cloud-name/image/upload/v1696543210/doctors/profile_pictures/doctor_1_profile_picture_1696543210.jpg'
-                        },
-                        message: 'Profile picture retrieved successfully'
-                    }
-                }
-            */
-            AuthMiddleware,
-            errorWrapper(this.doctorsController.getProfilePicture)
-        )
-        this.router.delete(
-            `/doctors/profile-picture`,
-            /*
-                #swagger.tags = ['Doctors']
-                #swagger.parameters['Authorization'] = {
-                    in: 'cookie',
-                    description: 'Bearer token for authentication',
-                    required: true,
-                    type: 'string'
-                }
-                #swagger.responses[200] = {
-                    description: 'Profile picture deleted successfully',
-                    schema: {
-                        message: 'Profile picture deleted successfully'
-                    }
-                }
-            */
-            AuthMiddleware,
-            RoleMiddleware(Role.DOCTOR),
-            errorWrapper(this.doctorsController.deleteProfilePicture)
         );
     }
 }

@@ -10,7 +10,7 @@ const prisma = new PrismaClient();
 @Service()
 export class UserService {
 
-    public async updateProfilePicture(userId: string, localFilePath: string): Promise<{ url: string; publicId: string }> {
+    public async updateProfilePicture(userId: string, localFilePath: string, userRole: string): Promise<void> {
 
         const oldProfilePictureId = await prisma.user.findUnique({
             where: { id: userId },
@@ -24,20 +24,24 @@ export class UserService {
 
         // Upload new profile picture to Cloudinary
         const uploadResult = await cloudinary.uploader.upload(localFilePath, {
-            folder: 'doctors/profile_pictures',
+            folder: `${userRole}S/profile_pictures`,
             overwrite: false,
-            public_id: `doctor_${userId}_profile_picture_${Date.now()}`
+            public_id: `${userRole}_${userId}_profile_picture_${Date.now()}`
         });
 
         fs.unlinkSync(localFilePath); // Remove local file after upload
 
-        return {
-            url: uploadResult.secure_url,
-            publicId: uploadResult.public_id
-        }
+        // Update user record with new profile picture info
+        await prisma.user.update({
+            where: { id: userId },
+            data: {
+                photo_url: uploadResult.secure_url,
+                photo_public_id: uploadResult.public_id
+            }
+        });
     }
 
-    public async getUserProfilePicture(userId: string): Promise<string | null> {
+    public async getProfilePicture(userId: string): Promise<string | null> {
         const user = await prisma.user.findUnique({
             where: { id: userId },
             select: { photo_url: true }
