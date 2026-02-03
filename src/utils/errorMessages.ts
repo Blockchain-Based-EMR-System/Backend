@@ -124,6 +124,10 @@ export const ErrorMessages = {
         en: "Requested time is outside doctor's working hours",
         ar: "الوقت المطلوب خارج ساعات عمل الطبيب"
     },
+    DAY_OUTSIDE_SCHEDULE: {
+        en: "Requested date is outside doctor's working days",
+        ar: "الموعد المطلوب خارج أيام عمل الطبيب"
+    },
     DOCTOR_NOT_ASSOCIATED_WITH_CLINIC: {
         en: 'Doctor is not associated with this clinic',
         ar: 'الطبيب غير مرتبط بهذه العيادة'
@@ -136,7 +140,7 @@ export const ErrorMessages = {
         en: 'Schedule already exists for this day and clinic',
         ar: 'الجدول موجود بالفعل لهذا اليوم والعيادة'
     },
-
+    
     // Clinic errors
     CLINIC_NOT_FOUND: {
         en: 'Clinic not found',

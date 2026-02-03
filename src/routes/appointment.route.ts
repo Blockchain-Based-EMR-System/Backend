@@ -762,6 +762,5 @@ export class AppointmentRoute implements Routes {
             AuthMiddleware,
             this.appointmentController.getCurrentDoctorSchedule
         );
-
     }
 }

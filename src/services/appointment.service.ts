@@ -20,7 +20,6 @@ export class AppointmentService {
         const schedules = await prisma.doctorSchedule.findMany({
             where: {
                 doctor_id: doctorId,
-                clinic_id: clinicId,
                 deleted_at: null
             },
             select: {
@@ -228,6 +227,11 @@ export class AppointmentService {
             }
         });
 
+        if (!schedule) {
+            const error = createBilingualError(400, ErrorMessages.DAY_OUTSIDE_SCHEDULE);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
         const isOnline = schedule.is_online;
 
         if (!isOnline && !clinicId) {
@@ -236,6 +240,7 @@ export class AppointmentService {
         }
 
         const endTime = new Date(scheduledTime.getTime() + schedule.slot_duration * 60000);
+
 
         await prisma.appointment.create({
             data: {
@@ -793,7 +798,6 @@ export class AppointmentService {
 
     // ex: "10:30" --> 630
     private timeStringToMinutes(timeStr: string): number {
-        console.log(`string ${timeStr}`)
         const [hours, minutes] = timeStr.split(':').map(Number);
         return hours * 60 + minutes;
     }
