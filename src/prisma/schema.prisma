@@ -63,9 +63,9 @@ model Doctor {
   fellowshipCertificatePublicId          String?             @db.VarChar(500)
   unionSpecializationCertificateUrl      String?             @db.VarChar(500)
   unionSpecializationCertificatePublicId String?             @db.VarChar(500)
-  availability_type      AvailabilityType    @default(UNSET)
-  present                Boolean             @default(true)
-  clinic_doctors         ClinicDoctor[]
+  availability_type                      AvailabilityType    @default(UNSET)
+  present                                Boolean             @default(true)
+  clinic_doctors                         ClinicDoctor[]
   user                                   User                @relation("UserAsDoctor", fields: [id], references: [id], onDelete: Cascade)
   doctorSchedules                        DoctorSchedule[]
 
@@ -90,8 +90,8 @@ model Appointment {
   scheduled_time DateTime
   is_online      Boolean           @default(false)
   is_completed   Boolean           @default(false)
-  position       Int                @default(0)
-  patients_ahead Int                @default(0)
+  position       Int               @default(0)
+  patients_ahead Int               @default(0)
   estimated_time Float?
   created_at     DateTime          @default(now())
   modified_at    DateTime          @updatedAt
@@ -263,8 +263,8 @@ model DoctorSchedule {
   buffer_time   Int       @default(0)
   is_online     Boolean   @default(true)
   is_active     Boolean   @default(true)
-  break_start   String? 
-  break_end     String?  
+  break_start   String?
+  break_end     String?
   created_at    DateTime  @default(now())
   modified_at   DateTime  @updatedAt
   deleted_at    DateTime?
