@@ -51,7 +51,7 @@ export class QueueService {
             throw new HttpException(error.status, error.message, error.messageAr);
         }
 
-        const dayOfWeek = this.getDayOfWeek(appointment.scheduled_time.getDay());
+        const dayOfWeek = this.getDayOfWeek(appointment.scheduled_time.getUTCDay());
 
         const schedule = await prisma.doctorSchedule.findFirst({
             where: {
@@ -74,10 +74,10 @@ export class QueueService {
         const bufferTime = schedule?.buffer_time || 0;
 
         const startOfDay = new Date(appointment.scheduled_time);
-        startOfDay.setHours(0, 0, 0, 0);
+        startOfDay.setUTCHours(0, 0, 0, 0);
 
         const endOfDay = new Date(appointment.scheduled_time);
-        endOfDay.setHours(23, 59, 59, 999);
+        endOfDay.setUTCHours(23, 59, 59, 999);
 
         const todayAppointments = await prisma.appointment.findMany({
             where: {

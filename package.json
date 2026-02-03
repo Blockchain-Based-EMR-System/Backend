@@ -16,7 +16,7 @@
     "prisma:migrate": "dotenv -e .env.development.local -- npx prisma migrate dev --schema=src/prisma/schema.prisma",
     "prisma:generate": "prisma generate",
     "prisma:studio": "dotenv -e .env.development.local -- prisma studio",
-    "swagger:generate": "node ./src/swagger.js",
+    "swagger:generate": "node ./src/swagger.mjs",
     "deploy:prod": "npm run build && pm2 start ecosystem.config.js --only prod",
     "deploy:dev": "pm2 start ecosystem.config.js --only dev"
   },

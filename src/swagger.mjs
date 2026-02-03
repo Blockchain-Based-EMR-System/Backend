@@ -14,7 +14,6 @@ const doc = {
     { name: 'MedicalRecords', description: 'Hyperledger Fabric medical record endpoints' },
     { name: 'Doctors', description: 'Doctor account endpoints' },
     { name: 'Clinics', description: 'Clinic endpoints' },
-    { name: 'Users', description: 'User account endpoints' },
     { name: 'Appointments', description: 'Appointment endpoints' },
     { name: 'Queue', description: 'Queue endpoints' },
 
@@ -26,6 +25,6 @@ const doc = {
 const outputFile = './swagger-output.json';
 const endpointsFiles = ['./routes/auth.route.ts', './routes/fabric.route.ts', './src/routes/admin.route.ts',
   './src/routes/superAdmin.route.ts', './src/routes/doctors.route.ts', './src/routes/clinic.route.ts'
-  , './src/routes/user.route.ts', './src/routes/appointment.route.ts', './src/routes/queue.route.ts'];
+  , './src/routes/appointment.route.ts', './src/routes/queue.route.ts'];
 
 swaggerAutogen()(outputFile, endpointsFiles, doc);

@@ -124,6 +124,18 @@ export const ErrorMessages = {
         en: "Requested time is outside doctor's working hours",
         ar: "الوقت المطلوب خارج ساعات عمل الطبيب"
     },
+    DOCTOR_NOT_ASSOCIATED_WITH_CLINIC: {
+        en: 'Doctor is not associated with this clinic',
+        ar: 'الطبيب غير مرتبط بهذه العيادة'
+    },
+    END_TIME_BEFORE_START_TIME: {
+        en: 'End time must be after start time',
+        ar: 'وقت الانتهاء يجب أن يكون بعد وقت البداية'
+    },
+    SCHEDULE_ALREADY_EXISTS: {
+        en: 'Schedule already exists for this day and clinic',
+        ar: 'الجدول موجود بالفعل لهذا اليوم والعيادة'
+    },
 
     // Clinic errors
     CLINIC_NOT_FOUND: {
@@ -179,9 +191,9 @@ export const ErrorMessages = {
         en: "This time slot is not available",
         ar: "هذا الوقت غير متاح"
     },
-    EITHER_MINUTES_OR_NEW_TIME: {
-        en: "Provide either shift minutes or new scheduled time, not both",
-        ar: "يرجى تقديم إما دقائق التغيير أو وقت موعد جديد، وليس كلاهما"
+    MINUTES_EXCEEDED_LIMIT: {
+        en: "The maximum allowed delay must not exceed 60 minutes.",
+        ar: "يجب ألا يتجاوز الحد الأقصى للتأجيل المسموح به 60 دقيقة."
     },
     // Generic errors
     SOMETHING_WENT_WRONG: {

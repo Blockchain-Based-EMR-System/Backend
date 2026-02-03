@@ -104,6 +104,10 @@ export const SuccessResponseMessages = {
         message_en: "Google user data retrieved successfully.",
         message_ar: "تم استرجاع بيانات مستخدم جوجل بنجاح.",
     },
+    SCHEDULE_CREATED_SUCCESSFULLY: {
+        message_en: 'Schedule created successfully',
+        message_ar: 'تم إنشاء الجدول بنجاح'
+    },
 
     // Success messages for Super Admin
     ADMIN_ADDED_SUCCESSFULLY: {

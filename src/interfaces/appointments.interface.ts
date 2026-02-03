@@ -79,6 +79,7 @@ export interface TimeSlot {
     start: string; 
     end: string;
     available: boolean;
+    online: boolean;
 }
 
 

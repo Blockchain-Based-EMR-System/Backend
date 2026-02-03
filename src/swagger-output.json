@@ -35,6 +35,10 @@
     {
       "name": "Appointments",
       "description": "Appointment endpoints"
+    },
+    {
+      "name": "Queue",
+      "description": "Queue endpoints"
     }
   ],
   "schemes": [
@@ -3189,7 +3193,7 @@
         "tags": [
           "Appointments"
         ],
-        "description": "Get all available days for a doctor that have at least one available slot",
+        "description": "Get available days for booking with a specific doctor (up to 30 days ahead)",
         "parameters": [
           {
             "name": "doctorId",
@@ -3226,7 +3230,7 @@
                     "properties": {
                       "date": {
                         "type": "string",
-                        "example": "2026-02-10"
+                        "example": "2026-02-03"
                       },
                       "dayOfWeek": {
                         "type": "string",
@@ -3234,7 +3238,7 @@
                       },
                       "displayDate": {
                         "type": "string",
-                        "example": "Monday, February 10, 2026"
+                        "example": "Monday, February 3, 2026"
                       }
                     }
                   }
@@ -3250,10 +3254,10 @@
             }
           },
           "400": {
-            "description": "Bad request - missing required parameters"
+            "description": "Bad request - missing doctor ID or invalid parameters"
           },
-          "404": {
-            "description": "Doctor not found or not available"
+          "401": {
+            "description": "Unauthorized - user not authenticated"
           }
         }
       }
@@ -3263,7 +3267,7 @@
         "tags": [
           "Appointments"
         ],
-        "description": "Get all available time slots for a doctor on a specific date",
+        "description": "Get available time slots for a specific doctor on a given date",
         "parameters": [
           {
             "name": "doctorId",
@@ -3284,8 +3288,7 @@
             "in": "query",
             "description": "Date in YYYY-MM-DD format",
             "required": true,
-            "type": "string",
-            "example": "2026-02-03"
+            "type": "string"
           },
           {
             "name": "clinicId",
@@ -3308,11 +3311,19 @@
                     "properties": {
                       "start": {
                         "type": "string",
-                        "example": "10:30"
+                        "example": "09:30"
                       },
                       "end": {
                         "type": "string",
-                        "example": "10:50"
+                        "example": "09:50"
+                      },
+                      "available": {
+                        "type": "boolean",
+                        "example": false
+                      },
+                      "online": {
+                        "type": "boolean",
+                        "example": true
                       }
                     }
                   }
@@ -3328,7 +3339,10 @@
             }
           },
           "400": {
-            "description": "Bad request - missing required parameters or invalid date"
+            "description": "Bad request - missing date, invalid format, or past date"
+          },
+          "401": {
+            "description": "Unauthorized - user not authenticated"
           }
         }
       }
@@ -3827,7 +3841,7 @@
         "tags": [
           "Appointments"
         ],
-        "description": "Reschedule an appointment by the doctor. Doctor can either shift the appointment by a number of minutes or set a new scheduled time (but not both)",
+        "description": "Reschedule an appointment by adding minutes (delay) as a doctor",
         "parameters": [
           {
             "name": "appointmentId",
@@ -3839,25 +3853,21 @@
           {
             "name": "Authorization",
             "in": "cookie",
-            "description": "Bearer token for authentication (doctor)",
+            "description": "Bearer token for authentication (must be a doctor)",
             "required": true,
             "type": "string"
           },
           {
             "name": "body",
             "in": "body",
-            "description": "Reschedule parameters (provide either minutes OR newScheduledTime)",
+            "description": "Minutes to add (max 60)",
             "required": true,
             "schema": {
               "type": "object",
               "properties": {
                 "minutes": {
                   "type": "number",
-                  "example": 15
-                },
-                "newScheduledTime": {
-                  "type": "string",
-                  "example": "2026-02-05T11:30:00.000Z"
+                  "example": 30
                 }
               }
             }
@@ -3880,205 +3890,16 @@
             }
           },
           "400": {
-            "description": "Bad request - invalid reschedule parameters",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string",
-                  "example": "Error message describing the issue"
-                }
-              },
-              "xml": {
-                "name": "main"
-              }
-            }
+            "description": "Bad request - missing minutes, exceeds limit, or invalid parameters"
           },
           "401": {
             "description": "Unauthorized - doctor not authenticated"
           },
           "403": {
-            "description": "Forbidden - appointment does not belong to the authenticated doctor"
+            "description": "Forbidden - appointment does not belong to the doctor"
           },
           "404": {
             "description": "Appointment not found"
-          }
-        }
-      }
-    },
-    "/appointments/doctor/bulk-reschedule": {
-      "patch": {
-        "tags": [
-          "Appointments"
-        ],
-        "description": "Bulk reschedule multiple appointments by the authenticated doctor. \\  Rules: \\  (1) You must provide EITHER \"minutes\" OR \"newScheduledTime\" (not both). \\  (2) When using \"minutes\", all appointments are shifted by the same number of minutes. \\  (3) When using \"newScheduledTime\": \\  - If \"keepOriginalSlots\" is true, appointments keep their original time-of-day but move to the new date. \\  - If \"keepOriginalSlots\" is false, appointments are reallocated sequentially based on the doctor schedule.",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "cookie",
-            "description": "Bearer token for authentication (doctor)",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "description": "Bulk reschedule parameters",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "appointmentIds": {
-                  "type": "array",
-                  "example": [
-                    "appointment-uuid-1",
-                    "appointment-uuid-2",
-                    "appointment-uuid-3"
-                  ],
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "minutes": {
-                  "type": "number",
-                  "example": 15
-                },
-                "newScheduledTime": {
-                  "type": "string",
-                  "example": "2026-02-10T09:00:00.000Z"
-                },
-                "keepOriginalSlots": {
-                  "type": "boolean",
-                  "example": true
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Appointments rescheduled successfully",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string",
-                  "example": "Appointments rescheduled successfully"
-                }
-              },
-              "xml": {
-                "name": "main"
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request - invalid or conflicting reschedule parameters",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string",
-                  "example": "Error message describing the issue"
-                }
-              },
-              "xml": {
-                "name": "main"
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized - doctor not authenticated"
-          },
-          "403": {
-            "description": "Forbidden - one or more appointments do not belong to the authenticated doctor"
-          },
-          "404": {
-            "description": "One or more appointments not found"
-          }
-        }
-      }
-    },
-    "/appointments/doctor/reschedule-day": {
-      "patch": {
-        "tags": [
-          "Appointments"
-        ],
-        "description": "Reschedule all appointments on a specific day by the authenticated doctor. \\  Rules: \\  (1) You must provide EITHER \"minutes\" OR \"newDate\" (not both). \\  (2) When using \"minutes\", all appointments on the specified day are shifted by the same number of minutes. \\  (3) When using \"newDate\": \\  - If \"keepOriginalSlots\" is true, appointments keep their original time-of-day but move to the new date. \\  - If \"keepOriginalSlots\" is false, appointments are reallocated sequentially based on the doctor schedule.",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "cookie",
-            "description": "Bearer token for authentication (doctor)",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "description": "Reschedule day parameters",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "currentDate": {
-                  "type": "string",
-                  "example": "2026-02-10T09:00:00.000Z"
-                },
-                "minutes": {
-                  "type": "number",
-                  "example": 15
-                },
-                "newDate": {
-                  "type": "string",
-                  "example": "2026-02-13T09:00:00.000Z"
-                },
-                "keepOriginalSlots": {
-                  "type": "boolean",
-                  "example": true
-                }
-              }
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Appointments rescheduled successfully",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string",
-                  "example": "Appointments rescheduled successfully"
-                }
-              },
-              "xml": {
-                "name": "main"
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request - invalid or conflicting reschedule parameters",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string",
-                  "example": "Error message describing the issue"
-                }
-              },
-              "xml": {
-                "name": "main"
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized - doctor not authenticated"
-          },
-          "403": {
-            "description": "Forbidden - one or more appointments do not belong to the authenticated doctor"
-          },
-          "404": {
-            "description": "No appointments found on the specified day"
           }
         }
       }
@@ -4175,6 +3996,174 @@
           },
           "401": {
             "description": "Unauthorized - doctor not authenticated"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Appointments"
+        ],
+        "description": "Enter or update a doctor",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication (must be a doctor)",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Schedule details",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "doctorId": {
+                  "type": "string",
+                  "example": "doctor-uuid"
+                },
+                "clinicId": {
+                  "type": "string",
+                  "example": "clinic-uuid"
+                },
+                "workingDay": {
+                  "type": "number",
+                  "example": 1
+                },
+                "startTime": {
+                  "type": "string",
+                  "example": "09:00"
+                },
+                "endTime": {
+                  "type": "string",
+                  "example": "17:00"
+                },
+                "slotDuration": {
+                  "type": "number",
+                  "example": 30
+                },
+                "bufferTime": {
+                  "type": "number",
+                  "example": 5
+                },
+                "isOnline": {
+                  "type": "boolean",
+                  "example": true
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Schedule created successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Schedule created successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid parameters or doctor ID missing"
+          },
+          "401": {
+            "description": "Unauthorized - doctor not authenticated"
+          }
+        }
+      }
+    },
+    "/appointments/doctor/current-schedule": {
+      "get": {
+        "tags": [
+          "Appointments"
+        ],
+        "description": "Get all confirmed appointments for doctor today",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication (must be a doctor)",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Today's appointments retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "appointment-uuid-2"
+                      },
+                      "status": {
+                        "type": "string",
+                        "example": "CONFIRMED"
+                      },
+                      "slot_duration": {
+                        "type": "number",
+                        "example": 20
+                      },
+                      "patient_name": {
+                        "type": "string",
+                        "example": "Jane Smith"
+                      },
+                      "appointment_date": {
+                        "type": "string",
+                        "example": "2026-02-03"
+                      },
+                      "start_time": {
+                        "type": "string",
+                        "example": "10:15"
+                      },
+                      "end_time": {
+                        "type": "string",
+                        "example": "10:35"
+                      },
+                      "clinic_name": {},
+                      "clinic_address": {}
+                    }
+                  }
+                },
+                "message": {
+                  "type": "object",
+                  "properties": {
+                    "en": {
+                      "type": "string",
+                      "example": "Doctor's schedule retrieved successfully"
+                    },
+                    "ar": {
+                      "type": "string",
+                      "example": "تم استرجاع جدول الطبيب بنجاح"
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (should rarely happen here)"
+          },
+          "401": {
+            "description": "Unauthorized - invalid or missing token"
           }
         }
       }

@@ -5,7 +5,7 @@ import { DoctorController } from "@/controllers/doctor.controller";
 import { AppointmentController } from "@/controllers/appointment.controller";
 import { ValidationMiddleware } from "@/middlewares/validation.middleware";
 import { AuthMiddleware } from "@/middlewares/auth.middleware";
-import { BookAppointmentDto, RescheduleAppointmentDto, RescheduleAppointmentByDoctorDto, BulkRescheduleDto, RescheduleDayDto } from "@/dtos/appointments.dto";
+import { BookAppointmentDto, RescheduleAppointmentDto, RescheduleAppointmentByDoctorDto, EnterDoctorScheduleDto } from "@/dtos/appointments.dto";
 
 export class AppointmentRoute implements Routes {
     public path = '/appointments';
@@ -19,7 +19,6 @@ export class AppointmentRoute implements Routes {
     }
 
     private initializeRoutes() {
-        // get online doctors
         this.router.get(
             `${this.path}/online-doctors`,
             /* 
@@ -137,7 +136,7 @@ export class AppointmentRoute implements Routes {
                     required: true,
                     type: 'string'
                 }
-                #swagger.description = 'Get all available days for a doctor that have at least one available slot'
+                #swagger.description = 'Get available days for booking with a specific doctor (up to 30 days ahead)'
                 #swagger.parameters['doctorId'] = {
                     in: 'path',
                     description: 'Doctor ID',
@@ -158,26 +157,16 @@ export class AppointmentRoute implements Routes {
                                 date: '2026-02-03',
                                 dayOfWeek: 'MONDAY',
                                 displayDate: 'Monday, February 3, 2026'
-                            },
-                            {
-                                date: '2026-02-05',
-                                dayOfWeek: 'WEDNESDAY',
-                                displayDate: 'Wednesday, February 5, 2026'
-                            },
-                            {
-                                date: '2026-02-10',
-                                dayOfWeek: 'MONDAY',
-                                displayDate: 'Monday, February 10, 2026'
                             }
                         ],
-                        message: 'Available days retrieved successfully',
+                        message: 'Available days retrieved successfully'
                     }
                 }
                 #swagger.responses[400] = {
-                    description: 'Bad request - missing required parameters'
+                    description: 'Bad request - missing doctor ID or invalid parameters'
                 }
-                #swagger.responses[404] = {
-                    description: 'Doctor not found or not available'
+                #swagger.responses[401] = {
+                    description: 'Unauthorized - user not authenticated'
                 }
             */
             AuthMiddleware,
@@ -197,7 +186,7 @@ export class AppointmentRoute implements Routes {
                     required: true,
                     type: 'string'
                 }
-                #swagger.description = 'Get all available time slots for a doctor on a specific date'
+                #swagger.description = 'Get available time slots for a specific doctor on a given date'
                 #swagger.parameters['doctorId'] = {
                     in: 'path',
                     description: 'Doctor ID',
@@ -208,8 +197,7 @@ export class AppointmentRoute implements Routes {
                     in: 'query',
                     description: 'Date in YYYY-MM-DD format',
                     required: true,
-                    type: 'string',
-                    example: '2026-02-03'
+                    type: 'string'
                 }
                 #swagger.parameters['clinicId'] = {
                     in: 'query',
@@ -223,26 +211,25 @@ export class AppointmentRoute implements Routes {
                         data: [
                             {
                                 start: '09:00',
-                                end: '09:20'
+                                end: '09:20',
+                                available: true,
+                                online: true
                             },
                             {
                                 start: '09:30',
-                                end: '09:50'
-                            },
-                            {
-                                start: '10:00',
-                                end: '10:20'
-                            },
-                            {
-                                start: '10:30',
-                                end: '10:50'
+                                end: '09:50',
+                                available: false,
+                                online: true
                             }
                         ],
-                        message: 'Available slots retrieved successfully',
+                        message: 'Available slots retrieved successfully'
                     }
                 }
                 #swagger.responses[400] = {
-                    description: 'Bad request - missing required parameters or invalid date'
+                    description: 'Bad request - missing date, invalid format, or past date'
+                }
+                #swagger.responses[401] = {
+                    description: 'Unauthorized - user not authenticated'
                 }
             */
             AuthMiddleware,
@@ -554,11 +541,11 @@ export class AppointmentRoute implements Routes {
                 #swagger.tags = ['Appointments']
                 #swagger.parameters['Authorization'] = {
                     in: 'cookie',
-                    description: 'Bearer token for authentication (doctor)',
+                    description: 'Bearer token for authentication (must be a doctor)',
                     required: true,
                     type: 'string'
                 }
-                #swagger.description = 'Reschedule an appointment by the doctor. Doctor can either shift the appointment by a number of minutes or set a new scheduled time (but not both)'
+                #swagger.description = 'Reschedule an appointment by adding minutes (delay) as a doctor'
                 #swagger.parameters['appointmentId'] = {
                     in: 'path',
                     description: 'Appointment ID to reschedule',
@@ -567,11 +554,10 @@ export class AppointmentRoute implements Routes {
                 }
                 #swagger.parameters['body'] = {
                     in: 'body',
-                    description: 'Reschedule parameters (provide either minutes OR newScheduledTime)',
+                    description: 'Minutes to add (max 60)',
                     required: true,
                     schema: {
-                        minutes: 15,
-                        newScheduledTime: '2026-02-05T11:30:00.000Z'
+                        minutes: 30
                     }
                 }
                 #swagger.responses[200] = {
@@ -581,16 +567,13 @@ export class AppointmentRoute implements Routes {
                     }
                 }
                 #swagger.responses[400] = {
-                    description: 'Bad request - invalid reschedule parameters',
-                    schema: {
-                        message: 'Error message describing the issue'
-                    }
+                    description: 'Bad request - missing minutes, exceeds limit, or invalid parameters'
                 }
                 #swagger.responses[401] = {
                     description: 'Unauthorized - doctor not authenticated'
                 }
                 #swagger.responses[403] = {
-                    description: 'Forbidden - appointment does not belong to the authenticated doctor'
+                    description: 'Forbidden - appointment does not belong to the doctor'
                 }
                 #swagger.responses[404] = {
                     description: 'Appointment not found'
@@ -600,126 +583,6 @@ export class AppointmentRoute implements Routes {
             ValidationMiddleware(RescheduleAppointmentByDoctorDto),
             this.appointmentController.rescheduleAppointmentByDoctor
         );
-
-        this.router.patch(
-            `${this.path}/doctor/bulk-reschedule`,
-            /*
-                #swagger.path = '/appointments/doctor/bulk-reschedule'
-                #swagger.method = 'patch'
-                #swagger.tags = ['Appointments']
-                #swagger.parameters['Authorization'] = {
-                    in: 'cookie',
-                    description: 'Bearer token for authentication (doctor)',
-                    required: true,
-                    type: 'string'
-                }
-                #swagger.description = 'Bulk reschedule multiple appointments by the authenticated doctor. \
-                Rules: \
-                (1) You must provide EITHER "minutes" OR "newScheduledTime" (not both). \
-                (2) When using "minutes", all appointments are shifted by the same number of minutes. \
-                (3) When using "newScheduledTime": \
-                    - If "keepOriginalSlots" is true, appointments keep their original time-of-day but move to the new date. \
-                    - If "keepOriginalSlots" is false, appointments are reallocated sequentially based on the doctor schedule.'
-
-                #swagger.parameters['body'] = {
-                    in: 'body',
-                    description: 'Bulk reschedule parameters',
-                    required: true,
-                    schema: {
-                        appointmentIds: [
-                            'appointment-uuid-1',
-                            'appointment-uuid-2',
-                            'appointment-uuid-3'
-                        ],
-                        minutes: 15,
-                        newScheduledTime: '2026-02-10T09:00:00.000Z',
-                        keepOriginalSlots: true
-                    }
-                }
-                #swagger.responses[200] = {
-                    description: 'Appointments rescheduled successfully',
-                    schema: {
-                        message: 'Appointments rescheduled successfully'
-                    }
-                }
-                #swagger.responses[400] = {
-                    description: 'Bad request - invalid or conflicting reschedule parameters',
-                    schema: {
-                        message: 'Error message describing the issue'
-                    }
-                }
-                #swagger.responses[401] = {
-                    description: 'Unauthorized - doctor not authenticated'
-                }
-                #swagger.responses[403] = {
-                    description: 'Forbidden - one or more appointments do not belong to the authenticated doctor'
-                }
-                #swagger.responses[404] = {
-                    description: 'One or more appointments not found'
-                }
-            */
-            AuthMiddleware,
-            ValidationMiddleware(BulkRescheduleDto),
-            this.appointmentController.bulkRescheduleByDoctor
-        );
-
-        this.router.patch(
-            `${this.path}/doctor/reschedule-day`,
-            /* 
-                #swagger.path = '/appointments/doctor/reschedule-day'
-                #swagger.method = 'patch'
-                #swagger.tags = ['Appointments']
-                #swagger.parameters['Authorization'] = {
-                    in: 'cookie',
-                    description: 'Bearer token for authentication (doctor)',
-                    required: true,
-                    type: 'string'
-                }
-                #swagger.description = 'Reschedule all appointments on a specific day by the authenticated doctor. \
-                Rules: \
-                (1) You must provide EITHER "minutes" OR "newDate" (not both). \
-                (2) When using "minutes", all appointments on the specified day are shifted by the same number of minutes. \
-                (3) When using "newDate": \
-                    - If "keepOriginalSlots" is true, appointments keep their original time-of-day but move to the new date. \
-                    - If "keepOriginalSlots" is false, appointments are reallocated sequentially based on the doctor schedule.'
-
-                #swagger.parameters['body'] = {
-                    in: 'body',
-                    description: 'Reschedule day parameters',
-                    required: true,
-                    schema: {
-                        currentDate: '2026-02-10T09:00:00.000Z',
-                        minutes: 15,
-                        newDate: '2026-02-13T09:00:00.000Z',
-                        keepOriginalSlots: true
-                    }
-                }
-                #swagger.responses[200] = {
-                    description: 'Appointments rescheduled successfully',
-                    schema: {
-                        message: 'Appointments rescheduled successfully'
-                    }
-                }
-                #swagger.responses[400] = {
-                    description: 'Bad request - invalid or conflicting reschedule parameters',
-                    schema: {
-                        message: 'Error message describing the issue'
-                    }
-                }
-                #swagger.responses[401] = {
-                    description: 'Unauthorized - doctor not authenticated'
-                }
-                #swagger.responses[403] = {
-                    description: 'Forbidden - one or more appointments do not belong to the authenticated doctor'
-                }
-                #swagger.responses[404] = {
-                    description: 'No appointments found on the specified day'
-                }
-            */
-            AuthMiddleware,
-            ValidationMiddleware(RescheduleDayDto),
-            this.appointmentController.rescheduleDayAppointments
-        )
 
         this.router.get(
             `${this.path}/doctor/schedule`,
@@ -796,5 +659,109 @@ export class AppointmentRoute implements Routes {
             AuthMiddleware,
             this.appointmentController.getDoctorSchedule
         );
+
+        this.router.post(
+            `${this.path}/doctor/schedule`,
+            /* 
+                #swagger.path = '/appointments/doctor/schedule'
+                #swagger.method = 'post'
+                #swagger.tags = ['Appointments']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication (must be a doctor)',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.description = 'Enter or update a doctor's schedule for a specific day'
+                #swagger.parameters['body'] = {
+                    in: 'body',
+                    description: 'Schedule details',
+                    required: true,
+                    schema: {
+                        doctorId: 'doctor-uuid',
+                        clinicId: 'clinic-uuid',
+                        workingDay: 1,
+                        startTime: '09:00',
+                        endTime: '17:00',
+                        slotDuration: 30,
+                        bufferTime: 5,
+                        isOnline: true
+                    }
+                }
+                #swagger.responses[201] = {
+                    description: 'Schedule created successfully',
+                    schema: {
+                        message: 'Schedule created successfully'
+                    }
+                }
+                #swagger.responses[400] = {
+                    description: 'Bad request - invalid parameters or doctor ID missing'
+                }
+                #swagger.responses[401] = {
+                    description: 'Unauthorized - doctor not authenticated'
+                }
+            */
+            AuthMiddleware,
+            ValidationMiddleware(EnterDoctorScheduleDto),
+            this.appointmentController.enterDoctorSchedule
+        );
+
+        this.router.get(
+            `${this.path}/doctor/current-schedule`,
+            /* 
+                #swagger.path = '/appointments/doctor/current-schedule'
+                #swagger.method = 'get'
+                #swagger.tags = ['Appointments']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication (must be a doctor)',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.description = 'Get all confirmed appointments for doctor today'
+                #swagger.responses[200] = {
+                    description: 'Today\'s appointments retrieved successfully',
+                    schema: {
+                        data: [
+                            {
+                                id: 'appointment-uuid',
+                                status: 'CONFIRMED',
+                                slot_duration: 30,
+                                patient_name: 'John Doe',
+                                appointment_date: '2026-02-03',
+                                start_time: '09:00',
+                                end_time: '09:30',
+                                clinic_name: 'New Cairo Medical Clinic',
+                                clinic_address: '123 Main Street, Medical Park'
+                            },
+                            {
+                                id: 'appointment-uuid-2',
+                                status: 'CONFIRMED',
+                                slot_duration: 20,
+                                patient_name: 'Jane Smith',
+                                appointment_date: '2026-02-03',
+                                start_time: '10:15',
+                                end_time: '10:35',
+                                clinic_name: null,
+                                clinic_address: null
+                            }
+                        ],
+                        message: {
+                            en: "Doctor's schedule retrieved successfully",
+                            ar: "تم استرجاع جدول الطبيب بنجاح"
+                        }
+                    }
+                }
+                #swagger.responses[401] = {
+                    description: 'Unauthorized - invalid or missing token'
+                }
+                #swagger.responses[400] = {
+                    description: 'Bad request (should rarely happen here)'
+                }
+            */
+            AuthMiddleware,
+            this.appointmentController.getCurrentDoctorSchedule
+        );
+
     }
 }

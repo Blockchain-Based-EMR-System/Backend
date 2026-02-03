@@ -1,4 +1,4 @@
-import { IsBoolean, IsNotEmpty, IsDateString, IsOptional, IsUUID, IsNumber, ValidateIf, IsArray } from 'class-validator';
+import { IsBoolean, IsNotEmpty, IsDateString, IsOptional, IsUUID, IsNumber, ValidateIf, IsString, Min, IsInt, Max } from 'class-validator';
 
 
 export class BookAppointmentDto {
@@ -48,43 +48,42 @@ export class RescheduleAppointmentDto {
 
 export class RescheduleAppointmentByDoctorDto {
     @IsNumber()
-    @IsOptional()
-    minutes?: number;
-
-    @IsDateString()
-    @IsOptional()
-    newScheduledTime?: string;
+    minutes: number;
 }
 
-export class BulkRescheduleDto {
-    @IsArray()
-    @IsUUID('4', { each: true })
-    @IsNotEmpty()
-    appointmentIds: string[];
 
-    @IsNumber()
-    @IsOptional()
-    minutes?: number;
+export class EnterDoctorScheduleDto {
+  @IsUUID('4')
+  @IsNotEmpty()
+  doctorId: string;
 
-    @IsDateString()
-    @IsOptional()
-    newScheduledTime?: string;
+  @IsUUID('4')
+  @IsOptional()
+  clinicId?: string | null;
 
-    @IsBoolean()
-    @IsOptional()
-    keepOriginalSlots?: boolean;
-}
+  @IsInt()
+  @Min(0)
+  @Max(6)
+  @IsNotEmpty()
+  workingDay: number; 
 
-export class RescheduleDayDto {
-    @IsDateString()
-    @IsNotEmpty()
-    currentDate: string;
+  @IsString()
+  @IsNotEmpty()
+  startTime: string; 
 
-    @IsDateString()
-    @IsNotEmpty()
-    newDate: string;
+  @IsString()
+  @IsNotEmpty()
+  endTime: string;
 
-    @IsBoolean()
-    @IsOptional()
-    keepOriginalSlots?: boolean;
+  @IsInt()
+  @IsNotEmpty()
+  slotDuration: number; 
+
+  @IsInt()
+  @IsOptional()
+  bufferTime?: number = 0; 
+
+  @IsBoolean()
+  @IsNotEmpty()
+  isOnline: boolean;
 }

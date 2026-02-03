@@ -13,7 +13,7 @@ export class AppointmentController {
     public appointmentService = Container.get(AppointmentService);
     public socketService = new SocketService();
 
-    public getAvailableDays = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
+    public getAvailableDays = catchAsync(async (req: Request, res: Response): Promise<void> => {
         const { doctorId } = req.params;
         const { clinicId } = req.query;
 
@@ -31,7 +31,7 @@ export class AppointmentController {
 
     });
 
-    public getAvailableSlots = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
+    public getAvailableSlots = catchAsync(async (req: Request, res: Response): Promise<void> => {
         const { doctorId } = req.params;
         const { date, clinicId } = req.query;
 
@@ -67,7 +67,6 @@ export class AppointmentController {
 
     });
 
-    // book a new appointment 
     public bookAppointment = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
         const patientId = req.user.id;
         const { doctorId, clinicId, scheduledTime } = req.body;
@@ -153,6 +152,7 @@ export class AppointmentController {
         //     oldScheduledTime: scheduledTime,
         //     newScheduledTime: new Date(newScheduledTime).toISOString(),
         // });
+        // idk
         const response = createMultiLangMessage(SuccessResponseMessages.APPOINTMENT_RESCHEDULED_SUCCESSFULLY);
         res.status(200).json({
             ...response
@@ -173,62 +173,20 @@ export class AppointmentController {
     public rescheduleAppointmentByDoctor = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
         const doctorId = req.user.id;
         const { appointmentId } = req.params;
-        const { minutes, newScheduledTime } = req.body;
+        const { minutes } = req.body;
 
         if (!doctorId) {
             const error = createBilingualError(400, ErrorMessages.DOCTOR_ID_REQUIRED);
             throw new HttpException(error.status, error.message, error.messageAr);
         }
 
-        if (minutes && newScheduledTime) {
-            const error = createBilingualError(400, ErrorMessages.EITHER_MINUTES_OR_NEW_TIME);
+        if (minutes > 60) {
+            const error = createBilingualError(400, ErrorMessages.MINUTES_EXCEEDED_LIMIT);
             throw new HttpException(error.status, error.message, error.messageAr);
         }
 
-        await this.appointmentService.rescheduleAppointmentByDoctor(doctorId, appointmentId, minutes, newScheduledTime ? new Date(newScheduledTime) : undefined);
+        await this.appointmentService.rescheduleAppointmentByDoctor(doctorId, appointmentId, minutes);
         const response = createMultiLangMessage(SuccessResponseMessages.APPOINTMENT_RESCHEDULED_SUCCESSFULLY);
-        res.status(200).json({
-            ...response
-        });
-    });
-
-    public bulkRescheduleByDoctor = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
-        const doctorId = req.user.id;
-        const { appointmentIds, minutes, newScheduledTime, keepOriginalSlots } = req.body;
-
-        if (!doctorId) {
-            const error = createBilingualError(400, ErrorMessages.DOCTOR_ID_REQUIRED);
-            throw new HttpException(error.status, error.message, error.messageAr);
-        }
-
-        if (minutes && newScheduledTime) {
-            const error = createBilingualError(400, ErrorMessages.EITHER_MINUTES_OR_NEW_TIME);
-            throw new HttpException(error.status, error.message, error.messageAr);
-        }
-
-        await this.appointmentService.bulkRescheduleByDoctor(doctorId, appointmentIds, minutes, newScheduledTime ? new Date(newScheduledTime) : undefined, keepOriginalSlots);
-        const response = createMultiLangMessage(SuccessResponseMessages.APPOINTMENTS_RESCHEDULED_SUCCESSFULLY);
-        res.status(200).json({
-            ...response
-        });
-    });
-
-    public rescheduleDayAppointments = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
-        const doctorId = req.user.id;
-        const { currentDate, minutes, newDate, keepOriginalSlots } = req.body;
-
-        if (!doctorId) {
-            const error = createBilingualError(400, ErrorMessages.DOCTOR_ID_REQUIRED);
-            throw new HttpException(error.status, error.message, error.messageAr);
-        }
-
-        if (minutes && newDate) {
-            const error = createBilingualError(400, ErrorMessages.EITHER_MINUTES_OR_NEW_TIME);
-            throw new HttpException(error.status, error.message, error.messageAr);
-        }
-
-        await this.appointmentService.rescheduleDayAppointments(doctorId, new Date(currentDate), minutes, newDate ? new Date(newDate) : undefined, keepOriginalSlots);
-        const response = createMultiLangMessage(SuccessResponseMessages.APPOINTMENTS_RESCHEDULED_SUCCESSFULLY);
         res.status(200).json({
             ...response
         });
@@ -246,6 +204,47 @@ export class AppointmentController {
         const response = createMultiLangMessage(SuccessResponseMessages.DOCTOR_SCHEDULE_RETRIEVED);
         res.status(200).json({
             data: schedule,
+            ...response
+        });
+    });
+
+    public getCurrentDoctorSchedule = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
+        const doctorId = req.user.id;
+
+        if (!doctorId) {
+            const error = createBilingualError(400, ErrorMessages.DOCTOR_ID_REQUIRED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const schedule = await this.appointmentService.getCurrentDoctorSchedule(doctorId);
+        const response = createMultiLangMessage(SuccessResponseMessages.DOCTOR_SCHEDULE_RETRIEVED);
+        res.status(200).json({
+            data: schedule,
+            ...response
+        });
+    });
+
+    public enterDoctorSchedule = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
+        const doctorId = req.user.id;
+        const {
+            clinicId,
+            workingDay,
+            startTime,
+            endTime,
+            slotDuration,
+            bufferTime,
+            isOnline,
+        } = req.body;
+
+        if (!doctorId) {
+            const error = createBilingualError(400, ErrorMessages.DOCTOR_ID_REQUIRED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        await this.appointmentService.enterDoctorSchedule(doctorId, clinicId || null, workingDay, startTime, endTime, slotDuration, bufferTime, isOnline);
+
+        const response = createMultiLangMessage(SuccessResponseMessages.SCHEDULE_CREATED_SUCCESSFULLY);
+        res.status(201).json({
             ...response
         });
     });
