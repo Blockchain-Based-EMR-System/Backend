@@ -51,6 +51,4 @@ export class DoctorController {
         const doctors = await this.doctorService.getOnlineDoctors();
         res.status(200).json({ data: doctors, message: 'Online doctors retrieved successfully' });
     }
-
-
 }

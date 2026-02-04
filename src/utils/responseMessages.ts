@@ -169,6 +169,14 @@ export const SuccessResponseMessages = {
         message_en: "Queue position retrieved successfully.",
         message_ar: "تم استرجاع موقعك في قائمة الانتظار بنجاح.",
     },
+     SCHEDULE_CREATED_SUCCESSFULLY: {
+        message_en: 'Schedule created successfully',
+        message_ar: 'تم إنشاء الجدول بنجاح'
+    },
+    DOCTOR_SCHEDULE_RETRIEVED: {
+        message_en: 'Doctor schedule retrieved successfully',
+        message_ar: 'تم استرجاع جدول الطبيب بنجاح'
+    }
 
 
 }
