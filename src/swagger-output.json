@@ -3173,135 +3173,6 @@
         }
       }
     },
-    "/users/profile-picture": {
-      "patch": {
-        "tags": [
-          "Users"
-        ],
-        "description": "",
-        "consumes": [
-          "multipart/form-data"
-        ],
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "cookie",
-            "description": "Bearer token for authentication",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "profilePicture",
-            "in": "formData",
-            "type": "file",
-            "required": true,
-            "description": "Profile picture file"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Profile picture updated successfully",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "messageEn": {
-                  "type": "string",
-                  "example": "Profile picture updated successfully"
-                },
-                "messageAr": {
-                  "type": "string",
-                  "example": "تم تحديث صورة الملف الشخصي بنجاح"
-                }
-              },
-              "xml": {
-                "name": "main"
-              }
-            }
-          }
-        }
-      },
-      "get": {
-        "tags": [
-          "Users"
-        ],
-        "description": "",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "cookie",
-            "description": "Bearer token for authentication",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Get profile picture successful",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "url": {
-                      "type": "string",
-                      "example": "https://res.cloudinary.com/your-cloud-name/image/upload/v1696543210/doctors/profile_pictures/doctor_1_profile_picture_1696543210.jpg"
-                    }
-                  }
-                },
-                "messageEn": {
-                  "type": "string",
-                  "example": "Profile picture retrieved successfully"
-                },
-                "messageAr": {
-                  "type": "string",
-                  "example": "تم استرجاع صورة الملف الشخصي بنجاح"
-                }
-              },
-              "xml": {
-                "name": "main"
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "Users"
-        ],
-        "description": "",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "cookie",
-            "description": "Bearer token for authentication",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Profile picture deleted successfully",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "messageEn": {
-                  "type": "string",
-                  "example": "Profile picture deleted successfully"
-                },
-                "messageAr": {
-                  "type": "string",
-                  "example": "تم حذف صورة الملف الشخصي بنجاح"
-                }
-              },
-              "xml": {
-                "name": "main"
-              }
-            }
-          }
-        }
-      }
-    },
     "/appointments/online-doctors": {
       "get": {
         "tags": [
@@ -4315,13 +4186,9 @@
             "schema": {
               "type": "object",
               "properties": {
-                "doctorId": {
-                  "type": "string",
-                  "example": "doctor-uuid"
-                },
                 "clinicId": {
                   "type": "string",
-                  "example": "clinic-uuid"
+                  "example": "clinic-uuid (optional)"
                 },
                 "workingDay": {
                   "type": "number",
@@ -4526,6 +4393,135 @@
           },
           "404": {
             "description": "Appointment not found or doctor not working on this day"
+          }
+        }
+      }
+    },
+    "/users/profile-picture": {
+      "patch": {
+        "tags": [
+          "Users"
+        ],
+        "description": "",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "profilePicture",
+            "in": "formData",
+            "type": "file",
+            "required": true,
+            "description": "Profile picture file"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Profile picture updated successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "messageEn": {
+                  "type": "string",
+                  "example": "Profile picture updated successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم تحديث صورة الملف الشخصي بنجاح"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get profile picture successful",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "url": {
+                      "type": "string",
+                      "example": "https://res.cloudinary.com/your-cloud-name/image/upload/v1696543210/doctors/profile_pictures/doctor_1_profile_picture_1696543210.jpg"
+                    }
+                  }
+                },
+                "messageEn": {
+                  "type": "string",
+                  "example": "Profile picture retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع صورة الملف الشخصي بنجاح"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Users"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Profile picture deleted successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "messageEn": {
+                  "type": "string",
+                  "example": "Profile picture deleted successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم حذف صورة الملف الشخصي بنجاح"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
           }
         }
       }

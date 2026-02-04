@@ -678,8 +678,7 @@ export class AppointmentRoute implements Routes {
                     description: 'Schedule details',
                     required: true,
                     schema: {
-                        doctorId: 'doctor-uuid',
-                        clinicId: 'clinic-uuid',
+                        clinicId: 'clinic-uuid (optional)',
                         workingDay: 1,
                         startTime: '09:00',
                         endTime: '17:00',
