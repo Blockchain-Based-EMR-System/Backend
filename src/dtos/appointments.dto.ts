@@ -53,11 +53,6 @@ export class RescheduleAppointmentByDoctorDto {
 
 
 export class EnterDoctorScheduleDto {
-  @IsUUID('4')
-  @IsNotEmpty()
-  doctorId: string;
-
-  @IsUUID('4')
   @IsOptional()
   clinicId?: string | null;
 
