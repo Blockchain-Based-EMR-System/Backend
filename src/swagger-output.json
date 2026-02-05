@@ -1791,6 +1791,251 @@
         }
       }
     },
+    "/admin/clinics": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get clinics successful",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "clinic-uuid"
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "Clinic Name"
+                      },
+                      "is_active": {
+                        "type": "boolean",
+                        "example": false
+                      },
+                      "opening_at": {
+                        "type": "string",
+                        "example": "08:00"
+                      },
+                      "closing_at": {
+                        "type": "string",
+                        "example": "16:00"
+                      },
+                      "address": {
+                        "type": "string",
+                        "example": "123 Main St, City, Country"
+                      },
+                      "address_maps_link": {
+                        "type": "string",
+                        "example": "https://maps.google.com/?q=123+Main+St,+City,+Country"
+                      },
+                      "phone": {
+                        "type": "string",
+                        "example": "1234567890"
+                      },
+                      "canPayOnline": {
+                        "type": "boolean",
+                        "example": true
+                      }
+                    }
+                  }
+                },
+                "messageEn": {
+                  "type": "string",
+                  "example": "Clinics retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع بيانات العيادات بنجاح."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/clinics/{id}": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the clinic to retrieve"
+          },
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Clinic retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "clinic-uuid"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Clinic Name"
+                    },
+                    "is_active": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "opening_at": {
+                      "type": "string",
+                      "example": "08:00"
+                    },
+                    "closing_at": {
+                      "type": "string",
+                      "example": "16:00"
+                    },
+                    "address": {
+                      "type": "string",
+                      "example": "123 Main St, City, Country"
+                    },
+                    "address_maps_link": {
+                      "type": "string",
+                      "example": "https://maps.google.com/?q=123+Main+St,+City,+Country"
+                    },
+                    "phone": {
+                      "type": "string",
+                      "example": "1234567890"
+                    },
+                    "canPayOnline": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                },
+                "messageEn": {
+                  "type": "string",
+                  "example": "Clinic retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع بيانات العيادة بنجاح."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/clinics/{id}/set-active-status": {
+      "patch": {
+        "tags": [
+          "Admin"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the clinic to set active status"
+          },
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "set active status",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "is_active": {
+                  "type": "boolean",
+                  "example": true
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Clinic active status toggled successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "clinic-uuid"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Clinic Name"
+                    },
+                    "is_active": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                },
+                "messageEn": {
+                  "type": "string",
+                  "example": "Clinic active status toggled successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم تبديل حالة العيادة بنجاح."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
     "/super-admin/admins": {
       "post": {
         "tags": [

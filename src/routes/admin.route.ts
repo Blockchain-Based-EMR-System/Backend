@@ -318,10 +318,10 @@ export class AdminRoute implements Routes {
                 #swagger.parameters['body'] = {
                     in: 'body',
                     description: 'set active status',
+                    required: true,
                     schema: {
                         is_active: true
                     }
-                    required: true
                 }
                 #swagger.responses[200] = {
                     description: 'Clinic active status toggled successfully',
