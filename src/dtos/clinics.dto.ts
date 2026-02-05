@@ -51,3 +51,9 @@ export class ClinicResponseDto {
     public canPayOnline?: boolean;
     public is_active: boolean;
 }
+
+export class ClinicActiveStatusResponseDto {
+    public id: string;
+    public name: string;
+    public is_active: boolean;
+}

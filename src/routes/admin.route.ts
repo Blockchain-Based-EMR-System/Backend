@@ -297,5 +297,48 @@ export class AdminRoute implements Routes {
             RoleMiddleware(Role.ADMIN),
             this.adminController.getClinicById
         );
+        this.router.patch(
+            `${this.path}/clinics/:id/set-active-status`,
+            /*
+                #swagger.path = '/admin/clinics/{id}/set-active-status'
+                #swagger.method = 'patch'
+                #swagger.tags = ['Admin']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['id'] = {
+                    in: 'path',
+                    description: 'The unique identifier of the clinic to set active status',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['body'] = {
+                    in: 'body',
+                    description: 'set active status',
+                    schema: {
+                        is_active: true
+                    }
+                    required: true
+                }
+                #swagger.responses[200] = {
+                    description: 'Clinic active status toggled successfully',
+                    schema: {
+                        data: {
+                            id: 'clinic-uuid',
+                            name: 'Clinic Name',
+                            is_active: true
+                        },
+                        messageEn: 'Clinic active status toggled successfully',
+                        messageAr: "تم تبديل حالة العيادة بنجاح."
+                    }
+                }
+            */
+            AuthMiddleware,
+            RoleMiddleware(Role.ADMIN),
+            this.adminController.setClinicActiveStatus
+        );
     }
 }

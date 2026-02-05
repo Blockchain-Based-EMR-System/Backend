@@ -10,7 +10,7 @@ import { createMultiLangMessage, SuccessResponseMessages } from '@/utils/respons
 import { HttpException } from '@/exceptions/HttpException';
 import { createBilingualError, ErrorMessages } from '@/utils/errorMessages';
 import { ClinicService } from '@/services/clinic.service';
-import { ClinicResponseDto } from '@/dtos/clinics.dto';
+import { ClinicActiveStatusResponseDto, ClinicResponseDto } from '@/dtos/clinics.dto';
 
 export class AdminController {
     public adminService = Container.get(AdminService);
@@ -147,6 +147,17 @@ export class AdminController {
         }
         const responseMessage = createMultiLangMessage(SuccessResponseMessages.CLINIC_RETRIEVED);
         res.status(200).json({ messageEn: responseMessage.messageEn, messageAr: responseMessage.messageAr, data: clinic });
+    }
+    public setClinicActiveStatus = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        const clinicId = req.params.id;
+        const { is_active } = req.body;
+        const updatedClinic: ClinicActiveStatusResponseDto = await this.clinicService.setClinicActiveStatus(clinicId, is_active);
+        const responseMessage = createMultiLangMessage(SuccessResponseMessages.CLINIC_STATUS_UPDATED);
+        res.status(200).json({
+            data: updatedClinic,
+            messageEn: responseMessage.messageEn,
+            messageAr: responseMessage.messageAr,
+        });
     }
 
 }

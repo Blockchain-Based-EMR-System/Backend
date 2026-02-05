@@ -1,8 +1,10 @@
-import { ClinicResponseDto, CreateUpdateClinicRequestDto } from "@/dtos/clinics.dto";
+import { ClinicActiveStatusResponseDto, ClinicResponseDto, CreateUpdateClinicRequestDto } from "@/dtos/clinics.dto";
 import { Service } from "typedi";
 import prisma from "@/config/prisma";
 import { Clinic } from "@/interfaces";
 import { Doctor } from "@prisma/client";
+import { createBilingualError, ErrorMessages } from "@/utils/errorMessages";
+import { HttpException } from "@/exceptions/HttpException";
 
 @Service()
 export class ClinicService {
@@ -195,14 +197,14 @@ export class ClinicService {
                     present: true,
                     availability_type: {
                         in: ['OFFLINE', 'BOTH']
-                    },        
+                    },
                 },
             },
             include: {
-                doctor:{
-                    include:{
-                        user:{
-                            select:{
+                doctor: {
+                    include: {
+                        user: {
+                            select: {
                                 id: true,
                                 name: true
                             },
@@ -220,11 +222,11 @@ export class ClinicService {
 
     public async getActiveClinics(): Promise<Partial<Clinic>[]> {
         const clinics = await prisma.clinic.findMany({
-            where:{
+            where: {
                 is_active: true,
                 deleted_at: null,
             },
-            select:{
+            select: {
                 id: true,
                 name: true,
                 opening_at: true,
@@ -255,5 +257,25 @@ export class ClinicService {
             }
         });
         return clinics;
+    }
+    public async setClinicActiveStatus(clinicId: string, is_active: boolean): Promise<ClinicActiveStatusResponseDto> {
+        const updatedClinic = await prisma.clinic.update({
+            where: {
+                id: clinicId,
+            },
+            data: {
+                is_active
+            },
+            select: {
+                id: true,
+                name: true,
+                is_active: true,
+            }
+        });
+        if (!updatedClinic) {
+            const error = createBilingualError(404, ErrorMessages.CLINIC_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+        return updatedClinic;
     }
 }
