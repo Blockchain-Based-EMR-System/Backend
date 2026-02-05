@@ -4010,72 +4010,75 @@
         "tags": [
           "Appointments"
         ],
-        "description": "Get todays appointment for the patient, including queue position and estimated wait time",
+        "summary": "Get all appointments for the patient today",
+        "description": "Returns all appointments scheduled for today for the patient",
         "parameters": [
           {
             "name": "Authorization",
             "in": "cookie",
-            "description": "Bearer token for authentication (must be a patient)",
+            "description": "Bearer token for authentication (patient role required)",
             "required": true,
             "type": "string"
           }
         ],
         "responses": {
           "200": {
-            "description": "Todays appointment details retrieved successfully",
+            "description": "Today's appointments retrieved successfully",
             "schema": {
               "type": "object",
               "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                },
                 "data": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string",
-                      "example": "appointment-uuid"
-                    },
-                    "status": {
-                      "type": "string",
-                      "example": "CONFIRMED"
-                    },
-                    "slot_duration": {
-                      "type": "number",
-                      "example": 30
-                    },
-                    "doctor_name": {
-                      "type": "string",
-                      "example": "Dr. House"
-                    },
-                    "appointment_date": {
-                      "type": "string",
-                      "example": "2026-02-03"
-                    },
-                    "start_time": {
-                      "type": "string",
-                      "example": "09:00"
-                    },
-                    "end_time": {
-                      "type": "string",
-                      "example": "09:30"
-                    },
-                    "clinic_name": {
-                      "type": "string",
-                      "example": "New Cairo Medical Clinic"
-                    },
-                    "clinic_address": {
-                      "type": "string",
-                      "example": "123 Main Street, Medical Park"
-                    },
-                    "position": {
-                      "type": "number",
-                      "example": 5
-                    },
-                    "estimated_time": {
-                      "type": "number",
-                      "example": 60
-                    },
-                    "patients_ahead": {
-                      "type": "number",
-                      "example": 3
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "appointment-uuid-2"
+                      },
+                      "status": {
+                        "type": "string",
+                        "example": "CONFIRMED"
+                      },
+                      "is_online": {
+                        "type": "boolean",
+                        "example": false
+                      },
+                      "slot_duration": {
+                        "type": "number",
+                        "example": 20
+                      },
+                      "doctor_name": {
+                        "type": "string",
+                        "example": "Dr. Wilson"
+                      },
+                      "appointment_date": {
+                        "type": "string",
+                        "example": "2026-02-05"
+                      },
+                      "start_time": {
+                        "type": "string",
+                        "example": "14:30"
+                      },
+                      "end_time": {
+                        "type": "string",
+                        "example": "14:50"
+                      },
+                      "clinic_name": {
+                        "type": "string",
+                        "example": "Downtown Clinic"
+                      },
+                      "clinic_address": {
+                        "type": "string",
+                        "example": "456 Nile Corniche"
+                      },
+                      "position": {},
+                      "estimatedWaitMinutes": {},
+                      "patientsAhead": {}
                     }
                   }
                 }
@@ -4086,13 +4089,13 @@
             }
           },
           "400": {
-            "description": "Bad request - patient ID missing"
+            "description": "Bad request (invalid authentication or missing required fields)"
           },
           "401": {
-            "description": "Unauthorized - patient not authenticated"
+            "description": "Unauthorized - missing or invalid authentication token"
           },
-          "404": {
-            "description": "No appointment found for today"
+          "403": {
+            "description": "Forbidden - user is not authorized as a patient"
           }
         }
       }
@@ -4752,10 +4755,104 @@
             }
           },
           "400": {
-            "description": "Bad request (should rarely happen here)"
+            "description": "Bad request"
           },
           "401": {
             "description": "Unauthorized - invalid or missing token"
+          }
+        }
+      }
+    },
+    "/appointments/doctor/daily-schedule": {
+      "get": {
+        "tags": [
+          "Appointments"
+        ],
+        "description": "Get all doctor appointments for a specific date",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication (must be a doctor)",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "description": "Date in YYYY-MM-DD format",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Daily schedule retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "appointment-uuid-2"
+                      },
+                      "status": {
+                        "type": "string",
+                        "example": "COMPLETED"
+                      },
+                      "slot_duration": {
+                        "type": "number",
+                        "example": 20
+                      },
+                      "patient_name": {
+                        "type": "string",
+                        "example": "Jane Hopper"
+                      },
+                      "appointment_date": {
+                        "type": "string",
+                        "example": "2026-02-05"
+                      },
+                      "start_time": {
+                        "type": "string",
+                        "example": "10:15"
+                      },
+                      "end_time": {
+                        "type": "string",
+                        "example": "10:35"
+                      },
+                      "clinic_name": {},
+                      "clinic_address": {}
+                    }
+                  }
+                },
+                "message": {
+                  "type": "object",
+                  "properties": {
+                    "en": {
+                      "type": "string",
+                      "example": "Doctor's schedule retrieved successfully"
+                    },
+                    "ar": {
+                      "type": "string",
+                      "example": "تم استرجاع جدول الطبيب بنجاح"
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - missing or invalid date parameter, or invalid date format"
+          },
+          "401": {
+            "description": "Unauthorized - doctor not authenticated"
           }
         }
       }

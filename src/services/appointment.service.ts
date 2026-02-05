@@ -342,19 +342,27 @@ export class AppointmentService {
         };
     }
 
-    public async getTodayAppointment(patientId: string): Promise<PatientTodayAppointment | null> {
+    public async getTodayAppointment(patientId: string): Promise<PatientTodayAppointment[]> {
+        const result: PatientTodayAppointment[] = [];
+
         const today = new Date();
         today.setUTCHours(0, 0, 0, 0);
+
         const endOfToday = new Date();
         endOfToday.setUTCHours(23, 59, 59, 999);
 
-        const appointment = await prisma.appointment.findFirst({
+        const appointments = await prisma.appointment.findMany({
             where: {
                 patient_id: patientId,
                 scheduled_time: {
                     gte: today,
                     lte: endOfToday,
-                }
+                },
+                deleted_at: null,
+                status: {
+                    in: ['CONFIRMED', 'COMPLETED']
+                },
+
             },
             select: {
                 id: true,
@@ -377,39 +385,55 @@ export class AppointmentService {
                         address: true,
                     }
                 }
+            },
+            orderBy: {
+                scheduled_time: 'asc'
             }
         });
 
-        if (!appointment) {
-            return null;
+        if (appointments.length === 0) {
+            return [];
+        }
+        for (const appointment of appointments) {
+            if (appointment.status === 'CONFIRMED') {
+                await this.queueService.calculateQueuePosition(appointment.id);
+
+                const refreshed = await prisma.appointment.findUnique({
+                    where: { id: appointment.id },
+                    select: {
+                        position: true,
+                        estimated_time: true,
+                        patients_ahead: true,
+                    }
+                });
+
+                if (refreshed) {
+                    appointment.position = refreshed.position;
+                    appointment.estimated_time = refreshed.estimated_time;
+                    appointment.patients_ahead = refreshed.patients_ahead;
+                }
+            }
+
+            result.push({
+                id: appointment.id,
+                status: appointment.status,
+                is_online: appointment.is_online,
+                slot_duration: appointment.slot_duration,
+                doctor_name: appointment.doctor.name,
+                appointment_date: this.formatDate(appointment.scheduled_time),
+                start_time: this.formatTime(appointment.scheduled_time),
+                end_time: this.formatTime(appointment.end_time),
+                clinic_name: appointment.clinic ? appointment.clinic.name : null,
+                clinic_address: appointment.clinic ? appointment.clinic.address : null,
+                position: appointment.position,              
+                estimatedWaitMinutes: appointment.estimated_time,
+                patientsAhead: appointment.patients_ahead
+            });
         }
 
-        await this.queueService.calculateQueuePosition(appointment.id);
-        // other transactions could interfere so dont blame me
-        const refreshed = await prisma.appointment.findUnique({
-            where: { id: appointment.id },
-            select: {
-                position: true,
-                estimated_time: true,
-                patients_ahead: true,
-            }
-        });
+        return result;
 
-        return {
-            id: appointment.id,
-            status: appointment.status,
-            is_online: appointment.is_online,
-            slot_duration: appointment.slot_duration,
-            doctor_name: appointment.doctor.name,
-            appointment_date: this.formatDate(appointment.scheduled_time),
-            start_time: this.formatTime(appointment.scheduled_time),
-            end_time: this.formatTime(appointment.end_time),
-            clinic_name: appointment.clinic ? appointment.clinic.name : null,
-            clinic_address: appointment.clinic ? appointment.clinic.address : null,
-            position: refreshed.position,
-            estimatedWaitMinutes: refreshed.estimated_time,
-            patientsAhead: refreshed.patients_ahead,
-        };
+
     }
 
     public async rescheduleAppointmentByPatient(patientId: string, appointmentId: string, newScheduledTime: Date): Promise<void> {
@@ -568,13 +592,16 @@ export class AppointmentService {
     };
 
     public async getUpcommingDoctorSchedule(doctorId: string): Promise<DoctorScheduleDay[]> {
-        const now = new Date();
+        // to be changed later -->
+        const nowUTC = new Date();
+        const egyptOffset = 2 * 60 * 60 * 1000; 
+        const now = new Date(nowUTC.getTime() + egyptOffset);
 
         const appointments = await prisma.appointment.findMany({
             where: {
                 doctor_id: doctorId,
                 scheduled_time: {
-                    gte: new Date(),
+                    gte: now,
                 },
                 status: 'CONFIRMED',
                 deleted_at: null,
@@ -639,7 +666,66 @@ export class AppointmentService {
         return schedule;
     }
 
-    public async getCurrentDoctorSchedule(doctorId: string): Promise<DoctorAppointment[] | null> {
+    public async getScheduleByDate(doctorId: string, date: string): Promise<DoctorAppointment[]> {
+        const requestedDate = new Date(date);
+
+        const startOfDay = new Date(requestedDate);
+        startOfDay.setUTCHours(0, 0, 0, 0);
+
+        const endOfDay = new Date(requestedDate);
+        endOfDay.setUTCHours(23, 59, 59, 999);
+
+        const appointments = await prisma.appointment.findMany({
+            where: {
+                doctor_id: doctorId,
+                scheduled_time: {
+                    gte: startOfDay,
+                    lte: endOfDay
+                },
+                status: {
+                    in: ['CONFIRMED', 'COMPLETED']
+                },
+                deleted_at: null,
+            },
+            select: {
+                id: true,
+                scheduled_time: true,
+                end_time: true,
+                slot_duration: true,
+                status: true,
+                clinic_id: true,
+                patient: {
+                    select: {
+                        name: true,
+                    }
+                },
+                clinic: {
+                    select: {
+                        name: true,
+                        address: true,
+                    }
+                }
+            },
+            orderBy: {
+                scheduled_time: 'asc'
+            }
+        });
+
+        return appointments.map(appointment => ({
+            id: appointment.id,
+            status: appointment.status,
+            slot_duration: appointment.slot_duration,
+            patient_name: appointment.patient.name,
+            appointment_date: this.formatDate(new Date(appointment.scheduled_time)),
+            start_time: this.formatTime(new Date(appointment.scheduled_time)),
+            end_time: this.formatTime(new Date(appointment.end_time)),
+            clinic_name: appointment.clinic?.name || null,
+            clinic_address: appointment.clinic?.address || null,
+        }));
+
+    }
+
+    public async getCurrentDoctorSchedule(doctorId: string): Promise<DoctorAppointment[]> {
         const startOfDay = new Date();
         startOfDay.setUTCHours(0, 0, 0, 0);
 
@@ -679,10 +765,6 @@ export class AppointmentService {
                 }
             }
         });
-
-        if (appointments.length === 0) {
-            return null;
-        }
 
         return appointments.map(app => ({
             id: app.id,
@@ -1033,5 +1115,5 @@ export class AppointmentService {
     private camelToSnakeCase(str: string): string {
         return str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
     }
-    
+
 }

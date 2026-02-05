@@ -392,40 +392,60 @@ export class AppointmentRoute implements Routes {
                 #swagger.path = '/appointments/patient/today-appointment'
                 #swagger.method = 'get'
                 #swagger.tags = ['Appointments']
+                #swagger.summary = 'Get all appointments for the patient today'
+                #swagger.description = 'Returns all appointments scheduled for today for the patient'
                 #swagger.parameters['Authorization'] = {
                     in: 'cookie',
-                    description: 'Bearer token for authentication (must be a patient)',
+                    description: 'Bearer token for authentication (patient role required)',
                     required: true,
                     type: 'string'
                 }
-                #swagger.description = 'Get todays appointment for the patient, including queue position and estimated wait time'
                 #swagger.responses[200] = {
-                    description: 'Todays appointment details retrieved successfully',
+                    description: 'Today\'s appointments retrieved successfully',
                     schema: {
-                        data: {
-                            id: 'appointment-uuid',
-                            status: 'CONFIRMED',
-                            slot_duration: 30,
-                            doctor_name: 'Dr. House',
-                            appointment_date: '2026-02-03',
-                            start_time: '09:00',
-                            end_time: '09:30',
-                            clinic_name: 'New Cairo Medical Clinic',
-                            clinic_address: '123 Main Street, Medical Park',
-                            position: 5,
-                            estimated_time: 60,
-                            patients_ahead: 3
-                        }
+                        success: true,
+                        data: [
+                            {
+                                id: 'appointment-uuid-1',
+                                status: 'CONFIRMED',
+                                is_online: true,
+                                slot_duration: 30,
+                                doctor_name: 'Dr. House',
+                                appointment_date: '2026-02-05',
+                                start_time: '09:00',
+                                end_time: '09:30',
+                                clinic_name: 'New Cairo Medical Clinic',
+                                clinic_address: '123 Main Street, Medical Park',
+                                position: 5,
+                                estimatedWaitMinutes: 60,
+                                patientsAhead: 3
+                            },
+                            {
+                                id: 'appointment-uuid-2',
+                                status: 'CONFIRMED',
+                                is_online: false,
+                                slot_duration: 20,
+                                doctor_name: 'Dr. Wilson',
+                                appointment_date: '2026-02-05',
+                                start_time: '14:30',
+                                end_time: '14:50',
+                                clinic_name: 'Downtown Clinic',
+                                clinic_address: '456 Nile Corniche',
+                                position: null,
+                                estimatedWaitMinutes: null,
+                                patientsAhead: null
+                            }
+                        ]
                     }
                 }
                 #swagger.responses[400] = {
-                    description: 'Bad request - patient ID missing'
+                    description: 'Bad request (invalid authentication or missing required fields)',
                 }
                 #swagger.responses[401] = {
-                    description: 'Unauthorized - patient not authenticated'
+                    description: 'Unauthorized - missing or invalid authentication token',
                 }
-                #swagger.responses[404] = {
-                    description: 'No appointment found for today'
+                #swagger.responses[403] = {
+                    description: 'Forbidden - user is not authorized as a patient',
                 }
             */
             AuthMiddleware,
@@ -855,11 +875,74 @@ export class AppointmentRoute implements Routes {
                     description: 'Unauthorized - invalid or missing token'
                 }
                 #swagger.responses[400] = {
-                    description: 'Bad request (should rarely happen here)'
+                    description: 'Bad request'
                 }
             */
             AuthMiddleware,
             this.appointmentController.getCurrentDoctorSchedule
+        );
+
+        this.router.get(
+            `${this.path}/doctor/daily-schedule`,
+            /* 
+                #swagger.path = '/appointments/doctor/daily-schedule'
+                #swagger.method = 'get'
+                #swagger.tags = ['Appointments']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication (must be a doctor)',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.description = 'Get all doctor appointments for a specific date'
+                #swagger.parameters['date'] = {
+                    in: 'query',
+                    description: 'Date in YYYY-MM-DD format',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.responses[200] = {
+                    description: 'Daily schedule retrieved successfully',
+                    schema: {
+                        data: [
+                            {
+                                id: 'appointment-uuid',
+                                status: 'CONFIRMED',
+                                slot_duration: 30,
+                                patient_name: 'John Sink',
+                                appointment_date: '2026-02-05',
+                                start_time: '09:00',
+                                end_time: '09:30',
+                                clinic_name: 'New Cairo Medical Clinic',
+                                clinic_address: '123 Main Street, Medical Park'
+                            },
+                            {
+                                id: 'appointment-uuid-2',
+                                status: 'COMPLETED',
+                                slot_duration: 20,
+                                patient_name: 'Jane Hopper',
+                                appointment_date: '2026-02-05',
+                                start_time: '10:15',
+                                end_time: '10:35',
+                                clinic_name: null,
+                                clinic_address: null
+                            }
+                        ],
+                        message: {
+                            en: "Doctor's schedule retrieved successfully",
+                            ar: "تم استرجاع جدول الطبيب بنجاح"
+                        }
+                    }
+                }
+                #swagger.responses[400] = {
+                    description: 'Bad request - missing or invalid date parameter, or invalid date format'
+                }
+                #swagger.responses[401] = {
+                    description: 'Unauthorized - doctor not authenticated'
+                }
+            */
+            AuthMiddleware,
+            this.appointmentController.getScheduleByDate
         );
     }
 }

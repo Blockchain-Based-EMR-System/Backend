@@ -289,4 +289,32 @@ export class AppointmentController {
         });
 
     });
+
+    public getScheduleByDate = catchAsync(async(req: RequestWithUser, res: Response): Promise<void> => {
+        const doctorId = req.user.id;
+        const { date } = req.query;
+
+        if (!doctorId) {
+            const error = createBilingualError(400, ErrorMessages.DOCTOR_ID_REQUIRED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        if (!date) {
+            const error = createBilingualError(400, ErrorMessages.DATE_REQUIRED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+        if (!dateRegex.test(date as string)) {
+            const error = createBilingualError(400, ErrorMessages.INVALID_DATE_FORMAT);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const scheduleData = await this.appointmentService.getScheduleByDate(doctorId, date as string);
+        const response = createMultiLangMessage(SuccessResponseMessages.DOCTOR_SCHEDULE_RETRIEVED);
+        res.status(200).json({
+            data: scheduleData,
+            ...response
+        });
+    });
 }
