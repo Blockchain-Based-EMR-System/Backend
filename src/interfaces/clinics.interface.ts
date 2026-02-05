@@ -2,6 +2,9 @@ import { User, Doctor } from './users.interface';
 
 export interface Clinic {
   id: string;
+  name: string;
+  phone: string;
+  canPayOnline?: boolean;
   is_active: boolean;
   opening_at: string;
   closing_at: string;

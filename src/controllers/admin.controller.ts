@@ -7,9 +7,14 @@ import { RequestWithLanguage } from '@/middlewares/language.middleware';
 import { formatSpecializationResponse } from '@/utils/specializationTransform';
 import { SpecializationKey } from '@/constants/specializations';
 import { createMultiLangMessage, SuccessResponseMessages } from '@/utils/responseMessages';
+import { HttpException } from '@/exceptions/HttpException';
+import { createBilingualError, ErrorMessages } from '@/utils/errorMessages';
+import { ClinicService } from '@/services/clinic.service';
+import { ClinicResponseDto } from '@/dtos/clinics.dto';
 
 export class AdminController {
     public adminService = Container.get(AdminService);
+    public clinicService = Container.get(ClinicService);
 
     public addDoctor = async (req: RequestWithLanguage, res: Response, next: NextFunction): Promise<void> => {
         const doctorData: AddDoctorFromAdminDto = req.body;
@@ -121,4 +126,27 @@ export class AdminController {
             messageAr: responseMessage.messageAr,
         });
     }
+
+    // Clinic Routes
+    public getAllClinics = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+
+        const clinics = await this.clinicService.getAllClinics();
+        const responseMessage = createMultiLangMessage(SuccessResponseMessages.CLINIC_RETRIEVED);
+        res.status(200).json({
+            data: clinics,
+            messageEn: responseMessage.messageEn,
+            messageAr: responseMessage.messageAr,
+        });
+    }
+    public getClinicById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        const clinicId = req.params.id;
+        const clinic = await this.clinicService.getClinicById(clinicId);
+        if (!clinic) {
+            const error = createBilingualError(404, ErrorMessages.CLINIC_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+        const responseMessage = createMultiLangMessage(SuccessResponseMessages.CLINIC_RETRIEVED);
+        res.status(200).json({ messageEn: responseMessage.messageEn, messageAr: responseMessage.messageAr, data: clinic });
+    }
+
 }

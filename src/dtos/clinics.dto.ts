@@ -39,3 +39,15 @@ export class CreateUpdateClinicRequestDto {
     @IsNumber()
     fees: number;
 }
+
+export class ClinicResponseDto {
+    public id: string;
+    public name: string;
+    public opening_at: string;
+    public closing_at: string;
+    public address: string;
+    public address_maps_link?: string;
+    public phone: string;
+    public canPayOnline?: boolean;
+    public is_active: boolean;
+}

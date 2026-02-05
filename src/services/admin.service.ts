@@ -7,6 +7,7 @@ import { ErrorMessages, createBilingualError } from '@/utils/errorMessages';
 import { User } from '@/interfaces';
 import { SENDER_EMAIL } from '@/config';
 import { transporter } from '@/utils/nodeMailerService';
+import { ClinicResponseDto } from '@/dtos/clinics.dto';
 
 // TO BE CHANGED
 const prisma = new PrismaClient();

@@ -217,5 +217,85 @@ export class AdminRoute implements Routes {
             LanguageMiddleware,
             this.adminController.getDoctorById,
         );
+
+        // Clinic routes
+        this.router.get(
+            `${this.path}/clinics`,
+            /*
+                #swagger.path = '/admin/clinics'
+                #swagger.method = 'get'
+                #swagger.tags = ['Admin']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.responses[200] = {
+                    description: 'Get clinics successful',
+                    schema: {
+                        data: [
+                            {
+                                id: 'clinic-uuid',
+                                name: 'Clinic Name',
+                                is_active: false,   
+                                opening_at: '08:00',
+                                closing_at: '16:00',
+                                address: '123 Main St, City, Country',
+                                address_maps_link: 'https://maps.google.com/?q=123+Main+St,+City,+Country',
+                                phone: '1234567890',
+                                canPayOnline: true
+                            }
+                        ],
+                        messageEn: 'Clinics retrieved successfully',
+                        messageAr: "تم استرجاع بيانات العيادات بنجاح."
+                    }
+                }
+            */
+            AuthMiddleware,
+            RoleMiddleware(Role.ADMIN),
+            this.adminController.getAllClinics
+        );
+        this.router.get(
+            `${this.path}/clinics/:id`,
+            /*
+                #swagger.path = '/admin/clinics/{id}'
+                #swagger.method = 'get'
+                #swagger.tags = ['Admin']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['id'] = {
+                    in: 'path',
+                    description: 'The unique identifier of the clinic to retrieve',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.responses[200] = {
+                    description: 'Clinic retrieved successfully',
+                    schema: {
+                        data: {
+                            id: 'clinic-uuid',
+                            name: 'Clinic Name',
+                            is_active: false,   
+                            opening_at: '08:00',
+                            closing_at: '16:00',
+                            address: '123 Main St, City, Country',
+                            address_maps_link: 'https://maps.google.com/?q=123+Main+St,+City,+Country',
+                            phone: '1234567890',
+                            canPayOnline: true
+                        },
+                        messageEn: 'Clinic retrieved successfully',
+                        messageAr: "تم استرجاع بيانات العيادة بنجاح."
+                    }
+                }
+            */
+            AuthMiddleware,
+            RoleMiddleware(Role.ADMIN),
+            this.adminController.getClinicById
+        );
     }
 }

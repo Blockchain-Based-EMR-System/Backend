@@ -1,4 +1,4 @@
-import { CreateUpdateClinicRequestDto } from "@/dtos/clinics.dto";
+import { ClinicResponseDto, CreateUpdateClinicRequestDto } from "@/dtos/clinics.dto";
 import { Service } from "typedi";
 import prisma from "@/config/prisma";
 import { Clinic } from "@/interfaces";
@@ -34,6 +34,7 @@ export class ClinicService {
                 phone: clinicData.phone,
                 canPayOnline: clinicData.canPayOnline,
                 created_by: doctorId,
+                is_active: false,
             },
             select: {
                 id: true,
@@ -64,7 +65,7 @@ export class ClinicService {
         });
     }
 
-    public async getClinicById(clinicId: string): Promise<Partial<Clinic> | null> {
+    public async getClinicById(clinicId: string): Promise<ClinicResponseDto | null> {
         const clinic = await prisma.clinic.findUnique({
             where: {
                 id: clinicId,
@@ -181,5 +182,22 @@ export class ClinicService {
             ...c.clinic,
             fees: c.fees
         }));
+    }
+
+    public async getAllClinics(): Promise<ClinicResponseDto[]> {
+        const clinics = await prisma.clinic.findMany({
+            select: {
+                id: true,
+                name: true,
+                address: true,
+                phone: true,
+                is_active: true,
+                opening_at: true,
+                closing_at: true,
+                canPayOnline: true,
+                address_maps_link: true,
+            }
+        });
+        return clinics;
     }
 }

@@ -80,6 +80,10 @@ export const SuccessResponseMessages = {
         message_en: "Clinic's doctors retrieved successfully.",
         message_ar: "تم استرجاع أطباء العيادة بنجاح.",
     },
+    CLINICS_RETRIEVED_SUCCESSFULLY: {
+        message_en: "Clinics retrieved successfully.",
+        message_ar: "تم استرجاع بيانات العيادات بنجاح.",
+    },
 
     // Success messages for Doctors
     DOCTOR_CREATED_WAITING_VERIFICATION: {
