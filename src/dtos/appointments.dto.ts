@@ -82,3 +82,50 @@ export class EnterDoctorScheduleDto {
   @IsNotEmpty()
   isOnline: boolean;
 }
+
+export class EditDoctorScheduleDto {
+  @IsUUID()
+  @IsNotEmpty()
+  scheduleId: string;
+
+  @IsOptional()
+  clinicId?: string | null;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(6)
+  workingDay?: number;
+
+  @IsOptional()
+  @IsString()
+  startTime?: string;
+
+  @IsOptional()
+  @IsString()
+  endTime?: string;
+
+  @IsOptional()
+  @IsInt()
+  slotDuration?: number;
+
+  @IsOptional()
+  @IsInt()
+  bufferTime?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  isOnline?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
+
+  @IsOptional()
+  @IsString()
+  breakStart?: string;
+
+  @IsOptional()
+  @IsString()
+  breakEnd?: string;
+}

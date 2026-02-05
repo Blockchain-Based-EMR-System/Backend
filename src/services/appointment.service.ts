@@ -5,7 +5,7 @@ import { Service, Container } from 'typedi';
 import { TimeSlot } from '@/interfaces';
 import { HttpException } from "@/exceptions/HttpException";
 import { createBilingualError, ErrorMessages } from '@/utils/errorMessages';
-import { PatientTodayAppointment, DoctorAppointment, DoctorScheduleDay, PatientAppointment } from '@/interfaces/appointments.interface';
+import { PatientTodayAppointment, DoctorAppointment, DoctorScheduleDay, PatientAppointment, DoctorSchedule } from '@/interfaces/appointments.interface';
 import { QueueService } from './queue.service';
 
 @Service()
@@ -567,7 +567,7 @@ export class AppointmentService {
         // penalty to be added later
     };
 
-    public async getDoctorSchedule(doctorId: string): Promise<DoctorScheduleDay[]> {
+    public async getUpcommingDoctorSchedule(doctorId: string): Promise<DoctorScheduleDay[]> {
         const now = new Date();
 
         const appointments = await prisma.appointment.findMany({
@@ -722,6 +722,70 @@ export class AppointmentService {
         };
     }
 
+    public async getDoctorSchedule(doctorId: string): Promise<DoctorSchedule[]> {
+        const schedules = await prisma.doctorSchedule.findMany({
+            where: {
+                doctor_id: doctorId,
+                deleted_at: null,
+            },
+            select: {
+                id: true,
+                clinic_id: true,
+                day_of_week: true,
+                start_time: true,
+                end_time: true,
+                slot_duration: true,
+                buffer_time: true,
+                is_online: true,
+                is_active: true,
+                break_start: true,
+                break_end: true,
+            }
+        });
+
+        return schedules.map(schedule => ({
+            id: schedule.id,
+            clinicId: schedule.clinic_id,
+            dayOfWeek: schedule.day_of_week,
+            startTime: schedule.start_time,
+            endTime: schedule.end_time,
+            slotDuration: schedule.slot_duration,
+            bufferTime: schedule.buffer_time,
+            isOnline: schedule.is_online,
+            isActive: schedule.is_active,
+            breakStart: schedule.break_start,
+            breakEnd: schedule.break_end,
+        }));
+    }
+
+    public async editDoctorSchedule(doctorId: string, scheduleId: string, updates: any): Promise<void> {
+        const schedule = await prisma.doctorSchedule.findUnique({
+            where: {
+                id: scheduleId
+            },
+        });
+
+        if (!schedule) {
+            const error = createBilingualError(404, ErrorMessages.SCHEDULE_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        if (schedule.doctor_id !== doctorId) {
+            const error = createBilingualError(403, ErrorMessages.UNAUTHORIZED_SCHEDULE_ACCESS);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        await prisma.doctorSchedule.update({
+            where: {
+                id: scheduleId
+            },
+            data: {
+                ...updates,
+                modified_at: new Date(),
+            }
+        });
+    }
+
     private generateTimeSlots(startTime: string, endTime: string, slotDuration: number, bufferTime: number, isOnline: boolean): Omit<TimeSlot, 'available'>[] {
         const slots: Omit<TimeSlot, 'available'>[] = [];
 
@@ -758,6 +822,15 @@ export class AppointmentService {
             DayOfWeek.SATURDAY,
         ];
         return days[jsDay];
+    }
+
+    public convertKeysToSnakeCase<T extends Record<string, any>>(obj: T): Record<string, any> {
+        return Object.entries(obj).reduce((acc, [key, value]) => {
+            if (value !== undefined) {
+                acc[this.camelToSnakeCase(key)] = value;
+            }
+            return acc;
+        }, {} as Record<string, any>);
     }
 
     // format date as YYYY-MM-DD
@@ -956,4 +1029,9 @@ export class AppointmentService {
             throw new HttpException(error.status, error.message, error.messageAr);
         }
     }
+
+    private camelToSnakeCase(str: string): string {
+        return str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+    }
+    
 }

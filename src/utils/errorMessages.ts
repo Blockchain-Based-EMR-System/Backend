@@ -207,6 +207,14 @@ export const ErrorMessages = {
         en: "The maximum allowed delay must not exceed 60 minutes.",
         ar: "يجب ألا يتجاوز الحد الأقصى للتأجيل المسموح به 60 دقيقة."
     },
+    SCHEDULE_NOT_FOUND: {
+        en: "Schedule not found",
+        ar: "لم يتم العثور على الجدول"
+    },
+    UNAUTHORIZED_SCHEDULE_ACCESS: {
+        en: "You are not authorized to access this schedule",
+        ar: "غير مصرح لك بالوصول إلى هذا الجدول"
+    },
     // Generic errors
     SOMETHING_WENT_WRONG: {
         en: 'Something went wrong',

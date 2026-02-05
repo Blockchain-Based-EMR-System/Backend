@@ -5,7 +5,7 @@ import { DoctorController } from "@/controllers/doctor.controller";
 import { AppointmentController } from "@/controllers/appointment.controller";
 import { ValidationMiddleware } from "@/middlewares/validation.middleware";
 import { AuthMiddleware } from "@/middlewares/auth.middleware";
-import { BookAppointmentDto, RescheduleAppointmentDto, RescheduleAppointmentByDoctorDto, EnterDoctorScheduleDto } from "@/dtos/appointments.dto";
+import { BookAppointmentDto, RescheduleAppointmentDto, RescheduleAppointmentByDoctorDto, EnterDoctorScheduleDto, EditDoctorScheduleDto } from "@/dtos/appointments.dto";
 
 export class AppointmentRoute implements Routes {
     public path = '/appointments';
@@ -585,9 +585,9 @@ export class AppointmentRoute implements Routes {
         );
 
         this.router.get(
-            `${this.path}/doctor/schedule`,
+            `${this.path}/doctor/upcomming-schedule`,
             /* 
-                #swagger.path = '/appointments/doctor/schedule'
+                #swagger.path = '/appointments/doctor/upcomming-schedule'
                 #swagger.method = 'get'
                 #swagger.tags = ['Appointments']
                 #swagger.parameters['Authorization'] = {
@@ -657,7 +657,7 @@ export class AppointmentRoute implements Routes {
                 }
             */
             AuthMiddleware,
-            this.appointmentController.getDoctorSchedule
+            this.appointmentController.getUpcommingDoctorSchedule
         );
 
         this.router.post(
@@ -703,6 +703,106 @@ export class AppointmentRoute implements Routes {
             AuthMiddleware,
             ValidationMiddleware(EnterDoctorScheduleDto),
             this.appointmentController.enterDoctorSchedule
+        );
+
+        this.router.get(
+            `${this.path}/doctor/schedule`,
+            /* 
+                #swagger.path = '/appointments/doctor/schedule'
+                #swagger.method = 'get'
+                #swagger.tags = ['Appointments']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication (must be a doctor)',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.description = 'Get the doctor\'s own schedule'
+                #swagger.responses[200] = {
+                    description: 'Doctor schedule retrieved successfully',
+                    schema: {
+                        data: [
+                            {
+                                id: 'schedule-uuid',
+                                clinicId: 'clinic-uuid (optional)',
+                                dayOfWeek: 'MONDAY',
+                                startTime: '09:00',
+                                endTime: '17:00',
+                                slotDuration: 30,
+                                bufferTime: 5,
+                                isOnline: true,
+                                isActive: true,
+                                breakStart: null,
+                                breakEnd: null
+                            }
+                        ],
+                        message: 'Doctor schedule retrieved successfully'
+                    }
+                }
+                #swagger.responses[400] = {
+                    description: 'Bad request - doctor ID missing'
+                }
+                #swagger.responses[401] = {
+                    description: 'Unauthorized - doctor not authenticated'
+                }
+            */
+            AuthMiddleware,
+            this.appointmentController.getDoctorSchedule
+        );
+
+        this.router.patch(
+            `${this.path}/doctor/schedule`,
+            /* 
+                #swagger.path = '/appointments/doctor/schedule'
+                #swagger.method = 'patch'
+                #swagger.tags = ['Appointments']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication (must be a doctor)',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.description = 'Edit a specific entry in the doctor\'s schedule'
+                #swagger.parameters['body'] = {
+                    in: 'body',
+                    description: 'Schedule edit details (all fields optional except scheduleId)',
+                    required: true,
+                    schema: {
+                        scheduleId: 'schedule-uuid',
+                        clinicId: 'clinic-uuid (optional)',
+                        workingDay: 1,
+                        startTime: '09:00',
+                        endTime: '17:00',
+                        slotDuration: 30,
+                        bufferTime: 5,
+                        isOnline: true,
+                        isActive: false,
+                        breakStart: '2026-02-01',
+                        breakEnd: '2026-02-22'
+                    }
+                }
+                #swagger.responses[200] = {
+                    description: 'Schedule updated successfully',
+                    schema: {
+                        message: 'Schedule updated successfully'
+                    }
+                }
+                #swagger.responses[400] = {
+                    description: 'Bad request - invalid parameters or conflict'
+                }
+                #swagger.responses[401] = {
+                    description: 'Unauthorized - doctor not authenticated'
+                }
+                #swagger.responses[403] = {
+                    description: 'Forbidden - schedule does not belong to the doctor'
+                }
+                #swagger.responses[404] = {
+                    description: 'Schedule not found'
+                }
+            */
+            AuthMiddleware,
+            ValidationMiddleware(EditDoctorScheduleDto),
+            this.appointmentController.editDoctorSchedule
         );
 
         this.router.get(

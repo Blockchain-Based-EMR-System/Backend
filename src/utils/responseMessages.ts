@@ -176,9 +176,11 @@ export const SuccessResponseMessages = {
     DOCTOR_SCHEDULE_RETRIEVED: {
         message_en: 'Doctor schedule retrieved successfully',
         message_ar: 'تم استرجاع جدول الطبيب بنجاح'
+    },
+    SCHEDULE_UPDATED_SUCCESSFULLY: {
+        message_en: 'Schedule updated successfully',
+        message_ar: 'تم تحديث الجدول بنجاح'
     }
-
-
 }
 
 interface MultiLangMessageObj {

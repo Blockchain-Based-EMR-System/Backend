@@ -4070,7 +4070,7 @@
         }
       }
     },
-    "/appointments/doctor/schedule": {
+    "/appointments/doctor/upcomming-schedule": {
       "get": {
         "tags": [
           "Appointments"
@@ -4164,7 +4164,9 @@
             "description": "Unauthorized - doctor not authenticated"
           }
         }
-      },
+      }
+    },
+    "/appointments/doctor/schedule": {
       "post": {
         "tags": [
           "Appointments"
@@ -4239,6 +4241,189 @@
           },
           "401": {
             "description": "Unauthorized - doctor not authenticated"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Appointments"
+        ],
+        "description": "Get the doctor\\'s own schedule",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication (must be a doctor)",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Doctor schedule retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "schedule-uuid"
+                      },
+                      "clinicId": {
+                        "type": "string",
+                        "example": "clinic-uuid (optional)"
+                      },
+                      "dayOfWeek": {
+                        "type": "string",
+                        "example": "MONDAY"
+                      },
+                      "startTime": {
+                        "type": "string",
+                        "example": "09:00"
+                      },
+                      "endTime": {
+                        "type": "string",
+                        "example": "17:00"
+                      },
+                      "slotDuration": {
+                        "type": "number",
+                        "example": 30
+                      },
+                      "bufferTime": {
+                        "type": "number",
+                        "example": 5
+                      },
+                      "isOnline": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "isActive": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "breakStart": {},
+                      "breakEnd": {}
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Doctor schedule retrieved successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - doctor ID missing"
+          },
+          "401": {
+            "description": "Unauthorized - doctor not authenticated"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Appointments"
+        ],
+        "description": "Edit a specific entry in the doctor\\'s schedule",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication (must be a doctor)",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Schedule edit details (all fields optional except scheduleId)",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "scheduleId": {
+                  "type": "string",
+                  "example": "schedule-uuid"
+                },
+                "clinicId": {
+                  "type": "string",
+                  "example": "clinic-uuid (optional)"
+                },
+                "workingDay": {
+                  "type": "number",
+                  "example": 1
+                },
+                "startTime": {
+                  "type": "string",
+                  "example": "09:00"
+                },
+                "endTime": {
+                  "type": "string",
+                  "example": "17:00"
+                },
+                "slotDuration": {
+                  "type": "number",
+                  "example": 30
+                },
+                "bufferTime": {
+                  "type": "number",
+                  "example": 5
+                },
+                "isOnline": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "isActive": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "breakStart": {
+                  "type": "string",
+                  "example": "2026-02-01"
+                },
+                "breakEnd": {
+                  "type": "string",
+                  "example": "2026-02-22"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Schedule updated successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Schedule updated successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid parameters or conflict"
+          },
+          "401": {
+            "description": "Unauthorized - doctor not authenticated"
+          },
+          "403": {
+            "description": "Forbidden - schedule does not belong to the doctor"
+          },
+          "404": {
+            "description": "Schedule not found"
           }
         }
       }

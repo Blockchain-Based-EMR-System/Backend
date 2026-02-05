@@ -192,7 +192,7 @@ export class AppointmentController {
         });
     });
 
-    public getDoctorSchedule = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
+    public getUpcommingDoctorSchedule = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
         const doctorId = req.user.id;
 
         if (!doctorId) {
@@ -200,7 +200,7 @@ export class AppointmentController {
             throw new HttpException(error.status, error.message, error.messageAr);
         }
 
-        const schedule = await this.appointmentService.getDoctorSchedule(doctorId);
+        const schedule = await this.appointmentService.getUpcommingDoctorSchedule(doctorId);
         const response = createMultiLangMessage(SuccessResponseMessages.DOCTOR_SCHEDULE_RETRIEVED);
         res.status(200).json({
             data: schedule,
@@ -247,5 +247,46 @@ export class AppointmentController {
         res.status(201).json({
             ...response
         });
+    });
+
+    public getDoctorSchedule = catchAsync(async(req: RequestWithUser, res: Response): Promise<void> => {
+        const doctorId = req.user.id;
+
+        if (!doctorId) {
+            const error = createBilingualError(400, ErrorMessages.DOCTOR_ID_REQUIRED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const schedules = await this.appointmentService.getDoctorSchedule(doctorId);
+        const response = createMultiLangMessage(SuccessResponseMessages.DOCTOR_SCHEDULE_RETRIEVED);
+        res.status(200).json({
+            data: schedules,
+            ...response
+        });
+
+    });
+
+    public editDoctorSchedule = catchAsync(async(req: RequestWithUser, res: Response): Promise<void> => {
+        const doctorId = req.user.id;
+
+        if (!doctorId) {
+            const error = createBilingualError(400, ErrorMessages.DOCTOR_ID_REQUIRED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const { scheduleId, workingDay, ...body } = req.body;
+
+        // for resolving the mapping issue with the db 
+        const updates = this.appointmentService.convertKeysToSnakeCase(body);
+
+        if (workingDay !== undefined) {
+            updates.day_of_week = this.appointmentService.getDayOfWeek(workingDay); 
+        }
+        await this.appointmentService.editDoctorSchedule(doctorId, scheduleId, updates);
+        const response = createMultiLangMessage(SuccessResponseMessages.SCHEDULE_UPDATED_SUCCESSFULLY);
+        res.status(200).json({
+            ...response
+        });
+
     });
 }

@@ -1,5 +1,5 @@
 import { User } from './users.interface';
-import {AppointmentStatus, DayOfWeek} from '@prisma/client'
+import { AppointmentStatus, DayOfWeek } from '@prisma/client'
 
 export interface Appointment {
     id: string;
@@ -24,28 +24,28 @@ export interface Appointment {
 
 export interface PatientAppointment {
     id: string;
-    status: AppointmentStatus;  
-    is_online: boolean;  
+    status: AppointmentStatus;
+    is_online: boolean;
     slot_duration: number;
     doctor_name: string;
     appointment_date: string;
     start_time: string;
     end_time: string;
     clinic_name: string | null;
-    clinic_address: string | null; 
+    clinic_address: string | null;
 }
 
 export interface PatientTodayAppointment {
     id: string;
-    status: AppointmentStatus;  
-    is_online: boolean;  
+    status: AppointmentStatus;
+    is_online: boolean;
     slot_duration: number;
     doctor_name: string;
     appointment_date: string;
     start_time: string;
     end_time: string;
     clinic_name: string | null;
-    clinic_address: string | null; 
+    clinic_address: string | null;
     position: number;
     estimatedWaitMinutes: number;
     patientsAhead: number;
@@ -53,7 +53,7 @@ export interface PatientTodayAppointment {
 
 export interface DoctorAppointment {
     id: string;
-    status: AppointmentStatus;  
+    status: AppointmentStatus;
     slot_duration: number;
     patient_name: string;
     appointment_date: string;
@@ -64,22 +64,36 @@ export interface DoctorAppointment {
 }
 
 export interface DoctorScheduleDay {
-    date: string; 
+    date: string;
     displayDate: string;
     appointments: DoctorAppointment[];
 }
 
 export interface AvailableDay {
-  date: string; 
-  dayOfWeek: DayOfWeek;
-  displayDate: string; 
+    date: string;
+    dayOfWeek: DayOfWeek;
+    displayDate: string;
 }
 
 export interface TimeSlot {
-    start: string; 
+    start: string;
     end: string;
     available: boolean;
     online: boolean;
+}
+
+export interface DoctorSchedule {
+    id: string;
+    clinicId: string | null;
+    dayOfWeek: DayOfWeek;
+    startTime: string;
+    endTime: string;
+    slotDuration: number;
+    bufferTime: number;
+    isOnline: boolean;
+    isActive: boolean;
+    breakStart: string | null;
+    breakEnd: string | null;
 }
 
 
