@@ -14,35 +14,53 @@ import { logger, stream } from '@utils/logger';
 // Google OAuth Imports
 import passport from 'passport';
 import '@utils/passsportGoogle';
+import { createServer, Server as HttpServer } from 'http';
+import { SocketService } from '@/services/socket.service';
 
 export class App {
   public app: express.Application;
   public env: string;
   public port: string | number;
+  public httpServer: HttpServer;
+  private socketService: SocketService;
 
   constructor(routes: Routes[]) {
     this.app = express();
     this.env = NODE_ENV || 'development';
     this.port = PORT || 3000;
-
+    this.httpServer = createServer(this.app);
+    
     this.initializeMiddlewares();
     this.initializeRoutes(routes);
-    this.initializeSwagger();
     this.initializeErrorHandling();
+    this.initializeSwagger();
+
+    this.socketService = new SocketService();
+    this.socketService.initialize(this.httpServer);
+
   }
 
   public listen() {
-    this.app.listen(this.port, () => {
+    this.httpServer.listen(this.port);
+
+    this.httpServer.on('listening', () => {
       logger.info(`=================================`);
       logger.info(`======= ENV: ${this.env} =======`);
-      logger.info(`🚀 App listening on the port ${this.port}`);
+      logger.info(`🚀 App listeningg on the port ${this.port}`);
       logger.info(`=================================`);
+    });
+
+    this.httpServer.on('error', (error: any) => {
+      logger.error('Server failed to start');
+      logger.error(error);
+      process.exit(1);
     });
   }
 
   public getServer() {
     return this.app;
   }
+
 
   private initializeMiddlewares() {
     this.app.use(morgan(LOG_FORMAT, { stream }));
@@ -74,4 +92,3 @@ export class App {
     this.app.use(ErrorMiddleware);
   }
 }
-

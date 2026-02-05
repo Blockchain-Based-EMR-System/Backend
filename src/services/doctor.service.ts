@@ -2,7 +2,7 @@ import { DoctorLoginRequestDto, DoctorSignupRequestDto } from "@/dtos/doctors.dt
 import { Service } from "typedi";
 import { HttpException } from "@/exceptions/HttpException";
 import { ErrorMessages, createBilingualError } from "@/utils/errorMessages";
-import { DoctorAccountStatus, PrismaClient, Role } from "@prisma/client";
+import { Doctor, DoctorAccountStatus, PrismaClient, Role } from "@prisma/client";
 import { hash, compare } from "bcrypt";
 import { DoctorLoginData } from "@/interfaces/doctors.interface";
 import { AuthService } from "./auth.service";
@@ -259,4 +259,28 @@ export class DoctorService {
             throw error;
         }
     }
+    public async getOnlineDoctors(): Promise<Partial<Doctor>[]> {
+        const doctors = await prisma.doctor.findMany({
+            where:{
+                account_status: 'APPROVED',
+                present: true,
+                availability_type: {
+                    in: ['ONLINE', 'BOTH']
+                }
+            },
+            select:{
+                id: true,
+                user: {
+                    select:{
+                        name: true,
+                    }
+                }
+            }
+        });
+        return doctors.map(doctor => ({
+            id: doctor.id,
+            name: doctor.user.name,
+        }));
+    }
+
 }

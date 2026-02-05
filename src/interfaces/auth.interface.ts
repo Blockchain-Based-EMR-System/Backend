@@ -20,6 +20,11 @@ export interface TokenResponse {
   refreshToken?: RefreshTokenData;
 }
 
+export interface SocketStoredInToken {
+  id: string;
+  role: string;
+}
+
 export interface RequestWithUser extends Request {
   user: User;
 }

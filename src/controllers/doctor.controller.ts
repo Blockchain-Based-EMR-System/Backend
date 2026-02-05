@@ -47,4 +47,8 @@ export class DoctorController {
         res.status(200).json({ messageEn: responseMessage.messageEn, messageAr: responseMessage.messageAr });
     }
 
+    public getOnlineDoctors = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        const doctors = await this.doctorService.getOnlineDoctors();
+        res.status(200).json({ data: doctors, message: 'Online doctors retrieved successfully' });
+    }
 }

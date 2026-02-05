@@ -2,6 +2,7 @@ import { ClinicResponseDto, CreateUpdateClinicRequestDto } from "@/dtos/clinics.
 import { Service } from "typedi";
 import prisma from "@/config/prisma";
 import { Clinic } from "@/interfaces";
+import { Doctor } from "@prisma/client";
 
 @Service()
 export class ClinicService {
@@ -181,6 +182,61 @@ export class ClinicService {
         return clinics.map(c => ({
             ...c.clinic,
             fees: c.fees
+        }));
+    }
+
+    public async getClinicDoctors(clinicId: string): Promise<Partial<Doctor>[]> {
+        const doctors = await prisma.clinicDoctor.findMany({
+            where: {
+                clinic_id: clinicId,
+                is_accepting: true,
+                doctor: {
+                    account_status: 'APPROVED',
+                    present: true,
+                    availability_type: {
+                        in: ['OFFLINE', 'BOTH']
+                    },        
+                },
+            },
+            include: {
+                doctor:{
+                    include:{
+                        user:{
+                            select:{
+                                id: true,
+                                name: true
+                            },
+                        },
+                    },
+                },
+            },
+        });
+
+        return doctors.map(d => ({
+            id: d.doctor.id,
+            name: d.doctor.user.name,
+        }));
+    }
+
+    public async getActiveClinics(): Promise<Partial<Clinic>[]> {
+        const clinics = await prisma.clinic.findMany({
+            where:{
+                is_active: true,
+                deleted_at: null,
+            },
+            select:{
+                id: true,
+                name: true,
+                opening_at: true,
+                closing_at: true,
+                address: true,
+                address_maps_link: true,
+                phone: true,
+                canPayOnline: true,
+            }
+        });
+        return clinics.map(c => ({
+            ...c
         }));
     }
 

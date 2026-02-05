@@ -124,21 +124,123 @@ export const ErrorMessages = {
         en: 'Unknown file fieldname',
         ar: 'اسم حقل الملف غير معروف',
     },
-
+    DOCTOR_NOT_WORKING_ON_DAY: {
+        en: "Doctor is not available on this day",
+        ar: "الطبيب غير متاح في هذا اليوم"
+    },
+    TIME_OUTSIDE_SCHEDULE: {
+        en: "Requested time is outside doctor's working hours",
+        ar: "الوقت المطلوب خارج ساعات عمل الطبيب"
+    },
+    DAY_OUTSIDE_SCHEDULE: {
+        en: "Requested date is outside doctor's working days",
+        ar: "الموعد المطلوب خارج أيام عمل الطبيب"
+    },
+    DOCTOR_NOT_ASSOCIATED_WITH_CLINIC: {
+        en: 'Doctor is not associated with this clinic',
+        ar: 'الطبيب غير مرتبط بهذه العيادة'
+    },
+    END_TIME_BEFORE_START_TIME: {
+        en: 'End time must be after start time',
+        ar: 'وقت الانتهاء يجب أن يكون بعد وقت البداية'
+    },
+    SCHEDULE_ALREADY_EXISTS: {
+        en: 'Schedule already exists for this day and clinic',
+        ar: 'الجدول موجود بالفعل لهذا اليوم والعيادة'
+    },
+    
     // Clinic errors
     CLINIC_NOT_FOUND: {
         en: 'Clinic not found',
         ar: 'العيادة غير موجودة',
     },
+    CLINIC_REQUIRED_FOR_OFFLINE: {
+        en: 'Clinic ID is required for offline appointments',
+        ar: 'معرف العيادة مطلوب للمواعيد غير المتصلة بالإنترنت',
+    },
     UNAUTHORIZED_CLINIC_DELETION: {
         en: 'You are not authorized to delete this clinic',
         ar: 'ليس لديك صلاحية لحذف هذه العيادة',
+    },
+    // appointments 
+    DOCTOR_ID_REQUIRED: {
+        en: 'Doctor ID is required',
+        ar: 'معرف الطبيب مطلوب',
+    },
+    PATIENT_ID_REQUIRED: {
+        en: 'Patient ID is required',
+        ar: 'معرف المريض مطلوب',
+    },
+    SCHEDULED_TIME_REQUIRED: {
+        en: 'Scheduled time is required',
+        ar: 'وقت الموعد مطلوب',
+    },
+    INVALID_SCHEDULED_TIME: {
+        en: 'Invalid scheduled time format',
+        ar: 'تنسيق وقت الموعد غير صالح',
+    },
+    DATE_REQUIRED: {
+        en: 'Date is required',
+        ar: 'التاريخ مطلوب',
+    },
+    INVALID_DATE_FORMAT: {
+        en: 'Invalid date format. Please use YYYY-MM-DD',
+        ar: 'تنسيق التاريخ غير صالح. يرجى استخدام YYYY-MM-DD',
+    },
+    NO_AVAILABLE_DAYS: {
+        en: 'No available days found for this doctor',
+        ar: 'لم يتم العثور على أيام متاحة لهذا الطبيب',
+    },
+    SLOT_NOT_AVAILABLE: {
+        en: 'This time slot is not available',
+        ar: 'هذا الوقت غير متاح',
+    },
+    APPOINTMENT_IN_PAST: {
+        en: 'Cannot book appointment in the past',
+        ar: 'لا يمكن حجز موعد في الماضي',
+    },
+    TIME_SLOT_NOT_AVAILABLE: {
+        en: "This time slot is not available",
+        ar: "هذا الوقت غير متاح"
+    },
+    MINUTES_EXCEEDED_LIMIT: {
+        en: "The maximum allowed delay must not exceed 60 minutes.",
+        ar: "يجب ألا يتجاوز الحد الأقصى للتأجيل المسموح به 60 دقيقة."
+    },
+    SCHEDULE_NOT_FOUND: {
+        en: "Schedule not found",
+        ar: "لم يتم العثور على الجدول"
+    },
+    UNAUTHORIZED_SCHEDULE_ACCESS: {
+        en: "You are not authorized to access this schedule",
+        ar: "غير مصرح لك بالوصول إلى هذا الجدول"
     },
     // Generic errors
     SOMETHING_WENT_WRONG: {
         en: 'Something went wrong',
         ar: 'حدث خطأ ما',
     },
+
+    APPOINTMENT_NOT_FOUND: {
+        en: "Appointment not found",
+        ar: "الموعد غير موجود"
+    },
+    APPOINTMENT_ID_REQUIRED: {
+        en: "Appointment ID is required",
+        ar: "معرف الموعد مطلوب"
+    },
+    UNAUTHORIZED_APPOINTMENT_ACCESS: {
+        en: "You are not authorized to access this appointment",
+        ar: "غير مصرح لك بالوصول إلى هذا الموعد"
+    },
+    APPOINTMENT_ALREADY_DELETED: {
+        en: "Appointment has already been deleted",
+        ar: "تم حذف الموعد بالفعل"
+    },
+    INVALID_RESCHEDULE_PARAMETERS: {
+        en: "Provide either new scheduled time or shift minutes",
+        ar: "يرجى تقديم وقت موعد جديد أو عدد دقائق التغيير"
+    }
 };
 
 // Helper function to create bilingual error
