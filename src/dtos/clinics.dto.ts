@@ -57,3 +57,9 @@ export class ClinicActiveStatusResponseDto {
     public name: string;
     public is_active: boolean;
 }
+
+export class ClinicUpdateFeesDto {
+    @IsNotEmpty()
+    @IsNumber()
+    fees: number;
+}

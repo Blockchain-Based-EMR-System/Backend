@@ -2743,6 +2743,174 @@
         }
       }
     },
+    "/super-admin/clinics": {
+      "get": {
+        "tags": [
+          "Super Admin"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Get clinics successful",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "clinic-uuid"
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "Clinic Name"
+                      },
+                      "is_active": {
+                        "type": "boolean",
+                        "example": false
+                      },
+                      "opening_at": {
+                        "type": "string",
+                        "example": "08:00"
+                      },
+                      "closing_at": {
+                        "type": "string",
+                        "example": "16:00"
+                      },
+                      "address": {
+                        "type": "string",
+                        "example": "123 Main St, City, Country"
+                      },
+                      "address_maps_link": {
+                        "type": "string",
+                        "example": "https://maps.google.com/?q=123+Main+St,+City,+Country"
+                      },
+                      "phone": {
+                        "type": "string",
+                        "example": "1234567890"
+                      },
+                      "canPayOnline": {
+                        "type": "boolean",
+                        "example": true
+                      }
+                    }
+                  }
+                },
+                "messageEn": {
+                  "type": "string",
+                  "example": "Clinics retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع بيانات العيادات بنجاح."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/super-admin/clinics/{id}": {
+      "get": {
+        "tags": [
+          "Super Admin"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Clinic ID"
+          },
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Clinic retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "clinic-uuid"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Clinic Name"
+                    },
+                    "is_active": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "opening_at": {
+                      "type": "string",
+                      "example": "08:00"
+                    },
+                    "closing_at": {
+                      "type": "string",
+                      "example": "16:00"
+                    },
+                    "address": {
+                      "type": "string",
+                      "example": "123 Main St, City, Country"
+                    },
+                    "address_maps_link": {
+                      "type": "string",
+                      "example": "https://maps.google.com/?q=123+Main+St,+City,+Country"
+                    },
+                    "phone": {
+                      "type": "string",
+                      "example": "1234567890"
+                    },
+                    "canPayOnline": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                },
+                "messageEn": {
+                  "type": "string",
+                  "example": "Clinic retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع بيانات العيادة بنجاح."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
     "/doctors/signup": {
       "post": {
         "tags": [
@@ -3178,6 +3346,14 @@
                       "fees": {
                         "type": "number",
                         "example": 100
+                      },
+                      "created_by": {
+                        "type": "string",
+                        "example": "doctor-uuid"
+                      },
+                      "isOwner": {
+                        "type": "boolean",
+                        "example": true
                       }
                     }
                   }
@@ -3408,6 +3584,66 @@
                 "messageAr": {
                   "type": "string",
                   "example": "تم حذف العيادة بنجاح"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/clinics/{id}/fees": {
+      "patch": {
+        "tags": [
+          "Clinics"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The unique identifier of the clinic to update fees for"
+          },
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Clinic fees update data",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "fees": {
+                  "type": "number",
+                  "example": 200
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Clinic fees updated successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "messageEn": {
+                  "type": "string",
+                  "example": "Clinic fees updated successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم تحديث رسوم العيادة بنجاح"
                 }
               },
               "xml": {

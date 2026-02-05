@@ -274,5 +274,81 @@ export class SuperAdminRoute implements Routes {
             LanguageMiddleware,
             this.adminController.getDoctorById,
         )
+
+        // CLINIC ROUTES
+        this.router.get(
+            '/super-admin/clinics',
+            /* 
+                #swagger.tags = ['Super Admin']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.responses[200] = {
+                    description: 'Get clinics successful',
+                    schema: {
+                        data: [
+                            {
+                                id: 'clinic-uuid',
+                                name: 'Clinic Name',
+                                is_active: false,   
+                                opening_at: '08:00',
+                                closing_at: '16:00',
+                                address: '123 Main St, City, Country',
+                                address_maps_link: 'https://maps.google.com/?q=123+Main+St,+City,+Country',
+                                phone: '1234567890',
+                                canPayOnline: true
+                            }
+                        ],
+                        messageEn: 'Clinics retrieved successfully',
+                        messageAr: "تم استرجاع بيانات العيادات بنجاح."
+                    }
+                }
+            */
+            AuthMiddleware,
+            RoleMiddleware(Role.SUPER_ADMIN),
+            this.adminController.getAllClinics,
+        );
+        this.router.get(
+            '/super-admin/clinics/:id',
+            /*
+                #swagger.tags = ['Super Admin']
+                #swagger.parameters['id'] = {
+                    in: 'path',
+                    description: 'Clinic ID',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.responses[200] = {
+                    description: 'Clinic retrieved successfully',
+                    schema: {
+                        data: {
+                            id: 'clinic-uuid',
+                            name: 'Clinic Name',
+                            is_active: false,   
+                            opening_at: '08:00',
+                            closing_at: '16:00',
+                            address: '123 Main St, City, Country',
+                            address_maps_link: 'https://maps.google.com/?q=123+Main+St,+City,+Country',
+                            phone: '1234567890',
+                            canPayOnline: true
+                        },
+                        messageEn: 'Clinic retrieved successfully',
+                        messageAr: "تم استرجاع بيانات العيادة بنجاح."
+                    }
+                }
+            */
+            AuthMiddleware,
+            RoleMiddleware(Role.SUPER_ADMIN),
+            this.adminController.getClinicById,
+        );
     }
 }

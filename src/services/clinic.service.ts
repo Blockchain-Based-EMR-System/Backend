@@ -90,16 +90,28 @@ export class ClinicService {
         return clinic;
     }
 
-    public async updateClinic(clinicId: string, clinicData: CreateUpdateClinicRequestDto): Promise<boolean> {
+    public async updateClinic(doctorId: string, clinicId: string, clinicData: CreateUpdateClinicRequestDto): Promise<boolean> {
+        const { fees, ...clinicUpdateData } = clinicData;
         const updatedClinic = await prisma.clinic.update({
             where: {
                 id: clinicId,
             },
             data: {
-                ...clinicData,
+                ...clinicUpdateData,
             },
         });
-        return updatedClinic !== null;
+        const clinicDoctor = await prisma.clinicDoctor.update({
+            where: {
+                clinic_id_doctor_id: {
+                    clinic_id: clinicId,
+                    doctor_id: doctorId,
+                }
+            },
+            data: {
+                fees,
+            }
+        });
+        return (updatedClinic && clinicDoctor) !== null;
     }
 
     public async isCreatingDoctorOfClinic(doctorId: string, clinicId: string): Promise<boolean> {
@@ -175,16 +187,23 @@ export class ClinicService {
                         is_active: true,
                         canPayOnline: true,
                         created_at: true,
+                        created_by: true,
                     }
                 },
                 fees: true
             }
         });
-
-        return clinics.map(c => ({
-            ...c.clinic,
-            fees: c.fees
-        }));
+        return clinics.map(c => {
+            let isOwner = true;
+            if (c.clinic.created_by !== doctorId) {
+                isOwner = false;
+            }
+            return {
+                ...c.clinic,
+                fees: c.fees,
+                isOwner
+            }
+        });
     }
 
     public async getClinicDoctors(clinicId: string): Promise<Partial<Doctor>[]> {
@@ -277,5 +296,38 @@ export class ClinicService {
             throw new HttpException(error.status, error.message, error.messageAr);
         }
         return updatedClinic;
+    }
+
+    public async isDoctorLinkedToClinic(doctorId: string, clinicId: string): Promise<boolean> {
+        const clinicDoctor = await prisma.clinicDoctor.findUnique({
+            where: {
+                clinic_id_doctor_id: {
+                    clinic_id: clinicId,
+                    doctor_id: doctorId,
+                }
+            }
+        });
+        if (clinicDoctor === null) {
+            return false;
+        }
+        return true;
+    }
+
+    public async updateClinicFees(doctorId: string, clinicId: string, fees: number): Promise<boolean> {
+        const clinicDoctor = await prisma.clinicDoctor.update({
+            where: {
+                clinic_id_doctor_id: {
+                    clinic_id: clinicId,
+                    doctor_id: doctorId,
+                }
+            },
+            data: {
+                fees,
+            }
+        });
+        if (clinicDoctor === null) {
+            return false;
+        }
+        return true;
     }
 }

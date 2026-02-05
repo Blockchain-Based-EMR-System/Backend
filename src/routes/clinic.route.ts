@@ -1,5 +1,5 @@
 import { ClinicController } from "@/controllers/clinic.controller";
-import {  CreateUpdateClinicRequestDto } from "@/dtos/clinics.dto";
+import {  ClinicUpdateFeesDto, CreateUpdateClinicRequestDto } from "@/dtos/clinics.dto";
 import { Routes } from "@/interfaces";
 import { AuthMiddleware, RoleMiddleware } from "@/middlewares/auth.middleware";
 import { ValidationMiddleware } from "@/middlewares/validation.middleware";
@@ -128,7 +128,7 @@ export class ClinicRoute implements Routes {
                         address_maps_link: 'https://maps.google.com/?q=456+New+Street',
                         phone: '+1234567891',
                         canPayOnline: false,
-                        fees: 150
+                        fees: 150,
                     }
                 }
                 #swagger.responses[200] = {
@@ -143,6 +143,46 @@ export class ClinicRoute implements Routes {
             RoleMiddleware(Role.DOCTOR),
             ValidationMiddleware(CreateUpdateClinicRequestDto, true),
             this.clinicController.updateClinicById
+        );
+        
+        this.router.patch(
+            `${this.path}/:id/fees`,
+            /*
+                #swagger.path = '/clinics/{id}/fees'
+                #swagger.method = 'patch'
+                #swagger.tags = ['Clinics']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['id'] = {
+                    in: 'path',
+                    description: 'The unique identifier of the clinic to update fees for',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['body'] = {
+                    in: 'body',
+                    description: 'Clinic fees update data',
+                    required: true,
+                    schema: {
+                        fees: 200
+                    }
+                }
+                #swagger.responses[200] = {
+                    description: 'Clinic fees updated successfully',
+                    schema: {
+                        messageEn: 'Clinic fees updated successfully',
+                        messageAr: "تم تحديث رسوم العيادة بنجاح"
+                    }
+                }
+            */
+            AuthMiddleware,
+            RoleMiddleware(Role.DOCTOR),
+            ValidationMiddleware(ClinicUpdateFeesDto),
+            this.clinicController.updateClinicFeesById
         );
 
         this.router.delete(
@@ -203,7 +243,9 @@ export class ClinicRoute implements Routes {
                                 canPayOnline: true,
                                 is_active: true,
                                 created_at: '2024-01-01T00:00:00.000Z',
-                                fees: 100
+                                fees: 100,
+                                created_by: 'doctor-uuid',
+                                isOwner: true
                             }
                         ],
                         messageEn: "Doctor's clinics retrieved successfully",

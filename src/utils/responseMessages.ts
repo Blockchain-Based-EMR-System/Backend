@@ -88,6 +88,10 @@ export const SuccessResponseMessages = {
         message_en: "Clinic active status updated successfully.",
         message_ar: "تم تحديث حالة العيادة بنجاح.",
     },
+    CLINIC_FEES_UPDATED_SUCCESSFULLY: {
+        message_en: "Clinic fees updated successfully.",
+        message_ar: "تم تحديث رسوم العيادة بنجاح.",
+    },
 
     // Success messages for Doctors
     DOCTOR_CREATED_WAITING_VERIFICATION: {

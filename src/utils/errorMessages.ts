@@ -148,7 +148,7 @@ export const ErrorMessages = {
         en: 'Schedule already exists for this day and clinic',
         ar: 'الجدول موجود بالفعل لهذا اليوم والعيادة'
     },
-    
+
     // Clinic errors
     CLINIC_NOT_FOUND: {
         en: 'Clinic not found',
@@ -162,6 +162,11 @@ export const ErrorMessages = {
         en: 'You are not authorized to delete this clinic',
         ar: 'ليس لديك صلاحية لحذف هذه العيادة',
     },
+    UNAUTHORIZED_CLINIC_UPDATE: {
+        en: 'You are not authorized to update this clinic',
+        ar: 'ليس لديك صلاحية لتحديث هذه العيادة',
+    },
+
     // appointments 
     DOCTOR_ID_REQUIRED: {
         en: 'Doctor ID is required',
