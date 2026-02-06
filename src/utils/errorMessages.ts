@@ -166,7 +166,22 @@ export const ErrorMessages = {
         en: 'You are not authorized to update this clinic',
         ar: 'ليس لديك صلاحية لتحديث هذه العيادة',
     },
-
+    SCHEDULE_ALREADY_DELETED: {
+        en: 'This schedule has already been deleted',
+        ar: 'تم حذف هذا الجدول مسبقًا',
+    },
+    SCHEDULE_ID_REQUIRED: {
+        en: 'Schedule ID is required',
+        ar: 'معرف الجدول مطلوب',
+    },
+    VACATION_DATES_REQUIRED: {
+        en: 'Vacation dates are required',
+        ar: 'تواريخ الإجازة مطلوبة',
+    },
+    INVALID_DATE_RANGE: {
+        en: 'Invalid date range',
+        ar: 'نطاق التاريخ غير صالح',
+    },
     // appointments 
     DOCTOR_ID_REQUIRED: {
         en: 'Doctor ID is required',

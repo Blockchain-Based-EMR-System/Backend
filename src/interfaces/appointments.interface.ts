@@ -96,5 +96,12 @@ export interface DoctorSchedule {
     breakEnd: string | null;
 }
 
+export interface checkExistingAppointments {
+    existing: boolean,
+    numOfAppointments?: number
+}
 
-
+export interface ConflictingAppointment {
+  id: string;
+  scheduled_time: Date;
+}

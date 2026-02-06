@@ -5093,6 +5093,181 @@
         }
       }
     },
+    "/appointments/doctor/vacation-check": {
+      "get": {
+        "tags": [
+          "Appointments"
+        ],
+        "description": "Check for existing appointments in a proposed vacation period for a specific doctor schedule",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication (must be a doctor)",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "scheduleId",
+            "in": "query",
+            "description": "Schedule ID",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "description": "Vacation start date (YYYY-MM-DD)",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "description": "Vacation end date (YYYY-MM-DD)",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vacation check completed successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "existing": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "numOfAppointments": {
+                      "type": "number",
+                      "example": 3
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Vacation check completed successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - missing/invalid dates or schedule ID"
+          },
+          "401": {
+            "description": "Unauthorized - doctor not authenticated"
+          },
+          "403": {
+            "description": "Forbidden - schedule does not belong to the doctor"
+          },
+          "404": {
+            "description": "Schedule not found"
+          }
+        }
+      }
+    },
+    "/appointments/doctor/vacation": {
+      "patch": {
+        "tags": [
+          "Appointments"
+        ],
+        "description": "Set vacation period for a specific doctor schedule. This will automatically cancel any existing confirmed appointments in the period (use vacation-check first to warn the doctor)",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication (must be a doctor)",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Vacation details",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "scheduleId": {
+                  "type": "string",
+                  "example": "schedule-uuid"
+                },
+                "startDate": {
+                  "type": "string",
+                  "example": "2026-03-01"
+                },
+                "endDate": {
+                  "type": "string",
+                  "example": "2026-03-15"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vacation set successfully (any conflicting appointments cancelled)"
+          },
+          "400": {
+            "description": "Bad request - invalid dates or date range"
+          },
+          "401": {
+            "description": "Unauthorized - doctor not authenticated"
+          },
+          "403": {
+            "description": "Forbidden - schedule does not belong to the doctor"
+          },
+          "404": {
+            "description": "Schedule not found"
+          }
+        }
+      }
+    },
+    "/appointments/doctor/schedule/{scheduleId}": {
+      "delete": {
+        "tags": [
+          "Appointments"
+        ],
+        "description": "Delete a doctor schedule",
+        "parameters": [
+          {
+            "name": "scheduleId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Schedule ID to delete"
+          },
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication (must be a doctor)",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Schedule deleted successfully"
+          },
+          "400": {
+            "description": "Bad request - schedule already deleted or has future appointments"
+          },
+          "401": {
+            "description": "Unauthorized - doctor not authenticated"
+          },
+          "404": {
+            "description": "Schedule not found"
+          }
+        }
+      }
+    },
     "/queue/position/{appointmentId}": {
       "get": {
         "tags": [

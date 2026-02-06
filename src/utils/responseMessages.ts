@@ -192,7 +192,20 @@ export const SuccessResponseMessages = {
     SCHEDULE_UPDATED_SUCCESSFULLY: {
         message_en: 'Schedule updated successfully',
         message_ar: 'تم تحديث الجدول بنجاح'
-    }
+    },
+    VACATION_SET_SUCCESSFULLY: {
+        message_en: 'Vacation set successfully',
+        message_ar: 'تم تعيين الإجازة بنجاح',
+    },
+    SCHEDULE_DELETED_SUCCESSFULLY: {
+        message_en: 'Schedule deleted successfully',
+        message_ar: 'تم حذف الجدول بنجاح',
+    },
+    VACATION_CHECK_COMPLETED: {
+        message_en: 'Vacation check completed',
+        message_ar: 'تم فحص الإجازة'
+    },
+
 }
 
 interface MultiLangMessageObj {

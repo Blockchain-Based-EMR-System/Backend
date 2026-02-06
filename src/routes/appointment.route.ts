@@ -5,7 +5,7 @@ import { DoctorController } from "@/controllers/doctor.controller";
 import { AppointmentController } from "@/controllers/appointment.controller";
 import { ValidationMiddleware } from "@/middlewares/validation.middleware";
 import { AuthMiddleware } from "@/middlewares/auth.middleware";
-import { BookAppointmentDto, RescheduleAppointmentDto, RescheduleAppointmentByDoctorDto, EnterDoctorScheduleDto, EditDoctorScheduleDto } from "@/dtos/appointments.dto";
+import { BookAppointmentDto, RescheduleAppointmentDto, RescheduleAppointmentByDoctorDto, EnterDoctorScheduleDto, EditDoctorScheduleDto, HandleDoctorVacationDto } from "@/dtos/appointments.dto";
 
 export class AppointmentRoute implements Routes {
     public path = '/appointments';
@@ -943,6 +943,145 @@ export class AppointmentRoute implements Routes {
             */
             AuthMiddleware,
             this.appointmentController.getScheduleByDate
+        );
+
+        this.router.get(
+            `${this.path}/doctor/vacation-check`,
+            /* 
+                #swagger.path = '/appointments/doctor/vacation-check'
+                #swagger.method = 'get'
+                #swagger.tags = ['Appointments']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication (must be a doctor)',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.description = 'Check for existing appointments in a proposed vacation period for a specific doctor schedule'
+                #swagger.parameters['scheduleId'] = {
+                    in: 'query',
+                    description: 'Schedule ID',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['startDate'] = {
+                    in: 'query',
+                    description: 'Vacation start date (YYYY-MM-DD)',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['endDate'] = {
+                    in: 'query',
+                    description: 'Vacation end date (YYYY-MM-DD)',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.responses[200] = {
+                    description: 'Vacation check completed successfully',
+                    schema: {
+                        data: {
+                            existing: true,
+                            numOfAppointments: 3
+                        },
+                        message: 'Vacation check completed successfully'
+                    }
+                }
+                #swagger.responses[400] = {
+                    description: 'Bad request - missing/invalid dates or schedule ID'
+                }
+                #swagger.responses[401] = {
+                    description: 'Unauthorized - doctor not authenticated'
+                }
+                #swagger.responses[403] = {
+                    description: 'Forbidden - schedule does not belong to the doctor'
+                }
+                #swagger.responses[404] = {
+                    description: 'Schedule not found'
+                }
+            */
+            AuthMiddleware,
+            this.appointmentController.checkDoctorVacation
+        );
+
+        this.router.patch(
+            `${this.path}/doctor/vacation`,
+            /* 
+                #swagger.path = '/appointments/doctor/vacation'
+                #swagger.method = 'patch'
+                #swagger.tags = ['Appointments']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication (must be a doctor)',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.description = 'Set vacation period for a specific doctor schedule. This will automatically cancel any existing confirmed appointments in the period (use vacation-check first to warn the doctor)'
+                #swagger.parameters['body'] = {
+                    in: 'body',
+                    description: 'Vacation details',
+                    required: true,
+                    schema: {
+                        scheduleId: 'schedule-uuid',
+                        startDate: '2026-03-01',
+                        endDate: '2026-03-15'
+                    }
+                }
+                #swagger.responses[200] = {
+                    description: 'Vacation set successfully (any conflicting appointments cancelled)'
+                }
+                #swagger.responses[400] = {
+                    description: 'Bad request - invalid dates or date range'
+                }
+                #swagger.responses[401] = {
+                    description: 'Unauthorized - doctor not authenticated'
+                }
+                #swagger.responses[403] = {
+                    description: 'Forbidden - schedule does not belong to the doctor'
+                }
+                #swagger.responses[404] = {
+                    description: 'Schedule not found'
+                }
+            */
+            AuthMiddleware,
+            ValidationMiddleware(HandleDoctorVacationDto),
+            this.appointmentController.handleDoctorVacation
+        );
+
+        this.router.delete(
+            `${this.path}/doctor/schedule/:scheduleId`,
+            /* 
+                #swagger.path = '/appointments/doctor/schedule/{scheduleId}'
+                #swagger.method = 'delete'
+                #swagger.tags = ['Appointments']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication (must be a doctor)',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.description = 'Delete a doctor schedule'
+                #swagger.parameters['scheduleId'] = {
+                    in: 'path',
+                    description: 'Schedule ID to delete',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.responses[200] = {
+                    description: 'Schedule deleted successfully',
+                    }
+                }
+                #swagger.responses[400] = {
+                    description: 'Bad request - schedule already deleted or has future appointments'
+                }
+                #swagger.responses[401] = {
+                    description: 'Unauthorized - doctor not authenticated'
+                }
+                #swagger.responses[404] = {
+                    description: 'Schedule not found'
+                }
+            */
+            AuthMiddleware,
+            this.appointmentController.deleteDoctorSchedule
         );
     }
 }

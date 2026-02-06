@@ -5,7 +5,7 @@ import { Service, Container } from 'typedi';
 import { TimeSlot } from '@/interfaces';
 import { HttpException } from "@/exceptions/HttpException";
 import { createBilingualError, ErrorMessages } from '@/utils/errorMessages';
-import { PatientTodayAppointment, DoctorAppointment, DoctorScheduleDay, PatientAppointment, DoctorSchedule } from '@/interfaces/appointments.interface';
+import { PatientTodayAppointment, DoctorAppointment, DoctorScheduleDay, PatientAppointment, DoctorSchedule, checkExistingAppointments, ConflictingAppointment } from '@/interfaces/appointments.interface';
 import { QueueService } from './queue.service';
 
 @Service()
@@ -425,7 +425,7 @@ export class AppointmentService {
                 end_time: this.formatTime(appointment.end_time),
                 clinic_name: appointment.clinic ? appointment.clinic.name : null,
                 clinic_address: appointment.clinic ? appointment.clinic.address : null,
-                position: appointment.position,              
+                position: appointment.position,
                 estimatedWaitMinutes: appointment.estimated_time,
                 patientsAhead: appointment.patients_ahead
             });
@@ -594,7 +594,7 @@ export class AppointmentService {
     public async getUpcommingDoctorSchedule(doctorId: string): Promise<DoctorScheduleDay[]> {
         // to be changed later -->
         const nowUTC = new Date();
-        const egyptOffset = 2 * 60 * 60 * 1000; 
+        const egyptOffset = 2 * 60 * 60 * 1000;
         const now = new Date(nowUTC.getTime() + egyptOffset);
 
         const appointments = await prisma.appointment.findMany({
@@ -866,6 +866,136 @@ export class AppointmentService {
                 modified_at: new Date(),
             }
         });
+    }
+
+    public async checkDoctorVacation(doctorId: string, scheduleId: string, breakStart: string, breakEnd: string): Promise<checkExistingAppointments> {
+        const conflictingAppointments = await this.getConflictingAppointments(doctorId, scheduleId, breakStart, breakEnd)
+
+        return conflictingAppointments.length > 0
+            ? { existing: true, numOfAppointments: conflictingAppointments.length }
+            : { existing: false };
+    }
+
+    public async handleDoctorVacation(doctorId: string, scheduleId: string, breakStart: string, breakEnd: string): Promise<void> {
+        const conflictingAppointments = await this.getConflictingAppointments(doctorId, scheduleId, breakStart, breakEnd)
+        const idsToCancel = conflictingAppointments.map(appointment => appointment.id);
+
+        await prisma.appointment.updateMany({
+            where: {
+                id: { in: idsToCancel },
+            },
+            data: {
+                status: 'CANCELLED',
+                cancelled_by: 'DOCTOR',
+                deleted_at: new Date(),
+                modified_at: new Date(),
+            },
+        });
+
+        await prisma.doctorSchedule.update({
+            where: {
+                id: scheduleId,
+            },
+            data: {
+                is_active: false,
+                break_start: breakStart,
+                break_end: breakEnd,
+                modified_at: new Date(),
+            },
+        });
+        // DONT FORGET LATER --> notify patients
+    }
+
+    public async deleteDoctorSchedule(doctorId: string, scheduleId: string): Promise<void> {
+        const schedule = await prisma.doctorSchedule.findUnique({
+            where: {
+                id: scheduleId
+            },
+            select: {
+                deleted_at: true
+            }
+        })
+
+        if (!schedule) {
+            const error = createBilingualError(404, ErrorMessages.SCHEDULE_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        if (schedule.deleted_at) {
+            const error = createBilingualError(400, ErrorMessages.SCHEDULE_ALREADY_DELETED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        await prisma.doctorSchedule.update({
+            where: {
+                id: scheduleId
+            },
+            data: {
+                is_active: false,
+                deleted_at: new Date(),
+            }
+        })
+
+    }
+
+    private async getConflictingAppointments(doctorId: string, scheduleId: string, breakStart: string, breakEnd: string): Promise<ConflictingAppointment[]> {
+        const schedule = await prisma.doctorSchedule.findUnique({
+            where: {
+                id: scheduleId
+            },
+            select: {
+                doctor_id: true,
+                deleted_at: true,
+                start_time: true,
+                end_time: true
+            }
+        });
+
+        if (!schedule) {
+            const error = createBilingualError(404, ErrorMessages.SCHEDULE_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        if (schedule.deleted_at) {
+            const error = createBilingualError(400, ErrorMessages.SCHEDULE_ALREADY_DELETED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const vacationStart = new Date(breakStart);
+        vacationStart.setUTCHours(0, 0, 0, 0);
+
+        const vacationEnd = new Date(breakEnd);
+        vacationEnd.setUTCHours(23, 59, 59, 999);
+
+        // convert everything to minutes since midnight
+        // 09:00:00 --> ["09", "00", "00"] --> [9, 0, 0] --> startHour = 9, startMin = 0
+        const [startHour, startMin] = schedule.start_time.split(':').map(Number);
+        const scheduleStartMin = (startHour * 60) + startMin;
+
+        const [endHour, endMin] = schedule.end_time.split(':').map(Number);
+        const scheduleEndMin = (endHour * 60) + endMin;
+
+        const existingAppointments = await prisma.appointment.findMany({
+            where: {
+                doctor_id: doctorId,
+                scheduled_time: {
+                    gte: vacationStart,
+                    lte: vacationEnd,
+                },
+                status: 'CONFIRMED',
+                deleted_at: null,
+            },
+            select: {
+                id: true,
+                scheduled_time: true
+            }
+        });
+
+        return existingAppointments.filter(appointment => {
+            const apptMin = appointment.scheduled_time.getUTCHours() * 60 + appointment.scheduled_time.getUTCMinutes();
+            return apptMin >= scheduleStartMin && apptMin < scheduleEndMin;
+        });
+
     }
 
     private generateTimeSlots(startTime: string, endTime: string, slotDuration: number, bufferTime: number, isOnline: boolean): Omit<TimeSlot, 'available'>[] {
