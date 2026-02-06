@@ -201,15 +201,10 @@ export const SuccessResponseMessages = {
         message_en: 'Schedule deleted successfully',
         message_ar: 'تم حذف الجدول بنجاح',
     },
-    VACATION_CHECK_COMPLETED: {
-        message_en: 'Vacation check completed',
-        message_ar: 'تم فحص الإجازة'
+    APPOINTMENTS_CHECK_COMPLETED: {
+        message_en: 'Appointments check completed',
+        message_ar: 'تم فحص المواعيد'
     },
-    DELETION_CHECK_COMPLETED: {
-        message_en: 'Deletion check completed',
-        message_ar: 'تم التحقق من الحذف',
-    },
-
 }
 
 interface MultiLangMessageObj {

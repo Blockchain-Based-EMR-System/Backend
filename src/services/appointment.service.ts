@@ -869,13 +869,14 @@ export class AppointmentService {
         });
     }
 
-    public async checkDoctorVacation(doctorId: string, scheduleId: string, breakStart: string, breakEnd: string): Promise<checkExistingAppointments> {
-        const conflictingAppointments = await this.getConflictingAppointments(doctorId, scheduleId, breakStart, breakEnd)
+    public async checkConflictingAppointments(doctorId: string, scheduleId: string, breakStart?: string, breakEnd?: string): Promise<checkExistingAppointments> {
+        const conflictingAppointments = await this.getConflictingAppointments(doctorId, scheduleId, breakStart, breakEnd);
 
         return conflictingAppointments.length > 0
             ? { existing: true, numOfAppointments: conflictingAppointments.length }
             : { existing: false };
     }
+
 
     public async handleDoctorVacation(doctorId: string, scheduleId: string, breakStart: string, breakEnd: string): Promise<void> {
         const conflictingAppointments = await this.getConflictingAppointments(doctorId, scheduleId, breakStart, breakEnd)
@@ -907,12 +908,6 @@ export class AppointmentService {
         // DONT FORGET LATER --> notify patients/ penalty
     }
 
-    public async checkScheduleDeletion(doctorId: string, scheduleId: string): Promise<checkExistingAppointments> {
-        const conflictingAppointments = await this.getConflictingAppointments(doctorId, scheduleId)
-        return conflictingAppointments.length > 0
-            ? { existing: true, numOfAppointments: conflictingAppointments.length }
-            : { existing: false };
-    }
 
     public async deleteDoctorSchedule(doctorId: string, scheduleId: string): Promise<void> {
         const conflictingAppointments = await this.getConflictingAppointments(doctorId, scheduleId)
@@ -968,7 +963,7 @@ export class AppointmentService {
 
         let existingAppointments: { id: string; scheduled_time: Date }[];
 
-        if (breakStart && breakEnd){
+        if (breakStart && breakEnd) {
             const vacationStart = new Date(breakStart);
             vacationStart.setUTCHours(0, 0, 0, 0);
 
@@ -1006,13 +1001,13 @@ export class AppointmentService {
                 }
             });
         }
-        
+
         const confilctingAppointments = existingAppointments.filter((appointment) => {
             const apptDay = this.getDayOfWeek(appointment.scheduled_time.getUTCDay());
             return apptDay === schedule.day_of_week;
 
         })
-        return confilctingAppointments;   
+        return confilctingAppointments;
     }
 
     private generateTimeSlots(startTime: string, endTime: string, slotDuration: number, bufferTime: number, isOnline: boolean): Omit<TimeSlot, 'available'>[] {

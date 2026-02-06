@@ -5093,12 +5093,12 @@
         }
       }
     },
-    "/appointments/doctor/vacation-check": {
+    "/appointments/doctor/schedule/check-appointments": {
       "get": {
         "tags": [
           "Appointments"
         ],
-        "description": "Check for existing appointments in a proposed vacation period for a specific doctor schedule",
+        "description": "Check for existing confirmed appointments in a doctor schedule",
         "parameters": [
           {
             "name": "Authorization",
@@ -5110,28 +5110,28 @@
           {
             "name": "scheduleId",
             "in": "query",
-            "description": "Schedule ID",
+            "description": "Schedule ID to check",
             "required": true,
             "type": "string"
           },
           {
             "name": "startDate",
             "in": "query",
-            "description": "Vacation start date (YYYY-MM-DD)",
-            "required": true,
+            "description": "Optional for vacation. format: YYYY-MM-DD",
+            "required": false,
             "type": "string"
           },
           {
             "name": "endDate",
             "in": "query",
-            "description": "Vacation end date (YYYY-MM-DD)",
-            "required": true,
+            "description": "Optional for vacation. format: YYYY-MM-DD",
+            "required": false,
             "type": "string"
           }
         ],
         "responses": {
           "200": {
-            "description": "Vacation check completed successfully",
+            "description": "Check completed successfully",
             "schema": {
               "type": "object",
               "properties": {
@@ -5150,7 +5150,7 @@
                 },
                 "message": {
                   "type": "string",
-                  "example": "Vacation check completed successfully"
+                  "example": "Check completed successfully"
                 }
               },
               "xml": {
@@ -5159,7 +5159,7 @@
             }
           },
           "400": {
-            "description": "Bad request - missing/invalid dates or schedule ID"
+            "description": "Bad request - missing/invalid parameters"
           },
           "401": {
             "description": "Unauthorized - doctor not authenticated"
@@ -5217,72 +5217,6 @@
           },
           "400": {
             "description": "Bad request - invalid dates or date range"
-          },
-          "401": {
-            "description": "Unauthorized - doctor not authenticated"
-          },
-          "403": {
-            "description": "Forbidden - schedule does not belong to the doctor"
-          },
-          "404": {
-            "description": "Schedule not found"
-          }
-        }
-      }
-    },
-    "/appointments/doctor/schedule/deletion-check": {
-      "get": {
-        "tags": [
-          "Appointments"
-        ],
-        "description": "Check if a doctor\\'s schedule can be deleted by verifying if there are any existing confirmed appointments associated with it",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "cookie",
-            "description": "Bearer token for authentication (must be a doctor)",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "scheduleId",
-            "in": "query",
-            "description": "Schedule ID to check for deletion",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Deletion check completed successfully",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "existing": {
-                      "type": "boolean",
-                      "example": true
-                    },
-                    "numOfAppointments": {
-                      "type": "number",
-                      "example": 2
-                    }
-                  }
-                },
-                "message": {
-                  "type": "string",
-                  "example": "Deletion check completed successfully"
-                }
-              },
-              "xml": {
-                "name": "main"
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request - missing schedule ID or doctor ID"
           },
           "401": {
             "description": "Unauthorized - doctor not authenticated"

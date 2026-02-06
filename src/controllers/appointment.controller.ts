@@ -318,7 +318,7 @@ export class AppointmentController {
         });
     });
 
-    public checkDoctorVacation = catchAsync(async(req: RequestWithUser, res: Response): Promise<void> => {
+    public checkConflictingAppointments = catchAsync(async(req: RequestWithUser, res: Response): Promise<void> => {
         const doctorId = req.user.id;
         const { scheduleId, startDate, endDate } = req.query;
 
@@ -332,34 +332,35 @@ export class AppointmentController {
             throw new HttpException(error.status, error.message, error.messageAr);
         }
 
-        if (!startDate || !endDate) {
-            const error = createBilingualError(400, ErrorMessages.VACATION_DATES_REQUIRED);
-            throw new HttpException(error.status, error.message, error.messageAr);
+        if (startDate || endDate) {
+            if (!startDate || !endDate) {
+                const error = createBilingualError(400, ErrorMessages.VACATION_DATES_REQUIRED);
+                throw new HttpException(error.status, error.message, error.messageAr);
+            }
+
+            const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+            if (!dateRegex.test(startDate as string) || !dateRegex.test(endDate as string)) {
+                const error = createBilingualError(400, ErrorMessages.INVALID_DATE_FORMAT);
+                throw new HttpException(error.status, error.message, error.messageAr);
+            }
+
+            const start = new Date(startDate as string);
+            const end = new Date(endDate as string);
+
+            if (start >= end) {
+                const error = createBilingualError(400, ErrorMessages.INVALID_DATE_RANGE);
+                throw new HttpException(error.status, error.message, error.messageAr);
+            }
         }
 
-        const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-        if (!dateRegex.test(startDate as string) || !dateRegex.test(endDate as string)) {
-            const error = createBilingualError(400, ErrorMessages.INVALID_DATE_FORMAT);
-            throw new HttpException(error.status, error.message, error.messageAr);
-        }
+        const checkResult = await this.appointmentService.checkConflictingAppointments(doctorId, scheduleId as string, startDate as string | undefined, endDate as string | undefined);
 
-        const start = new Date(startDate as string);
-        const end = new Date(endDate as string);
-
-        if (start >= end) {
-            const error = createBilingualError(400, ErrorMessages.INVALID_DATE_RANGE);
-            throw new HttpException(error.status, error.message, error.messageAr);
-        }
-
-        const checkResult = await this.appointmentService.checkDoctorVacation(doctorId, scheduleId as string, startDate as string, endDate as string);
-    
-        const response = createMultiLangMessage(SuccessResponseMessages.VACATION_CHECK_COMPLETED);
+        const response = createMultiLangMessage(SuccessResponseMessages.APPOINTMENTS_CHECK_COMPLETED); 
         res.status(200).json({
             ...response,
             data: checkResult
         });
     })
-
 
     public handleDoctorVacation = catchAsync(async(req: RequestWithUser, res: Response): Promise<void> => {
         const doctorId = req.user.id;
@@ -385,29 +386,6 @@ export class AppointmentController {
         const response = createMultiLangMessage(SuccessResponseMessages.VACATION_SET_SUCCESSFULLY);
         res.status(200).json({
             ...response
-        });
-    })
-
-    public checkScheduleDeletion = catchAsync(async(req: RequestWithUser, res: Response): Promise<void> => {
-        const doctorId = req.user.id;
-        const { scheduleId} = req.query;
-
-        if (!doctorId) {
-            const error = createBilingualError(400, ErrorMessages.DOCTOR_ID_REQUIRED);
-            throw new HttpException(error.status, error.message, error.messageAr);
-        }
-
-        if (!scheduleId) {
-            const error = createBilingualError(400, ErrorMessages.SCHEDULE_ID_REQUIRED);
-            throw new HttpException(error.status, error.message, error.messageAr);
-        }
-
-        const checkResult = await this.appointmentService.checkScheduleDeletion(doctorId, scheduleId as string);
-    
-        const response = createMultiLangMessage(SuccessResponseMessages.DELETION_CHECK_COMPLETED);
-        res.status(200).json({
-            ...response,
-            data: checkResult
         });
     })
 

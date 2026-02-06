@@ -946,9 +946,9 @@ export class AppointmentRoute implements Routes {
         );
 
         this.router.get(
-            `${this.path}/doctor/vacation-check`,
+            `${this.path}/doctor/schedule/check-appointments`,
             /* 
-                #swagger.path = '/appointments/doctor/vacation-check'
+                #swagger.path = '/appointments/doctor/schedule/check-appointments'
                 #swagger.method = 'get'
                 #swagger.tags = ['Appointments']
                 #swagger.parameters['Authorization'] = {
@@ -957,37 +957,37 @@ export class AppointmentRoute implements Routes {
                     required: true,
                     type: 'string'
                 }
-                #swagger.description = 'Check for existing appointments in a proposed vacation period for a specific doctor schedule'
+                #swagger.description = 'Check for existing confirmed appointments in a doctor schedule'
                 #swagger.parameters['scheduleId'] = {
                     in: 'query',
-                    description: 'Schedule ID',
+                    description: 'Schedule ID to check',
                     required: true,
                     type: 'string'
                 }
                 #swagger.parameters['startDate'] = {
                     in: 'query',
-                    description: 'Vacation start date (YYYY-MM-DD)',
-                    required: true,
+                    description: 'Optional for vacation. format: YYYY-MM-DD',
+                    required: false,
                     type: 'string'
                 }
                 #swagger.parameters['endDate'] = {
                     in: 'query',
-                    description: 'Vacation end date (YYYY-MM-DD)',
-                    required: true,
+                    description: 'Optional for vacation. format: YYYY-MM-DD',
+                    required: false,
                     type: 'string'
                 }
                 #swagger.responses[200] = {
-                    description: 'Vacation check completed successfully',
+                    description: 'Check completed successfully',
                     schema: {
                         data: {
                             existing: true,
                             numOfAppointments: 3
                         },
-                        message: 'Vacation check completed successfully'
+                        message: 'Check completed successfully'
                     }
                 }
                 #swagger.responses[400] = {
-                    description: 'Bad request - missing/invalid dates or schedule ID'
+                    description: 'Bad request - missing/invalid parameters'
                 }
                 #swagger.responses[401] = {
                     description: 'Unauthorized - doctor not authenticated'
@@ -1000,7 +1000,7 @@ export class AppointmentRoute implements Routes {
                 }
             */
             AuthMiddleware,
-            this.appointmentController.checkDoctorVacation
+            this.appointmentController.checkConflictingAppointments 
         );
 
         this.router.patch(
@@ -1045,52 +1045,6 @@ export class AppointmentRoute implements Routes {
             AuthMiddleware,
             ValidationMiddleware(HandleDoctorVacationDto),
             this.appointmentController.handleDoctorVacation
-        );
-
-        this.router.get(
-            `${this.path}/doctor/schedule/deletion-check`,
-            /* 
-                #swagger.path = '/appointments/doctor/schedule/deletion-check'
-                #swagger.method = 'get'
-                #swagger.tags = ['Appointments']
-                #swagger.parameters['Authorization'] = {
-                    in: 'cookie',
-                    description: 'Bearer token for authentication (must be a doctor)',
-                    required: true,
-                    type: 'string'
-                }
-                #swagger.description = 'Check if a doctor\'s schedule can be deleted by verifying if there are any existing confirmed appointments associated with it'
-                #swagger.parameters['scheduleId'] = {
-                    in: 'query',
-                    description: 'Schedule ID to check for deletion',
-                    required: true,
-                    type: 'string'
-                }
-                #swagger.responses[200] = {
-                    description: 'Deletion check completed successfully',
-                    schema: {
-                        data: {
-                            existing: true,
-                            numOfAppointments: 2
-                        },
-                        message: 'Deletion check completed successfully'
-                    }
-                }
-                #swagger.responses[400] = {
-                    description: 'Bad request - missing schedule ID or doctor ID'
-                }
-                #swagger.responses[401] = {
-                    description: 'Unauthorized - doctor not authenticated'
-                }
-                #swagger.responses[403] = {
-                    description: 'Forbidden - schedule does not belong to the doctor'
-                }
-                #swagger.responses[404] = {
-                    description: 'Schedule not found'
-                }
-            */
-            AuthMiddleware,
-            this.appointmentController.checkScheduleDeletion
         );
 
         this.router.delete(
