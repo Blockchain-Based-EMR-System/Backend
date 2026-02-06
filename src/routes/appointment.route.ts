@@ -1094,5 +1094,90 @@ export class AppointmentRoute implements Routes {
             AuthMiddleware,
             this.appointmentController.deleteDoctorSchedule
         );
+
+        this.router.get(
+            `${this.path}/doctor/vacation`,
+            /* 
+                #swagger.path = '/appointments/doctor/vacation'
+                #swagger.method = 'get'
+                #swagger.tags = ['Appointments']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication (must be a doctor)',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.description = 'Get all vacation periods for the doctor\'s schedules'
+                #swagger.responses[200] = {
+                    description: 'Doctor vacations retrieved successfully',
+                    schema: {
+                        data: [
+                            {
+                                scheduleId: 'schedule-uuid',
+                                dayOfWeek: 'MONDAY',
+                                isOnline: true,
+                                breakStart: '2026-03-01',
+                                breakEnd: '2026-03-15',
+                                numOfAppointments: 3
+                            }
+                        ],
+                        message: {
+                            en: 'Doctor vacations retrieved successfully',
+                            ar: 'تم استرجاع إجازات الطبيب بنجاح'
+                        }
+                    }
+                }
+                #swagger.responses[400] = {
+                    description: 'Bad request - doctor ID missing'
+                }
+                #swagger.responses[401] = {
+                    description: 'Unauthorized - doctor not authenticated'
+                }
+            */
+            
+            AuthMiddleware,
+            this.appointmentController.getDoctorVacations
+        );
+
+        this.router.patch(
+            `${this.path}/doctor/vacation/clear`,
+            /* 
+                #swagger.path = '/appointments/doctor/vacation/clear'
+                #swagger.method = 'patch'
+                #swagger.tags = ['Appointments']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication (must be a doctor)',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.description = 'Clear a vacation period from a specific doctor schedule'
+                #swagger.parameters['body'] = {
+                    in: 'body',
+                    description: 'Schedule ID to clear vacation from',
+                    required: true,
+                    schema: {
+                        scheduleId: 'schedule-uuid'
+                    }
+                }
+                #swagger.responses[200] = {
+                    description: 'Vacation cleared successfully',
+                }
+                #swagger.responses[400] = {
+                    description: 'Bad request - missing scheduleId, no active vacation, or invalid parameters'
+                }
+                #swagger.responses[401] = {
+                    description: 'Unauthorized - doctor not authenticated'
+                }
+                #swagger.responses[403] = {
+                    description: 'Forbidden - schedule does not belong to the doctor'
+                }
+                #swagger.responses[404] = {
+                    description: 'Schedule not found'
+                }
+            */
+            AuthMiddleware,
+            this.appointmentController.clearDoctorVacation
+        );
     }
 }

@@ -5228,6 +5228,85 @@
             "description": "Schedule not found"
           }
         }
+      },
+      "get": {
+        "tags": [
+          "Appointments"
+        ],
+        "description": "Get all vacation periods for the doctor\\'s schedules",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication (must be a doctor)",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Doctor vacations retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "scheduleId": {
+                        "type": "string",
+                        "example": "schedule-uuid"
+                      },
+                      "dayOfWeek": {
+                        "type": "string",
+                        "example": "MONDAY"
+                      },
+                      "isOnline": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "breakStart": {
+                        "type": "string",
+                        "example": "2026-03-01"
+                      },
+                      "breakEnd": {
+                        "type": "string",
+                        "example": "2026-03-15"
+                      },
+                      "numOfAppointments": {
+                        "type": "number",
+                        "example": 3
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "object",
+                  "properties": {
+                    "en": {
+                      "type": "string",
+                      "example": "Doctor vacations retrieved successfully"
+                    },
+                    "ar": {
+                      "type": "string",
+                      "example": "تم استرجاع إجازات الطبيب بنجاح"
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - doctor ID missing"
+          },
+          "401": {
+            "description": "Unauthorized - doctor not authenticated"
+          }
+        }
       }
     },
     "/appointments/doctor/schedule/delete": {
@@ -5297,6 +5376,55 @@
           },
           "403": {
             "description": "Forbidden - schedule does not belong to the authenticated doctor"
+          },
+          "404": {
+            "description": "Schedule not found"
+          }
+        }
+      }
+    },
+    "/appointments/doctor/vacation/clear": {
+      "patch": {
+        "tags": [
+          "Appointments"
+        ],
+        "description": "Clear a vacation period from a specific doctor schedule",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication (must be a doctor)",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Schedule ID to clear vacation from",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "scheduleId": {
+                  "type": "string",
+                  "example": "schedule-uuid"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vacation cleared successfully"
+          },
+          "400": {
+            "description": "Bad request - missing scheduleId, no active vacation, or invalid parameters"
+          },
+          "401": {
+            "description": "Unauthorized - doctor not authenticated"
+          },
+          "403": {
+            "description": "Forbidden - schedule does not belong to the doctor"
           },
           "404": {
             "description": "Schedule not found"

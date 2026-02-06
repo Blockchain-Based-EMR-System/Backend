@@ -249,7 +249,7 @@ export class AppointmentController {
         });
     });
 
-    public getDoctorSchedule = catchAsync(async(req: RequestWithUser, res: Response): Promise<void> => {
+    public getDoctorSchedule = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
         const doctorId = req.user.id;
 
         if (!doctorId) {
@@ -266,7 +266,7 @@ export class AppointmentController {
 
     });
 
-    public editDoctorSchedule = catchAsync(async(req: RequestWithUser, res: Response): Promise<void> => {
+    public editDoctorSchedule = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
         const doctorId = req.user.id;
 
         if (!doctorId) {
@@ -280,7 +280,7 @@ export class AppointmentController {
         const updates = this.appointmentService.convertKeysToSnakeCase(body);
 
         if (workingDay !== undefined) {
-            updates.day_of_week = this.appointmentService.getDayOfWeek(workingDay); 
+            updates.day_of_week = this.appointmentService.getDayOfWeek(workingDay);
         }
         await this.appointmentService.editDoctorSchedule(doctorId, scheduleId, updates);
         const response = createMultiLangMessage(SuccessResponseMessages.SCHEDULE_UPDATED_SUCCESSFULLY);
@@ -290,7 +290,7 @@ export class AppointmentController {
 
     });
 
-    public getScheduleByDate = catchAsync(async(req: RequestWithUser, res: Response): Promise<void> => {
+    public getScheduleByDate = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
         const doctorId = req.user.id;
         const { date } = req.query;
 
@@ -318,7 +318,7 @@ export class AppointmentController {
         });
     });
 
-    public checkConflictingAppointments = catchAsync(async(req: RequestWithUser, res: Response): Promise<void> => {
+    public checkConflictingAppointments = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
         const doctorId = req.user.id;
         const { scheduleId, startDate, endDate } = req.query;
 
@@ -355,14 +355,14 @@ export class AppointmentController {
 
         const checkResult = await this.appointmentService.checkConflictingAppointments(doctorId, scheduleId as string, startDate as string | undefined, endDate as string | undefined);
 
-        const response = createMultiLangMessage(SuccessResponseMessages.APPOINTMENTS_CHECK_COMPLETED); 
+        const response = createMultiLangMessage(SuccessResponseMessages.APPOINTMENTS_CHECK_COMPLETED);
         res.status(200).json({
             ...response,
             data: checkResult
         });
     })
 
-    public handleDoctorVacation = catchAsync(async(req: RequestWithUser, res: Response): Promise<void> => {
+    public handleDoctorVacation = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
         const doctorId = req.user.id;
         const { scheduleId, startDate, endDate } = req.body;
 
@@ -389,7 +389,7 @@ export class AppointmentController {
         });
     })
 
-    public deleteDoctorSchedule = catchAsync(async(req: RequestWithUser, res: Response): Promise<void> =>{
+    public deleteDoctorSchedule = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
         const doctorId = req.user.id;
         const { scheduleId } = req.body;
 
@@ -405,6 +405,44 @@ export class AppointmentController {
 
         await this.appointmentService.deleteDoctorSchedule(doctorId, scheduleId);
         const response = createMultiLangMessage(SuccessResponseMessages.SCHEDULE_DELETED_SUCCESSFULLY);
+        res.status(200).json({
+            ...response
+        });
+    })
+
+    public getDoctorVacations = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
+        const doctorId = req.user.id;
+
+        if (!doctorId) {
+            const error = createBilingualError(400, ErrorMessages.DOCTOR_ID_REQUIRED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const doctorVacations = await this.appointmentService.getDoctorVacations(doctorId)
+
+        const response = createMultiLangMessage(SuccessResponseMessages.DOCTOR_VACATIONS_RETRIEVED);
+        res.status(200).json({
+            ...response,
+            data: doctorVacations
+        });
+    })
+
+    public clearDoctorVacation = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
+        const doctorId = req.user.id;
+        const { scheduleId } = req.body;
+
+        if (!doctorId) {
+            const error = createBilingualError(400, ErrorMessages.DOCTOR_ID_REQUIRED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        if (!scheduleId) {
+            const error = createBilingualError(400, ErrorMessages.SCHEDULE_ID_REQUIRED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        await this.appointmentService.clearDoctorVacation(doctorId, scheduleId);
+        const response = createMultiLangMessage(SuccessResponseMessages.VACATION_REMOVED_SUCCESSFULLY);
         res.status(200).json({
             ...response
         });

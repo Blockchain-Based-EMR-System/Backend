@@ -205,6 +205,14 @@ export const SuccessResponseMessages = {
         message_en: 'Appointments check completed',
         message_ar: 'تم فحص المواعيد'
     },
+    VACATION_REMOVED_SUCCESSFULLY: {
+        message_en: 'Vacation removed successfully',
+        message_ar: 'تم حذف الإجازة بنجاح',
+    },
+    DOCTOR_VACATIONS_RETRIEVED: {
+        message_en: 'Doctor vacations retrieved successfully',
+        message_ar: 'تم استرجاع إجازات الطبيب بنجاح',
+    }
 }
 
 interface MultiLangMessageObj {

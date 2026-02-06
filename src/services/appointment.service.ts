@@ -5,7 +5,7 @@ import { Service, Container } from 'typedi';
 import { TimeSlot } from '@/interfaces';
 import { HttpException } from "@/exceptions/HttpException";
 import { createBilingualError, ErrorMessages } from '@/utils/errorMessages';
-import { PatientTodayAppointment, DoctorAppointment, DoctorScheduleDay, PatientAppointment, DoctorSchedule, checkExistingAppointments, ConflictingAppointment } from '@/interfaces/appointments.interface';
+import { PatientTodayAppointment, DoctorAppointment, DoctorScheduleDay, PatientAppointment, DoctorSchedule, checkExistingAppointments, ConflictingAppointment, DoctorVacations } from '@/interfaces/appointments.interface';
 import { QueueService } from './queue.service';
 import { start } from 'repl';
 
@@ -724,6 +724,107 @@ export class AppointmentService {
             clinic_address: appointment.clinic?.address || null,
         }));
 
+    }
+
+    public async clearDoctorVacation(doctorId: string, scheduleId: string): Promise<void> {
+        const schedule = await prisma.doctorSchedule.findUnique({
+            where: {
+                id: scheduleId
+            },
+        });
+
+        if (!schedule) {
+            const error = createBilingualError(404, ErrorMessages.SCHEDULE_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        if (schedule.doctor_id !== doctorId) {
+            const error = createBilingualError(403, ErrorMessages.UNAUTHORIZED_SCHEDULE_ACCESS);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        await prisma.doctorSchedule.update({
+            where: {
+                id: scheduleId
+            },
+            data: {
+                is_active: true,
+                break_start: null,
+                break_end: null,
+                modified_at: new Date(),
+            }
+        });
+    }
+
+    public async getDoctorVacations(doctorId: string): Promise<DoctorVacations[]> {
+        const vacations = await prisma.doctorSchedule.findMany({
+            where: {
+                doctor_id: doctorId,
+                is_active: false,
+                break_start: {
+                    not: null,
+                },
+                break_end: {
+                    not: null,
+                },
+                deleted_at: null,
+            },
+            select: {
+                id: true,
+                day_of_week: true,
+                is_online: true,
+                break_start: true,
+                break_end: true
+            },
+            orderBy: [
+                { break_start: 'asc' },
+                { break_end: 'asc' },
+            ],
+        });
+
+        const doctorVacations: DoctorVacations[] = [];
+
+        for (const vacation of vacations) {
+            const breakStartDate = new Date(vacation.break_start);
+            breakStartDate.setUTCHours(0, 0, 0, 0);
+
+            const breakEndDate = new Date(vacation.break_end);
+            breakEndDate.setUTCHours(23, 59, 59, 999);
+
+            const cancelledAppointments = await prisma.appointment.findMany({
+                where: {
+                    doctor_id: doctorId,
+                    status: 'CANCELLED',
+                    cancelled_by: 'DOCTOR',
+                    is_online: vacation.is_online,
+                    scheduled_time: {
+                        gte: breakStartDate,
+                        lte: breakEndDate,
+                    },
+                    deleted_at: {
+                        not: null
+                    }
+                },
+                select: {
+                    scheduled_time: true,
+                }
+            });
+            const filteredCancelled = cancelledAppointments.filter(appointment => {
+                const apptDay = this.getDayOfWeek(appointment.scheduled_time.getUTCDay());
+                return apptDay === vacation.day_of_week;
+            });
+
+            doctorVacations.push({
+                scheduleId: vacation.id,
+                dayOfWeek: vacation.day_of_week,
+                isOnline: vacation.is_online,
+                breakStart: vacation.break_start,   
+                breakEnd: vacation.break_end,
+                numOfAppointments: filteredCancelled.length,
+            });
+        }
+
+        return doctorVacations;
     }
 
     public async getCurrentDoctorSchedule(doctorId: string): Promise<DoctorAppointment[]> {

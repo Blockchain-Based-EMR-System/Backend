@@ -105,3 +105,12 @@ export interface ConflictingAppointment {
   id: string;
   scheduled_time: Date;
 }
+
+export interface DoctorVacations {
+    scheduleId: string;
+    dayOfWeek: DayOfWeek;
+    isOnline: boolean;
+    breakStart: string;
+    breakEnd: string;
+    numOfAppointments: number
+}
