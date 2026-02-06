@@ -1047,10 +1047,56 @@ export class AppointmentRoute implements Routes {
             this.appointmentController.handleDoctorVacation
         );
 
-        this.router.delete(
-            `${this.path}/doctor/schedule/:scheduleId`,
+        this.router.get(
+            `${this.path}/doctor/schedule/deletion-check`,
             /* 
-                #swagger.path = '/appointments/doctor/schedule/{scheduleId}'
+                #swagger.path = '/appointments/doctor/schedule/deletion-check'
+                #swagger.method = 'get'
+                #swagger.tags = ['Appointments']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication (must be a doctor)',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.description = 'Check if a doctor\'s schedule can be deleted by verifying if there are any existing confirmed appointments associated with it'
+                #swagger.parameters['scheduleId'] = {
+                    in: 'query',
+                    description: 'Schedule ID to check for deletion',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.responses[200] = {
+                    description: 'Deletion check completed successfully',
+                    schema: {
+                        data: {
+                            existing: true,
+                            numOfAppointments: 2
+                        },
+                        message: 'Deletion check completed successfully'
+                    }
+                }
+                #swagger.responses[400] = {
+                    description: 'Bad request - missing schedule ID or doctor ID'
+                }
+                #swagger.responses[401] = {
+                    description: 'Unauthorized - doctor not authenticated'
+                }
+                #swagger.responses[403] = {
+                    description: 'Forbidden - schedule does not belong to the doctor'
+                }
+                #swagger.responses[404] = {
+                    description: 'Schedule not found'
+                }
+            */
+            AuthMiddleware,
+            this.appointmentController.checkScheduleDeletion
+        );
+
+        this.router.delete(
+            `${this.path}/doctor/schedule/delete`,
+            /* 
+                #swagger.path = '/appointments/doctor/schedule/delete'
                 #swagger.method = 'delete'
                 #swagger.tags = ['Appointments']
                 #swagger.parameters['Authorization'] = {
@@ -1059,22 +1105,33 @@ export class AppointmentRoute implements Routes {
                     required: true,
                     type: 'string'
                 }
-                #swagger.description = 'Delete a doctor schedule'
-                #swagger.parameters['scheduleId'] = {
-                    in: 'path',
-                    description: 'Schedule ID to delete',
+                #swagger.description = 'Delete a doctor\'s schedule. If there are any appointments linked to this schedule, they will be automatically cancelled'
+                #swagger.parameters['body'] = {
+                    in: 'body',
+                    description: 'Schedule deletion payload',
                     required: true,
-                    type: 'string'
+                    schema: {
+                        scheduleId: 'schedule-uuid'
+                    }
                 }
                 #swagger.responses[200] = {
-                    description: 'Schedule deleted successfully',
+                    description: 'Schedule successfully deleted (any associated confirmed appointments were cancelled)',
+                    schema: {
+                        success: true,
+                        message: {
+                            en: "Schedule deleted successfully",
+                            ar: "تم حذف الجدول بنجاح"
+                        }
                     }
                 }
                 #swagger.responses[400] = {
-                    description: 'Bad request - schedule already deleted or has future appointments'
+                    description: 'Bad request - missing scheduleId in body or invalid request'
                 }
                 #swagger.responses[401] = {
-                    description: 'Unauthorized - doctor not authenticated'
+                    description: 'Unauthorized - missing or invalid token'
+                }
+                #swagger.responses[403] = {
+                    description: 'Forbidden - schedule does not belong to the authenticated doctor'
                 }
                 #swagger.responses[404] = {
                     description: 'Schedule not found'

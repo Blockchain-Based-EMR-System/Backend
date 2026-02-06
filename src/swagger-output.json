@@ -5230,37 +5230,139 @@
         }
       }
     },
-    "/appointments/doctor/schedule/{scheduleId}": {
-      "delete": {
+    "/appointments/doctor/schedule/deletion-check": {
+      "get": {
         "tags": [
           "Appointments"
         ],
-        "description": "Delete a doctor schedule",
+        "description": "Check if a doctor\\'s schedule can be deleted by verifying if there are any existing confirmed appointments associated with it",
         "parameters": [
-          {
-            "name": "scheduleId",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "description": "Schedule ID to delete"
-          },
           {
             "name": "Authorization",
             "in": "cookie",
             "description": "Bearer token for authentication (must be a doctor)",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "scheduleId",
+            "in": "query",
+            "description": "Schedule ID to check for deletion",
+            "required": true,
+            "type": "string"
           }
         ],
         "responses": {
           "200": {
-            "description": "Schedule deleted successfully"
+            "description": "Deletion check completed successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "existing": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "numOfAppointments": {
+                      "type": "number",
+                      "example": 2
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Deletion check completed successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
           },
           "400": {
-            "description": "Bad request - schedule already deleted or has future appointments"
+            "description": "Bad request - missing schedule ID or doctor ID"
           },
           "401": {
             "description": "Unauthorized - doctor not authenticated"
+          },
+          "403": {
+            "description": "Forbidden - schedule does not belong to the doctor"
+          },
+          "404": {
+            "description": "Schedule not found"
+          }
+        }
+      }
+    },
+    "/appointments/doctor/schedule/delete": {
+      "delete": {
+        "tags": [
+          "Appointments"
+        ],
+        "description": "Delete a doctor\\'s schedule. If there are any appointments linked to this schedule, they will be automatically cancelled",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication (must be a doctor)",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Schedule deletion payload",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "scheduleId": {
+                  "type": "string",
+                  "example": "schedule-uuid"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Schedule successfully deleted (any associated confirmed appointments were cancelled)",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "object",
+                  "properties": {
+                    "en": {
+                      "type": "string",
+                      "example": "Schedule deleted successfully"
+                    },
+                    "ar": {
+                      "type": "string",
+                      "example": "تم حذف الجدول بنجاح"
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - missing scheduleId in body or invalid request"
+          },
+          "401": {
+            "description": "Unauthorized - missing or invalid token"
+          },
+          "403": {
+            "description": "Forbidden - schedule does not belong to the authenticated doctor"
           },
           "404": {
             "description": "Schedule not found"

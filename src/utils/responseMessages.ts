@@ -205,6 +205,10 @@ export const SuccessResponseMessages = {
         message_en: 'Vacation check completed',
         message_ar: 'تم فحص الإجازة'
     },
+    DELETION_CHECK_COMPLETED: {
+        message_en: 'Deletion check completed',
+        message_ar: 'تم التحقق من الحذف',
+    },
 
 }
 

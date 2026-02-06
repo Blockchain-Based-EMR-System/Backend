@@ -7,6 +7,7 @@ import { HttpException } from "@/exceptions/HttpException";
 import { createBilingualError, ErrorMessages } from '@/utils/errorMessages';
 import { PatientTodayAppointment, DoctorAppointment, DoctorScheduleDay, PatientAppointment, DoctorSchedule, checkExistingAppointments, ConflictingAppointment } from '@/interfaces/appointments.interface';
 import { QueueService } from './queue.service';
+import { start } from 'repl';
 
 @Service()
 export class AppointmentService {
@@ -903,28 +904,31 @@ export class AppointmentService {
                 modified_at: new Date(),
             },
         });
-        // DONT FORGET LATER --> notify patients
+        // DONT FORGET LATER --> notify patients/ penalty
+    }
+
+    public async checkScheduleDeletion(doctorId: string, scheduleId: string): Promise<checkExistingAppointments> {
+        const conflictingAppointments = await this.getConflictingAppointments(doctorId, scheduleId)
+        return conflictingAppointments.length > 0
+            ? { existing: true, numOfAppointments: conflictingAppointments.length }
+            : { existing: false };
     }
 
     public async deleteDoctorSchedule(doctorId: string, scheduleId: string): Promise<void> {
-        const schedule = await prisma.doctorSchedule.findUnique({
+        const conflictingAppointments = await this.getConflictingAppointments(doctorId, scheduleId)
+        const idsToCancel = conflictingAppointments.map(appointment => appointment.id);
+
+        await prisma.appointment.updateMany({
             where: {
-                id: scheduleId
+                id: { in: idsToCancel },
             },
-            select: {
-                deleted_at: true
-            }
-        })
-
-        if (!schedule) {
-            const error = createBilingualError(404, ErrorMessages.SCHEDULE_NOT_FOUND);
-            throw new HttpException(error.status, error.message, error.messageAr);
-        }
-
-        if (schedule.deleted_at) {
-            const error = createBilingualError(400, ErrorMessages.SCHEDULE_ALREADY_DELETED);
-            throw new HttpException(error.status, error.message, error.messageAr);
-        }
+            data: {
+                status: 'CANCELLED',
+                cancelled_by: 'DOCTOR',
+                deleted_at: new Date(),
+                modified_at: new Date(),
+            },
+        });
 
         await prisma.doctorSchedule.update({
             where: {
@@ -935,10 +939,11 @@ export class AppointmentService {
                 deleted_at: new Date(),
             }
         })
+        // DONT FORGET LATER --> notify patients / penalty
 
     }
 
-    private async getConflictingAppointments(doctorId: string, scheduleId: string, breakStart: string, breakEnd: string): Promise<ConflictingAppointment[]> {
+    private async getConflictingAppointments(doctorId: string, scheduleId: string, breakStart?: string, breakEnd?: string): Promise<ConflictingAppointment[]> {
         const schedule = await prisma.doctorSchedule.findUnique({
             where: {
                 id: scheduleId
@@ -946,8 +951,8 @@ export class AppointmentService {
             select: {
                 doctor_id: true,
                 deleted_at: true,
-                start_time: true,
-                end_time: true
+                is_online: true,
+                day_of_week: true
             }
         });
 
@@ -961,41 +966,53 @@ export class AppointmentService {
             throw new HttpException(error.status, error.message, error.messageAr);
         }
 
-        const vacationStart = new Date(breakStart);
-        vacationStart.setUTCHours(0, 0, 0, 0);
+        let existingAppointments: { id: string; scheduled_time: Date }[];
 
-        const vacationEnd = new Date(breakEnd);
-        vacationEnd.setUTCHours(23, 59, 59, 999);
+        if (breakStart && breakEnd){
+            const vacationStart = new Date(breakStart);
+            vacationStart.setUTCHours(0, 0, 0, 0);
 
-        // convert everything to minutes since midnight
-        // 09:00:00 --> ["09", "00", "00"] --> [9, 0, 0] --> startHour = 9, startMin = 0
-        const [startHour, startMin] = schedule.start_time.split(':').map(Number);
-        const scheduleStartMin = (startHour * 60) + startMin;
+            const vacationEnd = new Date(breakEnd);
+            vacationEnd.setUTCHours(23, 59, 59, 999);
 
-        const [endHour, endMin] = schedule.end_time.split(':').map(Number);
-        const scheduleEndMin = (endHour * 60) + endMin;
-
-        const existingAppointments = await prisma.appointment.findMany({
-            where: {
-                doctor_id: doctorId,
-                scheduled_time: {
-                    gte: vacationStart,
-                    lte: vacationEnd,
+            existingAppointments = await prisma.appointment.findMany({
+                where: {
+                    doctor_id: doctorId,
+                    status: 'CONFIRMED',
+                    deleted_at: null,
+                    is_online: schedule.is_online,
+                    scheduled_time: {
+                        gte: vacationStart,
+                        lte: vacationEnd,
+                    }
                 },
-                status: 'CONFIRMED',
-                deleted_at: null,
-            },
-            select: {
-                id: true,
-                scheduled_time: true
-            }
-        });
+                select: {
+                    id: true,
+                    scheduled_time: true
+                }
+            });
+        }
+        else {
+            existingAppointments = await prisma.appointment.findMany({
+                where: {
+                    doctor_id: doctorId,
+                    status: 'CONFIRMED',
+                    deleted_at: null,
+                    is_online: schedule.is_online,
+                },
+                select: {
+                    id: true,
+                    scheduled_time: true
+                }
+            });
+        }
+        
+        const confilctingAppointments = existingAppointments.filter((appointment) => {
+            const apptDay = this.getDayOfWeek(appointment.scheduled_time.getUTCDay());
+            return apptDay === schedule.day_of_week;
 
-        return existingAppointments.filter(appointment => {
-            const apptMin = appointment.scheduled_time.getUTCHours() * 60 + appointment.scheduled_time.getUTCMinutes();
-            return apptMin >= scheduleStartMin && apptMin < scheduleEndMin;
-        });
-
+        })
+        return confilctingAppointments;   
     }
 
     private generateTimeSlots(startTime: string, endTime: string, slotDuration: number, bufferTime: number, isOnline: boolean): Omit<TimeSlot, 'available'>[] {

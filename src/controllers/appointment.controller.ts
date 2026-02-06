@@ -388,9 +388,32 @@ export class AppointmentController {
         });
     })
 
+    public checkScheduleDeletion = catchAsync(async(req: RequestWithUser, res: Response): Promise<void> => {
+        const doctorId = req.user.id;
+        const { scheduleId} = req.query;
+
+        if (!doctorId) {
+            const error = createBilingualError(400, ErrorMessages.DOCTOR_ID_REQUIRED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        if (!scheduleId) {
+            const error = createBilingualError(400, ErrorMessages.SCHEDULE_ID_REQUIRED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const checkResult = await this.appointmentService.checkScheduleDeletion(doctorId, scheduleId as string);
+    
+        const response = createMultiLangMessage(SuccessResponseMessages.DELETION_CHECK_COMPLETED);
+        res.status(200).json({
+            ...response,
+            data: checkResult
+        });
+    })
+
     public deleteDoctorSchedule = catchAsync(async(req: RequestWithUser, res: Response): Promise<void> =>{
         const doctorId = req.user.id;
-        const { scheduleId } = req.params;
+        const { scheduleId } = req.body;
 
         if (!doctorId) {
             const error = createBilingualError(400, ErrorMessages.DOCTOR_ID_REQUIRED);
