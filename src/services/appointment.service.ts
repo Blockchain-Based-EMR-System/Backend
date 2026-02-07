@@ -5,7 +5,7 @@ import { Service, Container } from 'typedi';
 import { TimeSlot } from '@/interfaces';
 import { HttpException } from "@/exceptions/HttpException";
 import { createBilingualError, ErrorMessages } from '@/utils/errorMessages';
-import { PatientTodayAppointment, DoctorAppointment, DoctorScheduleDay, PatientAppointment, DoctorSchedule, checkExistingAppointments, ConflictingAppointment, DoctorVacations } from '@/interfaces/appointments.interface';
+import { PatientTodayAppointment, DoctorAppointment, DoctorScheduleDay, PatientAppointment, DoctorSchedule, checkExistingAppointments, ConflictingAppointment, DoctorVacations, Vacations } from '@/interfaces/appointments.interface';
 import { QueueService } from './queue.service';
 import { start } from 'repl';
 
@@ -509,6 +509,16 @@ export class AppointmentService {
                 const error = createBilingualError(403, ErrorMessages.DOCTOR_NOT_ASSOCIATED_WITH_CLINIC);
                 throw new HttpException(error.status, error.message, error.messageAr);
             }
+
+            if (isOnline) {
+                const error = createBilingualError(403, ErrorMessages.EITHER_ONLINE_OR_OFFLINE);
+                throw new HttpException(error.status, error.message, error.messageAr);
+            }
+        }
+
+        if (!clinicId && !isOnline) {
+            const error = createBilingualError(403, ErrorMessages.EITHER_ONLINE_OR_OFFLINE);
+            throw new HttpException(error.status, error.message, error.messageAr);
         }
 
         const startMinutes = this.timeStringToMinutes(startTime);
@@ -520,12 +530,70 @@ export class AppointmentService {
             throw new HttpException(error.status, error.message, error.messageAr);
         }
 
+        // prevent time overlap in the same clinic (on different days)
+        if (clinicId) {
+            const overlappingClinics = await prisma.doctorSchedule.findMany({
+                where: {
+                    doctor_id: doctorId,
+                    clinic_id: { not: clinicId },
+                    day_of_week: dayOfWeek,
+                    deleted_at: null
+                },
+                select: {
+                    start_time: true,
+                    end_time: true,
+                }
+            });
+
+            for (const schedule of overlappingClinics) {
+                const existingStartMins = this.timeStringToMinutes(schedule.start_time);
+                const existingEndMins = this.timeStringToMinutes(schedule.end_time);
+
+                const hasTimeOverlap = (startMinutes < existingEndMins && endMinutes > existingStartMins);
+                if (hasTimeOverlap) {
+                    const error = createBilingualError(400, ErrorMessages.SCHEDULE_CONFLICT_DIFFERENT_CLINIC);
+                    throw new HttpException(error.status, error.message, error.messageAr);
+                }
+            }
+        }
+
+        const sameDaySchedules = await prisma.doctorSchedule.findMany({
+            where: {
+                doctor_id: doctorId,
+                day_of_week: dayOfWeek,
+                deleted_at: null
+            },
+            select: {
+                start_time: true,
+                end_time: true,
+                is_online: true,
+                clinic_id: true,
+            }
+        });
+
+        for (const schedule of sameDaySchedules) {
+            if (schedule.is_online === isOnline) {
+                continue;
+            }
+
+            const existingStartMinutes = this.timeStringToMinutes(schedule.start_time);
+            const existingEndMinutes = this.timeStringToMinutes(schedule.end_time);
+
+            const hasTimeOverlap = (startMinutes < existingEndMinutes && endMinutes > existingStartMinutes);
+
+            if (hasTimeOverlap) {
+                const error = createBilingualError(400, ErrorMessages.ONLINE_OFFLINE_CONFLICT);
+                throw new HttpException(error.status, error.message, error.messageAr);
+            }
+        }
+
+
         const existingSchedule = await prisma.doctorSchedule.findFirst({
             where: {
                 doctor_id: doctorId,
                 clinic_id: clinicId,
                 day_of_week: dayOfWeek,
-                deleted_at: null
+                deleted_at: null,
             }
         });
 
@@ -726,9 +794,10 @@ export class AppointmentService {
 
     }
 
-    public async clearDoctorVacation(doctorId: string, scheduleId: string): Promise<void> {
+    public async cancelDoctorVacation(doctorId: string, vacationId: string, scheduleId: string): Promise<void> {
         const schedule = await prisma.doctorSchedule.findUnique({
             where: {
+                doctor_id: doctorId,
                 id: scheduleId
             },
         });
@@ -754,10 +823,20 @@ export class AppointmentService {
                 modified_at: new Date(),
             }
         });
+
+        await prisma.vacation.update({
+            where: {
+                id: vacationId
+            },
+            data: {
+                deleted_at: new Date(),
+                status: 'ENDED',
+            }
+        });
     }
 
     public async getDoctorVacations(doctorId: string): Promise<DoctorVacations[]> {
-        const vacations = await prisma.doctorSchedule.findMany({
+        const inActiveSchedules = await prisma.doctorSchedule.findMany({
             where: {
                 doctor_id: doctorId,
                 is_active: false,
@@ -776,54 +855,107 @@ export class AppointmentService {
                 break_start: true,
                 break_end: true
             },
-            orderBy: [
-                { break_start: 'asc' },
-                { break_end: 'asc' },
-            ],
+            orderBy: {
+                break_start: 'asc'
+            }
         });
+
+        const vacationGroupsMap = new Map<string, typeof inActiveSchedules>();
+        for (const schedule of inActiveSchedules) {
+            const key = `${schedule.break_start}_${schedule.break_end}`;
+            if (!vacationGroupsMap.has(key)) {
+                vacationGroupsMap.set(key, []);
+            }
+            vacationGroupsMap.get(key)!.push(schedule);
+        }
+
 
         const doctorVacations: DoctorVacations[] = [];
 
-        for (const vacation of vacations) {
-            const breakStartDate = new Date(vacation.break_start);
-            breakStartDate.setUTCHours(0, 0, 0, 0);
+        for (const [key, schedules] of vacationGroupsMap.entries()) {
+            const representativeSchedule = schedules[0];
+            const allVacations: Vacations[] = [];
 
-            const breakEndDate = new Date(vacation.break_end);
-            breakEndDate.setUTCHours(23, 59, 59, 999);
-
-            const cancelledAppointments = await prisma.appointment.findMany({
+            const vacations = await prisma.vacation.findMany({
                 where: {
                     doctor_id: doctorId,
-                    status: 'CANCELLED',
-                    cancelled_by: 'DOCTOR',
-                    is_online: vacation.is_online,
-                    scheduled_time: {
-                        gte: breakStartDate,
-                        lte: breakEndDate,
-                    },
-                    deleted_at: {
-                        not: null
-                    }
+                    start_date: representativeSchedule.break_start,
+                    end_date: representativeSchedule.break_end,
+                    deleted_at: null,
                 },
                 select: {
-                    scheduled_time: true,
+                    id: true,
+                    doctor_id: true,
+                    schedule_id: true,
+                    start_date: true,
+                    end_date: true,
+                    status: true,
+                    schedule: {
+                        select: {
+                            is_online: true,
+                            day_of_week: true,
+                            clinic_id: true,
+                            clinic: {
+                                select: {
+                                    name: true,
+                                    address: true,
+                                }
+                            }
+                        }
+                    }
                 }
             });
-            const filteredCancelled = cancelledAppointments.filter(appointment => {
-                const apptDay = this.getDayOfWeek(appointment.scheduled_time.getUTCDay());
-                return apptDay === vacation.day_of_week;
-            });
+
+            for (const vacation of vacations) {
+                const breakStartDate = new Date(vacation.start_date);
+                breakStartDate.setUTCHours(0, 0, 0, 0);
+
+                const breakEndDate = new Date(vacation.end_date);
+                breakEndDate.setUTCHours(23, 59, 59, 999);
+
+                const cancelledAppointments = await prisma.appointment.findMany({
+                    where: {
+                        doctor_id: doctorId,
+                        status: 'CANCELLED',
+                        cancelled_by: 'DOCTOR',
+                        is_online: vacation.schedule.is_online,
+                        scheduled_time: {
+                            gte: breakStartDate,
+                            lte: breakEndDate,
+                        },
+                        deleted_at: {
+                            not: null
+                        }
+                    },
+                    select: {
+                        scheduled_time: true,
+                    }
+                });
+                const filteredCancelled = cancelledAppointments.filter(appointment => {
+                    const apptDay = this.getDayOfWeek(appointment.scheduled_time.getUTCDay());
+                    return apptDay === vacation.schedule.day_of_week;
+                });
+
+                allVacations.push({
+                    vacationId: vacation.id,
+                    scheduleId: vacation.schedule_id,
+                    clinicId: vacation.schedule.clinic_id,
+                    clinicName: vacation.schedule.clinic?.name || null,
+                    clinicAddress: vacation.schedule.clinic?.address || null,
+                    dayOfWeek: vacation.schedule.day_of_week,
+                    isOnline: vacation.schedule.is_online,
+                    status: vacation.status,
+                    cancelledAppointments: filteredCancelled.length,
+                })
+            }
 
             doctorVacations.push({
-                scheduleId: vacation.id,
-                dayOfWeek: vacation.day_of_week,
-                isOnline: vacation.is_online,
-                breakStart: vacation.break_start,   
-                breakEnd: vacation.break_end,
-                numOfAppointments: filteredCancelled.length,
+                breakStart: representativeSchedule.break_start,
+                breakEnd: representativeSchedule.break_end,
+                vacations: allVacations
             });
-        }
 
+        }
         return doctorVacations;
     }
 
@@ -1006,6 +1138,16 @@ export class AppointmentService {
                 modified_at: new Date(),
             },
         });
+
+        await prisma.vacation.create({
+            data: {
+                doctor_id: doctorId,
+                schedule_id: scheduleId,
+                start_date: breakStart,
+                end_date: breakEnd,
+            }
+
+        })
         // DONT FORGET LATER --> notify patients/ penalty
     }
 

@@ -5233,7 +5233,7 @@
         "tags": [
           "Appointments"
         ],
-        "description": "Get all vacation periods for the doctor\\'s schedules",
+        "description": "Get all vacation periods for the doctor, grouped by schedule with details including affected appointments",
         "parameters": [
           {
             "name": "Authorization",
@@ -5254,18 +5254,6 @@
                   "items": {
                     "type": "object",
                     "properties": {
-                      "scheduleId": {
-                        "type": "string",
-                        "example": "schedule-uuid"
-                      },
-                      "dayOfWeek": {
-                        "type": "string",
-                        "example": "MONDAY"
-                      },
-                      "isOnline": {
-                        "type": "boolean",
-                        "example": true
-                      },
                       "breakStart": {
                         "type": "string",
                         "example": "2026-03-01"
@@ -5274,9 +5262,40 @@
                         "type": "string",
                         "example": "2026-03-15"
                       },
-                      "numOfAppointments": {
-                        "type": "number",
-                        "example": 3
+                      "vacations": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "vacationId": {
+                              "type": "string",
+                              "example": "vacation-uuid-2"
+                            },
+                            "scheduleId": {
+                              "type": "string",
+                              "example": "schedule-uuid-2"
+                            },
+                            "clinicId": {},
+                            "clinicName": {},
+                            "clinicAddress": {},
+                            "dayOfWeek": {
+                              "type": "string",
+                              "example": "WEDNESDAY"
+                            },
+                            "isOnline": {
+                              "type": "boolean",
+                              "example": true
+                            },
+                            "status": {
+                              "type": "string",
+                              "example": "ACTIVE"
+                            },
+                            "cancelledAppointments": {
+                              "type": "number",
+                              "example": 2
+                            }
+                          }
+                        }
                       }
                     }
                   }
@@ -5286,7 +5305,7 @@
                   "properties": {
                     "en": {
                       "type": "string",
-                      "example": "Doctor vacations retrieved successfully"
+                      "example": "Doctor's vacations retrieved successfully"
                     },
                     "ar": {
                       "type": "string",
@@ -5301,7 +5320,7 @@
             }
           },
           "400": {
-            "description": "Bad request - doctor ID missing"
+            "description": "Bad request - doctor ID missing or invalid"
           },
           "401": {
             "description": "Unauthorized - doctor not authenticated"
@@ -5383,12 +5402,12 @@
         }
       }
     },
-    "/appointments/doctor/vacation/clear": {
+    "/appointments/doctor/vacation/cancel": {
       "patch": {
         "tags": [
           "Appointments"
         ],
-        "description": "Clear a vacation period from a specific doctor schedule",
+        "description": "Cancel a specific vacation period for a doctor schedule",
         "parameters": [
           {
             "name": "Authorization",
@@ -5400,11 +5419,15 @@
           {
             "name": "body",
             "in": "body",
-            "description": "Schedule ID to clear vacation from",
+            "description": "Vacation cancellation details",
             "required": true,
             "schema": {
               "type": "object",
               "properties": {
+                "vacationId": {
+                  "type": "string",
+                  "example": "vacation-uuid"
+                },
                 "scheduleId": {
                   "type": "string",
                   "example": "schedule-uuid"
@@ -5415,19 +5438,19 @@
         ],
         "responses": {
           "200": {
-            "description": "Vacation cleared successfully"
+            "description": "Vacation removed successfully"
           },
           "400": {
-            "description": "Bad request - missing scheduleId, no active vacation, or invalid parameters"
+            "description": "Bad request - missing vacationId or scheduleId, or invalid parameters"
           },
           "401": {
             "description": "Unauthorized - doctor not authenticated"
           },
           "403": {
-            "description": "Forbidden - schedule does not belong to the doctor"
+            "description": "Forbidden - vacation or schedule does not belong to the doctor"
           },
           "404": {
-            "description": "Schedule not found"
+            "description": "Vacation or schedule not found"
           }
         }
       }

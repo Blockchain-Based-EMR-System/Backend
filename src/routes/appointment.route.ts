@@ -1107,42 +1107,61 @@ export class AppointmentRoute implements Routes {
                     required: true,
                     type: 'string'
                 }
-                #swagger.description = 'Get all vacation periods for the doctor\'s schedules'
+                #swagger.description = 'Get all vacation periods for the doctor, grouped by schedule with details including affected appointments'
                 #swagger.responses[200] = {
                     description: 'Doctor vacations retrieved successfully',
                     schema: {
                         data: [
                             {
-                                scheduleId: 'schedule-uuid',
-                                dayOfWeek: 'MONDAY',
-                                isOnline: true,
                                 breakStart: '2026-03-01',
                                 breakEnd: '2026-03-15',
-                                numOfAppointments: 3
+                                vacations: [
+                                    {
+                                        vacationId: 'vacation-uuid',
+                                        scheduleId: 'schedule-uuid',
+                                        clinicId: 'clinic-uuid',
+                                        clinicName: 'New Cairo Medical Clinic',
+                                        clinicAddress: '123 Main Street, Medical Park',
+                                        dayOfWeek: 'MONDAY',
+                                        isOnline: false,
+                                        status: 'ACTIVE',
+                                        cancelledAppointments: 5
+                                    },
+                                    {
+                                        vacationId: 'vacation-uuid-2',
+                                        scheduleId: 'schedule-uuid-2',
+                                        clinicId: null,
+                                        clinicName: null,
+                                        clinicAddress: null,
+                                        dayOfWeek: 'WEDNESDAY',
+                                        isOnline: true,
+                                        status: 'ACTIVE',
+                                        cancelledAppointments: 2
+                                    }
+                                ]
                             }
                         ],
                         message: {
-                            en: 'Doctor vacations retrieved successfully',
-                            ar: 'تم استرجاع إجازات الطبيب بنجاح'
+                            en: "Doctor's vacations retrieved successfully",
+                            ar: "تم استرجاع إجازات الطبيب بنجاح"
                         }
                     }
                 }
                 #swagger.responses[400] = {
-                    description: 'Bad request - doctor ID missing'
+                    description: 'Bad request - doctor ID missing or invalid'
                 }
                 #swagger.responses[401] = {
                     description: 'Unauthorized - doctor not authenticated'
                 }
             */
-            
             AuthMiddleware,
             this.appointmentController.getDoctorVacations
         );
 
         this.router.patch(
-            `${this.path}/doctor/vacation/clear`,
+            `${this.path}/doctor/vacation/cancel`,
             /* 
-                #swagger.path = '/appointments/doctor/vacation/clear'
+                #swagger.path = '/appointments/doctor/vacation/cancel'
                 #swagger.method = 'patch'
                 #swagger.tags = ['Appointments']
                 #swagger.parameters['Authorization'] = {
@@ -1151,33 +1170,34 @@ export class AppointmentRoute implements Routes {
                     required: true,
                     type: 'string'
                 }
-                #swagger.description = 'Clear a vacation period from a specific doctor schedule'
+                #swagger.description = 'Cancel a specific vacation period for a doctor schedule'
                 #swagger.parameters['body'] = {
                     in: 'body',
-                    description: 'Schedule ID to clear vacation from',
+                    description: 'Vacation cancellation details',
                     required: true,
                     schema: {
+                        vacationId: 'vacation-uuid',
                         scheduleId: 'schedule-uuid'
                     }
                 }
                 #swagger.responses[200] = {
-                    description: 'Vacation cleared successfully',
+                    description: 'Vacation removed successfully',
                 }
                 #swagger.responses[400] = {
-                    description: 'Bad request - missing scheduleId, no active vacation, or invalid parameters'
+                    description: 'Bad request - missing vacationId or scheduleId, or invalid parameters'
                 }
                 #swagger.responses[401] = {
                     description: 'Unauthorized - doctor not authenticated'
                 }
                 #swagger.responses[403] = {
-                    description: 'Forbidden - schedule does not belong to the doctor'
+                    description: 'Forbidden - vacation or schedule does not belong to the doctor'
                 }
                 #swagger.responses[404] = {
-                    description: 'Schedule not found'
+                    description: 'Vacation or schedule not found'
                 }
             */
             AuthMiddleware,
-            this.appointmentController.clearDoctorVacation
+            this.appointmentController.cancelDoctorVacation
         );
     }
 }
