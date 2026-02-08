@@ -3660,15 +3660,6 @@
           "Appointments"
         ],
         "description": "Get all available online doctors",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "cookie",
-            "description": "Bearer token for authentication",
-            "required": true,
-            "type": "string"
-          }
-        ],
         "responses": {
           "200": {
             "description": "Online doctors retrieved successfully",
@@ -3710,15 +3701,6 @@
           "Appointments"
         ],
         "description": "Get all clinics available for booking appointments",
-        "parameters": [
-          {
-            "name": "Authorization",
-            "in": "cookie",
-            "description": "Bearer token for authentication",
-            "required": true,
-            "type": "string"
-          }
-        ],
         "responses": {
           "200": {
             "description": "Active clinics retrieved successfully",
@@ -3791,13 +3773,6 @@
             "required": true,
             "type": "string",
             "description": "Clinic ID"
-          },
-          {
-            "name": "Authorization",
-            "in": "cookie",
-            "description": "Bearer token for authentication",
-            "required": true,
-            "type": "string"
           }
         ],
         "responses": {
@@ -3850,13 +3825,6 @@
             "description": "Doctor ID"
           },
           {
-            "name": "Authorization",
-            "in": "cookie",
-            "description": "Bearer token for authentication",
-            "required": true,
-            "type": "string"
-          },
-          {
             "name": "clinicId",
             "in": "query",
             "description": "Clinic ID (required for offline appointments)",
@@ -3902,9 +3870,6 @@
           },
           "400": {
             "description": "Bad request - missing doctor ID or invalid parameters"
-          },
-          "401": {
-            "description": "Unauthorized - user not authenticated"
           }
         }
       }
@@ -3922,13 +3887,6 @@
             "required": true,
             "type": "string",
             "description": "Doctor ID"
-          },
-          {
-            "name": "Authorization",
-            "in": "cookie",
-            "description": "Bearer token for authentication",
-            "required": true,
-            "type": "string"
           },
           {
             "name": "date",
@@ -3987,9 +3945,6 @@
           },
           "400": {
             "description": "Bad request - missing date, invalid format, or past date"
-          },
-          "401": {
-            "description": "Unauthorized - user not authenticated"
           }
         }
       }

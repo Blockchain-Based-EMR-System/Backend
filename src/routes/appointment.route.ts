@@ -25,12 +25,6 @@ export class AppointmentRoute implements Routes {
                 #swagger.path = '/appointments/online-doctors'
                 #swagger.method = 'get'
                 #swagger.tags = ['Appointments']
-                #swagger.parameters['Authorization'] = {
-                    in: 'cookie',
-                    description: 'Bearer token for authentication',
-                    required: true,
-                    type: 'string'
-                }
                 #swagger.description = 'Get all available online doctors'
                 #swagger.responses[200] = {
                     description: 'Online doctors retrieved successfully',
@@ -45,7 +39,6 @@ export class AppointmentRoute implements Routes {
                     }
                 }
             */
-            AuthMiddleware,
             this.doctorController.getOnlineDoctors
         );
 
@@ -56,12 +49,6 @@ export class AppointmentRoute implements Routes {
                 #swagger.path = '/appointments/clinics'
                 #swagger.method = 'get'
                 #swagger.tags = ['Appointments']
-                #swagger.parameters['Authorization'] = {
-                    in: 'cookie',
-                    description: 'Bearer token for authentication',
-                    required: true,
-                    type: 'string'
-                }
                 #swagger.description = 'Get all clinics available for booking appointments'
                 #swagger.responses[200] = {
                     description: 'Active clinics retrieved successfully',
@@ -82,7 +69,6 @@ export class AppointmentRoute implements Routes {
                     }
                 }
             */
-            AuthMiddleware,
             this.clinicController.getActiveClinics
         );
 
@@ -93,12 +79,6 @@ export class AppointmentRoute implements Routes {
                 #swagger.path = '/appointments/clinic/{clinicId}/doctors'
                 #swagger.method = 'get'
                 #swagger.tags = ['Appointments']
-                #swagger.parameters['Authorization'] = {
-                    in: 'cookie',
-                    description: 'Bearer token for authentication',
-                    required: true,
-                    type: 'string'
-                }
                 #swagger.description = 'Get all doctors who are accepting appointments at a selected clinic'
                 #swagger.parameters['clinicId'] = {
                     in: 'path',
@@ -119,7 +99,6 @@ export class AppointmentRoute implements Routes {
                     }
                 }
             */
-            AuthMiddleware,
             this.clinicController.getClinicDoctors
         );
 
@@ -130,12 +109,6 @@ export class AppointmentRoute implements Routes {
                 #swagger.path = '/appointments/doctor/{doctorId}/available-days'
                 #swagger.method = 'get'
                 #swagger.tags = ['Appointments']
-                #swagger.parameters['Authorization'] = {
-                    in: 'cookie',
-                    description: 'Bearer token for authentication',
-                    required: true,
-                    type: 'string'
-                }
                 #swagger.description = 'Get available days for booking with a specific doctor (up to 30 days ahead)'
                 #swagger.parameters['doctorId'] = {
                     in: 'path',
@@ -165,11 +138,7 @@ export class AppointmentRoute implements Routes {
                 #swagger.responses[400] = {
                     description: 'Bad request - missing doctor ID or invalid parameters'
                 }
-                #swagger.responses[401] = {
-                    description: 'Unauthorized - user not authenticated'
-                }
             */
-            AuthMiddleware,
             this.appointmentController.getAvailableDays
         );
 
@@ -180,12 +149,6 @@ export class AppointmentRoute implements Routes {
                 #swagger.path = '/appointments/doctor/{doctorId}/available-slots'
                 #swagger.method = 'get'
                 #swagger.tags = ['Appointments']
-                #swagger.parameters['Authorization'] = {
-                    in: 'cookie',
-                    description: 'Bearer token for authentication',
-                    required: true,
-                    type: 'string'
-                }
                 #swagger.description = 'Get available time slots for a specific doctor on a given date'
                 #swagger.parameters['doctorId'] = {
                     in: 'path',
@@ -228,11 +191,7 @@ export class AppointmentRoute implements Routes {
                 #swagger.responses[400] = {
                     description: 'Bad request - missing date, invalid format, or past date'
                 }
-                #swagger.responses[401] = {
-                    description: 'Unauthorized - user not authenticated'
-                }
             */
-            AuthMiddleware,
             this.appointmentController.getAvailableSlots
         );
 

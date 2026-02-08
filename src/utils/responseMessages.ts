@@ -181,7 +181,7 @@ export const SuccessResponseMessages = {
         message_en: "Queue position retrieved successfully.",
         message_ar: "تم استرجاع موقعك في قائمة الانتظار بنجاح.",
     },
-     SCHEDULE_CREATED_SUCCESSFULLY: {
+    SCHEDULE_CREATED_SUCCESSFULLY: {
         message_en: 'Schedule created successfully',
         message_ar: 'تم إنشاء الجدول بنجاح'
     },
@@ -212,7 +212,11 @@ export const SuccessResponseMessages = {
     DOCTOR_VACATIONS_RETRIEVED: {
         message_en: 'Doctor vacations retrieved successfully',
         message_ar: 'تم استرجاع إجازات الطبيب بنجاح',
-    }
+    },
+    DOCTORS_RETRIEVED_SUCCESSFULLY: {
+        message_en: 'Online doctors retrieved successfully',
+        message_ar: 'تم استرجاع الأطباء المتاحين عبر الإنترنت بنجاح',
+    },
 }
 
 interface MultiLangMessageObj {
