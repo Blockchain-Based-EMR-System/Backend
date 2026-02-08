@@ -5,7 +5,7 @@ import { Service, Container } from 'typedi';
 @Service()
 export class VacationCronService {
 
-    private static async runScheduledTasks() {        
+    private static async runScheduledTasks() {
         try {
             await this.updateVacationStatuses();
             await this.reactivateEndedSchedules();
@@ -15,22 +15,16 @@ export class VacationCronService {
     }
 
     static startCronJobs() {
+        // run every min
+        cron.schedule('* * * * *', async () => {
+            await this.runScheduledTasks();
+        });
         // run every hour
         // cron.schedule('0 * * * *', async () => {
         //     await this.runScheduledTasks();
         // });
 
-        // run at midnight
-        cron.schedule('0 0 * * *', async () => {
-            console.log('[Cron] Running midnight status update');
-            await this.runScheduledTasks();
-        });
-
         this.runScheduledTasks();
-    }
-
-    static async runManually() {
-        return await this.runScheduledTasks();
     }
 
     private static async updateVacationStatuses() {
@@ -81,7 +75,7 @@ export class VacationCronService {
                     is_active: false,
                     break_end: {
                         not: null,
-                        lte: today, 
+                        lte: today,
                     },
                 },
                 include: {
@@ -106,10 +100,10 @@ export class VacationCronService {
                 });
 
                 await prisma.vacation.updateMany({
-                    where: { 
+                    where: {
                         schedule_id: schedule.id,
                         status: 'ENDED',
-                        deleted_at: null, 
+                        deleted_at: null,
                     },
                     data: {
                         deleted_at: new Date()
@@ -117,7 +111,7 @@ export class VacationCronService {
                 });
 
             }
-        } 
+        }
         catch (e) {
             console.error('schedule eeactivation error]', e);
             throw e;
