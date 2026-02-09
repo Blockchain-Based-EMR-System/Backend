@@ -34,3 +34,14 @@ export interface ClinicDoctor {
   clinic: Clinic;
   doctor: Doctor;
 }
+
+export interface DoctorClinics {
+  id: string;
+  name: string;
+  phone: string;
+  canPayOnline: boolean;
+  opening_at: string;
+  closing_at: string;
+  address: string;
+  address_maps_link: string
+}

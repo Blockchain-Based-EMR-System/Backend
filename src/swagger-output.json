@@ -3654,15 +3654,45 @@
         }
       }
     },
-    "/appointments/online-doctors": {
+    "/appointments/doctors": {
       "get": {
         "tags": [
           "Appointments"
         ],
-        "description": "Get all available online doctors",
+        "description": "Get all doctors available for booking appointments",
+        "parameters": [
+          {
+            "name": "gender",
+            "in": "query",
+            "description": "Filter doctors by gender (MALE or FEMALE)",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "minFees",
+            "in": "query",
+            "description": "Minimum fees filter",
+            "required": false,
+            "type": "number"
+          },
+          {
+            "name": "maxFees",
+            "in": "query",
+            "description": "Maximum fees filter",
+            "required": false,
+            "type": "number"
+          },
+          {
+            "name": "isOnline",
+            "in": "query",
+            "description": "Filter for online availability (true for online, false for offline)",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
         "responses": {
           "200": {
-            "description": "Online doctors retrieved successfully",
+            "description": "Doctors retrieved successfully",
             "schema": {
               "type": "object",
               "properties": {
@@ -3677,20 +3707,87 @@
                       },
                       "name": {
                         "type": "string",
-                        "example": "House"
+                        "example": "John Doe"
+                      },
+                      "gender": {
+                        "type": "string",
+                        "example": "MALE"
+                      },
+                      "age": {
+                        "type": "number",
+                        "example": 45
+                      },
+                      "specialization": {
+                        "type": "string",
+                        "example": "IMMUNOLOGY"
+                      },
+                      "phone": {
+                        "type": "string",
+                        "example": "+1234567890"
+                      },
+                      "fees": {
+                        "type": "number",
+                        "example": 200
+                      },
+                      "clinics": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "example": "clinic-uuid"
+                            },
+                            "name": {
+                              "type": "string",
+                              "example": "New Cairo Medical Clinic"
+                            },
+                            "phone": {
+                              "type": "string",
+                              "example": "+1234567890"
+                            },
+                            "canPayOnline": {
+                              "type": "boolean",
+                              "example": true
+                            },
+                            "opening_at": {
+                              "type": "string",
+                              "example": "09:00"
+                            },
+                            "closing_at": {
+                              "type": "string",
+                              "example": "17:00"
+                            },
+                            "address": {
+                              "type": "string",
+                              "example": "123 Main Street, Medical Park"
+                            },
+                            "address_maps_link": {
+                              "type": "string",
+                              "example": "https://maps.google.com/?q=123+Main+Street"
+                            }
+                          }
+                        }
                       }
                     }
                   }
                 },
-                "message": {
+                "messageEn": {
                   "type": "string",
-                  "example": "Online doctors retrieved successfully"
+                  "example": "Doctors retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع الأطباء بنجاح"
                 }
               },
               "xml": {
                 "name": "main"
               }
             }
+          },
+          "400": {
+            "description": "Bad request"
           }
         }
       }
@@ -3701,6 +3798,15 @@
           "Appointments"
         ],
         "description": "Get all clinics available for booking appointments",
+        "parameters": [
+          {
+            "name": "canPayOnline",
+            "in": "query",
+            "description": "Filter clinics by online payment availability",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Active clinics retrieved successfully",
@@ -3765,7 +3871,7 @@
         "tags": [
           "Appointments"
         ],
-        "description": "Get all doctors who are accepting appointments at a selected clinic",
+        "description": "Get all doctors in a specific clinic",
         "parameters": [
           {
             "name": "clinicId",
@@ -3773,6 +3879,27 @@
             "required": true,
             "type": "string",
             "description": "Clinic ID"
+          },
+          {
+            "name": "gender",
+            "in": "query",
+            "description": "Filter doctors by gender (MALE or FEMALE)",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "minFees",
+            "in": "query",
+            "description": "Minimum fees filter",
+            "required": false,
+            "type": "number"
+          },
+          {
+            "name": "maxFees",
+            "in": "query",
+            "description": "Maximum fees filter",
+            "required": false,
+            "type": "number"
           }
         ],
         "responses": {
@@ -3788,24 +3915,51 @@
                     "properties": {
                       "id": {
                         "type": "string",
-                        "example": "clinic-uuid"
+                        "example": "doctor-uuid"
                       },
                       "name": {
                         "type": "string",
-                        "example": "House"
+                        "example": "John Doe"
+                      },
+                      "gender": {
+                        "type": "string",
+                        "example": "MALE"
+                      },
+                      "age": {
+                        "type": "number",
+                        "example": 45
+                      },
+                      "specialization": {
+                        "type": "string",
+                        "example": "IMMUNOLOGY"
+                      },
+                      "phone": {
+                        "type": "string",
+                        "example": "+1234567890"
+                      },
+                      "fees": {
+                        "type": "number",
+                        "example": 200
                       }
                     }
                   }
                 },
-                "message": {
+                "messageEn": {
                   "type": "string",
                   "example": "Clinic doctors retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع أطباء العيادة بنجاح"
                 }
               },
               "xml": {
                 "name": "main"
               }
             }
+          },
+          "400": {
+            "description": "Bad request"
           }
         }
       }

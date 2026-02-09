@@ -2,12 +2,15 @@ import { ClinicActiveStatusResponseDto, ClinicResponseDto, CreateUpdateClinicReq
 import { Service } from "typedi";
 import prisma from "@/config/prisma";
 import { Clinic } from "@/interfaces";
-import { Doctor } from "@prisma/client";
+import { DoctorPersonalData } from "@/interfaces/doctors.interface";
+import { Doctor, Gender } from "@prisma/client";
 import { createBilingualError, ErrorMessages } from "@/utils/errorMessages";
 import { HttpException } from "@/exceptions/HttpException";
+import { UserService } from "./user.service";
 
 @Service()
 export class ClinicService {
+    private userService = new UserService();
     private MAX_CLINICS_PER_DOCTOR = 3;
 
     public async isDoctorAllowedToCreateClinic(doctorId: string): Promise<boolean> {
@@ -206,26 +209,39 @@ export class ClinicService {
         });
     }
 
-    public async getClinicDoctors(clinicId: string): Promise<Partial<Doctor>[]> {
+    public async getClinicDoctors(clinicId: string, gender?: Gender, minFees?: number, maxFees?: number): Promise<Partial<DoctorPersonalData>[]> {
         const doctors = await prisma.clinicDoctor.findMany({
             where: {
                 clinic_id: clinicId,
                 is_accepting: true,
+                fees: {
+                    ...(minFees !== undefined && { gte: minFees }),
+                    ...(maxFees !== undefined && { lte: maxFees })
+                },
                 doctor: {
                     account_status: 'APPROVED',
                     present: true,
                     availability_type: {
                         in: ['OFFLINE', 'BOTH']
                     },
+                    user: {
+                        ...(gender && { gender }),
+                    }
+
                 },
             },
-            include: {
+            select: {
+                fees: true,
                 doctor: {
-                    include: {
+                    select: {
+                        specialization: true,
                         user: {
                             select: {
                                 id: true,
-                                name: true
+                                name: true,
+                                gender: true,
+                                date_of_birth: true,
+                                phone: true,
                             },
                         },
                     },
@@ -233,17 +249,34 @@ export class ClinicService {
             },
         });
 
-        return doctors.map(d => ({
-            id: d.doctor.id,
-            name: d.doctor.user.name,
-        }));
+        const results = await Promise.all(
+            doctors.map(async (doc) => {
+                const user = doc.doctor.user;
+                const age = await this.userService.calculateUserAge(user.date_of_birth);
+
+                const doctorData = {
+                    id: user.id,
+                    name: user.name,
+                    gender: user.gender,
+                    age,
+                    specialization: doc.doctor.specialization,
+                    phone: user.phone,
+                    fees: doc.fees,
+                } satisfies Partial<DoctorPersonalData>;
+
+                return doctorData;
+            })
+        );
+
+        return results;
     }
 
-    public async getActiveClinics(): Promise<Partial<Clinic>[]> {
+    public async getActiveClinics(payOnline?: boolean): Promise<Partial<Clinic>[]> {
         const clinics = await prisma.clinic.findMany({
             where: {
                 is_active: true,
                 deleted_at: null,
+                ...(payOnline !== undefined && { canPayOnline: payOnline }),
             },
             select: {
                 id: true,

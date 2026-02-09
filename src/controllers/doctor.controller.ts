@@ -3,9 +3,11 @@ import { DoctorLoginRequestDto, DoctorSetPasswordRequestDto, DoctorSignupRequest
 import { RequestWithUser } from "@/interfaces";
 import { DoctorService } from "@/services/doctor.service";
 import { UserService } from "@/services/user.service";
+import { HttpException } from "@/exceptions/HttpException";
 import { createMultiLangMessage, SuccessResponseMessages } from "@/utils/responseMessages";
 import { NextFunction, Request, Response } from "express";
 import { Container } from "typedi";
+import { createBilingualError, ErrorMessages } from "@/utils/errorMessages";
 
 
 export class DoctorController {
@@ -15,7 +17,7 @@ export class DoctorController {
     public doctorSignup = async (req: Request, res: Response, next: NextFunction) => {
         const doctorData: DoctorSignupRequestDto = req.body;
         const doctorFiles = req.files as Express.Multer.File[];
-        await this.doctorService.signup(doctorData , doctorFiles);
+        await this.doctorService.signup(doctorData, doctorFiles);
         const responseMessage = createMultiLangMessage(SuccessResponseMessages.DOCTOR_CREATED_WAITING_VERIFICATION);
         res.status(201).json({ messageEn: responseMessage.messageEn, messageAr: responseMessage.messageAr });
     };
@@ -49,6 +51,29 @@ export class DoctorController {
 
     public getOnlineDoctors = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         const doctors = await this.doctorService.getOnlineDoctors();
+        const response = createMultiLangMessage(SuccessResponseMessages.DOCTORS_RETRIEVED_SUCCESSFULLY);
+        res.status(200).json({
+            data: doctors,
+            ...response
+        });
+    }
+
+    public getDoctors = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+        const { gender, minFees, maxFees, isOnline } = req.query;
+
+        const finalIsOnline = isOnline !== undefined ? isOnline === 'true' : undefined;
+        const finalGender = gender as string | undefined;
+
+        const finalMinFees = minFees && typeof minFees === 'string' ? parseFloat(minFees) : undefined;
+        const finalMaxFees = maxFees && typeof maxFees === 'string' ? parseFloat(maxFees) : undefined;
+
+        if (finalMinFees > finalMaxFees) {
+            const error = createBilingualError(404, ErrorMessages.INVALID_FEES_RANGE);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const doctors = await this.doctorService.getDoctors(finalGender, finalMinFees, finalMaxFees, finalIsOnline);
+
         const response = createMultiLangMessage(SuccessResponseMessages.DOCTORS_RETRIEVED_SUCCESSFULLY);
         res.status(200).json({
             data: doctors,

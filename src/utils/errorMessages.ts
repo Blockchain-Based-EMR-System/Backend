@@ -187,6 +187,10 @@ export const ErrorMessages = {
         en: 'Doctor ID is required',
         ar: 'معرف الطبيب مطلوب',
     },
+    INVALID_FEES_RANGE: {
+        en: 'Invalid fees range.',
+        ar: 'نطاق الرسوم غير صالح.'
+    },
     PATIENT_ID_REQUIRED: {
         en: 'Patient ID is required',
         ar: 'معرف المريض مطلوب',

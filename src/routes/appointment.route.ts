@@ -20,26 +20,71 @@ export class AppointmentRoute implements Routes {
 
     private initializeRoutes() {
         this.router.get(
-            `${this.path}/online-doctors`,
+            `${this.path}/doctors`,
             /* 
-                #swagger.path = '/appointments/online-doctors'
+                #swagger.path = '/appointments/doctors'
                 #swagger.method = 'get'
                 #swagger.tags = ['Appointments']
-                #swagger.description = 'Get all available online doctors'
+                #swagger.description = 'Get all doctors available for booking appointments'
+                #swagger.parameters['gender'] = {
+                    in: 'query',
+                    description: 'Filter doctors by gender (MALE or FEMALE)',
+                    required: false,
+                    type: 'string'
+                }
+                #swagger.parameters['minFees'] = {
+                    in: 'query',
+                    description: 'Minimum fees filter',
+                    required: false,
+                    type: 'number'
+                }
+                #swagger.parameters['maxFees'] = {
+                    in: 'query',
+                    description: 'Maximum fees filter',
+                    required: false,
+                    type: 'number'
+                }
+                #swagger.parameters['isOnline'] = {
+                    in: 'query',
+                    description: 'Filter for online availability (true for online, false for offline)',
+                    required: false,
+                    type: 'boolean'
+                }
                 #swagger.responses[200] = {
-                    description: 'Online doctors retrieved successfully',
+                    description: 'Doctors retrieved successfully',
                     schema: {
                         data: [
                             {
                                 id: 'doctor-uuid',
-                                name: 'House'
+                                name: 'John Doe',
+                                gender: 'MALE',
+                                age: 45,
+                                specialization: 'IMMUNOLOGY',
+                                phone: '+1234567890',
+                                fees: 200,
+                                clinics: [
+                                    {
+                                        id: 'clinic-uuid',
+                                        name: 'New Cairo Medical Clinic',
+                                        phone: '+1234567890',
+                                        canPayOnline: true,
+                                        opening_at: '09:00',
+                                        closing_at: '17:00',
+                                        address: '123 Main Street, Medical Park',
+                                        address_maps_link: 'https://maps.google.com/?q=123+Main+Street'
+                                    }
+                                ]
                             }
                         ],
-                        message: 'Online doctors retrieved successfully'
+                        messageEn: 'Doctors retrieved successfully',
+                        messageAr: 'تم استرجاع الأطباء بنجاح'
                     }
                 }
+                #swagger.responses[400] = {
+                    description: 'Bad request'
+                }
             */
-            this.doctorController.getOnlineDoctors
+            this.doctorController.getDoctors
         );
 
         // get all clinics
@@ -50,6 +95,12 @@ export class AppointmentRoute implements Routes {
                 #swagger.method = 'get'
                 #swagger.tags = ['Appointments']
                 #swagger.description = 'Get all clinics available for booking appointments'
+                #swagger.parameters['canPayOnline'] = {
+                    in: 'query',
+                    description: 'Filter clinics by online payment availability',
+                    required: false,
+                    type: 'boolean'
+                }
                 #swagger.responses[200] = {
                     description: 'Active clinics retrieved successfully',
                     schema: {
@@ -79,24 +130,51 @@ export class AppointmentRoute implements Routes {
                 #swagger.path = '/appointments/clinic/{clinicId}/doctors'
                 #swagger.method = 'get'
                 #swagger.tags = ['Appointments']
-                #swagger.description = 'Get all doctors who are accepting appointments at a selected clinic'
+                #swagger.description = 'Get all doctors in a specific clinic'
                 #swagger.parameters['clinicId'] = {
                     in: 'path',
                     description: 'Clinic ID',
                     required: true,
                     type: 'string'
                 }
+                #swagger.parameters['gender'] = {
+                    in: 'query',
+                    description: 'Filter doctors by gender (MALE or FEMALE)',
+                    required: false,
+                    type: 'string'
+                }
+                #swagger.parameters['minFees'] = {
+                    in: 'query',
+                    description: 'Minimum fees filter',
+                    required: false,
+                    type: 'number'
+                }
+                #swagger.parameters['maxFees'] = {
+                    in: 'query',
+                    description: 'Maximum fees filter',
+                    required: false,
+                    type: 'number'
+                }
                 #swagger.responses[200] = {
                     description: 'Clinic doctors retrieved successfully',
                     schema: {
                         data: [
                             {
-                                id: 'clinic-uuid',
-                                name: 'House'
+                                id: 'doctor-uuid',
+                                name: 'John Doe',
+                                gender: 'MALE',
+                                age: 45,
+                                specialization: 'IMMUNOLOGY',
+                                phone: '+1234567890',
+                                fees: 200
                             }
                         ],
-                        message: 'Clinic doctors retrieved successfully'
+                        messageEn: 'Clinic doctors retrieved successfully',
+                        messageAr: 'تم استرجاع أطباء العيادة بنجاح'
                     }
+                }
+                #swagger.responses[400] = {
+                    description: 'Bad request'
                 }
             */
             this.clinicController.getClinicDoctors
