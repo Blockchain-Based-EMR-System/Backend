@@ -30,6 +30,7 @@ export interface DoctorPersonalData {
   age: number;
   specialization: string;
   phone: string;
-  fees: number
+  fees: number;
+  profilePic: string;
   clinics?: DoctorClinics[]
 }

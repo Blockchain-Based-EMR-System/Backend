@@ -242,6 +242,7 @@ export class ClinicService {
                                 gender: true,
                                 date_of_birth: true,
                                 phone: true,
+                                photo_url: true,
                             },
                         },
                     },
@@ -262,6 +263,7 @@ export class ClinicService {
                     specialization: doc.doctor.specialization,
                     phone: user.phone,
                     fees: doc.fees,
+                    profilePic: user.photo_url,
                 } satisfies Partial<DoctorPersonalData>;
 
                 return doctorData;

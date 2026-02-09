@@ -337,6 +337,7 @@ export class DoctorService {
                                 gender: true,
                                 phone: true,
                                 date_of_birth: true,
+                                photo_url: true,
                             },
                         },
                     },
@@ -402,6 +403,7 @@ export class DoctorService {
                 specialization: doctor.specialization,
                 phone: user.phone,
                 fees: representativeRecord.fees,
+                profilePic: user.photo_url,
                 clinics: allClinics,
             });
         }

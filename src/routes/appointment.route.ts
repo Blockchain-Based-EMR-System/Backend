@@ -62,6 +62,7 @@ export class AppointmentRoute implements Routes {
                                 specialization: 'IMMUNOLOGY',
                                 phone: '+1234567890',
                                 fees: 200,
+                                profilePic: 'https://res.cloudinary.com/deh1n7kqj/image/upload/v1770577124/DOCTORS/profile_pictures/DOCTOR_102ef1ca-3084-41f3-a225-1058e7059ee8_profile_picture_1770577124527.jpg',
                                 clinics: [
                                     {
                                         id: 'clinic-uuid',
@@ -166,7 +167,8 @@ export class AppointmentRoute implements Routes {
                                 age: 45,
                                 specialization: 'IMMUNOLOGY',
                                 phone: '+1234567890',
-                                fees: 200
+                                fees: 200,
+                                profilePic: 'https://res.cloudinary.com/deh1n7kqj/image/upload/v1770577124/DOCTORS/profile_pictures/DOCTOR_102ef1ca-3084-41f3-a225-1058e7059ee8_profile_picture_1770577124527.jpg',
                             }
                         ],
                         messageEn: 'Clinic doctors retrieved successfully',
