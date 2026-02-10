@@ -64,7 +64,8 @@ export class AuthService {
           { email: userData.emailOrUsername },
           { username: userData.emailOrUsername }
         ]
-      }
+      },
+      include: { doctor: true }
     });
     if (!findUser) {
       const error = createBilingualError(404, ErrorMessages.USER_NOT_FOUND_CREDENTIALS);
@@ -92,7 +93,7 @@ export class AuthService {
         specialization: doctor.specialization,
         account_status: doctor.account_status
       } : undefined
-    };
+    };    
     if( patientLoginData.doctor && patientLoginData.doctor.account_status !== DoctorAccountStatus.APPROVED) {
       const error = createBilingualError(403, ErrorMessages.DOCTOR_ACCOUNT_NOT_APPROVED);
       throw new HttpException(error.status, error.message, error.messageAr);
