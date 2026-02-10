@@ -49,15 +49,6 @@ export class DoctorController {
         res.status(200).json({ messageEn: responseMessage.messageEn, messageAr: responseMessage.messageAr });
     }
 
-    public getOnlineDoctors = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-        const doctors = await this.doctorService.getOnlineDoctors();
-        const response = createMultiLangMessage(SuccessResponseMessages.DOCTORS_RETRIEVED_SUCCESSFULLY);
-        res.status(200).json({
-            data: doctors,
-            ...response
-        });
-    }
-
     public getDoctors = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         const { gender, minFees, maxFees, isOnline } = req.query;
 

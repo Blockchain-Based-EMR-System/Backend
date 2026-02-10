@@ -3,10 +3,12 @@ import { Service } from "typedi";
 import prisma from "@/config/prisma";
 import { Clinic } from "@/interfaces";
 import { DoctorPersonalData } from "@/interfaces/doctors.interface";
+import { DoctorClinics } from "@/interfaces/clinics.interface"
 import { Doctor, Gender } from "@prisma/client";
 import { createBilingualError, ErrorMessages } from "@/utils/errorMessages";
 import { HttpException } from "@/exceptions/HttpException";
 import { UserService } from "./user.service";
+import { DoctorAccountStatus } from "@prisma/client";
 
 @Service()
 export class ClinicService {
@@ -273,28 +275,28 @@ export class ClinicService {
         return results;
     }
 
-    public async getActiveClinics(payOnline?: boolean): Promise<Partial<Clinic>[]> {
-        const clinics = await prisma.clinic.findMany({
-            where: {
-                is_active: true,
-                deleted_at: null,
-                ...(payOnline !== undefined && { canPayOnline: payOnline }),
-            },
-            select: {
-                id: true,
-                name: true,
-                opening_at: true,
-                closing_at: true,
-                address: true,
-                address_maps_link: true,
-                phone: true,
-                canPayOnline: true,
-            }
-        });
-        return clinics.map(c => ({
-            ...c
-        }));
-    }
+    // public async getActiveClinics(payOnline?: boolean): Promise<Partial<Clinic>[]> {
+    //     const clinics = await prisma.clinic.findMany({
+    //         where: {
+    //             is_active: true,
+    //             deleted_at: null,
+    //             ...(payOnline !== undefined && { canPayOnline: payOnline }),
+    //         },
+    //         select: {
+    //             id: true,
+    //             name: true,
+    //             opening_at: true,
+    //             closing_at: true,
+    //             address: true,
+    //             address_maps_link: true,
+    //             phone: true,
+    //             canPayOnline: true,
+    //         }
+    //     });
+    //     return clinics.map(c => ({
+    //         ...c
+    //     }));
+    // }
 
     public async getAllClinics(): Promise<ClinicResponseDto[]> {
         const clinics = await prisma.clinic.findMany({
@@ -364,5 +366,100 @@ export class ClinicService {
             return false;
         }
         return true;
+    }
+
+    public async getClinics(payOnline?: boolean): Promise<DoctorClinics[]> {
+
+        const clinicDoctors = await prisma.clinicDoctor.findMany({
+            where: {
+                is_accepting: true,
+                doctor: {
+                    account_status: DoctorAccountStatus.APPROVED,
+                },
+                clinic: {
+                    ...(payOnline !== undefined && { canPayOnline: payOnline }),
+                }
+            },
+            include: {
+                doctor: {
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                gender: true,
+                                phone: true,
+                                date_of_birth: true,
+                                photo_url: true,
+                            },
+                        },
+                    },
+                },
+                clinic: {
+                    select: {
+                        id: true,
+                        name: true,
+                        phone: true,
+                        canPayOnline: true,
+                        opening_at: true,
+                        closing_at: true,
+                        address: true,
+                        address_maps_link: true,
+                    },
+                },
+            },
+        });
+
+        const clinicsGroupsMap = new Map<string, typeof clinicDoctors>();
+        for (const docClinic of clinicDoctors) {
+            const clinicId = docClinic.clinic.id;
+            if (!clinicId) continue;
+
+            if (!clinicsGroupsMap.has(clinicId)) {
+                clinicsGroupsMap.set(clinicId, []);
+            }
+            clinicsGroupsMap.get(clinicId)!.push(docClinic);
+        }
+
+        const clinicsData: DoctorClinics[] = [];
+
+        for (const [clinicId, doctorRecords] of clinicsGroupsMap.entries()) {
+            const representativeRecord = doctorRecords[0];
+            const clinic = representativeRecord.clinic;
+            const user = representativeRecord.doctor.user;
+
+            if (!user) continue;
+
+
+            const allDoctors: Partial<DoctorPersonalData>[] = [];
+
+            for (const record of doctorRecords) {
+                const age = await this.userService.calculateUserAge(record.doctor.user.date_of_birth);
+                allDoctors.push({
+                    id: record.doctor.user.id,
+                    name: record.doctor.user.name,
+                    gender: record.doctor.user.gender,
+                    age,
+                    phone: record.doctor.user.phone,
+                    fees: representativeRecord.fees,
+                    profilePic: record.doctor.user.photo_url,
+                });
+            }
+
+            clinicsData.push({
+                id: clinic.id,
+                name: clinic.name,
+                phone: clinic.phone,
+                canPayOnline: clinic.canPayOnline,
+                opening_at: clinic.opening_at,
+                closing_at: clinic.closing_at,
+                address: clinic.address,
+                address_maps_link: clinic.address_maps_link || "",
+                doctors: allDoctors
+            });
+        }
+
+        return clinicsData;
+
     }
 }

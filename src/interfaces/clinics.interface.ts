@@ -1,4 +1,5 @@
 import { User, Doctor } from './users.interface';
+import { DoctorPersonalData } from './doctors.interface';
 
 export interface Clinic {
   id: string;
@@ -43,5 +44,6 @@ export interface DoctorClinics {
   opening_at: string;
   closing_at: string;
   address: string;
-  address_maps_link: string
+  address_maps_link: string;
+  doctors?: Partial<DoctorPersonalData>[];
 }

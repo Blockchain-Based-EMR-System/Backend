@@ -95,30 +95,54 @@ export class AppointmentRoute implements Routes {
                 #swagger.path = '/appointments/clinics'
                 #swagger.method = 'get'
                 #swagger.tags = ['Appointments']
-                #swagger.description = 'Get all clinics available for booking appointments'
-                #swagger.parameters['canPayOnline'] = {
+                #swagger.description = 'Get all active clinics available for booking appointments'
+                #swagger.parameters['payOnline'] = {
                     in: 'query',
-                    description: 'Filter clinics by online payment availability',
+                    description: 'Filter clinics that support online payment (true) or not (false)',
                     required: false,
                     type: 'boolean'
                 }
                 #swagger.responses[200] = {
-                    description: 'Active clinics retrieved successfully',
+                    description: 'Clinics retrieved successfully',
                     schema: {
                         data: [
                             {
                                 id: 'clinic-uuid',
                                 name: 'New Cairo Medical Clinic',
-                                opening_at: '10:00',
+                                phone: '+1234567890',
+                                canPayOnline: true,
+                                opening_at: '09:00',
                                 closing_at: '17:00',
                                 address: '123 Main Street, Medical Park',
                                 address_maps_link: 'https://maps.google.com/?q=123+Main+Street',
-                                phone: '+1234567890',
-                                canPayOnline: true
+                                doctors: [
+                                    {
+                                        id: 'doctor-uuid',
+                                        name: 'John Doe',
+                                        gender: 'MALE',
+                                        age: 45,
+                                        phone: '+1234567890',
+                                        fees: 200,
+                                        profilePic: 'https://res.cloudinary.com/deh1n7kqj/image/upload/v1770577124/DOCTORS/profile_pictures/DOCTOR_102ef1ca-3084-41f3-a225-1058e7059ee8_profile_picture_1770577124527.jpg'
+                                    }, 
+                                    {
+                                        id: 'doctor-uuid2',
+                                        name: 'House',
+                                        gender: 'MALE',
+                                        age: 45,
+                                        phone: '+1234567890',
+                                        fees: 200,
+                                        profilePic: 'https://res.cloudinary.com/deh1n7kqj/image/upload/v1770577124/DOCTORS/profile_pictures/DOCTOR_102ef1ca-3084-41f3-a225-1058e7059ee8_profile_picture_1770577124527.jpg'
+                                    }
+                                ]
                             }
                         ],
-                        message: 'Clinics retrieved successfully'
+                        messageEn: 'Clinics retrieved successfully',
+                        messageAr: 'تم استرجاع العيادات بنجاح'
                     }
+                }
+                #swagger.responses[400] = {
+                    description: 'Bad request'
                 }
             */
             this.clinicController.getActiveClinics

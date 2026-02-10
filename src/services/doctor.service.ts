@@ -264,29 +264,6 @@ export class DoctorService {
             throw error;
         }
     }
-    public async getOnlineDoctors(): Promise<Partial<Doctor>[]> {
-        const doctors = await prisma.doctor.findMany({
-            where: {
-                account_status: 'APPROVED',
-                present: true,
-                availability_type: {
-                    in: ['ONLINE', 'BOTH']
-                }
-            },
-            select: {
-                id: true,
-                user: {
-                    select: {
-                        name: true,
-                    }
-                }
-            }
-        });
-        return doctors.map(doctor => ({
-            id: doctor.id,
-            name: doctor.user.name,
-        }));
-    }
 
     public async getDoctors(gender?: string, minFees?: number, maxFees?: number, isOnline?: boolean): Promise<DoctorPersonalData[]> {
         const WhereClause: any = {

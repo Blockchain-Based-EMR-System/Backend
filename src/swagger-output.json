@@ -3801,19 +3801,19 @@
         "tags": [
           "Appointments"
         ],
-        "description": "Get all clinics available for booking appointments",
+        "description": "Get all active clinics available for booking appointments",
         "parameters": [
           {
-            "name": "canPayOnline",
+            "name": "payOnline",
             "in": "query",
-            "description": "Filter clinics by online payment availability",
+            "description": "Filter clinics that support online payment (true) or not (false)",
             "required": false,
             "type": "boolean"
           }
         ],
         "responses": {
           "200": {
-            "description": "Active clinics retrieved successfully",
+            "description": "Clinics retrieved successfully",
             "schema": {
               "type": "object",
               "properties": {
@@ -3830,9 +3830,17 @@
                         "type": "string",
                         "example": "New Cairo Medical Clinic"
                       },
+                      "phone": {
+                        "type": "string",
+                        "example": "+1234567890"
+                      },
+                      "canPayOnline": {
+                        "type": "boolean",
+                        "example": true
+                      },
                       "opening_at": {
                         "type": "string",
-                        "example": "10:00"
+                        "example": "09:00"
                       },
                       "closing_at": {
                         "type": "string",
@@ -3846,26 +3854,61 @@
                         "type": "string",
                         "example": "https://maps.google.com/?q=123+Main+Street"
                       },
-                      "phone": {
-                        "type": "string",
-                        "example": "+1234567890"
-                      },
-                      "canPayOnline": {
-                        "type": "boolean",
-                        "example": true
+                      "doctors": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "example": "doctor-uuid2"
+                            },
+                            "name": {
+                              "type": "string",
+                              "example": "House"
+                            },
+                            "gender": {
+                              "type": "string",
+                              "example": "MALE"
+                            },
+                            "age": {
+                              "type": "number",
+                              "example": 45
+                            },
+                            "phone": {
+                              "type": "string",
+                              "example": "+1234567890"
+                            },
+                            "fees": {
+                              "type": "number",
+                              "example": 200
+                            },
+                            "profilePic": {
+                              "type": "string",
+                              "example": "https://res.cloudinary.com/deh1n7kqj/image/upload/v1770577124/DOCTORS/profile_pictures/DOCTOR_102ef1ca-3084-41f3-a225-1058e7059ee8_profile_picture_1770577124527.jpg"
+                            }
+                          }
+                        }
                       }
                     }
                   }
                 },
-                "message": {
+                "messageEn": {
                   "type": "string",
                   "example": "Clinics retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع العيادات بنجاح"
                 }
               },
               "xml": {
                 "name": "main"
               }
             }
+          },
+          "400": {
+            "description": "Bad request"
           }
         }
       }
