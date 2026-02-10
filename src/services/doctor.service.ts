@@ -307,7 +307,9 @@ export class DoctorService {
             where: WhereClause,
             include: {
                 doctor: {
-                    include: {
+                    select: {
+                        availability_type: true,
+                        specialization: true,
                         user: {
                             select: {
                                 id: true,
@@ -316,6 +318,7 @@ export class DoctorService {
                                 phone: true,
                                 date_of_birth: true,
                                 photo_url: true,
+                                
                             },
                         },
                     },
@@ -356,6 +359,10 @@ export class DoctorService {
             if (!user) continue;
 
             const age = await this.userService.calculateUserAge(user.date_of_birth);
+            let canWorkOnline = false;
+            if (doctor.availability_type == 'ONLINE' || doctor.availability_type == 'BOTH') {
+                canWorkOnline = true; 
+            }
             const allClinics: DoctorClinics[] = [];
 
             if (!isOnline) {
@@ -372,10 +379,7 @@ export class DoctorService {
                     });
                 }
             }
-            const specResponse = formatSpecializationResponse(
-                doctor.specialization as SpecializationKey,
-                lang
-            );
+            const specResponse = formatSpecializationResponse(doctor.specialization as SpecializationKey, lang);
 
             const specialization = specResponse.value;
 
@@ -388,6 +392,7 @@ export class DoctorService {
                 phone: user.phone,
                 fees: representativeRecord.fees,
                 profilePic: user.photo_url,
+                is_online: canWorkOnline,
                 clinics: allClinics,
             });
         }

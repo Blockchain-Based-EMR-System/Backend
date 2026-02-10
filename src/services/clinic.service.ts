@@ -361,7 +361,9 @@ export class ClinicService {
             },
             include: {
                 doctor: {
-                    include: {
+                    select: {
+                        availability_type: true,
+                        specialization: true,
                         user: {
                             select: {
                                 id: true,
@@ -414,9 +416,13 @@ export class ClinicService {
 
             for (const record of doctorRecords) {
                 const age = await this.userService.calculateUserAge(record.doctor.user.date_of_birth);
+                let isOnline = false;
+                if (record.doctor.availability_type == 'ONLINE' || record.doctor.availability_type == 'BOTH') {
+                    isOnline = true;
+                }
                 const specResponse = formatSpecializationResponse(record.doctor.specialization as SpecializationKey, lang);
                 const specialization = specResponse.value;
-                
+
                 allDoctors.push({
                     id: record.doctor.user.id,
                     name: record.doctor.user.name,
@@ -425,6 +431,7 @@ export class ClinicService {
                     specialization,
                     phone: record.doctor.user.phone,
                     fees: representativeRecord.fees,
+                    is_online: isOnline,
                     profilePic: record.doctor.user.photo_url,
                 });
             }

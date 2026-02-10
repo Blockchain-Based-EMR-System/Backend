@@ -32,5 +32,6 @@ export interface DoctorPersonalData {
   phone: string;
   fees: number;
   profilePic: string;
+  is_online: boolean;
   clinics?: DoctorClinics[]
 }
