@@ -1,4 +1,4 @@
-import { Role } from '@prisma/client';
+import { DoctorAccountStatus, Role } from '@prisma/client';
 import { compare, hash } from 'bcrypt';
 import { sign, verify } from 'jsonwebtoken';
 import { Service } from 'typedi';
@@ -93,6 +93,10 @@ export class AuthService {
         account_status: doctor.account_status
       } : undefined
     };
+    if( patientLoginData.doctor && patientLoginData.doctor.account_status !== DoctorAccountStatus.APPROVED) {
+      const error = createBilingualError(403, ErrorMessages.DOCTOR_ACCOUNT_NOT_APPROVED);
+      throw new HttpException(error.status, error.message, error.messageAr);
+    }
 
     const tokenResponse = await this.createTokens(findUser, userData.rememberMe);
     const cookies = this.createCookies(tokenResponse);
