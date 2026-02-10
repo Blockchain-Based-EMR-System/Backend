@@ -114,9 +114,14 @@ export class ClinicController {
     }
 
     public getActiveClinics = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-        const { canPayOnline } = req.query;
+        const { canPayOnline, lang } = req.query;
+        if (!lang || (lang !== 'en' && lang !== 'ar')) {
+            const error = createBilingualError(400, ErrorMessages.SPECIALIZATION_LANG);
+            throw new HttpException(400, error.message, error.messageAr);
+        }
+
         const payOnline = canPayOnline !== undefined ? canPayOnline === 'true' : undefined;
-        const clinics = await this.clinicService.getClinics(payOnline);
+        const clinics = await this.clinicService.getActiveClinics(lang as 'en' | 'ar', payOnline);
         const response = createMultiLangMessage(SuccessResponseMessages.CLINICS_RETRIEVED_SUCCESSFULLY);
         res.status(200).json({
             data: clinics,

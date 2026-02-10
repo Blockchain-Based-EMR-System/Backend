@@ -13,7 +13,8 @@ import fs from "fs";
 import { AvailabilityType, Gender } from "@prisma/client";
 import { UserService } from "./user.service";
 import { DoctorClinics } from "@/interfaces";
-
+import { formatSpecializationResponse } from "@/utils/specializationTransform";
+import { SpecializationKey } from "@/constants/specializations";
 
 const authService = new AuthService();
 
@@ -265,9 +266,9 @@ export class DoctorService {
         }
     }
 
-    public async getDoctors(gender?: string, minFees?: number, maxFees?: number, isOnline?: boolean): Promise<DoctorPersonalData[]> {
+    public async getDoctors(lang: 'en' | 'ar', gender?: string, minFees?: number, maxFees?: number, isOnline?: boolean ): Promise<DoctorPersonalData[]> {
         const WhereClause: any = {
-            is_accepting: true,                  
+            is_accepting: true,
             doctor: {
                 account_status: DoctorAccountStatus.APPROVED,
             }
@@ -319,7 +320,7 @@ export class DoctorService {
                         },
                     },
                 },
-                clinic: {  
+                clinic: {
                     select: {
                         id: true,
                         name: true,
@@ -357,27 +358,33 @@ export class DoctorService {
             const age = await this.userService.calculateUserAge(user.date_of_birth);
             const allClinics: DoctorClinics[] = [];
 
-            if (!isOnline){
+            if (!isOnline) {
                 for (const record of clinicRecords) {
-                allClinics.push({
-                    id: record.clinic.id,
-                    name: record.clinic.name,
-                    phone: record.clinic.phone,
-                    canPayOnline: record.clinic.canPayOnline,
-                    opening_at: record.clinic.opening_at,
-                    closing_at: record.clinic.closing_at,
-                    address: record.clinic.address,
-                    address_maps_link: record.clinic.address_maps_link || "",
-                });
+                    allClinics.push({
+                        id: record.clinic.id,
+                        name: record.clinic.name,
+                        phone: record.clinic.phone,
+                        canPayOnline: record.clinic.canPayOnline,
+                        opening_at: record.clinic.opening_at,
+                        closing_at: record.clinic.closing_at,
+                        address: record.clinic.address,
+                        address_maps_link: record.clinic.address_maps_link || "",
+                    });
+                }
             }
-            }
+            const specResponse = formatSpecializationResponse(
+                doctor.specialization as SpecializationKey,
+                lang
+            );
+
+            const specialization = specResponse.value;
 
             doctorPersonalData.push({
                 id: user.id,
                 name: user.name,
                 gender: user.gender,
                 age,
-                specialization: doctor.specialization,
+                specialization,
                 phone: user.phone,
                 fees: representativeRecord.fees,
                 profilePic: user.photo_url,

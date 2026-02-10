@@ -3662,6 +3662,13 @@
         "description": "Get all doctors available for booking appointments",
         "parameters": [
           {
+            "name": "lang",
+            "in": "query",
+            "description": "Required language for specialization",
+            "required": true,
+            "type": "string"
+          },
+          {
             "name": "gender",
             "in": "query",
             "description": "Filter doctors by gender (MALE or FEMALE)",
@@ -3803,6 +3810,13 @@
         ],
         "description": "Get all active clinics available for booking appointments",
         "parameters": [
+          {
+            "name": "lang",
+            "in": "query",
+            "description": "Required language for specialization",
+            "required": true,
+            "type": "string"
+          },
           {
             "name": "payOnline",
             "in": "query",

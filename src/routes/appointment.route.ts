@@ -26,6 +26,12 @@ export class AppointmentRoute implements Routes {
                 #swagger.method = 'get'
                 #swagger.tags = ['Appointments']
                 #swagger.description = 'Get all doctors available for booking appointments'
+                #swagger.parameters['lang'] = {
+                    in: 'query',
+                    description: 'Required language for specialization',
+                    required: true,
+                    type: 'string'
+                }
                 #swagger.parameters['gender'] = {
                     in: 'query',
                     description: 'Filter doctors by gender (MALE or FEMALE)',
@@ -96,6 +102,12 @@ export class AppointmentRoute implements Routes {
                 #swagger.method = 'get'
                 #swagger.tags = ['Appointments']
                 #swagger.description = 'Get all active clinics available for booking appointments'
+                #swagger.parameters['lang'] = {
+                    in: 'query',
+                    description: 'Required language for specialization',
+                    required: true,
+                    type: 'string'
+                }
                 #swagger.parameters['payOnline'] = {
                     in: 'query',
                     description: 'Filter clinics that support online payment (true) or not (false)',
@@ -121,6 +133,7 @@ export class AppointmentRoute implements Routes {
                                         name: 'John Doe',
                                         gender: 'MALE',
                                         age: 45,
+                                        specialization: 'IMMUNOLOGY',
                                         phone: '+1234567890',
                                         fees: 200,
                                         profilePic: 'https://res.cloudinary.com/deh1n7kqj/image/upload/v1770577124/DOCTORS/profile_pictures/DOCTOR_102ef1ca-3084-41f3-a225-1058e7059ee8_profile_picture_1770577124527.jpg'

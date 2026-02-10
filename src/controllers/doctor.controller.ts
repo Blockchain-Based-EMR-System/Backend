@@ -50,7 +50,12 @@ export class DoctorController {
     }
 
     public getDoctors = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-        const { gender, minFees, maxFees, isOnline } = req.query;
+        const { gender, minFees, maxFees, isOnline, lang } = req.query;
+
+        if (!lang || (lang !== 'en' && lang !== 'ar')) {
+            const error = createBilingualError(400, ErrorMessages.SPECIALIZATION_LANG);
+            throw new HttpException(400, error.message, error.messageAr);
+        }
 
         const finalIsOnline = isOnline !== undefined ? isOnline === 'true' : undefined;
         const finalGender = gender as string | undefined;
@@ -63,7 +68,7 @@ export class DoctorController {
             throw new HttpException(error.status, error.message, error.messageAr);
         }
 
-        const doctors = await this.doctorService.getDoctors(finalGender, finalMinFees, finalMaxFees, finalIsOnline);
+        const doctors = await this.doctorService.getDoctors(lang as 'en' | 'ar', finalGender, finalMinFees, finalMaxFees, finalIsOnline);
 
         const response = createMultiLangMessage(SuccessResponseMessages.DOCTORS_RETRIEVED_SUCCESSFULLY);
         res.status(200).json({

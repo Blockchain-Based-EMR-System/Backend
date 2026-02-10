@@ -9,6 +9,8 @@ import { createBilingualError, ErrorMessages } from "@/utils/errorMessages";
 import { HttpException } from "@/exceptions/HttpException";
 import { UserService } from "./user.service";
 import { DoctorAccountStatus } from "@prisma/client";
+import { formatSpecializationResponse } from "@/utils/specializationTransform";
+import { SpecializationKey } from "@/constants/specializations";
 
 @Service()
 export class ClinicService {
@@ -275,29 +277,6 @@ export class ClinicService {
         return results;
     }
 
-    // public async getActiveClinics(payOnline?: boolean): Promise<Partial<Clinic>[]> {
-    //     const clinics = await prisma.clinic.findMany({
-    //         where: {
-    //             is_active: true,
-    //             deleted_at: null,
-    //             ...(payOnline !== undefined && { canPayOnline: payOnline }),
-    //         },
-    //         select: {
-    //             id: true,
-    //             name: true,
-    //             opening_at: true,
-    //             closing_at: true,
-    //             address: true,
-    //             address_maps_link: true,
-    //             phone: true,
-    //             canPayOnline: true,
-    //         }
-    //     });
-    //     return clinics.map(c => ({
-    //         ...c
-    //     }));
-    // }
-
     public async getAllClinics(): Promise<ClinicResponseDto[]> {
         const clinics = await prisma.clinic.findMany({
             select: {
@@ -368,7 +347,7 @@ export class ClinicService {
         return true;
     }
 
-    public async getClinics(payOnline?: boolean): Promise<DoctorClinics[]> {
+    public async getActiveClinics(lang: 'en' | 'ar', payOnline?: boolean): Promise<DoctorClinics[]> {
 
         const clinicDoctors = await prisma.clinicDoctor.findMany({
             where: {
@@ -435,11 +414,15 @@ export class ClinicService {
 
             for (const record of doctorRecords) {
                 const age = await this.userService.calculateUserAge(record.doctor.user.date_of_birth);
+                const specResponse = formatSpecializationResponse(record.doctor.specialization as SpecializationKey, lang);
+                const specialization = specResponse.value;
+                
                 allDoctors.push({
                     id: record.doctor.user.id,
                     name: record.doctor.user.name,
                     gender: record.doctor.user.gender,
                     age,
+                    specialization,
                     phone: record.doctor.user.phone,
                     fees: representativeRecord.fees,
                     profilePic: record.doctor.user.photo_url,

@@ -148,6 +148,10 @@ export const ErrorMessages = {
         en: 'Schedule already exists for this day and clinic',
         ar: 'الجدول موجود بالفعل لهذا اليوم والعيادة'
     },
+    SPECIALIZATION_LANG: {
+        en: "Language must be 'en' or 'ar'",
+        ar: "يجب أن تكون اللغة 'en' أو 'ar'"
+    },
 
     // Clinic errors
     CLINIC_NOT_FOUND: {
@@ -248,8 +252,8 @@ export const ErrorMessages = {
         ar: "يوجد تعارض بين المواعيد الإلكترونية والحضورية"
     },
     EITHER_ONLINE_OR_OFFLINE: {
-    en: "Please choose either online or offline",
-    ar: "يرجى اختيار إما الإلكتروني أو الحضوري"
+        en: "Please choose either online or offline",
+        ar: "يرجى اختيار إما الإلكتروني أو الحضوري"
     },
     // Generic errors
     SOMETHING_WENT_WRONG: {
