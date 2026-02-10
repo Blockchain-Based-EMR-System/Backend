@@ -103,6 +103,7 @@ export const ErrorMessages = {
         en: 'Maximum number of created clinics reached',
         ar: 'تم الوصول إلى الحد الأقصى لعدد العيادات',
     },
+    
     // File upload errors
     NO_FILE_UPLOADED: {
         en: 'No file uploaded',
@@ -194,6 +195,10 @@ export const ErrorMessages = {
     INVALID_FEES_RANGE: {
         en: 'Invalid fees range.',
         ar: 'نطاق الرسوم غير صالح.'
+    },
+    APPOINTMENT_ALREADY_EXISTS: {
+        en: 'Appointment already exists.',
+        ar: 'الموعد موجود بالفعل.'
     },
     PATIENT_ID_REQUIRED: {
         en: 'Patient ID is required',

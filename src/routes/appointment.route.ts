@@ -108,7 +108,7 @@ export class AppointmentRoute implements Routes {
                     required: true,
                     type: 'string'
                 }
-                #swagger.parameters['payOnline'] = {
+                #swagger.parameters['canPayOnline'] = {
                     in: 'query',
                     description: 'Filter clinics that support online payment (true) or not (false)',
                     required: false,
@@ -1076,7 +1076,7 @@ export class AppointmentRoute implements Routes {
                 }
             */
             AuthMiddleware,
-            this.appointmentController.checkConflictingAppointments 
+            this.appointmentController.checkConflictingAppointments
         );
 
         this.router.patch(

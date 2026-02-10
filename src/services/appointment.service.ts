@@ -21,6 +21,7 @@ export class AppointmentService {
         const schedules = await prisma.doctorSchedule.findMany({
             where: {
                 doctor_id: doctorId,
+                clinic_id: clinicId,
                 deleted_at: null
             },
             select: {
@@ -127,6 +128,7 @@ export class AppointmentService {
             where: {
                 day_of_week: dayOfWeek,
                 doctor_id: doctorId,
+                clinic_id: clinicId,
                 deleted_at: null,
             },
             select: {
@@ -214,6 +216,21 @@ export class AppointmentService {
     }
 
     public async bookAppointment(patientId: string, doctorId: string, clinicId: string | null, scheduledTime: Date): Promise<void> {
+        const existingAppointment = await prisma.appointment.findFirst({
+            where: {
+                patient_id: patientId,
+                doctor_id: doctorId,
+                clinic_id: clinicId,
+                scheduled_time: scheduledTime,
+                deleted_at: null,
+            }
+        })
+
+        if (existingAppointment) {
+            const error = createBilingualError(400, ErrorMessages.APPOINTMENT_ALREADY_EXISTS);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
         const schedule = await prisma.doctorSchedule.findFirst({
             where: {
                 doctor_id: doctorId,

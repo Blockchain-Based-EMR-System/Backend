@@ -3818,7 +3818,7 @@
             "type": "string"
           },
           {
-            "name": "payOnline",
+            "name": "canPayOnline",
             "in": "query",
             "description": "Filter clinics that support online payment (true) or not (false)",
             "required": false,
