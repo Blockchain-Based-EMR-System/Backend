@@ -3654,24 +3654,52 @@
         }
       }
     },
-    "/appointments/online-doctors": {
+    "/appointments/doctors": {
       "get": {
         "tags": [
           "Appointments"
         ],
-        "description": "Get all available online doctors",
+        "description": "Get all doctors available for booking appointments",
         "parameters": [
           {
-            "name": "Authorization",
-            "in": "cookie",
-            "description": "Bearer token for authentication",
+            "name": "lang",
+            "in": "query",
+            "description": "Required language for specialization",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "gender",
+            "in": "query",
+            "description": "Filter doctors by gender (MALE or FEMALE)",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "minFees",
+            "in": "query",
+            "description": "Minimum fees filter",
+            "required": false,
+            "type": "number"
+          },
+          {
+            "name": "maxFees",
+            "in": "query",
+            "description": "Maximum fees filter",
+            "required": false,
+            "type": "number"
+          },
+          {
+            "name": "isOnline",
+            "in": "query",
+            "description": "Filter for online availability (true for online, false for offline)",
+            "required": false,
+            "type": "boolean"
           }
         ],
         "responses": {
           "200": {
-            "description": "Online doctors retrieved successfully",
+            "description": "Doctors retrieved successfully",
             "schema": {
               "type": "object",
               "properties": {
@@ -3686,20 +3714,91 @@
                       },
                       "name": {
                         "type": "string",
-                        "example": "House"
+                        "example": "John Doe"
+                      },
+                      "gender": {
+                        "type": "string",
+                        "example": "MALE"
+                      },
+                      "age": {
+                        "type": "number",
+                        "example": 45
+                      },
+                      "specialization": {
+                        "type": "string",
+                        "example": "IMMUNOLOGY"
+                      },
+                      "phone": {
+                        "type": "string",
+                        "example": "+1234567890"
+                      },
+                      "fees": {
+                        "type": "number",
+                        "example": 200
+                      },
+                      "profilePic": {
+                        "type": "string",
+                        "example": "https://res.cloudinary.com/deh1n7kqj/image/upload/v1770577124/DOCTORS/profile_pictures/DOCTOR_102ef1ca-3084-41f3-a225-1058e7059ee8_profile_picture_1770577124527.jpg"
+                      },
+                      "clinics": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "example": "clinic-uuid"
+                            },
+                            "name": {
+                              "type": "string",
+                              "example": "New Cairo Medical Clinic"
+                            },
+                            "phone": {
+                              "type": "string",
+                              "example": "+1234567890"
+                            },
+                            "canPayOnline": {
+                              "type": "boolean",
+                              "example": true
+                            },
+                            "opening_at": {
+                              "type": "string",
+                              "example": "09:00"
+                            },
+                            "closing_at": {
+                              "type": "string",
+                              "example": "17:00"
+                            },
+                            "address": {
+                              "type": "string",
+                              "example": "123 Main Street, Medical Park"
+                            },
+                            "address_maps_link": {
+                              "type": "string",
+                              "example": "https://maps.google.com/?q=123+Main+Street"
+                            }
+                          }
+                        }
                       }
                     }
                   }
                 },
-                "message": {
+                "messageEn": {
                   "type": "string",
-                  "example": "Online doctors retrieved successfully"
+                  "example": "Doctors retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع الأطباء بنجاح"
                 }
               },
               "xml": {
                 "name": "main"
               }
             }
+          },
+          "400": {
+            "description": "Bad request"
           }
         }
       }
@@ -3709,19 +3808,26 @@
         "tags": [
           "Appointments"
         ],
-        "description": "Get all clinics available for booking appointments",
+        "description": "Get all active clinics available for booking appointments",
         "parameters": [
           {
-            "name": "Authorization",
-            "in": "cookie",
-            "description": "Bearer token for authentication",
+            "name": "lang",
+            "in": "query",
+            "description": "Required language for specialization",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "payOnline",
+            "in": "query",
+            "description": "Filter clinics that support online payment (true) or not (false)",
+            "required": false,
+            "type": "boolean"
           }
         ],
         "responses": {
           "200": {
-            "description": "Active clinics retrieved successfully",
+            "description": "Clinics retrieved successfully",
             "schema": {
               "type": "object",
               "properties": {
@@ -3738,9 +3844,17 @@
                         "type": "string",
                         "example": "New Cairo Medical Clinic"
                       },
+                      "phone": {
+                        "type": "string",
+                        "example": "+1234567890"
+                      },
+                      "canPayOnline": {
+                        "type": "boolean",
+                        "example": true
+                      },
                       "opening_at": {
                         "type": "string",
-                        "example": "10:00"
+                        "example": "09:00"
                       },
                       "closing_at": {
                         "type": "string",
@@ -3754,26 +3868,61 @@
                         "type": "string",
                         "example": "https://maps.google.com/?q=123+Main+Street"
                       },
-                      "phone": {
-                        "type": "string",
-                        "example": "+1234567890"
-                      },
-                      "canPayOnline": {
-                        "type": "boolean",
-                        "example": true
+                      "doctors": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "example": "doctor-uuid2"
+                            },
+                            "name": {
+                              "type": "string",
+                              "example": "House"
+                            },
+                            "gender": {
+                              "type": "string",
+                              "example": "MALE"
+                            },
+                            "age": {
+                              "type": "number",
+                              "example": 45
+                            },
+                            "phone": {
+                              "type": "string",
+                              "example": "+1234567890"
+                            },
+                            "fees": {
+                              "type": "number",
+                              "example": 200
+                            },
+                            "profilePic": {
+                              "type": "string",
+                              "example": "https://res.cloudinary.com/deh1n7kqj/image/upload/v1770577124/DOCTORS/profile_pictures/DOCTOR_102ef1ca-3084-41f3-a225-1058e7059ee8_profile_picture_1770577124527.jpg"
+                            }
+                          }
+                        }
                       }
                     }
                   }
                 },
-                "message": {
+                "messageEn": {
                   "type": "string",
                   "example": "Clinics retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع العيادات بنجاح"
                 }
               },
               "xml": {
                 "name": "main"
               }
             }
+          },
+          "400": {
+            "description": "Bad request"
           }
         }
       }
@@ -3783,7 +3932,7 @@
         "tags": [
           "Appointments"
         ],
-        "description": "Get all doctors who are accepting appointments at a selected clinic",
+        "description": "Get all doctors in a specific clinic",
         "parameters": [
           {
             "name": "clinicId",
@@ -3793,11 +3942,25 @@
             "description": "Clinic ID"
           },
           {
-            "name": "Authorization",
-            "in": "cookie",
-            "description": "Bearer token for authentication",
-            "required": true,
+            "name": "gender",
+            "in": "query",
+            "description": "Filter doctors by gender (MALE or FEMALE)",
+            "required": false,
             "type": "string"
+          },
+          {
+            "name": "minFees",
+            "in": "query",
+            "description": "Minimum fees filter",
+            "required": false,
+            "type": "number"
+          },
+          {
+            "name": "maxFees",
+            "in": "query",
+            "description": "Maximum fees filter",
+            "required": false,
+            "type": "number"
           }
         ],
         "responses": {
@@ -3813,24 +3976,55 @@
                     "properties": {
                       "id": {
                         "type": "string",
-                        "example": "clinic-uuid"
+                        "example": "doctor-uuid"
                       },
                       "name": {
                         "type": "string",
-                        "example": "House"
+                        "example": "John Doe"
+                      },
+                      "gender": {
+                        "type": "string",
+                        "example": "MALE"
+                      },
+                      "age": {
+                        "type": "number",
+                        "example": 45
+                      },
+                      "specialization": {
+                        "type": "string",
+                        "example": "IMMUNOLOGY"
+                      },
+                      "phone": {
+                        "type": "string",
+                        "example": "+1234567890"
+                      },
+                      "fees": {
+                        "type": "number",
+                        "example": 200
+                      },
+                      "profilePic": {
+                        "type": "string",
+                        "example": "https://res.cloudinary.com/deh1n7kqj/image/upload/v1770577124/DOCTORS/profile_pictures/DOCTOR_102ef1ca-3084-41f3-a225-1058e7059ee8_profile_picture_1770577124527.jpg"
                       }
                     }
                   }
                 },
-                "message": {
+                "messageEn": {
                   "type": "string",
                   "example": "Clinic doctors retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع أطباء العيادة بنجاح"
                 }
               },
               "xml": {
                 "name": "main"
               }
             }
+          },
+          "400": {
+            "description": "Bad request"
           }
         }
       }
@@ -3848,13 +4042,6 @@
             "required": true,
             "type": "string",
             "description": "Doctor ID"
-          },
-          {
-            "name": "Authorization",
-            "in": "cookie",
-            "description": "Bearer token for authentication",
-            "required": true,
-            "type": "string"
           },
           {
             "name": "clinicId",
@@ -3902,9 +4089,6 @@
           },
           "400": {
             "description": "Bad request - missing doctor ID or invalid parameters"
-          },
-          "401": {
-            "description": "Unauthorized - user not authenticated"
           }
         }
       }
@@ -3922,13 +4106,6 @@
             "required": true,
             "type": "string",
             "description": "Doctor ID"
-          },
-          {
-            "name": "Authorization",
-            "in": "cookie",
-            "description": "Bearer token for authentication",
-            "required": true,
-            "type": "string"
           },
           {
             "name": "date",
@@ -3987,9 +4164,6 @@
           },
           "400": {
             "description": "Bad request - missing date, invalid format, or past date"
-          },
-          "401": {
-            "description": "Unauthorized - user not authenticated"
           }
         }
       }
@@ -5089,6 +5263,368 @@
           },
           "401": {
             "description": "Unauthorized - doctor not authenticated"
+          }
+        }
+      }
+    },
+    "/appointments/doctor/schedule/check-appointments": {
+      "get": {
+        "tags": [
+          "Appointments"
+        ],
+        "description": "Check for existing confirmed appointments in a doctor schedule",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication (must be a doctor)",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "scheduleId",
+            "in": "query",
+            "description": "Schedule ID to check",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "startDate",
+            "in": "query",
+            "description": "Optional for vacation. format: YYYY-MM-DD",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "endDate",
+            "in": "query",
+            "description": "Optional for vacation. format: YYYY-MM-DD",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Check completed successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "existing": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "numOfAppointments": {
+                      "type": "number",
+                      "example": 3
+                    }
+                  }
+                },
+                "message": {
+                  "type": "string",
+                  "example": "Check completed successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - missing/invalid parameters"
+          },
+          "401": {
+            "description": "Unauthorized - doctor not authenticated"
+          },
+          "403": {
+            "description": "Forbidden - schedule does not belong to the doctor"
+          },
+          "404": {
+            "description": "Schedule not found"
+          }
+        }
+      }
+    },
+    "/appointments/doctor/vacation": {
+      "patch": {
+        "tags": [
+          "Appointments"
+        ],
+        "description": "Set vacation period for a specific doctor schedule. This will automatically cancel any existing confirmed appointments in the period (use vacation-check first to warn the doctor)",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication (must be a doctor)",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Vacation details",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "scheduleId": {
+                  "type": "string",
+                  "example": "schedule-uuid"
+                },
+                "startDate": {
+                  "type": "string",
+                  "example": "2026-03-01"
+                },
+                "endDate": {
+                  "type": "string",
+                  "example": "2026-03-15"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vacation set successfully (any conflicting appointments cancelled)"
+          },
+          "400": {
+            "description": "Bad request - invalid dates or date range"
+          },
+          "401": {
+            "description": "Unauthorized - doctor not authenticated"
+          },
+          "403": {
+            "description": "Forbidden - schedule does not belong to the doctor"
+          },
+          "404": {
+            "description": "Schedule not found"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Appointments"
+        ],
+        "description": "Get all vacation periods for the doctor, grouped by schedule with details including affected appointments",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication (must be a doctor)",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Doctor vacations retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "breakStart": {
+                        "type": "string",
+                        "example": "2026-03-01"
+                      },
+                      "breakEnd": {
+                        "type": "string",
+                        "example": "2026-03-15"
+                      },
+                      "vacations": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "vacationId": {
+                              "type": "string",
+                              "example": "vacation-uuid-2"
+                            },
+                            "scheduleId": {
+                              "type": "string",
+                              "example": "schedule-uuid-2"
+                            },
+                            "clinicId": {},
+                            "clinicName": {},
+                            "clinicAddress": {},
+                            "dayOfWeek": {
+                              "type": "string",
+                              "example": "WEDNESDAY"
+                            },
+                            "isOnline": {
+                              "type": "boolean",
+                              "example": true
+                            },
+                            "status": {
+                              "type": "string",
+                              "example": "ACTIVE"
+                            },
+                            "cancelledAppointments": {
+                              "type": "number",
+                              "example": 2
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "message": {
+                  "type": "object",
+                  "properties": {
+                    "en": {
+                      "type": "string",
+                      "example": "Doctor's vacations retrieved successfully"
+                    },
+                    "ar": {
+                      "type": "string",
+                      "example": "تم استرجاع إجازات الطبيب بنجاح"
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - doctor ID missing or invalid"
+          },
+          "401": {
+            "description": "Unauthorized - doctor not authenticated"
+          }
+        }
+      }
+    },
+    "/appointments/doctor/schedule/delete": {
+      "delete": {
+        "tags": [
+          "Appointments"
+        ],
+        "description": "Delete a doctor\\'s schedule. If there are any appointments linked to this schedule, they will be automatically cancelled",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication (must be a doctor)",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Schedule deletion payload",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "scheduleId": {
+                  "type": "string",
+                  "example": "schedule-uuid"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Schedule successfully deleted (any associated confirmed appointments were cancelled)",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "success": {
+                  "type": "boolean",
+                  "example": true
+                },
+                "message": {
+                  "type": "object",
+                  "properties": {
+                    "en": {
+                      "type": "string",
+                      "example": "Schedule deleted successfully"
+                    },
+                    "ar": {
+                      "type": "string",
+                      "example": "تم حذف الجدول بنجاح"
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - missing scheduleId in body or invalid request"
+          },
+          "401": {
+            "description": "Unauthorized - missing or invalid token"
+          },
+          "403": {
+            "description": "Forbidden - schedule does not belong to the authenticated doctor"
+          },
+          "404": {
+            "description": "Schedule not found"
+          }
+        }
+      }
+    },
+    "/appointments/doctor/vacation/cancel": {
+      "patch": {
+        "tags": [
+          "Appointments"
+        ],
+        "description": "Cancel a specific vacation period for a doctor schedule",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication (must be a doctor)",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Vacation cancellation details",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "vacationId": {
+                  "type": "string",
+                  "example": "vacation-uuid"
+                },
+                "scheduleId": {
+                  "type": "string",
+                  "example": "schedule-uuid"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Vacation removed successfully"
+          },
+          "400": {
+            "description": "Bad request - missing vacationId or scheduleId, or invalid parameters"
+          },
+          "401": {
+            "description": "Unauthorized - doctor not authenticated"
+          },
+          "403": {
+            "description": "Forbidden - vacation or schedule does not belong to the doctor"
+          },
+          "404": {
+            "description": "Vacation or schedule not found"
           }
         }
       }

@@ -5,7 +5,7 @@ import { DoctorController } from "@/controllers/doctor.controller";
 import { AppointmentController } from "@/controllers/appointment.controller";
 import { ValidationMiddleware } from "@/middlewares/validation.middleware";
 import { AuthMiddleware } from "@/middlewares/auth.middleware";
-import { BookAppointmentDto, RescheduleAppointmentDto, RescheduleAppointmentByDoctorDto, EnterDoctorScheduleDto, EditDoctorScheduleDto } from "@/dtos/appointments.dto";
+import { BookAppointmentDto, RescheduleAppointmentDto, RescheduleAppointmentByDoctorDto, EnterDoctorScheduleDto, EditDoctorScheduleDto, HandleDoctorVacationDto } from "@/dtos/appointments.dto";
 
 export class AppointmentRoute implements Routes {
     public path = '/appointments';
@@ -20,33 +20,78 @@ export class AppointmentRoute implements Routes {
 
     private initializeRoutes() {
         this.router.get(
-            `${this.path}/online-doctors`,
+            `${this.path}/doctors`,
             /* 
-                #swagger.path = '/appointments/online-doctors'
+                #swagger.path = '/appointments/doctors'
                 #swagger.method = 'get'
                 #swagger.tags = ['Appointments']
-                #swagger.parameters['Authorization'] = {
-                    in: 'cookie',
-                    description: 'Bearer token for authentication',
+                #swagger.description = 'Get all doctors available for booking appointments'
+                #swagger.parameters['lang'] = {
+                    in: 'query',
+                    description: 'Required language for specialization',
                     required: true,
                     type: 'string'
                 }
-                #swagger.description = 'Get all available online doctors'
+                #swagger.parameters['gender'] = {
+                    in: 'query',
+                    description: 'Filter doctors by gender (MALE or FEMALE)',
+                    required: false,
+                    type: 'string'
+                }
+                #swagger.parameters['minFees'] = {
+                    in: 'query',
+                    description: 'Minimum fees filter',
+                    required: false,
+                    type: 'number'
+                }
+                #swagger.parameters['maxFees'] = {
+                    in: 'query',
+                    description: 'Maximum fees filter',
+                    required: false,
+                    type: 'number'
+                }
+                #swagger.parameters['isOnline'] = {
+                    in: 'query',
+                    description: 'Filter for online availability (true for online, false for offline)',
+                    required: false,
+                    type: 'boolean'
+                }
                 #swagger.responses[200] = {
-                    description: 'Online doctors retrieved successfully',
+                    description: 'Doctors retrieved successfully',
                     schema: {
                         data: [
                             {
                                 id: 'doctor-uuid',
-                                name: 'House'
+                                name: 'John Doe',
+                                gender: 'MALE',
+                                age: 45,
+                                specialization: 'IMMUNOLOGY',
+                                phone: '+1234567890',
+                                fees: 200,
+                                profilePic: 'https://res.cloudinary.com/deh1n7kqj/image/upload/v1770577124/DOCTORS/profile_pictures/DOCTOR_102ef1ca-3084-41f3-a225-1058e7059ee8_profile_picture_1770577124527.jpg',
+                                clinics: [
+                                    {
+                                        id: 'clinic-uuid',
+                                        name: 'New Cairo Medical Clinic',
+                                        phone: '+1234567890',
+                                        canPayOnline: true,
+                                        opening_at: '09:00',
+                                        closing_at: '17:00',
+                                        address: '123 Main Street, Medical Park',
+                                        address_maps_link: 'https://maps.google.com/?q=123+Main+Street'
+                                    }
+                                ]
                             }
                         ],
-                        message: 'Online doctors retrieved successfully'
+                        messageEn: 'Doctors retrieved successfully',
+                        messageAr: 'تم استرجاع الأطباء بنجاح'
                     }
                 }
+                #swagger.responses[400] = {
+                    description: 'Bad request'
+                }
             */
-            AuthMiddleware,
-            this.doctorController.getOnlineDoctors
+            this.doctorController.getDoctors
         );
 
         // get all clinics
@@ -56,33 +101,63 @@ export class AppointmentRoute implements Routes {
                 #swagger.path = '/appointments/clinics'
                 #swagger.method = 'get'
                 #swagger.tags = ['Appointments']
-                #swagger.parameters['Authorization'] = {
-                    in: 'cookie',
-                    description: 'Bearer token for authentication',
+                #swagger.description = 'Get all active clinics available for booking appointments'
+                #swagger.parameters['lang'] = {
+                    in: 'query',
+                    description: 'Required language for specialization',
                     required: true,
                     type: 'string'
                 }
-                #swagger.description = 'Get all clinics available for booking appointments'
+                #swagger.parameters['payOnline'] = {
+                    in: 'query',
+                    description: 'Filter clinics that support online payment (true) or not (false)',
+                    required: false,
+                    type: 'boolean'
+                }
                 #swagger.responses[200] = {
-                    description: 'Active clinics retrieved successfully',
+                    description: 'Clinics retrieved successfully',
                     schema: {
                         data: [
                             {
                                 id: 'clinic-uuid',
                                 name: 'New Cairo Medical Clinic',
-                                opening_at: '10:00',
+                                phone: '+1234567890',
+                                canPayOnline: true,
+                                opening_at: '09:00',
                                 closing_at: '17:00',
                                 address: '123 Main Street, Medical Park',
                                 address_maps_link: 'https://maps.google.com/?q=123+Main+Street',
-                                phone: '+1234567890',
-                                canPayOnline: true
+                                doctors: [
+                                    {
+                                        id: 'doctor-uuid',
+                                        name: 'John Doe',
+                                        gender: 'MALE',
+                                        age: 45,
+                                        specialization: 'IMMUNOLOGY',
+                                        phone: '+1234567890',
+                                        fees: 200,
+                                        profilePic: 'https://res.cloudinary.com/deh1n7kqj/image/upload/v1770577124/DOCTORS/profile_pictures/DOCTOR_102ef1ca-3084-41f3-a225-1058e7059ee8_profile_picture_1770577124527.jpg'
+                                    }, 
+                                    {
+                                        id: 'doctor-uuid2',
+                                        name: 'House',
+                                        gender: 'MALE',
+                                        age: 45,
+                                        phone: '+1234567890',
+                                        fees: 200,
+                                        profilePic: 'https://res.cloudinary.com/deh1n7kqj/image/upload/v1770577124/DOCTORS/profile_pictures/DOCTOR_102ef1ca-3084-41f3-a225-1058e7059ee8_profile_picture_1770577124527.jpg'
+                                    }
+                                ]
                             }
                         ],
-                        message: 'Clinics retrieved successfully'
+                        messageEn: 'Clinics retrieved successfully',
+                        messageAr: 'تم استرجاع العيادات بنجاح'
                     }
                 }
+                #swagger.responses[400] = {
+                    description: 'Bad request'
+                }
             */
-            AuthMiddleware,
             this.clinicController.getActiveClinics
         );
 
@@ -93,33 +168,54 @@ export class AppointmentRoute implements Routes {
                 #swagger.path = '/appointments/clinic/{clinicId}/doctors'
                 #swagger.method = 'get'
                 #swagger.tags = ['Appointments']
-                #swagger.parameters['Authorization'] = {
-                    in: 'cookie',
-                    description: 'Bearer token for authentication',
-                    required: true,
-                    type: 'string'
-                }
-                #swagger.description = 'Get all doctors who are accepting appointments at a selected clinic'
+                #swagger.description = 'Get all doctors in a specific clinic'
                 #swagger.parameters['clinicId'] = {
                     in: 'path',
                     description: 'Clinic ID',
                     required: true,
                     type: 'string'
                 }
+                #swagger.parameters['gender'] = {
+                    in: 'query',
+                    description: 'Filter doctors by gender (MALE or FEMALE)',
+                    required: false,
+                    type: 'string'
+                }
+                #swagger.parameters['minFees'] = {
+                    in: 'query',
+                    description: 'Minimum fees filter',
+                    required: false,
+                    type: 'number'
+                }
+                #swagger.parameters['maxFees'] = {
+                    in: 'query',
+                    description: 'Maximum fees filter',
+                    required: false,
+                    type: 'number'
+                }
                 #swagger.responses[200] = {
                     description: 'Clinic doctors retrieved successfully',
                     schema: {
                         data: [
                             {
-                                id: 'clinic-uuid',
-                                name: 'House'
+                                id: 'doctor-uuid',
+                                name: 'John Doe',
+                                gender: 'MALE',
+                                age: 45,
+                                specialization: 'IMMUNOLOGY',
+                                phone: '+1234567890',
+                                fees: 200,
+                                profilePic: 'https://res.cloudinary.com/deh1n7kqj/image/upload/v1770577124/DOCTORS/profile_pictures/DOCTOR_102ef1ca-3084-41f3-a225-1058e7059ee8_profile_picture_1770577124527.jpg',
                             }
                         ],
-                        message: 'Clinic doctors retrieved successfully'
+                        messageEn: 'Clinic doctors retrieved successfully',
+                        messageAr: 'تم استرجاع أطباء العيادة بنجاح'
                     }
                 }
+                #swagger.responses[400] = {
+                    description: 'Bad request'
+                }
             */
-            AuthMiddleware,
             this.clinicController.getClinicDoctors
         );
 
@@ -130,12 +226,6 @@ export class AppointmentRoute implements Routes {
                 #swagger.path = '/appointments/doctor/{doctorId}/available-days'
                 #swagger.method = 'get'
                 #swagger.tags = ['Appointments']
-                #swagger.parameters['Authorization'] = {
-                    in: 'cookie',
-                    description: 'Bearer token for authentication',
-                    required: true,
-                    type: 'string'
-                }
                 #swagger.description = 'Get available days for booking with a specific doctor (up to 30 days ahead)'
                 #swagger.parameters['doctorId'] = {
                     in: 'path',
@@ -165,11 +255,7 @@ export class AppointmentRoute implements Routes {
                 #swagger.responses[400] = {
                     description: 'Bad request - missing doctor ID or invalid parameters'
                 }
-                #swagger.responses[401] = {
-                    description: 'Unauthorized - user not authenticated'
-                }
             */
-            AuthMiddleware,
             this.appointmentController.getAvailableDays
         );
 
@@ -180,12 +266,6 @@ export class AppointmentRoute implements Routes {
                 #swagger.path = '/appointments/doctor/{doctorId}/available-slots'
                 #swagger.method = 'get'
                 #swagger.tags = ['Appointments']
-                #swagger.parameters['Authorization'] = {
-                    in: 'cookie',
-                    description: 'Bearer token for authentication',
-                    required: true,
-                    type: 'string'
-                }
                 #swagger.description = 'Get available time slots for a specific doctor on a given date'
                 #swagger.parameters['doctorId'] = {
                     in: 'path',
@@ -228,11 +308,7 @@ export class AppointmentRoute implements Routes {
                 #swagger.responses[400] = {
                     description: 'Bad request - missing date, invalid format, or past date'
                 }
-                #swagger.responses[401] = {
-                    description: 'Unauthorized - user not authenticated'
-                }
             */
-            AuthMiddleware,
             this.appointmentController.getAvailableSlots
         );
 
@@ -943,6 +1019,261 @@ export class AppointmentRoute implements Routes {
             */
             AuthMiddleware,
             this.appointmentController.getScheduleByDate
+        );
+
+        this.router.get(
+            `${this.path}/doctor/schedule/check-appointments`,
+            /* 
+                #swagger.path = '/appointments/doctor/schedule/check-appointments'
+                #swagger.method = 'get'
+                #swagger.tags = ['Appointments']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication (must be a doctor)',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.description = 'Check for existing confirmed appointments in a doctor schedule'
+                #swagger.parameters['scheduleId'] = {
+                    in: 'query',
+                    description: 'Schedule ID to check',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['startDate'] = {
+                    in: 'query',
+                    description: 'Optional for vacation. format: YYYY-MM-DD',
+                    required: false,
+                    type: 'string'
+                }
+                #swagger.parameters['endDate'] = {
+                    in: 'query',
+                    description: 'Optional for vacation. format: YYYY-MM-DD',
+                    required: false,
+                    type: 'string'
+                }
+                #swagger.responses[200] = {
+                    description: 'Check completed successfully',
+                    schema: {
+                        data: {
+                            existing: true,
+                            numOfAppointments: 3
+                        },
+                        message: 'Check completed successfully'
+                    }
+                }
+                #swagger.responses[400] = {
+                    description: 'Bad request - missing/invalid parameters'
+                }
+                #swagger.responses[401] = {
+                    description: 'Unauthorized - doctor not authenticated'
+                }
+                #swagger.responses[403] = {
+                    description: 'Forbidden - schedule does not belong to the doctor'
+                }
+                #swagger.responses[404] = {
+                    description: 'Schedule not found'
+                }
+            */
+            AuthMiddleware,
+            this.appointmentController.checkConflictingAppointments 
+        );
+
+        this.router.patch(
+            `${this.path}/doctor/vacation`,
+            /* 
+                #swagger.path = '/appointments/doctor/vacation'
+                #swagger.method = 'patch'
+                #swagger.tags = ['Appointments']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication (must be a doctor)',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.description = 'Set vacation period for a specific doctor schedule. This will automatically cancel any existing confirmed appointments in the period (use vacation-check first to warn the doctor)'
+                #swagger.parameters['body'] = {
+                    in: 'body',
+                    description: 'Vacation details',
+                    required: true,
+                    schema: {
+                        scheduleId: 'schedule-uuid',
+                        startDate: '2026-03-01',
+                        endDate: '2026-03-15'
+                    }
+                }
+                #swagger.responses[200] = {
+                    description: 'Vacation set successfully (any conflicting appointments cancelled)'
+                }
+                #swagger.responses[400] = {
+                    description: 'Bad request - invalid dates or date range'
+                }
+                #swagger.responses[401] = {
+                    description: 'Unauthorized - doctor not authenticated'
+                }
+                #swagger.responses[403] = {
+                    description: 'Forbidden - schedule does not belong to the doctor'
+                }
+                #swagger.responses[404] = {
+                    description: 'Schedule not found'
+                }
+            */
+            AuthMiddleware,
+            ValidationMiddleware(HandleDoctorVacationDto),
+            this.appointmentController.handleDoctorVacation
+        );
+
+        this.router.delete(
+            `${this.path}/doctor/schedule/delete`,
+            /* 
+                #swagger.path = '/appointments/doctor/schedule/delete'
+                #swagger.method = 'delete'
+                #swagger.tags = ['Appointments']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication (must be a doctor)',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.description = 'Delete a doctor\'s schedule. If there are any appointments linked to this schedule, they will be automatically cancelled'
+                #swagger.parameters['body'] = {
+                    in: 'body',
+                    description: 'Schedule deletion payload',
+                    required: true,
+                    schema: {
+                        scheduleId: 'schedule-uuid'
+                    }
+                }
+                #swagger.responses[200] = {
+                    description: 'Schedule successfully deleted (any associated confirmed appointments were cancelled)',
+                    schema: {
+                        success: true,
+                        message: {
+                            en: "Schedule deleted successfully",
+                            ar: "تم حذف الجدول بنجاح"
+                        }
+                    }
+                }
+                #swagger.responses[400] = {
+                    description: 'Bad request - missing scheduleId in body or invalid request'
+                }
+                #swagger.responses[401] = {
+                    description: 'Unauthorized - missing or invalid token'
+                }
+                #swagger.responses[403] = {
+                    description: 'Forbidden - schedule does not belong to the authenticated doctor'
+                }
+                #swagger.responses[404] = {
+                    description: 'Schedule not found'
+                }
+            */
+            AuthMiddleware,
+            this.appointmentController.deleteDoctorSchedule
+        );
+
+        this.router.get(
+            `${this.path}/doctor/vacation`,
+            /* 
+                #swagger.path = '/appointments/doctor/vacation'
+                #swagger.method = 'get'
+                #swagger.tags = ['Appointments']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication (must be a doctor)',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.description = 'Get all vacation periods for the doctor, grouped by schedule with details including affected appointments'
+                #swagger.responses[200] = {
+                    description: 'Doctor vacations retrieved successfully',
+                    schema: {
+                        data: [
+                            {
+                                breakStart: '2026-03-01',
+                                breakEnd: '2026-03-15',
+                                vacations: [
+                                    {
+                                        vacationId: 'vacation-uuid',
+                                        scheduleId: 'schedule-uuid',
+                                        clinicId: 'clinic-uuid',
+                                        clinicName: 'New Cairo Medical Clinic',
+                                        clinicAddress: '123 Main Street, Medical Park',
+                                        dayOfWeek: 'MONDAY',
+                                        isOnline: false,
+                                        status: 'ACTIVE',
+                                        cancelledAppointments: 5
+                                    },
+                                    {
+                                        vacationId: 'vacation-uuid-2',
+                                        scheduleId: 'schedule-uuid-2',
+                                        clinicId: null,
+                                        clinicName: null,
+                                        clinicAddress: null,
+                                        dayOfWeek: 'WEDNESDAY',
+                                        isOnline: true,
+                                        status: 'ACTIVE',
+                                        cancelledAppointments: 2
+                                    }
+                                ]
+                            }
+                        ],
+                        message: {
+                            en: "Doctor's vacations retrieved successfully",
+                            ar: "تم استرجاع إجازات الطبيب بنجاح"
+                        }
+                    }
+                }
+                #swagger.responses[400] = {
+                    description: 'Bad request - doctor ID missing or invalid'
+                }
+                #swagger.responses[401] = {
+                    description: 'Unauthorized - doctor not authenticated'
+                }
+            */
+            AuthMiddleware,
+            this.appointmentController.getDoctorVacations
+        );
+
+        this.router.patch(
+            `${this.path}/doctor/vacation/cancel`,
+            /* 
+                #swagger.path = '/appointments/doctor/vacation/cancel'
+                #swagger.method = 'patch'
+                #swagger.tags = ['Appointments']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication (must be a doctor)',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.description = 'Cancel a specific vacation period for a doctor schedule'
+                #swagger.parameters['body'] = {
+                    in: 'body',
+                    description: 'Vacation cancellation details',
+                    required: true,
+                    schema: {
+                        vacationId: 'vacation-uuid',
+                        scheduleId: 'schedule-uuid'
+                    }
+                }
+                #swagger.responses[200] = {
+                    description: 'Vacation removed successfully',
+                }
+                #swagger.responses[400] = {
+                    description: 'Bad request - missing vacationId or scheduleId, or invalid parameters'
+                }
+                #swagger.responses[401] = {
+                    description: 'Unauthorized - doctor not authenticated'
+                }
+                #swagger.responses[403] = {
+                    description: 'Forbidden - vacation or schedule does not belong to the doctor'
+                }
+                #swagger.responses[404] = {
+                    description: 'Vacation or schedule not found'
+                }
+            */
+            AuthMiddleware,
+            this.appointmentController.cancelDoctorVacation
         );
     }
 }

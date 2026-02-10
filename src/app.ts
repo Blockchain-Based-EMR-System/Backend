@@ -16,6 +16,7 @@ import passport from 'passport';
 import '@utils/passsportGoogle';
 import { createServer, Server as HttpServer } from 'http';
 import { SocketService } from '@/services/socket.service';
+import { VacationCronService } from '@/services/cron.service';
 
 export class App {
   public app: express.Application;
@@ -37,6 +38,8 @@ export class App {
 
     this.socketService = new SocketService();
     this.socketService.initialize(this.httpServer);
+
+    VacationCronService.startCronJobs();
 
   }
 

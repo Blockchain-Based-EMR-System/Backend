@@ -68,6 +68,7 @@ model Doctor {
   clinic_doctors                         ClinicDoctor[]
   user                                   User                @relation("UserAsDoctor", fields: [id], references: [id], onDelete: Cascade)
   doctorSchedules                        DoctorSchedule[]
+  vacations                              Vacation[]
 
   @@map("Doctor")
 }
@@ -253,28 +254,55 @@ model RefreshToken {
 }
 
 model DoctorSchedule {
-  id            String    @id @default(uuid())
+  id            String     @id @default(uuid())
   doctor_id     String
   clinic_id     String?
   day_of_week   DayOfWeek
   start_time    String
   end_time      String
   slot_duration Int
-  buffer_time   Int       @default(0)
-  is_online     Boolean   @default(true)
-  is_active     Boolean   @default(true)
+  buffer_time   Int        @default(0)
+  is_online     Boolean    @default(true)
+  is_active     Boolean    @default(true)
   break_start   String?
   break_end     String?
-  created_at    DateTime  @default(now())
-  modified_at   DateTime  @updatedAt
+  created_at    DateTime   @default(now())
+  modified_at   DateTime   @updatedAt
   deleted_at    DateTime?
-  clinic        Clinic?   @relation(fields: [clinic_id], references: [id], onDelete: Cascade)
-  doctor        Doctor    @relation(fields: [doctor_id], references: [id], onDelete: Cascade)
+  vacations     Vacation[]
+  clinic        Clinic?    @relation(fields: [clinic_id], references: [id], onDelete: Cascade)
+  doctor        Doctor     @relation(fields: [doctor_id], references: [id], onDelete: Cascade)
 
-  @@unique([doctor_id, clinic_id, day_of_week])
   @@index([doctor_id])
   @@index([clinic_id])
   @@map("DoctorSchedules")
+}
+
+model Vacation {
+  id          String         @id @default(uuid())
+  doctor_id   String
+  schedule_id String
+  start_date  String
+  end_date    String
+  status      VacationStatus @default(UPCOMING)
+  created_at  DateTime       @default(now())
+  modified_at DateTime       @updatedAt
+  deleted_at  DateTime?
+
+  doctor   Doctor         @relation(fields: [doctor_id], references: [id], onDelete: Cascade)
+  schedule DoctorSchedule @relation(fields: [schedule_id], references: [id], onDelete: Cascade)
+
+  @@index([doctor_id])
+  @@index([schedule_id])
+  @@index([start_date])
+  @@index([end_date])
+  @@map("Vacations")
+}
+
+enum VacationStatus {
+  UPCOMING
+  CURRENT
+  ENDED
 }
 
 enum ScanLabType {

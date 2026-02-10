@@ -148,6 +148,10 @@ export const ErrorMessages = {
         en: 'Schedule already exists for this day and clinic',
         ar: 'الجدول موجود بالفعل لهذا اليوم والعيادة'
     },
+    SPECIALIZATION_LANG: {
+        en: "Language must be 'en' or 'ar'",
+        ar: "يجب أن تكون اللغة 'en' أو 'ar'"
+    },
 
     // Clinic errors
     CLINIC_NOT_FOUND: {
@@ -166,11 +170,30 @@ export const ErrorMessages = {
         en: 'You are not authorized to update this clinic',
         ar: 'ليس لديك صلاحية لتحديث هذه العيادة',
     },
-
+    SCHEDULE_ALREADY_DELETED: {
+        en: 'This schedule has already been deleted',
+        ar: 'تم حذف هذا الجدول مسبقًا',
+    },
+    SCHEDULE_ID_REQUIRED: {
+        en: 'Schedule ID is required',
+        ar: 'معرف الجدول مطلوب',
+    },
+    VACATION_DATES_REQUIRED: {
+        en: 'Vacation dates are required',
+        ar: 'تواريخ الإجازة مطلوبة',
+    },
+    INVALID_DATE_RANGE: {
+        en: 'Invalid date range',
+        ar: 'نطاق التاريخ غير صالح',
+    },
     // appointments 
     DOCTOR_ID_REQUIRED: {
         en: 'Doctor ID is required',
         ar: 'معرف الطبيب مطلوب',
+    },
+    INVALID_FEES_RANGE: {
+        en: 'Invalid fees range.',
+        ar: 'نطاق الرسوم غير صالح.'
     },
     PATIENT_ID_REQUIRED: {
         en: 'Patient ID is required',
@@ -219,6 +242,18 @@ export const ErrorMessages = {
     UNAUTHORIZED_SCHEDULE_ACCESS: {
         en: "You are not authorized to access this schedule",
         ar: "غير مصرح لك بالوصول إلى هذا الجدول"
+    },
+    SCHEDULE_CONFLICT_DIFFERENT_CLINIC: {
+        en: "There is a scheduling conflict on another clinic",
+        ar: "يوجد تعارض في المواعيد في عيادة اخرى"
+    },
+    ONLINE_OFFLINE_CONFLICT: {
+        en: "There is a conflict between online and offline schedules",
+        ar: "يوجد تعارض بين المواعيد الإلكترونية والحضورية"
+    },
+    EITHER_ONLINE_OR_OFFLINE: {
+        en: "Please choose either online or offline",
+        ar: "يرجى اختيار إما الإلكتروني أو الحضوري"
     },
     // Generic errors
     SOMETHING_WENT_WRONG: {

@@ -1,5 +1,5 @@
 import { User } from './users.interface';
-import { AppointmentStatus, DayOfWeek } from '@prisma/client'
+import { AppointmentStatus, DayOfWeek, VacationStatus } from '@prisma/client'
 
 export interface Appointment {
     id: string;
@@ -96,5 +96,30 @@ export interface DoctorSchedule {
     breakEnd: string | null;
 }
 
+export interface checkExistingAppointments {
+    existing: boolean,
+    numOfAppointments?: number
+}
 
+export interface ConflictingAppointment {
+  id: string;
+  scheduled_time: Date;
+}
 
+export interface Vacations {
+    vacationId: string;
+    scheduleId: string;
+    clinicId: string | null;
+    clinicName: string | null;  
+    clinicAddress: string | null; 
+    dayOfWeek: DayOfWeek;
+    isOnline: boolean;
+    status: VacationStatus;
+    cancelledAppointments: number;
+}
+
+export interface DoctorVacations {
+    breakStart: string;
+    breakEnd: string;
+    vacations: Vacations[];
+}

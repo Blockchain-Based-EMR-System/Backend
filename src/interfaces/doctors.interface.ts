@@ -1,4 +1,5 @@
-import { DoctorAccountStatus, AvailabilityType } from "@prisma/client";
+import { DoctorAccountStatus, AvailabilityType, Gender} from "@prisma/client";
+import { DoctorClinics } from "./clinics.interface";
 
 export interface Doctor {
   id: string;
@@ -20,4 +21,16 @@ export interface DoctorLoginData {
         specialization: string,
         account_status: DoctorAccountStatus
     }
+}
+
+export interface DoctorPersonalData {
+  id: string;
+  name: string;
+  gender: Gender;
+  age: number;
+  specialization: string;
+  phone: string;
+  fees: number;
+  profilePic: string;
+  clinics?: DoctorClinics[]
 }

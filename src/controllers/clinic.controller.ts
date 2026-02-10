@@ -7,6 +7,7 @@ import { createBilingualError, ErrorMessages } from "@/utils/errorMessages";
 import { createMultiLangMessage, SuccessResponseMessages } from "@/utils/responseMessages";
 import { NextFunction, Request, Response } from "express";
 import Container from "typedi";
+import { Gender } from "@prisma/client";
 
 export class ClinicController {
     public clinicService = Container.get(ClinicService);
@@ -44,8 +45,8 @@ export class ClinicController {
     public updateClinicById = catchAsync(async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
         const clinicId = req.params.id;
         const clinicUpdateData: CreateUpdateClinicRequestDto = req.body;
-        const isCreatingDoctor = await this.clinicService.isCreatingDoctorOfClinic(req.user.id, clinicId); 
-        if(!isCreatingDoctor) {
+        const isCreatingDoctor = await this.clinicService.isCreatingDoctorOfClinic(req.user.id, clinicId);
+        if (!isCreatingDoctor) {
             const error = createBilingualError(403, ErrorMessages.UNAUTHORIZED_CLINIC_UPDATE);
             throw new HttpException(error.status, error.message, error.messageAr);
         }
@@ -85,15 +86,47 @@ export class ClinicController {
     });
 
     public getClinicDoctors = async (req: Request, res: Response, next: NextFunction) => {
-        const {clinicId} = req.params;
-        const doctors = await this.clinicService.getClinicDoctors(clinicId);
-        res.status(200).json({ data: doctors, message: 'Clinic doctors retrieved successfully' });
+        const { clinicId } = req.params;
+        const { gender, minFees, maxFees } = req.query;
 
+        let validGender: Gender | undefined = undefined;
+        if (gender && typeof gender === 'string') {
+            const upperGender = gender.toUpperCase();
+            if (Object.values(Gender).includes(upperGender as Gender)) {
+                validGender = upperGender as Gender;
+            }
+        }
+
+        const finalMinFees = minFees && typeof minFees === 'string' ? parseFloat(minFees) : undefined;
+        const finalMaxFees = maxFees && typeof maxFees === 'string' ? parseFloat(maxFees) : undefined;
+
+        if (finalMinFees > finalMaxFees){
+            const error = createBilingualError(404, ErrorMessages.INVALID_FEES_RANGE);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const doctors = await this.clinicService.getClinicDoctors(clinicId, validGender, finalMinFees, finalMaxFees);
+        const response = createMultiLangMessage(SuccessResponseMessages.CLINIC_DOCTORS_RETRIEVED);
+        res.status(200).json({
+            data: doctors,
+            ...response
+        });
     }
 
     public getActiveClinics = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-        const clinics = await this.clinicService.getActiveClinics();
-        res.status(200).json({ data: clinics, message: 'Clinics retrieved successfully' });
+        const { canPayOnline, lang } = req.query;
+        if (!lang || (lang !== 'en' && lang !== 'ar')) {
+            const error = createBilingualError(400, ErrorMessages.SPECIALIZATION_LANG);
+            throw new HttpException(400, error.message, error.messageAr);
+        }
+
+        const payOnline = canPayOnline !== undefined ? canPayOnline === 'true' : undefined;
+        const clinics = await this.clinicService.getActiveClinics(lang as 'en' | 'ar', payOnline);
+        const response = createMultiLangMessage(SuccessResponseMessages.CLINICS_RETRIEVED_SUCCESSFULLY);
+        res.status(200).json({
+            data: clinics,
+            ...response
+        });
     }
 
     public updateClinicFeesById = catchAsync(async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
@@ -104,7 +137,7 @@ export class ClinicController {
             const error = createBilingualError(403, ErrorMessages.UNAUTHORIZED_CLINIC_UPDATE);
             throw new HttpException(error.status, error.message, error.messageAr);
         }
-        const isFeesUpdated = await this.clinicService.updateClinicFees(req.user.id , clinicId, fees);
+        const isFeesUpdated = await this.clinicService.updateClinicFees(req.user.id, clinicId, fees);
 
         if (!isFeesUpdated) {
             const error = createBilingualError(404, ErrorMessages.CLINIC_NOT_FOUND);

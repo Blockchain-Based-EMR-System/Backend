@@ -4,18 +4,24 @@ import { HttpException } from "@/exceptions/HttpException";
 import { ErrorMessages, createBilingualError } from "@/utils/errorMessages";
 import { Doctor, DoctorAccountStatus, PrismaClient, Role } from "@prisma/client";
 import { hash, compare } from "bcrypt";
-import { DoctorLoginData } from "@/interfaces/doctors.interface";
+import { DoctorLoginData, DoctorPersonalData } from "@/interfaces/doctors.interface";
 import { AuthService } from "./auth.service";
 import prisma from "@/config/prisma";
 import cloudinary from "@/utils/cloudinary";
 import { DOCTOR_FILES } from "@/interfaces";
-import  fs  from "fs";
-
+import fs from "fs";
+import { AvailabilityType, Gender } from "@prisma/client";
+import { UserService } from "./user.service";
+import { DoctorClinics } from "@/interfaces";
+import { formatSpecializationResponse } from "@/utils/specializationTransform";
+import { SpecializationKey } from "@/constants/specializations";
 
 const authService = new AuthService();
 
 @Service()
 export class DoctorService {
+
+    private userService = new UserService();
 
     public async signup(doctorData: DoctorSignupRequestDto, doctorFiles: {}): Promise<void> {
         // Check if email already exists
@@ -73,7 +79,7 @@ export class DoctorService {
         // Upload files and update doctor record with files urls        
         if (doctorFiles && Object.keys(doctorFiles).length > 0) {
             const doctorFilesArray = Object.values(doctorFiles).flat() as Express.Multer.File[];
-            
+
             await this._uploadFiles(doctorFilesArray, createdUserId);
         }
     }
@@ -231,7 +237,7 @@ export class DoctorService {
                         break;
                 }
                 console.log(`Deleting ${file.path}`);
-                
+
                 fs.unlinkSync(file.path); // Delete local file after upload
             });
 
@@ -259,28 +265,138 @@ export class DoctorService {
             throw error;
         }
     }
-    public async getOnlineDoctors(): Promise<Partial<Doctor>[]> {
-        const doctors = await prisma.doctor.findMany({
-            where:{
-                account_status: 'APPROVED',
-                present: true,
-                availability_type: {
-                    in: ['ONLINE', 'BOTH']
-                }
-            },
-            select:{
-                id: true,
-                user: {
-                    select:{
+
+    public async getDoctors(lang: 'en' | 'ar', gender?: string, minFees?: number, maxFees?: number, isOnline?: boolean ): Promise<DoctorPersonalData[]> {
+        const WhereClause: any = {
+            is_accepting: true,
+            doctor: {
+                account_status: DoctorAccountStatus.APPROVED,
+            }
+        };
+
+        if (isOnline !== undefined) {
+            WhereClause.doctor = {
+                ...(WhereClause.doctor || {}),
+                availability_type: isOnline
+                    ? { in: [AvailabilityType.ONLINE, AvailabilityType.BOTH] }
+                    : { in: [AvailabilityType.OFFLINE, AvailabilityType.BOTH] },
+            };
+        }
+
+        if (minFees !== undefined || maxFees !== undefined) {
+            WhereClause.fees = {};
+
+            if (minFees !== undefined) {
+                WhereClause.fees.gte = minFees;
+            }
+            if (maxFees !== undefined) {
+                WhereClause.fees.lte = maxFees;
+            }
+        }
+
+        if (gender) {
+            const normalized = gender.toUpperCase();
+            if (normalized === 'MALE' || normalized === 'FEMALE') {
+                WhereClause.doctor.user = {
+                    gender: normalized as Gender
+                };
+            }
+        }
+
+        const doctorClinics = await prisma.clinicDoctor.findMany({
+            where: WhereClause,
+            include: {
+                doctor: {
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                gender: true,
+                                phone: true,
+                                date_of_birth: true,
+                                photo_url: true,
+                            },
+                        },
+                    },
+                },
+                clinic: {
+                    select: {
+                        id: true,
                         name: true,
-                    }
+                        phone: true,
+                        canPayOnline: true,
+                        opening_at: true,
+                        closing_at: true,
+                        address: true,
+                        address_maps_link: true,
+                    },
+                },
+            },
+        });
+
+        const doctorGroupsMap = new Map<string, typeof doctorClinics>();
+        for (const docClinic of doctorClinics) {
+            const doctorId = docClinic.doctor.user?.id;
+            if (!doctorId) continue;
+
+            if (!doctorGroupsMap.has(doctorId)) {
+                doctorGroupsMap.set(doctorId, []);
+            }
+            doctorGroupsMap.get(doctorId)!.push(docClinic);
+        }
+
+        const doctorPersonalData: DoctorPersonalData[] = [];
+
+        for (const [doctorId, clinicRecords] of doctorGroupsMap.entries()) {
+            const representativeRecord = clinicRecords[0];
+            const doctor = representativeRecord.doctor;
+            const user = doctor.user;
+
+            if (!user) continue;
+
+            const age = await this.userService.calculateUserAge(user.date_of_birth);
+            const allClinics: DoctorClinics[] = [];
+
+            if (!isOnline) {
+                for (const record of clinicRecords) {
+                    allClinics.push({
+                        id: record.clinic.id,
+                        name: record.clinic.name,
+                        phone: record.clinic.phone,
+                        canPayOnline: record.clinic.canPayOnline,
+                        opening_at: record.clinic.opening_at,
+                        closing_at: record.clinic.closing_at,
+                        address: record.clinic.address,
+                        address_maps_link: record.clinic.address_maps_link || "",
+                    });
                 }
             }
-        });
-        return doctors.map(doctor => ({
-            id: doctor.id,
-            name: doctor.user.name,
-        }));
+            const specResponse = formatSpecializationResponse(
+                doctor.specialization as SpecializationKey,
+                lang
+            );
+
+            const specialization = specResponse.value;
+
+            doctorPersonalData.push({
+                id: user.id,
+                name: user.name,
+                gender: user.gender,
+                age,
+                specialization,
+                phone: user.phone,
+                fees: representativeRecord.fees,
+                profilePic: user.photo_url,
+                clinics: allClinics,
+            });
+        }
+
+        return doctorPersonalData;
     }
 
+
 }
+
+
+

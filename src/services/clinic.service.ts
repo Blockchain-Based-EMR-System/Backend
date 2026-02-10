@@ -2,12 +2,19 @@ import { ClinicActiveStatusResponseDto, ClinicResponseDto, CreateUpdateClinicReq
 import { Service } from "typedi";
 import prisma from "@/config/prisma";
 import { Clinic } from "@/interfaces";
-import { Doctor } from "@prisma/client";
+import { DoctorPersonalData } from "@/interfaces/doctors.interface";
+import { DoctorClinics } from "@/interfaces/clinics.interface"
+import { Doctor, Gender } from "@prisma/client";
 import { createBilingualError, ErrorMessages } from "@/utils/errorMessages";
 import { HttpException } from "@/exceptions/HttpException";
+import { UserService } from "./user.service";
+import { DoctorAccountStatus } from "@prisma/client";
+import { formatSpecializationResponse } from "@/utils/specializationTransform";
+import { SpecializationKey } from "@/constants/specializations";
 
 @Service()
 export class ClinicService {
+    private userService = new UserService();
     private MAX_CLINICS_PER_DOCTOR = 3;
 
     public async isDoctorAllowedToCreateClinic(doctorId: string): Promise<boolean> {
@@ -206,26 +213,40 @@ export class ClinicService {
         });
     }
 
-    public async getClinicDoctors(clinicId: string): Promise<Partial<Doctor>[]> {
+    public async getClinicDoctors(clinicId: string, gender?: Gender, minFees?: number, maxFees?: number): Promise<Partial<DoctorPersonalData>[]> {
         const doctors = await prisma.clinicDoctor.findMany({
             where: {
                 clinic_id: clinicId,
                 is_accepting: true,
+                fees: {
+                    ...(minFees !== undefined && { gte: minFees }),
+                    ...(maxFees !== undefined && { lte: maxFees })
+                },
                 doctor: {
                     account_status: 'APPROVED',
                     present: true,
                     availability_type: {
                         in: ['OFFLINE', 'BOTH']
                     },
+                    user: {
+                        ...(gender && { gender }),
+                    }
+
                 },
             },
-            include: {
+            select: {
+                fees: true,
                 doctor: {
-                    include: {
+                    select: {
+                        specialization: true,
                         user: {
                             select: {
                                 id: true,
-                                name: true
+                                name: true,
+                                gender: true,
+                                date_of_birth: true,
+                                phone: true,
+                                photo_url: true,
                             },
                         },
                     },
@@ -233,32 +254,27 @@ export class ClinicService {
             },
         });
 
-        return doctors.map(d => ({
-            id: d.doctor.id,
-            name: d.doctor.user.name,
-        }));
-    }
+        const results = await Promise.all(
+            doctors.map(async (doc) => {
+                const user = doc.doctor.user;
+                const age = await this.userService.calculateUserAge(user.date_of_birth);
 
-    public async getActiveClinics(): Promise<Partial<Clinic>[]> {
-        const clinics = await prisma.clinic.findMany({
-            where: {
-                is_active: true,
-                deleted_at: null,
-            },
-            select: {
-                id: true,
-                name: true,
-                opening_at: true,
-                closing_at: true,
-                address: true,
-                address_maps_link: true,
-                phone: true,
-                canPayOnline: true,
-            }
-        });
-        return clinics.map(c => ({
-            ...c
-        }));
+                const doctorData = {
+                    id: user.id,
+                    name: user.name,
+                    gender: user.gender,
+                    age,
+                    specialization: doc.doctor.specialization,
+                    phone: user.phone,
+                    fees: doc.fees,
+                    profilePic: user.photo_url,
+                } satisfies Partial<DoctorPersonalData>;
+
+                return doctorData;
+            })
+        );
+
+        return results;
     }
 
     public async getAllClinics(): Promise<ClinicResponseDto[]> {
@@ -329,5 +345,104 @@ export class ClinicService {
             return false;
         }
         return true;
+    }
+
+    public async getActiveClinics(lang: 'en' | 'ar', payOnline?: boolean): Promise<DoctorClinics[]> {
+
+        const clinicDoctors = await prisma.clinicDoctor.findMany({
+            where: {
+                is_accepting: true,
+                doctor: {
+                    account_status: DoctorAccountStatus.APPROVED,
+                },
+                clinic: {
+                    ...(payOnline !== undefined && { canPayOnline: payOnline }),
+                }
+            },
+            include: {
+                doctor: {
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                gender: true,
+                                phone: true,
+                                date_of_birth: true,
+                                photo_url: true,
+                            },
+                        },
+                    },
+                },
+                clinic: {
+                    select: {
+                        id: true,
+                        name: true,
+                        phone: true,
+                        canPayOnline: true,
+                        opening_at: true,
+                        closing_at: true,
+                        address: true,
+                        address_maps_link: true,
+                    },
+                },
+            },
+        });
+
+        const clinicsGroupsMap = new Map<string, typeof clinicDoctors>();
+        for (const docClinic of clinicDoctors) {
+            const clinicId = docClinic.clinic.id;
+            if (!clinicId) continue;
+
+            if (!clinicsGroupsMap.has(clinicId)) {
+                clinicsGroupsMap.set(clinicId, []);
+            }
+            clinicsGroupsMap.get(clinicId)!.push(docClinic);
+        }
+
+        const clinicsData: DoctorClinics[] = [];
+
+        for (const [clinicId, doctorRecords] of clinicsGroupsMap.entries()) {
+            const representativeRecord = doctorRecords[0];
+            const clinic = representativeRecord.clinic;
+            const user = representativeRecord.doctor.user;
+
+            if (!user) continue;
+
+
+            const allDoctors: Partial<DoctorPersonalData>[] = [];
+
+            for (const record of doctorRecords) {
+                const age = await this.userService.calculateUserAge(record.doctor.user.date_of_birth);
+                const specResponse = formatSpecializationResponse(record.doctor.specialization as SpecializationKey, lang);
+                const specialization = specResponse.value;
+                
+                allDoctors.push({
+                    id: record.doctor.user.id,
+                    name: record.doctor.user.name,
+                    gender: record.doctor.user.gender,
+                    age,
+                    specialization,
+                    phone: record.doctor.user.phone,
+                    fees: representativeRecord.fees,
+                    profilePic: record.doctor.user.photo_url,
+                });
+            }
+
+            clinicsData.push({
+                id: clinic.id,
+                name: clinic.name,
+                phone: clinic.phone,
+                canPayOnline: clinic.canPayOnline,
+                opening_at: clinic.opening_at,
+                closing_at: clinic.closing_at,
+                address: clinic.address,
+                address_maps_link: clinic.address_maps_link || "",
+                doctors: allDoctors
+            });
+        }
+
+        return clinicsData;
+
     }
 }
