@@ -140,6 +140,10 @@ export const SuccessResponseMessages = {
         message_en: "Profile picture deleted successfully.",
         message_ar: "تم حذف صورة الملف الشخصي بنجاح.",
     },
+    USER_PROFILE_UPDATED_SUCCESSFULLY: {
+        message_en: "User profile updated successfully.",
+        message_ar: "تم تحديث الملف الشخصي للمستخدم بنجاح.",
+    },
     // success messages for appointments
     APPOINTMENT_BOOKED_SUCCESSFULLY: {
         message_en: "Appointment booked successfully.",

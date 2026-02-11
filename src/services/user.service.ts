@@ -1,9 +1,10 @@
 import cloudinary from "@/utils/cloudinary";
-import { PrismaClient } from "@prisma/client";
+import { AvailabilityType, Gender, PrismaClient, Role } from "@prisma/client";
 import { Service } from "typedi";
 import fs from "fs";
 import { createBilingualError, ErrorMessages } from "@/utils/errorMessages";
 import { HttpException } from "@/exceptions/HttpException";
+import { UpdateUserProfileDto } from "@/dtos/users.dto";
 
 const prisma = new PrismaClient();
 
@@ -85,5 +86,37 @@ export class UserService {
             age--;
         }
         return age;
+    }
+    public async updateUserProfile(userId: string, name?: string, phone?: string, gender?: Gender, dateOfBirth?: string, availability_type?: AvailabilityType): Promise<void> {
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+        });
+        if (!user) {
+            const error = createBilingualError(404, ErrorMessages.USER_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+        const updateData: UpdateUserProfileDto = {};
+        if (name) updateData.name = name;
+        if (phone) updateData.phone = phone;
+        if (gender) updateData.gender = gender;
+        if (dateOfBirth) updateData.date_of_birth = new Date(dateOfBirth);
+        if(availability_type && user.role === Role.DOCTOR) {
+            await prisma.$transaction([
+                prisma.user.update({
+                    where: { id: userId },
+                    data: updateData
+                }),
+                prisma.doctor.update({
+                    where: { id: userId },
+                    data: { availability_type }
+                })
+            ]);
+        }
+        else {
+            await prisma.user.update({
+                where: { id: userId },
+                data: updateData
+            });
+        }
     }
 }

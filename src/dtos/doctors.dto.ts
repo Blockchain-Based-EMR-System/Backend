@@ -1,7 +1,8 @@
 import { TransformSpecialization } from "@/utils/specializationTransform";
 import { IsValidSpecialization } from "@/validators/specialization.validator";
-import { Gender } from "@prisma/client";
+import { AvailabilityType, Gender } from "@prisma/client";
 import { IsString, IsNotEmpty, IsEmail } from "class-validator";
+import { UpdateUserProfileDto } from "./users.dto";
 
 export class DoctorSignupRequestDto {
     @IsString()
@@ -58,4 +59,9 @@ export class DoctorSetPasswordRequestDto {
 
 export class DoctorProfilePictureRequestDto {
     profilePicture: Express.Multer.File;
+}
+
+export class DoctorUpdateProfileRequestDto extends UpdateUserProfileDto {
+    @IsString()
+    availability_type?: AvailabilityType;
 }

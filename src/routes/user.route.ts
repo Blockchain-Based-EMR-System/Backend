@@ -1,4 +1,5 @@
 import { UsersController } from "@/controllers/user.controller";
+import { UpdateUserProfileDto } from "@/dtos/users.dto";
 import { Routes } from "@/interfaces";
 import { AuthMiddleware } from "@/middlewares/auth.middleware";
 import {uploadImage} from "@/middlewares/multer.middleware";
@@ -94,5 +95,45 @@ export class UsersRoute implements Routes {
             AuthMiddleware,
             errorWrapper(this.usersController.deleteProfilePicture)
         );
+
+        this.router.patch(
+            `${this.path}/update-profile`,
+            /*
+                #swagger.path = '/users/update-profile'
+                #swagger.tags = ['Users']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.requestBody = {
+                    required: true,
+                    content: {
+                        "application/json": {
+                            schema: {
+                                type: 'object',
+                                properties: {
+                                    name: { type: 'string', example: 'John Doe' },
+                                    phone: { type: 'string', example: '+1234567890' },
+                                    gender: { type: 'enum', enum: ['MALE', 'FEMALE'], example: 'MALE' },
+                                    dateOfBirth: { type: 'string', format: 'date', example: '1990-01-01' }
+                                }
+                            }
+                        }
+                    }
+                }
+                #swagger.responses[200] = {
+                    description: 'Profile updated successfully',
+                    schema: {
+                        messageEn: 'Profile updated successfully',
+                        messageAr: "تم تحديث الملف الشخصي بنجاح"
+                    }
+                }
+            */
+            AuthMiddleware,
+            ValidationMiddleware(UpdateUserProfileDto, false, false, true),
+            errorWrapper(this.usersController.updateUserProfile)
+        );
     }
-}
+}                                    

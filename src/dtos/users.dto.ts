@@ -66,3 +66,14 @@ export class ResetPasswordDto {
   @MaxLength(32)
   public newPassword: string;
 }
+
+export class UpdateUserProfileDto {
+  @IsString()
+  public name?: string;
+  @IsString()
+  public phone?: string;
+  @IsString()
+  public gender?: Gender;
+  @IsDateString()
+  public date_of_birth?: Date;
+}

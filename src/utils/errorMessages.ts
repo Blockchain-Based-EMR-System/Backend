@@ -79,7 +79,10 @@ export const ErrorMessages = {
         en: 'Validation error',
         ar: 'خطأ في التحقق من البيانات',
     },
-
+    NO_PROFILE_DATA_PROVIDED: {
+        en: 'No profile data provided for update',
+        ar: 'لم يتم تقديم بيانات الملف الشخصي للتحديث',
+    },
     // Google Auth errors
     NO_EMAIL_IN_GOOGLE_PROFILE: {
         en: 'No email found in Google profile',
