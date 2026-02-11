@@ -77,3 +77,15 @@ export class UpdateUserProfileDto {
   @IsDateString()
   public date_of_birth?: Date;
 }
+
+export class PasswordCheckDto {
+  @IsString()
+  @IsNotEmpty()
+  public password: string;
+}
+
+export class ChangePasswordDto {
+  @IsString()
+  @IsNotEmpty()
+  public newPassword: string;
+}

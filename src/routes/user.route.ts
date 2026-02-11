@@ -1,8 +1,8 @@
 import { UsersController } from "@/controllers/user.controller";
-import { UpdateUserProfileDto } from "@/dtos/users.dto";
+import { PasswordCheckDto, UpdateUserProfileDto } from "@/dtos/users.dto";
 import { Routes } from "@/interfaces";
 import { AuthMiddleware } from "@/middlewares/auth.middleware";
-import {uploadImage} from "@/middlewares/multer.middleware";
+import { uploadImage } from "@/middlewares/multer.middleware";
 import { ValidationMiddleware } from "@/middlewares/validation.middleware";
 import { errorWrapper } from "@/utils/errorWrapper";
 import { Router } from "express";
@@ -107,20 +107,16 @@ export class UsersRoute implements Routes {
                     required: true,
                     type: 'string'
                 }
-                #swagger.requestBody = {
-                    required: true,
-                    content: {
-                        "application/json": {
-                            schema: {
-                                type: 'object',
-                                properties: {
-                                    name: { type: 'string', example: 'John Doe' },
-                                    phone: { type: 'string', example: '+1234567890' },
-                                    gender: { type: 'enum', enum: ['MALE', 'FEMALE'], example: 'MALE' },
-                                    dateOfBirth: { type: 'string', format: 'date', example: '1990-01-01' }
-                                }
-                            }
-                        }
+                #swagger.parameters['body'] = {
+                    in: 'body',
+                    description: 'User profile update data',
+                    required: false,
+                    schema: {
+                        name: 'John Doe',
+                        phone: '1234567890',
+                        gender: 'MALE or FEMALE',
+                        dateOfBirth: '1990-01-01',
+                        availability_type: 'ONLINE, OFFLINE, BOTH or UNSET'
                     }
                 }
                 #swagger.responses[200] = {

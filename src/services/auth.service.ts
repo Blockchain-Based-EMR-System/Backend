@@ -93,8 +93,8 @@ export class AuthService {
         specialization: doctor.specialization,
         account_status: doctor.account_status
       } : undefined
-    };    
-    if( patientLoginData.doctor && patientLoginData.doctor.account_status !== DoctorAccountStatus.APPROVED) {
+    };
+    if (patientLoginData.doctor && patientLoginData.doctor.account_status !== DoctorAccountStatus.APPROVED) {
       const error = createBilingualError(403, ErrorMessages.DOCTOR_ACCOUNT_NOT_APPROVED);
       throw new HttpException(error.status, error.message, error.messageAr);
     }
@@ -427,6 +427,33 @@ export class AuthService {
     });
   }
 
+  public async checkPassword(userId: string, password: string): Promise<boolean> {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { password_hash: true }
+    });
+    if (!user) {
+      const error = createBilingualError(404, ErrorMessages.USER_NOT_FOUND);
+      throw new HttpException(error.status, error.message, error.messageAr);
+    }
+    const isMatch = await compare(password, user.password_hash);
+    return isMatch;
+  }
+
+  public async changePassword(userId: string, newPassword: string): Promise<void> {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+    if (!user) {
+      const error = createBilingualError(404, ErrorMessages.USER_NOT_FOUND);
+      throw new HttpException(error.status, error.message, error.messageAr);
+    }
+    const hashedPassword = await hash(newPassword, 10);
+    await prisma.user.update({
+      where: { id: userId },
+      data: { password_hash: hashedPassword }
+    });
+  }
 
   // Keep old methods for backward compatibility
   public createToken(user: User): AccessTokenData {

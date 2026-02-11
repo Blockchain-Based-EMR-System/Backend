@@ -45,7 +45,7 @@ export class UsersController {
     public updateUserProfile = async (req: RequestWithUser, res: Response, next: NextFunction) => {
         const userId = req.user?.id;
         const { name, phone, gender, dateOfBirth, availability_type } = req.body;
-        if(!name && !phone && !gender && !dateOfBirth) {
+        if (!name && !phone && !gender && !dateOfBirth) {
             const error = createBilingualError(400, ErrorMessages.NO_PROFILE_DATA_PROVIDED);
             throw new HttpException(error.status, error.message, error.messageAr);
         }
@@ -53,4 +53,5 @@ export class UsersController {
         const responseMessage = createMultiLangMessage(SuccessResponseMessages.USER_PROFILE_UPDATED_SUCCESSFULLY);
         res.status(200).json({ messageEn: responseMessage.messageEn, messageAr: responseMessage.messageAr });
     }
+
 }

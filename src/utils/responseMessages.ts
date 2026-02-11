@@ -36,6 +36,14 @@ export const SuccessResponseMessages = {
         message_en: "OTP resent successfully.",
         message_ar: "تم إعادة إرسال رمز التحقق بنجاح.",
     },
+    PASSWORD_CHECK_SUCCESSFUL: {
+        message_en: "Password check successful.",
+        message_ar: "تم التحقق من كلمة المرور بنجاح.",
+    },
+    PASSWORD_CHANGED_SUCCESSFULLY: {
+        message_en: "Password changed successfully.",
+        message_ar: "تم تغيير كلمة المرور بنجاح.",
+    },
 
     // Success messages for Doctors by Admin
     DOCTOR_CREATED: {

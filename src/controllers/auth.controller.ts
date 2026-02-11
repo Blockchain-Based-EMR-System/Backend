@@ -3,7 +3,7 @@ import { Container } from 'typedi';
 import { RequestWithUser } from '@interfaces/auth.interface';
 import { User } from '@interfaces/users.interface';
 import { AuthService } from '@services/auth.service';
-import { CompleteUserProfileDto, CreateUserDto, LoginUserDto, ResetPasswordDto } from '@/dtos/users.dto';
+import { ChangePasswordDto, CompleteUserProfileDto, CreateUserDto, LoginUserDto, ResetPasswordDto } from '@/dtos/users.dto';
 import { catchAsync } from '@/utils/catchAsync';
 import { createBilingualError, ErrorMessages } from '@/utils/errorMessages';
 import { HttpException } from '@/exceptions/HttpException';
@@ -139,5 +139,21 @@ export class AuthController {
       messageAr: responseMessage.messageAr
     });
   });
+
+  public checkPassword = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+    const userId = req.user?.id;
+    const { password } = req.body;
+    const isMatch = await this.auth.checkPassword(userId, password);
+    const responseMessage = createMultiLangMessage(SuccessResponseMessages.PASSWORD_CHECK_SUCCESSFUL);
+    res.status(200).json({ data: { isMatch }, messageEn: responseMessage.messageEn, messageAr: responseMessage.messageAr });
+  }
+
+  public changePassword = async (req: RequestWithUser, res: Response, next: NextFunction) => {
+    const userId = req.user?.id;
+    const { newPassword }: ChangePasswordDto = req.body;
+    await this.auth.changePassword(userId, newPassword);
+    const responseMessage = createMultiLangMessage(SuccessResponseMessages.PASSWORD_CHANGED_SUCCESSFULLY);
+    res.status(200).json({ messageEn: responseMessage.messageEn, messageAr: responseMessage.messageAr });
+  }
 }
 

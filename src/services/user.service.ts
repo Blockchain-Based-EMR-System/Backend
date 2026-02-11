@@ -5,6 +5,7 @@ import fs from "fs";
 import { createBilingualError, ErrorMessages } from "@/utils/errorMessages";
 import { HttpException } from "@/exceptions/HttpException";
 import { UpdateUserProfileDto } from "@/dtos/users.dto";
+import { compare } from "bcrypt";
 
 const prisma = new PrismaClient();
 
