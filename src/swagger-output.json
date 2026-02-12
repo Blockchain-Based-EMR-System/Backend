@@ -4432,6 +4432,10 @@
                       "clinic_address": {
                         "type": "string",
                         "example": "123 Main Street, Medical Park"
+                      },
+                      "address_maps_link": {
+                        "type": "string",
+                        "example": "https://maps.app.goo.gl/iKB7dwMcneuUaULYA"
                       }
                     }
                   }
@@ -4447,93 +4451,6 @@
           },
           "401": {
             "description": "Unauthorized - patient not authenticated"
-          }
-        }
-      }
-    },
-    "/appointments/patient/{appointmentId}": {
-      "get": {
-        "tags": [
-          "Appointments"
-        ],
-        "description": "Get details of a specific appointment for the patient",
-        "parameters": [
-          {
-            "name": "appointmentId",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "description": "Appointment ID"
-          },
-          {
-            "name": "Authorization",
-            "in": "cookie",
-            "description": "Bearer token for authentication (must be a patient)",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Appointment details retrieved successfully",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "data": {
-                  "type": "object",
-                  "properties": {
-                    "id": {
-                      "type": "string",
-                      "example": "appointment-uuid"
-                    },
-                    "status": {
-                      "type": "string",
-                      "example": "CONFIRMED"
-                    },
-                    "slot_duration": {
-                      "type": "number",
-                      "example": 30
-                    },
-                    "doctor_name": {
-                      "type": "string",
-                      "example": "Dr. House"
-                    },
-                    "appointment_date": {
-                      "type": "string",
-                      "example": "2026-02-03"
-                    },
-                    "start_time": {
-                      "type": "string",
-                      "example": "09:00"
-                    },
-                    "end_time": {
-                      "type": "string",
-                      "example": "09:30"
-                    },
-                    "clinic_name": {
-                      "type": "string",
-                      "example": "New Cairo Medical Clinic"
-                    },
-                    "clinic_address": {
-                      "type": "string",
-                      "example": "123 Main Street, Medical Park"
-                    }
-                  }
-                }
-              },
-              "xml": {
-                "name": "main"
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request - patient ID missing"
-          },
-          "401": {
-            "description": "Unauthorized - patient not authenticated"
-          },
-          "404": {
-            "description": "Appointment not found or does not belong to the patient"
           }
         }
       }
@@ -4609,6 +4526,10 @@
                         "type": "string",
                         "example": "456 Nile Corniche"
                       },
+                      "address_maps_link": {
+                        "type": "string",
+                        "example": "https://maps.app.goo.gl/iKB7dwMcneuUaULYA"
+                      },
                       "position": {},
                       "estimatedWaitMinutes": {},
                       "patientsAhead": {}
@@ -4629,6 +4550,97 @@
           },
           "403": {
             "description": "Forbidden - user is not authorized as a patient"
+          }
+        }
+      }
+    },
+    "/appointments/patient/{appointmentId}": {
+      "get": {
+        "tags": [
+          "Appointments"
+        ],
+        "description": "Get details of a specific appointment for the patient",
+        "parameters": [
+          {
+            "name": "appointmentId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Appointment ID"
+          },
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication (must be a patient)",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Appointment details retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "appointment-uuid"
+                    },
+                    "status": {
+                      "type": "string",
+                      "example": "CONFIRMED"
+                    },
+                    "slot_duration": {
+                      "type": "number",
+                      "example": 30
+                    },
+                    "doctor_name": {
+                      "type": "string",
+                      "example": "Dr. House"
+                    },
+                    "appointment_date": {
+                      "type": "string",
+                      "example": "2026-02-03"
+                    },
+                    "start_time": {
+                      "type": "string",
+                      "example": "09:00"
+                    },
+                    "end_time": {
+                      "type": "string",
+                      "example": "09:30"
+                    },
+                    "clinic_name": {
+                      "type": "string",
+                      "example": "New Cairo Medical Clinic"
+                    },
+                    "clinic_address": {
+                      "type": "string",
+                      "example": "123 Main Street, Medical Park"
+                    },
+                    "address_maps_link": {
+                      "type": "string",
+                      "example": "https://maps.app.goo.gl/iKB7dwMcneuUaULYA"
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - patient ID missing"
+          },
+          "401": {
+            "description": "Unauthorized - patient not authenticated"
+          },
+          "404": {
+            "description": "Appointment not found or does not belong to the patient"
           }
         }
       }
