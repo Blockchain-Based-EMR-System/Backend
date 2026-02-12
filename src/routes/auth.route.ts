@@ -351,17 +351,12 @@ export class AuthRoute implements Routes {
                     required: true,
                     type: 'string'
                 }
-                #swagger.requestBody = {
+                #swagger.parameters['body'] = {
+                    in: 'body',
+                    description: 'User current password',
                     required: true,
-                    content: {
-                        "application/json": {
-                            schema: {
-                                type: 'object',
-                                properties: {
-                                    password: { type: 'string', example: 'your_password' }
-                                }
-                            }
-                        }
+                    schema: {
+                        password: 'current_password123'
                     }
                 }
                 #swagger.responses[200] = {

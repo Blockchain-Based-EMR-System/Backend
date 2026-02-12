@@ -798,6 +798,21 @@
             "description": "Bearer token for authentication",
             "required": true,
             "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "User current password",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "password": {
+                  "type": "string",
+                  "example": "current_password123"
+                }
+              }
+            }
           }
         ],
         "responses": {
@@ -826,22 +841,6 @@
               },
               "xml": {
                 "name": "main"
-              }
-            }
-          }
-        },
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "password": {
-                    "type": "string",
-                    "example": "your_password"
-                  }
-                }
               }
             }
           }
