@@ -295,6 +295,7 @@ export class AppointmentService {
                     select: {
                         name: true,
                         address: true,
+                        address_maps_link: true,
                     }
                 }
             },
@@ -313,6 +314,7 @@ export class AppointmentService {
             end_time: this.formatTime(appointment.end_time),
             clinic_name: appointment.clinic ? appointment.clinic.name : null,
             clinic_address: appointment.clinic ? appointment.clinic.address : null,
+            address_maps_link: appointment.clinic? appointment.clinic.address_maps_link : null,
         }));
     }
 
@@ -338,6 +340,7 @@ export class AppointmentService {
                     select: {
                         name: true,
                         address: true,
+                        address_maps_link: true,
                     }
                 }
             }
@@ -357,6 +360,7 @@ export class AppointmentService {
             end_time: this.formatTime(appointment.end_time),
             clinic_name: appointment.clinic ? appointment.clinic.name : null,
             clinic_address: appointment.clinic ? appointment.clinic.address : null,
+            address_maps_link: appointment.clinic? appointment.clinic.address_maps_link : null,
         };
     }
 
@@ -401,6 +405,7 @@ export class AppointmentService {
                     select: {
                         name: true,
                         address: true,
+                        address_maps_link: true,
                     }
                 }
             },
@@ -443,6 +448,7 @@ export class AppointmentService {
                 end_time: this.formatTime(appointment.end_time),
                 clinic_name: appointment.clinic ? appointment.clinic.name : null,
                 clinic_address: appointment.clinic ? appointment.clinic.address : null,
+                address_maps_link: appointment.clinic? appointment.clinic.address_maps_link : null,
                 position: appointment.position,
                 estimatedWaitMinutes: appointment.estimated_time,
                 patientsAhead: appointment.patients_ahead

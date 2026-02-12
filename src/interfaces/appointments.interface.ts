@@ -33,6 +33,7 @@ export interface PatientAppointment {
     end_time: string;
     clinic_name: string | null;
     clinic_address: string | null;
+    address_maps_link: string | null;
 }
 
 export interface PatientTodayAppointment {
@@ -46,6 +47,7 @@ export interface PatientTodayAppointment {
     end_time: string;
     clinic_name: string | null;
     clinic_address: string | null;
+    address_maps_link: string | null;
     position: number;
     estimatedWaitMinutes: number;
     patientsAhead: number;
