@@ -20,7 +20,7 @@ export interface User {
   created_at: Date;
   modified_at: Date;
   deleted_at?: Date;
-
+  photo_url?: string;
   patient?: Patient;
   doctor?: Partial<Doctor>;
   appointments_as_patient?: Appointment[];
@@ -64,6 +64,7 @@ export interface UserLoginData {
   role: Role,
   isVerified: Boolean,
   hasCompletedProfile: Boolean,
+  photo_url?: string;
   doctor?: {
     specialization: string;
     account_status: DoctorAccountStatus;

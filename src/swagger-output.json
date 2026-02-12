@@ -214,6 +214,10 @@
                       "type": "string",
                       "example": "PATIENT"
                     },
+                    "photo_url": {
+                      "type": "string",
+                      "example": "https://example.com/photo.jpg"
+                    },
                     "doctor": {
                       "type": "object",
                       "properties": {

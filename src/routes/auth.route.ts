@@ -77,7 +77,7 @@ export class AuthRoute implements Routes {
               #swagger.responses[200] = {
                   description: 'Login successful',
                   schema: {
-                      data: { id: 1, email: 'user@example.com', name: 'John Doe', role: 'PATIENT' , doctor: { specialization: 'Cardiology', account_status: 'APPROVED' } },
+                      data: { id: 1, email: 'user@example.com', name: 'John Doe', role: 'PATIENT', photo_url: 'https://example.com/photo.jpg', doctor: { specialization: 'Cardiology', account_status: 'APPROVED' } },
                       messageEn: 'Logged In Successfully',
                       messageAr: "تم تسجيل الدخول بنجاح"
                   }

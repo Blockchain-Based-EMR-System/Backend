@@ -78,7 +78,7 @@ export class AuthService {
       throw new HttpException(error.status, error.message, error.messageAr);
     }
 
-    const { name, gender, date_of_birth, email, isVerified, username, phone, role, hasCompletedProfile, doctor } = findUser;
+    const { name, gender, date_of_birth, email, isVerified, username, phone, role, hasCompletedProfile, doctor, photo_url } = findUser;
     const patientLoginData: UserLoginData = {
       name,
       email,
@@ -89,6 +89,7 @@ export class AuthService {
       role,
       isVerified,
       hasCompletedProfile,
+      photo_url,
       doctor: doctor ? {
         specialization: doctor.specialization,
         account_status: doctor.account_status
