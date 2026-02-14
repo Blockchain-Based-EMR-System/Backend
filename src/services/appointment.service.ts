@@ -289,6 +289,7 @@ export class AppointmentService {
                 doctor: {
                     select: {
                         name: true,
+                        photo_url: true,
                     }
                 },
                 clinic: {
@@ -309,6 +310,7 @@ export class AppointmentService {
             is_online: appointment.is_online,
             slot_duration: appointment.slot_duration,
             doctor_name: appointment.doctor.name,
+            doctor_profile_pic: appointment.doctor.photo_url,
             appointment_date: this.formatDate(appointment.scheduled_time),
             start_time: this.formatTime(appointment.scheduled_time),
             end_time: this.formatTime(appointment.end_time),
@@ -334,6 +336,7 @@ export class AppointmentService {
                 doctor: {
                     select: {
                         name: true,
+                        photo_url: true,
                     }
                 },
                 clinic: {
@@ -355,6 +358,7 @@ export class AppointmentService {
             is_online: appointment.is_online,
             slot_duration: appointment.slot_duration,
             doctor_name: appointment.doctor.name,
+            doctor_profile_pic: appointment.doctor.photo_url,
             appointment_date: this.formatDate(appointment.scheduled_time),
             start_time: this.formatTime(appointment.scheduled_time),
             end_time: this.formatTime(appointment.end_time),
@@ -399,6 +403,7 @@ export class AppointmentService {
                 doctor: {
                     select: {
                         name: true,
+                        photo_url: true,
                     }
                 },
                 clinic: {
@@ -443,6 +448,7 @@ export class AppointmentService {
                 is_online: appointment.is_online,
                 slot_duration: appointment.slot_duration,
                 doctor_name: appointment.doctor.name,
+                doctor_profile_pic: appointment.doctor.photo_url,
                 appointment_date: this.formatDate(appointment.scheduled_time),
                 start_time: this.formatTime(appointment.scheduled_time),
                 end_time: this.formatTime(appointment.end_time),

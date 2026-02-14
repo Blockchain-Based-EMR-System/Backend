@@ -28,6 +28,7 @@ export interface PatientAppointment {
     is_online: boolean;
     slot_duration: number;
     doctor_name: string;
+    doctor_profile_pic: string;
     appointment_date: string;
     start_time: string;
     end_time: string;
@@ -42,6 +43,7 @@ export interface PatientTodayAppointment {
     is_online: boolean;
     slot_duration: number;
     doctor_name: string;
+    doctor_profile_pic: string;
     appointment_date: string;
     start_time: string;
     end_time: string;
