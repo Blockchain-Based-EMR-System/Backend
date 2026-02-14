@@ -381,6 +381,8 @@ export class AppointmentRoute implements Routes {
                         data: [
                             {
                                 id: 'appointment-uuid',
+                                doctorId: 'doctor-uuid',
+                                clinicId: 'clinic-uuid',
                                 status: 'CONFIRMED',
                                 slot_duration: 30,
                                 doctor_name: 'Dr. House',
@@ -394,6 +396,8 @@ export class AppointmentRoute implements Routes {
                             },
                             {
                                 id: 'appointment-uuid',
+                                doctorId: 'doctor-uuid',
+                                clinicId: null,
                                 status: 'CONFIRMED',
                                 slot_duration: 20,
                                 doctor_name: 'Dr. House',
@@ -440,6 +444,8 @@ export class AppointmentRoute implements Routes {
                         data: [
                             {
                                 id: 'appointment-uuid-1',
+                                doctorId: 'doctor-uuid',
+                                clinicId: 'clinic-uuid',
                                 status: 'CONFIRMED',
                                 is_online: true,
                                 slot_duration: 30,
@@ -457,6 +463,8 @@ export class AppointmentRoute implements Routes {
                             },
                             {
                                 id: 'appointment-uuid-2',
+                                doctorId: 'doctor-uuid',
+                                clinicId: 'clinic-uuid',
                                 status: 'CONFIRMED',
                                 is_online: false,
                                 slot_duration: 20,
@@ -513,6 +521,8 @@ export class AppointmentRoute implements Routes {
                     schema: {
                         data: {
                             id: 'appointment-uuid',
+                            doctorId: 'doctor-uuid',
+                            clinicId: 'clinic-uuid',
                             status: 'CONFIRMED',
                             slot_duration: 30,
                             doctor_name: 'Dr. House',

@@ -288,12 +288,14 @@ export class AppointmentService {
                 end_time: true,
                 doctor: {
                     select: {
+                        id: true,
                         name: true,
                         photo_url: true,
                     }
                 },
                 clinic: {
                     select: {
+                        id: true,
                         name: true,
                         address: true,
                         address_maps_link: true,
@@ -306,6 +308,8 @@ export class AppointmentService {
         });
         return appointments.map(appointment => ({
             id: appointment.id,
+            doctor_id: appointment.doctor.id,
+            clinic_id: appointment.clinic ? appointment.clinic.id : null,
             status: appointment.status,
             is_online: appointment.is_online,
             slot_duration: appointment.slot_duration,
@@ -335,12 +339,14 @@ export class AppointmentService {
                 end_time: true,
                 doctor: {
                     select: {
+                        id: true,
                         name: true,
                         photo_url: true,
                     }
                 },
                 clinic: {
                     select: {
+                        id: true,
                         name: true,
                         address: true,
                         address_maps_link: true,
@@ -354,6 +360,8 @@ export class AppointmentService {
 
         return {
             id: appointment.id,
+            doctor_id: appointment.doctor.id,
+            clinic_id: appointment.clinic ? appointment.clinic.id : null,
             status: appointment.status,
             is_online: appointment.is_online,
             slot_duration: appointment.slot_duration,
@@ -402,12 +410,14 @@ export class AppointmentService {
                 patients_ahead: true,
                 doctor: {
                     select: {
+                        id: true,
                         name: true,
                         photo_url: true,
                     }
                 },
                 clinic: {
                     select: {
+                        id: true,
                         name: true,
                         address: true,
                         address_maps_link: true,
@@ -444,6 +454,8 @@ export class AppointmentService {
 
             result.push({
                 id: appointment.id,
+                doctor_id: appointment.doctor.id,
+                clinic_id: appointment.clinic ? appointment.clinic.id : null,
                 status: appointment.status,
                 is_online: appointment.is_online,
                 slot_duration: appointment.slot_duration,

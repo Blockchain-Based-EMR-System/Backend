@@ -24,6 +24,8 @@ export interface Appointment {
 
 export interface PatientAppointment {
     id: string;
+    doctor_id: string;
+    clinic_id: string | null;
     status: AppointmentStatus;
     is_online: boolean;
     slot_duration: number;
@@ -39,6 +41,8 @@ export interface PatientAppointment {
 
 export interface PatientTodayAppointment {
     id: string;
+    doctor_id: string;
+    clinic_id: string | null;
     status: AppointmentStatus;
     is_online: boolean;
     slot_duration: number;

@@ -4401,6 +4401,11 @@
                         "type": "string",
                         "example": "appointment-uuid"
                       },
+                      "doctorId": {
+                        "type": "string",
+                        "example": "doctor-uuid"
+                      },
+                      "clinicId": {},
                       "status": {
                         "type": "string",
                         "example": "CONFIRMED"
@@ -4493,6 +4498,14 @@
                       "id": {
                         "type": "string",
                         "example": "appointment-uuid-2"
+                      },
+                      "doctorId": {
+                        "type": "string",
+                        "example": "doctor-uuid"
+                      },
+                      "clinicId": {
+                        "type": "string",
+                        "example": "clinic-uuid"
                       },
                       "status": {
                         "type": "string",
@@ -4596,6 +4609,14 @@
                     "id": {
                       "type": "string",
                       "example": "appointment-uuid"
+                    },
+                    "doctorId": {
+                      "type": "string",
+                      "example": "doctor-uuid"
+                    },
+                    "clinicId": {
+                      "type": "string",
+                      "example": "clinic-uuid"
                     },
                     "status": {
                       "type": "string",
