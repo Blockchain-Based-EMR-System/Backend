@@ -392,11 +392,6 @@ export class AppointmentService {
                     gte: today,
                     lte: endOfToday,
                 },
-                deleted_at: null,
-                status: {
-                    in: ['CONFIRMED', 'COMPLETED']
-                },
-
             },
             select: {
                 id: true,
@@ -1014,8 +1009,6 @@ export class AppointmentService {
                     gte: startOfDay,
                     lte: endOfDay
                 },
-                status: 'CONFIRMED',
-                deleted_at: null,
             },
             orderBy: {
                 scheduled_time: 'asc',
