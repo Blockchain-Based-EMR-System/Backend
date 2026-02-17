@@ -14,14 +14,14 @@ export class NurseController {
     public nurseSignup = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
         const nurseData: NurseSignupRequestDto = req.body;
         const nurseFiles = req.files as Express.Multer.File[];
-        await this.nurseService.signup(nurseData, nurseFiles);
+        await this.nurseService.nurseSignup(nurseData, nurseFiles);
         const responseMessage = createMultiLangMessage(SuccessResponseMessages.NURSE_CREATED_WAITING_VERIFICATION);
         res.status(201).json({ messageEn: responseMessage.messageEn, messageAr: responseMessage.messageAr });
     });
 
     public nurseLogin = async (req: Request, res: Response, next: NextFunction) => {
         const nurseLoginData: NurseLoginRequestDto = req.body;
-        const loginResult = await this.nurseService.login(nurseLoginData);
+        const loginResult = await this.nurseService.nurseLogin(nurseLoginData);
 
         if (loginResult === false) {
             res.redirect('/test')
@@ -40,7 +40,7 @@ export class NurseController {
     public nurseSetPassword = catchAsync(async (req: RequestWithUser, res: Response, next: NextFunction) => {
         const nurseId = req.user?.id;
         const { password }: NurseSetPasswordRequestDto = req.body;
-        await this.nurseService.setPassword(nurseId, password);
+        await this.nurseService.nurseSetPassword(nurseId, password);
         const responseMessage = createMultiLangMessage(SuccessResponseMessages.PASSWORD_SET_SUCCESSFULLY_BY_NURSE);
         res.status(200).json({ messageEn: responseMessage.messageEn, messageAr: responseMessage.messageAr });
     });

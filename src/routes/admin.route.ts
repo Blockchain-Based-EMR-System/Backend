@@ -175,6 +175,43 @@ export class AdminRoute implements Routes {
             this.adminController.updateDoctorVerificationStatus,
         );
 
+        this.router.patch(
+            '/admin/nurses/verify/:id',
+            /* 
+                #swagger.tags = ['Admin']
+                #swagger.parameters['id'] = {
+                    in: 'path',
+                    description: 'Nurse ID',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['body'] = {
+                    in: 'body',
+                    description: 'Verification status',
+                    required: true,
+                    schema: {
+                        $isApproved: true
+                    }
+                }
+                #swagger.parameters['Authorization'] = {
+                    in: 'header',
+                    description: 'Bearer access token (sent via Authorization cookie or Authorization header)',
+                    required: false,
+                    type: 'string'
+                }
+                #swagger.responses[200] = {
+                    description: 'Nurse verification status updated successfully',
+                    schema: {
+                        messageEn: 'Nurse verification status updated successfully',
+                        messageAr: "تم تحديث حالة اعتماد الممرض بنجاح."
+                    }
+                }
+            */
+            AuthMiddleware,
+            RoleMiddleware(Role.ADMIN),
+            this.adminController.updateNurseVerificationStatus,
+        );
+
         this.router.get(
             '/admin/doctors/:id',
             /* 

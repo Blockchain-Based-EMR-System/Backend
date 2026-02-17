@@ -16,7 +16,7 @@ export class NurseService {
 
     private authService = new AuthService();
 
-    public async signup(nurseData: NurseSignupRequestDto, nurseFiles: {}) {
+    public async nurseSignup(nurseData: NurseSignupRequestDto, nurseFiles: {}) {
         const existingUser = await prisma.user.findUnique({
             where: { email: nurseData.email }
         });
@@ -34,6 +34,13 @@ export class NurseService {
 
         if (existingUsername) {
             const error = createBilingualError(409, ErrorMessages.USERNAME_EXISTS);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const files = nurseFiles as { [key: string]: Express.Multer.File[] | undefined };
+
+        if (!files?.nationalCard?.length) {
+            const error = createBilingualError(400, ErrorMessages.NATIONAL_CARD_REQUIRED);
             throw new HttpException(error.status, error.message, error.messageAr);
         }
 
@@ -73,7 +80,7 @@ export class NurseService {
         }
     }
 
-    public async login(nurseLoginData: NurseLoginRequestDto): Promise<{ cookies: string[]; NurseAccountData: NurseLoginData } | boolean> {
+    public async nurseLogin(nurseLoginData: NurseLoginRequestDto): Promise<{ cookies: string[]; NurseAccountData: NurseLoginData } | boolean> {
 
         const nurseUserData = await prisma.user.findFirst({
             where: {
@@ -139,7 +146,7 @@ export class NurseService {
         return { cookies, NurseAccountData };
     }
 
-    public async setPassword(nurseId: string, password: string): Promise<void> {
+    public async nurseSetPassword(nurseId: string, password: string): Promise<void> {
         const hashedPassword = await hash(password, 10);
         const nurseUserData = await prisma.user.findUnique({
             where: { id: nurseId },

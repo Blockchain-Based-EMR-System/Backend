@@ -124,6 +124,10 @@ export const SuccessResponseMessages = {
         message_en: 'Password set successfully by nurse',
         message_ar: 'تم تعيين كلمة المرور بنجاح من قبل الممرضة',
     },
+    NURSE_VERIFICATION_STATUS_UPDATED: {
+        message_en: "Nurse verification status updated successfully.",
+        message_ar: "تم تحديث حالة اعتماد الممرضة بنجاح.",
+    },
 
     // Success messages for Google Auth
     PHONE_NUMBER_UPDATED_SUCCESSFULLY: {

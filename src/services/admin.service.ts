@@ -1,4 +1,4 @@
-import { DoctorAccountStatus, PrismaClient, Role } from '@prisma/client';
+import { DoctorAccountStatus, NurseAccountStatus, PrismaClient, Role } from '@prisma/client';
 import { hash } from 'bcrypt';
 import { Service } from 'typedi';
 import { AddDoctorFromAdminDto, DoctorFromAdminResponseDto } from '@/dtos/admins.dto';
@@ -231,27 +231,58 @@ export class AdminService {
         });
     }
 
-    public async sendVerificationStatusEmail(doctorId: string, isApproved: boolean): Promise<void> {
-        const doctor = await prisma.user.findUnique({
-            where: { id: doctorId, role: Role.DOCTOR },
+    public async sendVerificationStatusEmail(userId: string, isApproved: boolean): Promise<void> {
+        const user = await prisma.user.findUnique({
+            where: { id: userId},
             select: { email: true, name: true }
         });
-        if (!doctor) {
+        if (!user) {
             const error = createBilingualError(404, ErrorMessages.USER_NOT_FOUND);
             throw new HttpException(error.status, error.message, error.messageAr);
         }
         const mailOptions = {
             from: SENDER_EMAIL,
-            to: doctor.email,
+            to: user.email,
             subject: isApproved ? 'Doctor Account Approved - MedBridge' : 'Doctor Account Rejected - MedBridge',
             html: `
-                <p>Dear Dr. ${doctor.name},</p>
+                <p>Dear ${user.name},</p>
                 <p>Your account has been ${isApproved ? 'approved' : 'rejected'}.</p>
                 <p>Thank you for using our platform.</p>
-                <p>Best regards,<br/>MedicBridge Team</p>
+                <p>Best regards,<br/>HoloCura Team</p>
             `
         };
 
         await transporter.sendMail(mailOptions);
+    }
+
+    public async updateNurseVerificationStatus(nurseId: string, isApproved: boolean | null): Promise<void> {
+
+        const nurse = await prisma.user.findUnique({
+            where: { id: nurseId, role: Role.NURSE },
+        });
+        if (!nurse) {
+            const error = createBilingualError(404, ErrorMessages.USER_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        let accountStatus: NurseAccountStatus;
+        if (isApproved === true) {
+            accountStatus = NurseAccountStatus.APPROVED;
+        } else if (isApproved === false) {
+            accountStatus = NurseAccountStatus.REJECTED;
+        } else {
+            accountStatus = NurseAccountStatus.PENDING;
+        }
+
+        await prisma.user.update({
+            where: { id: nurseId },
+            data: {
+                nurse: {
+                    update: {
+                        account_status: accountStatus,
+                    }
+                }
+            }
+        });
     }
 }

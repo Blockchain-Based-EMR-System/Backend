@@ -127,6 +127,19 @@ export class AdminController {
         });
     }
 
+    public updateNurseVerificationStatus = async (req: RequestWithLanguage, res: Response, next: NextFunction): Promise<void> => {
+
+        const nurseId = req.params.id;
+        const { isVerified } = req.body;
+        await this.adminService.updateNurseVerificationStatus(nurseId, isVerified);
+        await this.adminService.sendVerificationStatusEmail(nurseId, isVerified);
+        const responseMessage = createMultiLangMessage(SuccessResponseMessages.NURSE_VERIFICATION_STATUS_UPDATED);
+        res.status(200).json({
+            messageEn: responseMessage.messageEn,
+            messageAr: responseMessage.messageAr,
+        });
+    }
+
     // Clinic Routes
     public getAllClinics = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
 

@@ -116,6 +116,10 @@ export const ErrorMessages = {
         en: 'Nurse account is not approved yet',
         ar: 'حساب الممرضة غير مفعل بعد',
     },
+    NATIONAL_CARD_REQUIRED: {
+        en: 'National card image is required',
+        ar: 'صورة البطاقة الوطنية مطلوبة',
+    },
     
     // File upload errors
     NO_FILE_UPLOADED: {

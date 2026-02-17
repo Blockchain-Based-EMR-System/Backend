@@ -1,8 +1,16 @@
 import multer from 'multer';
 import path from 'path';
+import fs from 'fs';
 import { Request } from 'express';
 import { createBilingualError, ErrorMessages } from '@/utils/errorMessages';
 import { HttpException } from '@/exceptions/HttpException';
+
+const uploadDir = path.join(process.cwd(), 'uploads');
+
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+    console.log(`Created uploads directory: ${uploadDir}`);
+}
 
 // We use diskStorage so the file is saved to a 'temp' folder first.
 const storage = multer.diskStorage({

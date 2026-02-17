@@ -1,5 +1,6 @@
 import { Gender } from "@prisma/client";
-import { IsString, IsNotEmpty, IsEmail, IsInt } from "class-validator";
+import { IsString, IsNotEmpty, IsEmail, IsInt, IsOptional } from "class-validator";
+import { Type } from "class-transformer";
 
 export class NurseSignupRequestDto {
     @IsString()
@@ -19,10 +20,12 @@ export class NurseSignupRequestDto {
     public password: string;
 
     @IsInt()
+    @Type(() => Number)
     @IsNotEmpty()
     public years_of_experience: number;
 
     @IsString()
+    @IsOptional()
     public brief?: string;
 
     @IsString()

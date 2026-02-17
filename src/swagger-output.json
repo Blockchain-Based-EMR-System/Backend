@@ -43,6 +43,10 @@
     {
       "name": "Users",
       "description": "User account endpoints"
+    },
+    {
+      "name": "Nurses",
+      "description": "Nurse account endpoints"
     }
   ],
   "schemes": [
@@ -1763,6 +1767,69 @@
                 "messageAr": {
                   "type": "string",
                   "example": "تم تحديث حالة اعتماد الطبيب بنجاح."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/nurses/verify/{id}": {
+      "patch": {
+        "tags": [
+          "Admin"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Nurse ID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Verification status",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "isApproved": {
+                  "type": "boolean",
+                  "example": true
+                }
+              },
+              "required": [
+                "isApproved"
+              ]
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer access token (sent via Authorization cookie or Authorization header)",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Nurse verification status updated successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "messageEn": {
+                  "type": "string",
+                  "example": "Nurse verification status updated successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم تحديث حالة اعتماد الممرض بنجاح."
                 }
               },
               "xml": {
@@ -6058,6 +6125,287 @@
                 "name": "main"
               }
             }
+          }
+        }
+      }
+    },
+    "/nurses/signup": {
+      "post": {
+        "tags": [
+          "Nurses"
+        ],
+        "description": "Creates a new nurse account. Requires national ID card upload and optional bonus file",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "formData",
+            "description": "name of the nurse",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "email",
+            "in": "formData",
+            "description": "Email address",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "phone",
+            "in": "formData",
+            "description": "Phone number",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "password",
+            "in": "formData",
+            "description": "Initial password for the account",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "years_of_experience",
+            "in": "formData",
+            "description": "Number of years of professional nursing experience",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "gender",
+            "in": "formData",
+            "description": "Gender (must match Prisma enum: MALE or FEMALE)",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "date_of_birth",
+            "in": "formData",
+            "description": "Date of birth (format YYYY-MM-DD)",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "brief",
+            "in": "formData",
+            "description": "Short professional summary / bio (optional)",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "nationalCard",
+            "in": "formData",
+            "description": "National ID card or passport scan (PDF only)",
+            "required": true,
+            "type": "file"
+          },
+          {
+            "name": "bonusFile",
+            "in": "formData",
+            "description": "Additional document: nursing license, experience certificate, etc.",
+            "required": false,
+            "type": "file"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Account created successfully – awaiting admin approval",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message_en": {
+                  "type": "string",
+                  "example": "Nurse account created successfully. Please wait for verification."
+                },
+                "message_ar": {
+                  "type": "string",
+                  "example": "تم إنشاء حساب الممرضة بنجاح. يرجى الانتظار للموافقة عليه."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed (missing fields, wrong file type, invalid date format, etc.)"
+          },
+          "500": {
+            "description": "Server error during file upload or database transaction"
+          }
+        }
+      }
+    },
+    "/nurses/login": {
+      "post": {
+        "tags": [
+          "Nurses"
+        ],
+        "description": "Authenticates nurse credentials",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Nurse login data",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "emailOrUsername": {
+                  "type": "string",
+                  "example": "nurse@example.com"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "SecurePassword123"
+                },
+                "rememberMe": {
+                  "type": "string",
+                  "example": "true"
+                }
+              },
+              "required": [
+                "emailOrUsername",
+                "password",
+                "rememberMe"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Login successful – approved nurse with completed profile",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "uuid-string"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Maxine Lee"
+                    },
+                    "email": {
+                      "type": "string",
+                      "example": "maxine.lee@example.com"
+                    },
+                    "username": {
+                      "type": "string",
+                      "example": "maxine.lee"
+                    },
+                    "phone": {
+                      "type": "string",
+                      "example": "+201234567890"
+                    },
+                    "gender": {
+                      "type": "string",
+                      "example": "FEMALE"
+                    },
+                    "nurse": {
+                      "type": "object",
+                      "properties": {
+                        "account_status": {
+                          "type": "string",
+                          "example": "APPROVED"
+                        }
+                      }
+                    }
+                  }
+                },
+                "messageEn": {
+                  "type": "string",
+                  "example": "Nurse retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع بيانات الممرض بنجاح"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials (wrong email/username or password)"
+          },
+          "403": {
+            "description": "Account not approved (PENDING or REJECTED)"
+          }
+        }
+      }
+    },
+    "/nurses/set-password": {
+      "patch": {
+        "tags": [
+          "Nurses"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "New password data",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "password": {
+                  "type": "string",
+                  "example": "NewSecurePassword123"
+                }
+              },
+              "required": [
+                "password"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Password set successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "messageEn": {
+                  "type": "string",
+                  "example": "Password updated successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم تحديث كلمة المرور بنجاح"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Password already set / validation error"
+          },
+          "401": {
+            "description": "Unauthorized – missing or invalid token"
+          },
+          "403": {
+            "description": "Forbidden – user is not a nurse role"
+          },
+          "404": {
+            "description": "Nurse user not found"
           }
         }
       }

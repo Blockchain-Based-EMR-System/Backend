@@ -1,7 +1,8 @@
 import { Routes } from "@/interfaces";
 import { ValidationMiddleware } from "@/middlewares/validation.middleware";
 import { Router } from "express";
-import { errorWrapper } from "@/utils/errorWrapper";
+import { NurseController } from "@/controllers/nurse.controller";
+import { NurseLoginRequestDto, NurseSetPasswordRequestDto, NurseSignupRequestDto } from "@/dtos/nurses.dto";
 import { AuthMiddleware, RoleMiddleware } from "@/middlewares/auth.middleware";
 import { Role } from "@prisma/client";
 import { uploadPdf } from "@/middlewares/multer.middleware";
@@ -9,6 +10,7 @@ import { uploadPdf } from "@/middlewares/multer.middleware";
 export class NurseRoute implements Routes {
     public path = '/nurses'
     public router = Router();
+    public nursesController = new NurseController();
     constructor() {
         this.initializeRoutes();
     }
@@ -16,14 +18,187 @@ export class NurseRoute implements Routes {
     private initializeRoutes() {
         this.router.post(
             `${this.path}/signup`,
+            /* 
+                #swagger.path = '/nurses/signup'
+                #swagger.method = 'post'
+                #swagger.tags = ['Nurses']
+                #swagger.description = 'Creates a new nurse account. Requires national ID card upload and optional bonus file'
+                #swagger.consumes = ['multipart/form-data']
+
+                #swagger.parameters['name'] = {
+                    in: 'formData',
+                    description: 'name of the nurse',
+                    required: true,
+                    type: 'string',
+                }
+                #swagger.parameters['email'] = {
+                    in: 'formData',
+                    description: 'Email address',
+                    required: true,
+                    type: 'string',
+                }
+                #swagger.parameters['phone'] = {
+                    in: 'formData',
+                    description: 'Phone number',
+                    required: true,
+                    type: 'string',
+                }
+                #swagger.parameters['password'] = {
+                    in: 'formData',
+                    description: 'Initial password for the account',
+                    required: true,
+                    type: 'string',
+                }
+                #swagger.parameters['years_of_experience'] = {
+                    in: 'formData',
+                    description: 'Number of years of professional nursing experience',
+                    required: true,
+                    type: 'integer',
+                }
+                #swagger.parameters['gender'] = {
+                    in: 'formData',
+                    description: 'Gender (must match Prisma enum: MALE or FEMALE)',
+                    required: true,
+                    type: 'string',
+                }
+                #swagger.parameters['date_of_birth'] = {
+                    in: 'formData',
+                    description: 'Date of birth (format YYYY-MM-DD)',
+                    required: true,
+                    type: 'string',
+                }
+                #swagger.parameters['brief'] = {
+                    in: 'formData',
+                    description: 'Short professional summary / bio (optional)',
+                    required: false,
+                    type: 'string',
+                }
+                #swagger.parameters['nationalCard'] = {
+                    in: 'formData',
+                    description: 'National ID card or passport scan (PDF only)',
+                    required: true,
+                    type: 'file'
+                }
+                #swagger.parameters['bonusFile'] = {
+                    in: 'formData',
+                    description: 'Additional document: nursing license, experience certificate, etc.',
+                    required: false,
+                    type: 'file'
+                }
+
+                #swagger.responses[201] = {
+                    description: 'Account created successfully – awaiting admin approval',
+                    schema: {
+                        message_en: "Nurse account created successfully. Please wait for verification.",
+                        message_ar: "تم إنشاء حساب الممرضة بنجاح. يرجى الانتظار للموافقة عليه.",
+                    }
+                }
+                #swagger.responses[400] = {
+                    description: 'Validation failed (missing fields, wrong file type, invalid date format, etc.)'
+                }
+                #swagger.responses[500] = {
+                    description: 'Server error during file upload or database transaction'
+                }
+            */
+
+            uploadPdf.fields([
+                { name: 'nationalCard', maxCount: 1 },
+                { name: 'bonusFile', maxCount: 1 },
+            ]),
+            ValidationMiddleware(NurseSignupRequestDto),
+            this.nursesController.nurseSignup,
         )
 
         this.router.post(
             `${this.path}/login`,
+            /* 
+                #swagger.path = '/nurses/login'
+                #swagger.method = 'post'
+                #swagger.tags = ['Nurses']
+                #swagger.description = 'Authenticates nurse credentials'
+                #swagger.parameters['body'] = {
+                    in: 'body',
+                    description: 'Nurse login data',
+                    required: true,
+                    schema: {
+                        $emailOrUsername: 'nurse@example.com',
+                        $password: 'SecurePassword123',
+                        $rememberMe: "true"
+                    }
+                }
+
+                #swagger.responses[200] = {
+                    description: 'Login successful – approved nurse with completed profile',
+                    schema: {
+                        data: {
+                            id: 'uuid-string',
+                            name: 'Maxine Lee',
+                            email: 'maxine.lee@example.com',
+                            username: 'maxine.lee',
+                            phone: '+201234567890',
+                            gender: 'FEMALE',
+                            nurse: { account_status: 'APPROVED' }
+                        },
+                        messageEn: 'Nurse retrieved successfully',
+                        messageAr: 'تم استرجاع بيانات الممرض بنجاح'
+                    }
+                }
+                #swagger.responses[401] = {
+                    description: 'Invalid credentials (wrong email/username or password)'
+                }
+                #swagger.responses[403] = {
+                    description: 'Account not approved (PENDING or REJECTED)'
+                }
+            */
+            ValidationMiddleware(NurseLoginRequestDto),
+            this.nursesController.nurseLogin
         );
 
         this.router.patch(
             `${this.path}/set-password`,
+            /* 
+                #swagger.path = '/nurses/set-password'
+                #swagger.method = 'patch'
+                #swagger.tags = ['Nurses']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['body'] = {
+                    in: 'body',
+                    description: 'New password data',
+                    required: true,
+                    schema: {
+                        $password: 'NewSecurePassword123'
+                    }
+                }
+                #swagger.responses[200] = {
+                    description: 'Password set successfully',
+                    schema: {
+                        messageEn: 'Password updated successfully',
+                        messageAr: "تم تحديث كلمة المرور بنجاح"
+                    }
+                }
+                #swagger.responses[400] = {
+                    description: 'Password already set / validation error'
+                }
+                #swagger.responses[401] = {
+                    description: 'Unauthorized – missing or invalid token'
+                }
+                #swagger.responses[403] = {
+                    description: 'Forbidden – user is not a nurse role'
+                }
+                #swagger.responses[404] = {
+                    description: 'Nurse user not found'
+                }
+                    
+            */
+            ValidationMiddleware(NurseSetPasswordRequestDto),
+            AuthMiddleware,
+            RoleMiddleware(Role.NURSE),
+            this.nursesController.nurseSetPassword
         );
     }
 }

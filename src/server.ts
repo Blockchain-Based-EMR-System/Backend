@@ -8,7 +8,7 @@ import { DoctorsRoute } from './routes/doctors.route';
 import { ClinicRoute } from './routes/clinic.route';
 import { AppointmentRoute } from './routes/appointment.route';
 import { QueueRoute } from './routes/queue.route';
-
+import { NurseRoute } from './routes/nurse.route';
 import { UsersRoute } from './routes/user.route';
 ValidateEnv();
 
@@ -16,7 +16,7 @@ const app = new App(
     [
         new AuthRoute(), new FabricRoute(), new AdminRoute(),
         new SuperAdminRoute(), new DoctorsRoute(), new ClinicRoute(), new AppointmentRoute(), new QueueRoute(),
-        new UsersRoute()
+        new UsersRoute(), new NurseRoute(),
     ]);
 
 app.listen();
