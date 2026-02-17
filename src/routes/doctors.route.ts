@@ -239,5 +239,67 @@ export class DoctorsRoute implements Routes {
             ValidationMiddleware(PostAnnouncementDto),
             this.doctorsController.postAnnouncement
         )
+
+        this.router.get(
+            `/doctors/announcements`,
+            /*
+                #swagger.path = '/doctors/announcements'
+                #swagger.method = 'get'
+                #swagger.tags = ['Doctors']
+                #swagger.description = 'Retrieves all nurse hiring announcements posted by the doctor'
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.responses[200] = {
+                    description: 'Announcements retrieved successfully',
+                    schema: {
+                        data: [
+                            {
+                                id: 'uuid-string',
+                                doctor: {
+                                    id: 'uuid-string',
+                                    name: 'Dr. Ahmed Ali',
+                                    gender: 'MALE',
+                                    profilePic: 'https://res.cloudinary.com/example/image.jpg'
+                                },
+                                clinic: {
+                                    id: 'uuid-string',
+                                    name: 'Al Salam Clinic',
+                                    address: '123 Main St, Cairo',
+                                    address_maps_link: 'https://maps.google.com/?q=...'
+                                },
+                                working_days: [
+                                    {
+                                        day_of_week: 'MONDAY',
+                                        start_time: '09:00',
+                                        end_time: '17:00'
+                                    }
+                                ],
+                                status: 'PENDING',
+                                gender: 'FEMALE',
+                                max_age: 40,
+                                years_of_experience: 3,
+                                notes: 'Looking for an experienced nurse'
+                            }
+                        ],
+                        messageEn: 'Announcements retrieved successfully',
+                        messageAr: 'تم استرجاع الإعلانات بنجاح'
+                    }
+                }
+                #swagger.responses[401] = {
+                    description: 'Unauthorized – missing or invalid token'
+                }
+                #swagger.responses[404] = {
+                    description: 'Doctor not found'
+                }
+            */
+           AuthMiddleware,
+           this.doctorsController.getDoctorAnnouncements
+
+        )
+
     }
 }

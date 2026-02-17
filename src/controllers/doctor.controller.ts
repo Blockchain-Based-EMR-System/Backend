@@ -86,4 +86,15 @@ export class DoctorController {
         const responseMessage = createMultiLangMessage(SuccessResponseMessages.ANNOUNCEMENT_CREATED_SUCCESSFULLY);
         res.status(201).json({ messageEn: responseMessage.messageEn, messageAr: responseMessage.messageAr });
     }
+
+    public getDoctorAnnouncements = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+        const doctorId = req.user?.id;
+        const announcements = await this.doctorService.getDoctorAnnouncements(doctorId);
+
+        const responseMessage = createMultiLangMessage(SuccessResponseMessages.ANNOUNCEMENTS_RETRIEVED_SUCCESSFULLY);
+        res.status(200).json({
+            data: announcements,
+            ...responseMessage
+        });
+    }
 }

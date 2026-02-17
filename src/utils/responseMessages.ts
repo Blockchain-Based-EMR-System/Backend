@@ -114,6 +114,10 @@ export const SuccessResponseMessages = {
         message_en: "Announcement created successfully.",
         message_ar: "تم إنشاء الإعلان بنجاح.",
     },
+    ANNOUNCEMENTS_RETRIEVED_SUCCESSFULLY: {
+        message_en: "Announcements retrieved successfully.",
+        message_ar: "تم استرجاع الإعلانات بنجاح.",
+    },
 
     // Success messages for nurses
     NURSE_CREATED_WAITING_VERIFICATION: {

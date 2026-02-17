@@ -4,7 +4,7 @@ import { HttpException } from "@/exceptions/HttpException";
 import { ErrorMessages, createBilingualError } from "@/utils/errorMessages";
 import { Doctor, DoctorAccountStatus, PrismaClient, Role } from "@prisma/client";
 import { hash, compare } from "bcrypt";
-import { DoctorLoginData, DoctorPersonalData } from "@/interfaces/doctors.interface";
+import { DoctorLoginData, DoctorPersonalData, DoctorAnnouncements } from "@/interfaces/doctors.interface";
 import { AuthService } from "./auth.service";
 import prisma from "@/config/prisma";
 import cloudinary from "@/utils/cloudinary";
@@ -266,7 +266,7 @@ export class DoctorService {
         }
     }
 
-    public async getDoctors(lang: 'en' | 'ar', gender?: string, minFees?: number, maxFees?: number, isOnline?: boolean ): Promise<DoctorPersonalData[]> {
+    public async getDoctors(lang: 'en' | 'ar', gender?: string, minFees?: number, maxFees?: number, isOnline?: boolean): Promise<DoctorPersonalData[]> {
         const WhereClause: any = {
             is_accepting: true,
             doctor: {
@@ -318,7 +318,7 @@ export class DoctorService {
                                 phone: true,
                                 date_of_birth: true,
                                 photo_url: true,
-                                
+
                             },
                         },
                     },
@@ -361,7 +361,7 @@ export class DoctorService {
             const age = await this.userService.calculateUserAge(user.date_of_birth);
             let canWorkOnline = false;
             if (doctor.availability_type == 'ONLINE' || doctor.availability_type == 'BOTH') {
-                canWorkOnline = true; 
+                canWorkOnline = true;
             }
             const allClinics: DoctorClinics[] = [];
 
@@ -400,13 +400,101 @@ export class DoctorService {
         return doctorPersonalData;
     }
 
+    public async getDoctorAnnouncements(doctorId: string): Promise<DoctorAnnouncements[]> {
+        const doctor = await prisma.doctor.findUnique({
+            where: {
+                id: doctorId
+            },
+            select: {
+                account_status: true
+            }
+        });
+
+        if (!doctor) {
+            const error = createBilingualError(404, ErrorMessages.USER_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        if (doctor.account_status !== DoctorAccountStatus.APPROVED) {
+            const error = createBilingualError(403, ErrorMessages.DOCTOR_ACCOUNT_NOT_APPROVED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+        
+        const announcements = await prisma.announcement.findMany({
+            where: {
+                doctor_id: doctorId
+            },
+            select: {
+                id: true,
+                doctor: {
+                    select: {
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                gender: true,
+                                photo_url: true,
+                            }
+                        }
+                    }
+                },
+                clinic: {
+                    select: {
+                        id: true,
+                        name: true,
+                        address: true,
+                        address_maps_link: true,
+                    }
+                },
+                working_days: {
+                    select: {
+                        day_of_week: true,
+                        start_time: true,
+                        end_time: true,
+                    }
+                },
+                status: true,
+                gender: true,
+                max_age: true,
+                years_of_experience: true,
+                notes: true,
+
+            }
+        });
+        return announcements.map(announcement => ({
+            id: announcement.id,
+            doctor: {
+                id: announcement.doctor.user.id,
+                name: announcement.doctor.user.name,
+                gender: announcement.doctor.user.gender,
+                profilePic: announcement.doctor.user.photo_url,
+            },
+            clinic: {
+                id: announcement.clinic.id,
+                name: announcement.clinic.name,
+                address: announcement.clinic.address,
+                address_maps_link: announcement.clinic.address_maps_link,
+            },
+            working_days: announcement.working_days.map(wd => ({
+                day_of_week: wd.day_of_week,
+                start_time: wd.start_time,
+                end_time: wd.end_time,
+            })),
+            status: announcement.status,
+            gender: announcement.gender || undefined,
+            max_age: announcement.max_age || undefined,
+            years_of_experience: announcement.years_of_experience || undefined,
+            notes: announcement.notes || undefined,
+        }));
+    }
+
     public async postAnnouncement(doctorId: string, data: PostAnnouncementDto): Promise<void> {
         const doctor = await prisma.doctor.findUnique({
-            where: { 
-                id: doctorId 
+            where: {
+                id: doctorId
             },
-            select: { 
-                account_status: true 
+            select: {
+                account_status: true
             }
         });
 
