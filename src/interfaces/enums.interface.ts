@@ -34,3 +34,9 @@ export enum DOCTOR_FILES {
   FELLOWSHIP_CERTIFICATE = 'fellowshipCertificate',
   UNION_SPECIALIZATION_CERTIFICATE = 'unionSpecializationCertificate',
 }
+
+export enum NURSE_FILES {
+  NATIONAL_CARD = 'nationalCard',
+  BONUS_FILE = 'bonusFile',
+
+}

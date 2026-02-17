@@ -91,17 +91,17 @@ model Patient {
 }
 
 model Nurse {
-  id                    String              @id @default(uuid())
-  account_status        NurseAccountStatus  @default(PENDING)
-  years_of_experience   Int
-  national_id_url       String?             @db.VarChar(500)
-  national_id_public_id String?             @db.VarChar(500)
-  bonus_file_url        String?             @db.VarChar(500)
-  bonus_file_public_id  String?             @db.VarChar(500)
-  brief                 String?
-  user                  User                @relation("UserAsNurse", fields: [id], references: [id], onDelete: Cascade)
-  nurse_schedules       NurseSchedule[]     @relation("NurseScheduleNurse")
-  announcement_nurses   AnnouncementNurse[] @relation("AnnouncementNurseNurse")
+  id                   String              @id @default(uuid())
+  account_status       NurseAccountStatus  @default(PENDING)
+  years_of_experience  Int
+  nationalCardUrl      String?             @db.VarChar(500)
+  nationalCardPublicId String?             @db.VarChar(500)
+  bonusFileUrl         String?             @db.VarChar(500)
+  bonusFilePublicId    String?             @db.VarChar(500)
+  brief                String?
+  user                 User                @relation("UserAsNurse", fields: [id], references: [id], onDelete: Cascade)
+  nurse_schedules      NurseSchedule[]     @relation("NurseScheduleNurse")
+  announcement_nurses  AnnouncementNurse[] @relation("AnnouncementNurseNurse")
 
   @@map("Nurse")
 }

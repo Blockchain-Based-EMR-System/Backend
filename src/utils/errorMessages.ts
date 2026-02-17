@@ -106,6 +106,16 @@ export const ErrorMessages = {
         en: 'Maximum number of created clinics reached',
         ar: 'تم الوصول إلى الحد الأقصى لعدد العيادات',
     },
+
+    // nurse
+    NURSE_PASSWORD_ALREADY_SET: {
+        en: 'Password has already been set',
+        ar: 'تم تعيين كلمة المرور بالفعل',
+    },
+    NURSE_ACCOUNT_NOT_APPROVED: {
+        en: 'Nurse account is not approved yet',
+        ar: 'حساب الممرضة غير مفعل بعد',
+    },
     
     // File upload errors
     NO_FILE_UPLOADED: {

@@ -111,6 +111,20 @@ export const SuccessResponseMessages = {
         message_ar: "تم تعيين كلمة المرور بنجاح.",
     },
 
+    // Success messages for nurses
+    NURSE_CREATED_WAITING_VERIFICATION: {
+        message_en: "Nurse account created successfully. Please wait for verification.",
+        message_ar: "تم إنشاء حساب الممرضة بنجاح. يرجى الانتظار للموافقة عليه.",
+    },
+    NURSE_RETRIEVED: {
+        message_en: "Nurse retrieved successfully.",
+        message_ar: "تم استرجاع بيانات الممرضة بنجاح.",
+    },
+    PASSWORD_SET_SUCCESSFULLY_BY_NURSE: {
+        message_en: 'Password set successfully by nurse',
+        message_ar: 'تم تعيين كلمة المرور بنجاح من قبل الممرضة',
+    },
+
     // Success messages for Google Auth
     PHONE_NUMBER_UPDATED_SUCCESSFULLY: {
         message_en: "Phone number updated successfully.",
