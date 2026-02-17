@@ -3376,6 +3376,103 @@
         }
       }
     },
+    "/doctors/announcement": {
+      "post": {
+        "tags": [
+          "Doctors"
+        ],
+        "description": "Allows doctor to post a nurse hiring announcement",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Announcement data",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "clinic_id": {
+                  "type": "string",
+                  "example": "uuid-of-the-clinic"
+                },
+                "working_days": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "day_of_week": {
+                        "type": "string",
+                        "example": "TUESDAY"
+                      },
+                      "start_time": {
+                        "type": "string",
+                        "example": "10:00"
+                      },
+                      "end_time": {
+                        "type": "string",
+                        "example": "17:00"
+                      }
+                    },
+                    "required": [
+                      "day_of_week",
+                      "start_time",
+                      "end_time"
+                    ]
+                  }
+                },
+                "gender": {
+                  "type": "string",
+                  "example": "FEMALE"
+                },
+                "max_age": {
+                  "type": "number",
+                  "example": 40
+                },
+                "years_of_experience": {
+                  "type": "number",
+                  "example": 3
+                },
+                "notes": {
+                  "type": "string",
+                  "example": "Looking for an experienced nurse"
+                }
+              },
+              "required": [
+                "clinic_id",
+                "working_days"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Announcement posted successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "messageEn": {
+                  "type": "string",
+                  "example": "Announcement created successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم نشر الإعلان بنجاح"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "403": {
+            "description": "Doctor account not approved (PENDING or REJECTED)"
+          },
+          "404": {
+            "description": "Doctor not found or does not belong to the specified clinic"
+          }
+        }
+      }
+    },
     "/clinics": {
       "post": {
         "tags": [

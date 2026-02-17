@@ -1,5 +1,5 @@
 
-import { DoctorLoginRequestDto, DoctorSetPasswordRequestDto, DoctorSignupRequestDto } from "@/dtos/doctors.dto";
+import { DoctorLoginRequestDto, DoctorSetPasswordRequestDto, DoctorSignupRequestDto, PostAnnouncementDto } from "@/dtos/doctors.dto";
 import { RequestWithUser } from "@/interfaces";
 import { DoctorService } from "@/services/doctor.service";
 import { UserService } from "@/services/user.service";
@@ -75,5 +75,15 @@ export class DoctorController {
             data: doctors,
             ...response
         });
+    }
+
+    public postAnnouncement = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+        const doctorId = req.user?.id;
+        const announcementData: PostAnnouncementDto = req.body;
+
+        await this.doctorService.postAnnouncement(doctorId, announcementData);
+
+        const responseMessage = createMultiLangMessage(SuccessResponseMessages.ANNOUNCEMENT_CREATED_SUCCESSFULLY);
+        res.status(201).json({ messageEn: responseMessage.messageEn, messageAr: responseMessage.messageAr });
     }
 }

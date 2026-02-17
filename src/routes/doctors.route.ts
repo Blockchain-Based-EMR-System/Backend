@@ -1,5 +1,5 @@
 import { DoctorController } from "@/controllers/doctor.controller";
-import { DoctorLoginRequestDto, DoctorSetPasswordRequestDto, DoctorSignupRequestDto } from "@/dtos/doctors.dto";
+import { DoctorLoginRequestDto, DoctorSetPasswordRequestDto, DoctorSignupRequestDto, PostAnnouncementDto } from "@/dtos/doctors.dto";
 import { Routes } from "@/interfaces";
 import { ValidationMiddleware } from "@/middlewares/validation.middleware";
 import { Router } from "express";
@@ -189,5 +189,55 @@ export class DoctorsRoute implements Routes {
             RoleMiddleware(Role.DOCTOR),
             errorWrapper(this.doctorsController.doctorSetPassword)
         );
+
+        this.router.post(
+            `/doctors/announcement`,
+            /*
+                #swagger.path = '/doctors/announcement'
+                #swagger.method = 'post'
+                #swagger.tags = ['Doctors']
+                #swagger.description = 'Allows doctor to post a nurse hiring announcement'
+                #swagger.parameters['body'] = {
+                    in: 'body',
+                    description: 'Announcement data',
+                    required: true,
+                    schema: {
+                        $clinic_id: 'uuid-of-the-clinic',
+                        $working_days: [
+                            {
+                                $day_of_week: 'MONDAY',
+                                $start_time: '09:00',
+                                $end_time: '17:00'
+                            },
+                            {
+                                $day_of_week: 'TUESDAY',
+                                $start_time: '10:00',
+                                $end_time: '17:00'
+                            }
+                        ],
+                        gender: 'FEMALE',
+                        max_age: 40,
+                        years_of_experience: 3,
+                        notes: 'Looking for an experienced nurse'
+                    }
+                }
+                #swagger.responses[201] = {
+                    description: 'Announcement posted successfully',
+                    schema: {
+                        messageEn: 'Announcement created successfully',
+                        messageAr: 'تم نشر الإعلان بنجاح'
+                    }
+                }
+                #swagger.responses[403] = {
+                    description: 'Doctor account not approved (PENDING or REJECTED)'
+                }
+                #swagger.responses[404] = {
+                    description: 'Doctor not found or does not belong to the specified clinic'
+                }
+            */
+            AuthMiddleware,
+            ValidationMiddleware(PostAnnouncementDto),
+            this.doctorsController.postAnnouncement
+        )
     }
 }

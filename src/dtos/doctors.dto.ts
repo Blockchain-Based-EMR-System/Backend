@@ -1,8 +1,8 @@
-import { TransformSpecialization } from "@/utils/specializationTransform";
-import { IsValidSpecialization } from "@/validators/specialization.validator";
-import { AvailabilityType, Gender } from "@prisma/client";
-import { IsString, IsNotEmpty, IsEmail } from "class-validator";
+import { AvailabilityType, DayOfWeek, Gender } from "@prisma/client";
+import { IsString, IsNotEmpty, IsEmail, IsArray, IsOptional, IsInt, IsEnum, ValidateNested, Min } from "class-validator";
 import { UpdateUserProfileDto } from "./users.dto";
+import { Type } from "class-transformer";
+
 
 export class DoctorSignupRequestDto {
     @IsString()
@@ -64,4 +64,47 @@ export class DoctorProfilePictureRequestDto {
 export class DoctorUpdateProfileRequestDto extends UpdateUserProfileDto {
     @IsString()
     availability_type?: AvailabilityType;
+}
+
+export class WorkingDayDto {
+    @IsEnum(DayOfWeek)
+    @IsNotEmpty()
+    public day_of_week: DayOfWeek;
+
+    @IsString()
+    @IsNotEmpty()
+    public start_time: string;
+
+    @IsString()
+    @IsNotEmpty()
+    public end_time: string;
+}
+
+export class PostAnnouncementDto {
+    @IsString()
+    @IsNotEmpty()
+    public clinic_id: string;
+
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => WorkingDayDto)
+    public working_days: WorkingDayDto[];
+
+    @IsOptional()
+    @IsEnum(Gender)
+    public gender?: Gender;
+
+    @IsOptional()
+    @IsInt()
+    @Min(0)
+    public max_age?: number;
+
+    @IsOptional()
+    @IsInt()
+    @Min(0)
+    public years_of_experience?: number;
+
+    @IsOptional()
+    @IsString()
+    public notes?: string;
 }

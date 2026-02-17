@@ -1,4 +1,4 @@
-import { DoctorLoginRequestDto, DoctorSignupRequestDto } from "@/dtos/doctors.dto";
+import { DoctorLoginRequestDto, DoctorSignupRequestDto, PostAnnouncementDto } from "@/dtos/doctors.dto";
 import { Service } from "typedi";
 import { HttpException } from "@/exceptions/HttpException";
 import { ErrorMessages, createBilingualError } from "@/utils/errorMessages";
@@ -400,6 +400,58 @@ export class DoctorService {
         return doctorPersonalData;
     }
 
+    public async postAnnouncement(doctorId: string, data: PostAnnouncementDto): Promise<void> {
+        const doctor = await prisma.doctor.findUnique({
+            where: { 
+                id: doctorId 
+            },
+            select: { 
+                account_status: true 
+            }
+        });
+
+        if (!doctor) {
+            const error = createBilingualError(404, ErrorMessages.USER_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        if (doctor.account_status !== DoctorAccountStatus.APPROVED) {
+            const error = createBilingualError(403, ErrorMessages.DOCTOR_ACCOUNT_NOT_APPROVED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const clinicDoctor = await prisma.clinicDoctor.findUnique({
+            where: {
+                clinic_id_doctor_id: {
+                    clinic_id: data.clinic_id,
+                    doctor_id: doctorId
+                }
+            }
+        });
+
+        if (!clinicDoctor) {
+            const error = createBilingualError(404, ErrorMessages.DOCTOR_NOT_ASSOCIATED_WITH_CLINIC);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        await prisma.announcement.create({
+            data: {
+                doctor_id: doctorId,
+                clinic_id: data.clinic_id,
+                gender: data.gender,
+                max_age: data.max_age,
+                years_of_experience: data.years_of_experience,
+                notes: data.notes,
+                working_days: {
+                    create: data.working_days.map(day => ({
+                        day_of_week: day.day_of_week,
+                        start_time: day.start_time,
+                        end_time: day.end_time
+                    }))
+                }
+            }
+        });
+    }
 
 }
 
