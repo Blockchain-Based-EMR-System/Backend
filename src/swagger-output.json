@@ -3611,6 +3611,112 @@
         }
       }
     },
+    "/doctors/announcements/{announcementId}/applicants": {
+      "get": {
+        "tags": [
+          "Doctors"
+        ],
+        "description": "Retrieves all PENDING nurse applicants for a specific announcement",
+        "parameters": [
+          {
+            "name": "announcementId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "ID of the announcement to retrieve applicants for"
+          },
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Applicants retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "uuid-string"
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "Max Mustermann"
+                      },
+                      "email": {
+                        "type": "string",
+                        "example": "max.mustermann@example.com"
+                      },
+                      "gender": {
+                        "type": "string",
+                        "example": "FEMALE"
+                      },
+                      "phone": {
+                        "type": "string",
+                        "example": "+201234567890"
+                      },
+                      "age": {
+                        "type": "number",
+                        "example": 28
+                      },
+                      "profilePic": {
+                        "type": "string",
+                        "example": "https://res.cloudinary.com/example/photo.jpg"
+                      },
+                      "years_of_experience": {
+                        "type": "number",
+                        "example": 5
+                      },
+                      "nationalCardUrl": {
+                        "type": "string",
+                        "example": "https://res.cloudinary.com/example/national_card.pdf"
+                      },
+                      "brief": {
+                        "type": "string",
+                        "example": "Experienced ICU nurse with 5 years in critical care"
+                      },
+                      "bonusFileUrl": {
+                        "type": "string",
+                        "example": "https://res.cloudinary.com/example/bonus.pdf"
+                      }
+                    }
+                  }
+                },
+                "messageEn": {
+                  "type": "string",
+                  "example": "Applicants retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع المتقدمين بنجاح"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized – missing or invalid token"
+          },
+          "403": {
+            "description": "Forbidden – announcement does not belong to this doctor"
+          },
+          "404": {
+            "description": "Announcement not found"
+          }
+        }
+      }
+    },
     "/clinics": {
       "post": {
         "tags": [

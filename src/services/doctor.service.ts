@@ -5,6 +5,7 @@ import { ErrorMessages, createBilingualError } from "@/utils/errorMessages";
 import { Doctor, DoctorAccountStatus, PrismaClient, Role } from "@prisma/client";
 import { hash, compare } from "bcrypt";
 import { DoctorLoginData, DoctorPersonalData, DoctorAnnouncements } from "@/interfaces/doctors.interface";
+import { NurseData } from "@/interfaces/nurse.interface";
 import { AuthService } from "./auth.service";
 import prisma from "@/config/prisma";
 import cloudinary from "@/utils/cloudinary";
@@ -419,7 +420,7 @@ export class DoctorService {
             const error = createBilingualError(403, ErrorMessages.DOCTOR_ACCOUNT_NOT_APPROVED);
             throw new HttpException(error.status, error.message, error.messageAr);
         }
-        
+
         const announcements = await prisma.announcement.findMany({
             where: {
                 doctor_id: doctorId
@@ -486,6 +487,69 @@ export class DoctorService {
             years_of_experience: announcement.years_of_experience || undefined,
             notes: announcement.notes || undefined,
         }));
+    }
+
+    public async getAnnouncementApplicants(doctorId: string, announcementId: string): Promise<NurseData[]> {
+        const announcement = await prisma.announcement.findUnique({
+            where: {
+                id: announcementId
+            },
+            select: {
+                doctor_id: true
+            }
+        });
+
+        if (!announcement) {
+            const error = createBilingualError(404, ErrorMessages.ANNOUNCEMENT_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        if (announcement.doctor_id !== doctorId) {
+            const error = createBilingualError(403, ErrorMessages.UNAUTHORIZED_ACCESS);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const applicants = await prisma.announcementNurse.findMany({
+            where: {
+                announcement_id: announcementId,
+                status: 'PENDING'
+            },
+            select: {
+                nurse: {
+                    select: {
+                        years_of_experience: true,
+                        nationalCardUrl: true,
+                        bonusFileUrl: true,
+                        brief: true,
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true,
+                                gender: true,
+                                phone: true,
+                                date_of_birth: true,
+                                photo_url: true,
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        return Promise.all(applicants.map(async ({ nurse }) => ({
+            id: nurse.user.id,
+            name: nurse.user.name,
+            email: nurse.user.email,
+            gender: nurse.user.gender,
+            phone: nurse.user.phone,
+            age: await this.userService.calculateUserAge(nurse.user.date_of_birth),
+            profilePic: nurse.user.photo_url,
+            years_of_experience: nurse.years_of_experience,
+            nationalCardUrl: nurse.nationalCardUrl,
+            bonusFileUrl: nurse.bonusFileUrl,
+            brief: nurse.brief,
+        })));
     }
 
     public async postAnnouncement(doctorId: string, data: PostAnnouncementDto): Promise<void> {

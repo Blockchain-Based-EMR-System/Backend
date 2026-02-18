@@ -106,6 +106,14 @@ export const ErrorMessages = {
         en: 'Maximum number of created clinics reached',
         ar: 'تم الوصول إلى الحد الأقصى لعدد العيادات',
     },
+    ANNOUNCEMENT_NOT_FOUND: {
+        en: 'Announcement not found',
+        ar: 'الإعلان غير موجود',
+    },
+    UNAUTHORIZED_ACCESS :{
+        en: 'You are not authorized to access this',
+        ar: 'ليس لديك صلاحية للوصول إلى هذا ',
+    },
 
     // nurse
     NURSE_PASSWORD_ALREADY_SET: {

@@ -301,5 +301,60 @@ export class DoctorsRoute implements Routes {
 
         )
 
+        this.router.get(
+            `/doctors/announcements/:announcementId/applicants`,
+            /*
+                #swagger.path = '/doctors/announcements/{announcementId}/applicants'
+                #swagger.method = 'get'
+                #swagger.tags = ['Doctors']
+                #swagger.description = 'Retrieves all PENDING nurse applicants for a specific announcement'
+                #swagger.parameters['announcementId'] = {
+                    in: 'path',
+                    description: 'ID of the announcement to retrieve applicants for',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.responses[200] = {
+                    description: 'Applicants retrieved successfully',
+                    schema: {
+                        data: [
+                            {
+                                id: 'uuid-string',
+                                name: 'Max Mustermann',
+                                email: 'max.mustermann@example.com',
+                                gender: 'FEMALE',
+                                phone: '+201234567890',
+                                age: 28,
+                                profilePic: 'https://res.cloudinary.com/example/photo.jpg',
+                                years_of_experience: 5,
+                                nationalCardUrl: 'https://res.cloudinary.com/example/national_card.pdf',
+                                brief: 'Experienced ICU nurse with 5 years in critical care',
+                                bonusFileUrl: 'https://res.cloudinary.com/example/bonus.pdf'
+                            }
+                        ],
+                        messageEn: 'Applicants retrieved successfully',
+                        messageAr: 'تم استرجاع المتقدمين بنجاح'
+                    }
+                }
+                #swagger.responses[401] = {
+                    description: 'Unauthorized – missing or invalid token'
+                }
+                #swagger.responses[403] = {
+                    description: 'Forbidden – announcement does not belong to this doctor'
+                }
+                #swagger.responses[404] = {
+                    description: 'Announcement not found'
+                }
+            */
+            AuthMiddleware,
+            this.doctorsController.getAnnouncementApplicants
+        )
+
     }
 }

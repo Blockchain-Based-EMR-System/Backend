@@ -1,4 +1,4 @@
-import { NurseAccountStatus} from "@prisma/client";
+import { NurseAccountStatus, Gender} from "@prisma/client";
 
 export interface NurseLoginData {
     id: string,
@@ -12,3 +12,16 @@ export interface NurseLoginData {
     }
 }
 
+export interface NurseData {
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    gender: Gender;
+    age: number;
+    profilePic: string | null;
+    years_of_experience: number;
+    nationalCardUrl: string;
+    brief: string | null;
+    bonusFileUrl: string | null;
+}
