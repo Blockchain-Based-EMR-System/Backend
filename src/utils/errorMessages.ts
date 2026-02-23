@@ -128,6 +128,10 @@ export const ErrorMessages = {
         en: 'National card image is required',
         ar: 'صورة البطاقة الوطنية مطلوبة',
     },
+    NURSE_ID_NOT_FOUND: {
+        en: 'Nurse ID not found in request',
+        ar: 'معرف الممرضة غير موجود في الطلب',
+    },
     
     // File upload errors
     NO_FILE_UPLOADED: {

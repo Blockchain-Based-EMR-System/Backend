@@ -200,5 +200,67 @@ export class NurseRoute implements Routes {
             RoleMiddleware(Role.NURSE),
             this.nursesController.nurseSetPassword
         );
+
+        this.router.get(
+            `${this.path}/announcements`,
+            /* 
+                #swagger.path = '/nurses/announcements'
+                #swagger.method = 'get'
+                #swagger.tags = ['Nurses']
+                #swagger.description = 'Retrieves all active announcements for the nurse'
+
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
+
+                #swagger.responses[200] = {
+                    description: 'Announcements retrieved successfully',
+                    schema: {
+                        data: [
+                            {
+                                id: 'uuid-string',
+                                doctor: {
+                                    id: 'uuid-string',
+                                    name: 'Dr. House',
+                                    gender: 'MALE',
+                                    profilePic: 'https://res.cloudinary.com/example/image.jpg'
+                                },
+                                clinic: {
+                                    id: 'uuid-string',
+                                    name: 'Al Salam Clinic',
+                                    address: '123 Main St, Cairo',
+                                    address_maps_link: 'https://maps.google.com/?q=...'
+                                },
+                                working_days: [
+                                    {
+                                        day_of_week: 'MONDAY',
+                                        start_time: '09:00',
+                                        end_time: '17:00'
+                                    }
+                                ],
+                                status: 'PENDING',
+                                gender: 'FEMALE',
+                                max_age: 40,
+                                years_of_experience: 3,
+                                notes: 'Looking for an experienced nurse'
+                            }
+                        ],
+                        messageEn: 'Announcements retrieved successfully',
+                        messageAr: 'تم استرجاع الإعلانات بنجاح'
+                    }
+                }
+                #swagger.responses[401] = {
+                    description: 'Unauthorized – missing or invalid token'
+                }
+                #swagger.responses[404] = {
+                    description: 'Nurse account not approved (PENDING or REJECTED)'
+                }
+            */
+            AuthMiddleware,
+            this.nursesController.getAllAnnouncements
+        );
     }
 }

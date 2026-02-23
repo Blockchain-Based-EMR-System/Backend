@@ -10,6 +10,7 @@ import prisma from '@/config/prisma';
 import { Role, NurseAccountStatus } from "@prisma/client";
 import cloudinary from "@/utils/cloudinary";
 import fs from "fs";
+import { DoctorAnnouncements } from "@/interfaces/doctors.interface";
 
 @Service()
 export class NurseService {
@@ -167,6 +168,93 @@ export class NurseService {
                 hasCompletedProfile: true
             }
         });
+    }
+
+    public async getAllAnnouncements(nurseId): Promise<DoctorAnnouncements[]> {
+        const nurseData = await prisma.nurse.findUnique({
+            where: { id: nurseId },
+            select: { account_status: true }
+        });
+
+        if (nurseData.account_status !== NurseAccountStatus.APPROVED) {
+            const error = createBilingualError(404, ErrorMessages.NURSE_ACCOUNT_NOT_APPROVED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+        const announcements = await prisma.announcement.findMany({
+            where: {
+                deleted_at: null,
+                status: {
+                    in: ['POSTED', 'PENDING']
+                }
+            },
+            select: {
+                id: true,
+                doctor: {
+                    select: {
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                gender: true,
+                                photo_url: true,
+                            }
+                        }
+                    }
+                },
+                clinic: {
+                    select: {
+                        id: true,
+                        name: true,
+                        address: true,
+                        address_maps_link: true,
+                    }
+                },
+                working_days: {
+                    select: {
+                        day_of_week: true,
+                        start_time: true,
+                        end_time: true,
+                    }
+                },
+                status: true,
+                gender: true,
+                max_age: true,
+                years_of_experience: true,
+                notes: true,
+
+            }
+        });
+
+        if (!announcements) {
+            return [];
+        }
+
+        return announcements.map(announcement => ({
+            id: announcement.id,
+            doctor: {
+                id: announcement.doctor.user.id,
+                name: announcement.doctor.user.name,
+                gender: announcement.doctor.user.gender,
+                profilePic: announcement.doctor.user.photo_url,
+            },
+            clinic: {
+                id: announcement.clinic.id,
+                name: announcement.clinic.name,
+                address: announcement.clinic.address,
+                address_maps_link: announcement.clinic.address_maps_link,
+            },
+            working_days: announcement.working_days.map(wd => ({
+                day_of_week: wd.day_of_week,
+                start_time: wd.start_time,
+                end_time: wd.end_time,
+            })),
+            status: announcement.status,
+            gender: announcement.gender || undefined,
+            max_age: announcement.max_age || undefined,
+            years_of_experience: announcement.years_of_experience || undefined,
+            notes: announcement.notes || undefined,
+        }));
+
     }
 
 

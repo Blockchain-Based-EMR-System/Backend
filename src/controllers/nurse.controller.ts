@@ -8,6 +8,7 @@ import { NurseSignupRequestDto, NurseLoginRequestDto, NurseSetPasswordRequestDto
 import { createBilingualError, ErrorMessages } from '@/utils/errorMessages';
 import { SuccessResponseMessages, createMultiLangMessage } from '@/utils/responseMessages';
 
+
 export class NurseController {
     private nurseService = Container.get(NurseService);
 
@@ -43,6 +44,17 @@ export class NurseController {
         await this.nurseService.nurseSetPassword(nurseId, password);
         const responseMessage = createMultiLangMessage(SuccessResponseMessages.PASSWORD_SET_SUCCESSFULLY_BY_NURSE);
         res.status(200).json({ messageEn: responseMessage.messageEn, messageAr: responseMessage.messageAr });
+    });
+
+    public getAllAnnouncements = catchAsync(async (req: RequestWithUser, res: Response, next: NextFunction) => {
+        const nurseId = req.user?.id;
+        if (!nurseId) {
+            const error = createBilingualError(400, ErrorMessages.NURSE_ID_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+        const announcements = await this.nurseService.getAllAnnouncements(nurseId);
+        const responseMessage = createMultiLangMessage(SuccessResponseMessages.ANNOUNCEMENTS_RETRIEVED);
+        res.status(200).json({ data: announcements, messageEn: responseMessage.messageEn, messageAr: responseMessage.messageAr });
     });
 
 }

@@ -1,4 +1,4 @@
-import { NurseAccountStatus, Gender} from "@prisma/client";
+import { NurseAccountStatus, Gender, AnnouncementStatus} from "@prisma/client";
 
 export interface NurseLoginData {
     id: string,
