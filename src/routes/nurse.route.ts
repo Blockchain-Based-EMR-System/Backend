@@ -262,5 +262,47 @@ export class NurseRoute implements Routes {
             AuthMiddleware,
             this.nursesController.getAllAnnouncements
         );
+
+        this.router.post(
+            `${this.path}/announcements/:announcementId/apply`,
+            /* 
+                #swagger.path = '/nurses/announcements/{announcementId}/apply'
+                #swagger.method = 'post'
+                #swagger.tags = ['Nurses']
+                #swagger.description = 'Apply to a specific announcement'
+
+                #swagger.parameters['announcementId'] = {
+                    in: 'path',
+                    description: 'ID of the announcement to apply for',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
+
+                #swagger.responses[200] = {
+                    description: 'Application submitted successfully',
+                    schema: {
+                        messageEn: 'Applied to announcement successfully',
+                        messageAr: 'تم التقديم على الإعلان بنجاح'
+                    }
+                }
+                #swagger.responses[400] = {
+                    description: 'Invalid announcement ID / already applied / validation error'
+                }
+                #swagger.responses[401] = {
+                    description: 'Unauthorized – missing or invalid token'
+                }
+                #swagger.responses[404] = {
+                    description: 'Announcement not found / Nurse account not approved (PENDING or REJECTED)'
+                }
+            */
+            AuthMiddleware,
+            this.nursesController.applyToAnnouncement
+        )
     }
 }

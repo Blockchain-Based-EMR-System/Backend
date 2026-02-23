@@ -144,6 +144,10 @@ export const SuccessResponseMessages = {
         message_en: "Nurse verification status updated successfully.",
         message_ar: "تم تحديث حالة اعتماد الممرضة بنجاح.",
     },
+    APPLIED_TO_ANNOUNCEMENT_SUCCESSFULLY: {
+        message_en: "Applied to announcement successfully.",
+        message_ar: "تم التقديم للإعلان بنجاح.",
+    },
 
     // Success messages for Google Auth
     PHONE_NUMBER_UPDATED_SUCCESSFULLY: {

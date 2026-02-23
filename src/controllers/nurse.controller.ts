@@ -57,4 +57,15 @@ export class NurseController {
         res.status(200).json({ data: announcements, messageEn: responseMessage.messageEn, messageAr: responseMessage.messageAr });
     });
 
+    public applyToAnnouncement = catchAsync(async (req: RequestWithUser, res: Response, next: NextFunction) => {
+        const nurseId = req.user?.id;
+        const announcementId = req.params.announcementId;
+        if (!nurseId) {
+            const error = createBilingualError(400, ErrorMessages.NURSE_ID_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+        await this.nurseService.applyToAnnouncement(nurseId, announcementId);
+        const responseMessage = createMultiLangMessage(SuccessResponseMessages.APPLIED_TO_ANNOUNCEMENT_SUCCESSFULLY);
+        res.status(200).json({ messageEn: responseMessage.messageEn, messageAr: responseMessage.messageAr });
+    });
 }

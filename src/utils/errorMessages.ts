@@ -132,6 +132,14 @@ export const ErrorMessages = {
         en: 'Nurse ID not found in request',
         ar: 'معرف الممرضة غير موجود في الطلب',
     },
+    ANNOUNCEMENT_EXPIRED: {
+        en: 'Announcement has expired',
+        ar: 'انتهت صلاحية الإعلان',
+    },
+    APPLICATION_ALREADY_EXISTS: {
+        en: 'You have already applied to this announcement',
+        ar: 'لقد تقدمت بالفعل لهذا الإعلان',
+    },
     
     // File upload errors
     NO_FILE_UPLOADED: {

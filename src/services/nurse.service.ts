@@ -170,6 +170,54 @@ export class NurseService {
         });
     }
 
+    public async applyToAnnouncement(nurseId: string, announcementId: string): Promise<void> {
+        const nurseData = await prisma.nurse.findUnique({
+            where: { id: nurseId },
+            select: { account_status: true }
+        });
+
+        if (nurseData.account_status !== NurseAccountStatus.APPROVED) {
+            const error = createBilingualError(404, ErrorMessages.NURSE_ACCOUNT_NOT_APPROVED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const announcement = await prisma.announcement.findUnique({
+            where: {
+                id: announcementId,
+            },
+            select: {
+                status: true,
+            }
+        });
+
+        if (announcement.status == 'EXPIRED') {
+            const error = createBilingualError(404, ErrorMessages.ANNOUNCEMENT_EXPIRED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const existingApplication = await prisma.announcementNurse.findUnique({
+            where: {
+                announcement_id_nurse_id: {
+                    nurse_id: nurseId,
+                    announcement_id: announcementId
+                }
+            }
+        });
+
+        if (existingApplication) {
+            const error = createBilingualError(409, ErrorMessages.APPLICATION_ALREADY_EXISTS);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        await prisma.announcementNurse.create({
+            data: {
+                nurse_id: nurseId,
+                announcement_id: announcementId,
+                status: 'PENDING'
+            }
+        });
+    }
+
     public async getAllAnnouncements(nurseId): Promise<DoctorAnnouncements[]> {
         const nurseData = await prisma.nurse.findUnique({
             where: { id: nurseId },
