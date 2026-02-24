@@ -1,5 +1,5 @@
 import { DoctorController } from "@/controllers/doctor.controller";
-import { DoctorLoginRequestDto, DoctorSetPasswordRequestDto, DoctorSignupRequestDto, PostAnnouncementDto } from "@/dtos/doctors.dto";
+import { DoctorLoginRequestDto, DoctorSetPasswordRequestDto, DoctorSignupRequestDto, PostAnnouncementDto, EditAnnouncementDto } from "@/dtos/doctors.dto";
 import { Routes } from "@/interfaces";
 import { ValidationMiddleware } from "@/middlewares/validation.middleware";
 import { Router } from "express";
@@ -486,6 +486,71 @@ export class DoctorsRoute implements Routes {
             */
             AuthMiddleware,
             this.doctorsController.deleteAnnouncement
+        )
+
+        this.router.patch(
+            `/doctors/announcements/:announcementId`,
+            /*
+                #swagger.path = '/doctors/announcements/{announcementId}'
+                #swagger.method = 'patch'
+                #swagger.tags = ['Doctors']
+                #swagger.description = 'Edits a specific nurse hiring announcement (only if it is still PENDING)'
+                #swagger.parameters['announcementId'] = {
+                    in: 'path',
+                    description: 'ID of the announcement to edit',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['body'] = {
+                    in: 'body',
+                    description: 'Updated announcement data (only include fields to be updated)',
+                    required: true,
+                    schema: {
+                        $clinic_id: 'uuid-of-the-clinic',
+                        $working_days: [
+                            {
+                                $day_of_week: 'MONDAY',
+                                $start_time: '09:00',
+                                $end_time: '17:00'
+                            },
+                            {
+                                $day_of_week: 'TUESDAY',
+                                $start_time: '10:00',
+                                $end_time: '17:00'
+                            }
+                        ],
+                        gender: 'FEMALE',
+                        max_age: 40,
+                        years_of_experience: 3,
+                        notes: 'Looking for an experienced nurse'
+                    }
+                }
+                #swagger.responses[200] = {
+                    description: 'Announcement updated successfully',
+                    schema: {
+                        messageEn: 'Announcement updated successfully',
+                        messageAr: 'تم تحديث الإعلان بنجاح'
+                    }
+                }
+                #swagger.responses[401] = {
+                    description: 'Unauthorized – missing or invalid token'
+                }
+                #swagger.responses[403] = {
+                    description: 'Forbidden – announcement does not belong to this doctor or is not PENDING'
+                }
+                #swagger.responses[404] = {
+                    description: 'Announcement not found'
+                }
+            */
+            AuthMiddleware,
+            ValidationMiddleware(EditAnnouncementDto),
+            this.doctorsController.editAnnouncement
         )
 
     }

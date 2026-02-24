@@ -108,3 +108,33 @@ export class PostAnnouncementDto {
     @IsString()
     public notes?: string;
 }
+
+export class EditAnnouncementDto {
+    @IsOptional()
+    @IsString()
+    public clinic_id: string;
+
+    @IsOptional()
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => WorkingDayDto)
+    public working_days: WorkingDayDto[];
+
+    @IsOptional()
+    @IsEnum(Gender)
+    public gender?: Gender;
+
+    @IsOptional()
+    @IsInt()
+    @Min(0)
+    public max_age?: number;
+
+    @IsOptional()
+    @IsInt()
+    @Min(0)
+    public years_of_experience?: number;
+
+    @IsOptional()
+    @IsString()
+    public notes?: string;
+}

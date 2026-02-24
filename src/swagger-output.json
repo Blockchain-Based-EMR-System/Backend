@@ -3891,6 +3891,118 @@
             "description": "Announcement not found"
           }
         }
+      },
+      "patch": {
+        "tags": [
+          "Doctors"
+        ],
+        "description": "Edits a specific nurse hiring announcement (only if it is still PENDING)",
+        "parameters": [
+          {
+            "name": "announcementId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "ID of the announcement to edit"
+          },
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Updated announcement data (only include fields to be updated)",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "clinic_id": {
+                  "type": "string",
+                  "example": "uuid-of-the-clinic"
+                },
+                "working_days": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "day_of_week": {
+                        "type": "string",
+                        "example": "TUESDAY"
+                      },
+                      "start_time": {
+                        "type": "string",
+                        "example": "10:00"
+                      },
+                      "end_time": {
+                        "type": "string",
+                        "example": "17:00"
+                      }
+                    },
+                    "required": [
+                      "day_of_week",
+                      "start_time",
+                      "end_time"
+                    ]
+                  }
+                },
+                "gender": {
+                  "type": "string",
+                  "example": "FEMALE"
+                },
+                "max_age": {
+                  "type": "number",
+                  "example": 40
+                },
+                "years_of_experience": {
+                  "type": "number",
+                  "example": 3
+                },
+                "notes": {
+                  "type": "string",
+                  "example": "Looking for an experienced nurse"
+                }
+              },
+              "required": [
+                "clinic_id",
+                "working_days"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Announcement updated successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "messageEn": {
+                  "type": "string",
+                  "example": "Announcement updated successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم تحديث الإعلان بنجاح"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized – missing or invalid token"
+          },
+          "403": {
+            "description": "Forbidden – announcement does not belong to this doctor or is not PENDING"
+          },
+          "404": {
+            "description": "Announcement not found"
+          }
+        }
       }
     },
     "/clinics": {

@@ -1,4 +1,4 @@
-import { DoctorLoginRequestDto, DoctorSignupRequestDto, PostAnnouncementDto } from "@/dtos/doctors.dto";
+import { DoctorLoginRequestDto, DoctorSignupRequestDto, PostAnnouncementDto, EditAnnouncementDto } from "@/dtos/doctors.dto";
 import { Service } from "typedi";
 import { HttpException } from "@/exceptions/HttpException";
 import { ErrorMessages, createBilingualError } from "@/utils/errorMessages";
@@ -665,7 +665,51 @@ export class DoctorService {
         });
     }
 
+    public async editAnnouncement(doctorId: string, announcementId: string, data: EditAnnouncementDto): Promise<void> {
+        const updateData: any = { ...data };
+        const announcement = await prisma.announcement.findUnique({
+            where: {
+                id: announcementId
+            },
+            select: {
+                doctor_id: true,
+                status: true
+            }
+        });
 
+        if (!announcement) {
+            const error = createBilingualError(404, ErrorMessages.ANNOUNCEMENT_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        if (announcement.doctor_id !== doctorId) {
+            const error = createBilingualError(403, ErrorMessages.UNAUTHORIZED_ACCESS);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        if (announcement.status === 'EXPIRED') {
+            const error = createBilingualError(400, ErrorMessages.ANNOUNCEMENT_EXPIRED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        if (data.working_days !== undefined) {
+            updateData.working_days = {
+                deleteMany: {},
+                create: data.working_days.map(day => ({
+                    day_of_week: day.day_of_week,
+                    start_time: day.start_time,
+                    end_time: day.end_time
+                }))
+            };
+        }
+
+        await prisma.announcement.update({
+            where: { 
+                id: announcementId 
+            },
+            data: updateData
+        });
+    }
 
     public async getAnnouncementApplicants(doctorId: string, announcementId: string): Promise<NurseData[]> {
         const announcement = await prisma.announcement.findUnique({

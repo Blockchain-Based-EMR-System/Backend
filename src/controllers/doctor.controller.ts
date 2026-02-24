@@ -1,5 +1,5 @@
 
-import { DoctorLoginRequestDto, DoctorSetPasswordRequestDto, DoctorSignupRequestDto, PostAnnouncementDto } from "@/dtos/doctors.dto";
+import { DoctorLoginRequestDto, DoctorSetPasswordRequestDto, DoctorSignupRequestDto, PostAnnouncementDto, EditAnnouncementDto } from "@/dtos/doctors.dto";
 import { RequestWithUser } from "@/interfaces";
 import { DoctorService } from "@/services/doctor.service";
 import { UserService } from "@/services/user.service";
@@ -155,6 +155,22 @@ export class DoctorController {
         await this.doctorService.deleteAnnouncement(doctorId, announcementId);
 
         const responseMessage = createMultiLangMessage(SuccessResponseMessages.ANNOUNCEMENT_DELETED_SUCCESSFULLY);
+        res.status(200).json({ messageEn: responseMessage.messageEn, messageAr: responseMessage.messageAr });
+    }
+
+    public editAnnouncement = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+        const doctorId = req.user?.id;
+        const { announcementId } = req.params;
+        const announcementData: EditAnnouncementDto = req.body;
+
+        if (!doctorId) {
+            const error = createBilingualError(401, ErrorMessages.DOCTOR_ID_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        await this.doctorService.editAnnouncement(doctorId, announcementId, announcementData);
+
+        const responseMessage = createMultiLangMessage(SuccessResponseMessages.ANNOUNCEMENT_EDITED_SUCCESSFULLY);
         res.status(200).json({ messageEn: responseMessage.messageEn, messageAr: responseMessage.messageAr });
     }
 }
