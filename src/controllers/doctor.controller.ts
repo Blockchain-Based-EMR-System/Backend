@@ -142,4 +142,19 @@ export class DoctorController {
         const responseMessage = createMultiLangMessage(SuccessResponseMessages.APPLICANT_REJECTED_SUCCESSFULLY);
         res.status(200).json({ messageEn: responseMessage.messageEn, messageAr: responseMessage.messageAr });
     }
+
+    public deleteAnnouncement = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+        const doctorId = req.user?.id;
+        const { announcementId } = req.params;
+
+        if (!doctorId) {
+            const error = createBilingualError(401, ErrorMessages.DOCTOR_ID_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        await this.doctorService.deleteAnnouncement(doctorId, announcementId);
+
+        const responseMessage = createMultiLangMessage(SuccessResponseMessages.ANNOUNCEMENT_DELETED_SUCCESSFULLY);
+        res.status(200).json({ messageEn: responseMessage.messageEn, messageAr: responseMessage.messageAr });
+    }
 }

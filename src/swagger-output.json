@@ -3839,6 +3839,60 @@
         }
       }
     },
+    "/doctors/announcements/{announcementId}": {
+      "delete": {
+        "tags": [
+          "Doctors"
+        ],
+        "description": "Deletes a specific nurse hiring announcement",
+        "parameters": [
+          {
+            "name": "announcementId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "ID of the announcement to delete"
+          },
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Announcement deleted successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "messageEn": {
+                  "type": "string",
+                  "example": "Announcement deleted successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم حذف الإعلان بنجاح"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized – missing or invalid token"
+          },
+          "403": {
+            "description": "Forbidden – announcement does not belong to this doctor"
+          },
+          "404": {
+            "description": "Announcement not found"
+          }
+        }
+      }
+    },
     "/clinics": {
       "post": {
         "tags": [

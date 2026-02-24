@@ -448,5 +448,45 @@ export class DoctorsRoute implements Routes {
             this.doctorsController.rejectApplicant
         )
 
+        this.router.delete(
+            `/doctors/announcements/:announcementId`,
+            /*
+                #swagger.path = '/doctors/announcements/{announcementId}'
+                #swagger.method = 'delete'
+                #swagger.tags = ['Doctors']
+                #swagger.description = 'Deletes a specific nurse hiring announcement'
+                #swagger.parameters['announcementId'] = {
+                    in: 'path',
+                    description: 'ID of the announcement to delete',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.responses[200] = {
+                    description: 'Announcement deleted successfully',
+                    schema: {
+                        messageEn: 'Announcement deleted successfully',
+                        messageAr: 'تم حذف الإعلان بنجاح'
+                    }
+                }
+                #swagger.responses[401] = {
+                    description: 'Unauthorized – missing or invalid token'
+                }
+                #swagger.responses[403] = {
+                    description: 'Forbidden – announcement does not belong to this doctor'
+                }
+                #swagger.responses[404] = {
+                    description: 'Announcement not found'
+                }
+            */
+            AuthMiddleware,
+            this.doctorsController.deleteAnnouncement
+        )
+
     }
 }

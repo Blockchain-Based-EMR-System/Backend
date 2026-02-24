@@ -540,7 +540,9 @@ export class DoctorService {
                     }
                 },
                 data: {
-                    status: 'APPROVED'
+                    status: 'APPROVED',
+                    doctor_id: application.announcement.doctor_id,
+                    clinic_id: application.announcement.clinic_id,
                 }
             });
 
@@ -625,6 +627,45 @@ export class DoctorService {
             }
         });
     }
+
+    public async deleteAnnouncement(doctorId: string, announcementId: string): Promise<void> {
+        const announcement = await prisma.announcement.findUnique({
+            where: {
+                id: announcementId
+            },
+            select: {
+                doctor_id: true,
+                status: true
+            }
+        });
+
+        if (!announcement) {
+            const error = createBilingualError(404, ErrorMessages.ANNOUNCEMENT_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        if (announcement.doctor_id !== doctorId) {
+            const error = createBilingualError(403, ErrorMessages.UNAUTHORIZED_ACCESS);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        if (announcement.status === 'EXPIRED') {
+            const error = createBilingualError(400, ErrorMessages.ANNOUNCEMENT_EXPIRED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        await prisma.announcement.update({
+            where: {
+                id: announcementId
+            },
+            data: {
+                status: 'EXPIRED',
+                deleted_at: new Date()
+            }
+        });
+    }
+
+
 
     public async getAnnouncementApplicants(doctorId: string, announcementId: string): Promise<NurseData[]> {
         const announcement = await prisma.announcement.findUnique({

@@ -156,6 +156,10 @@ export const SuccessResponseMessages = {
         message_en: "Applicant rejected successfully.",
         message_ar: "تم رفض المتقدم بنجاح.",
     },
+    ANNOUNCEMENT_DELETED_SUCCESSFULLY: {
+        message_en: "Announcement deleted successfully.",
+        message_ar: "تم حذف الإعلان بنجاح.",
+    },
 
     // Success messages for Google Auth
     PHONE_NUMBER_UPDATED_SUCCESSFULLY: {
