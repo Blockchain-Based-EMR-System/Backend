@@ -100,6 +100,10 @@ export class DoctorController {
 
     public getAnnouncementApplicants = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
         const doctorId = req.user?.id;
+        if (!doctorId) {
+            const error = createBilingualError(401, ErrorMessages.DOCTOR_ID_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
         const { announcementId } = req.params;
         const applicants = await this.doctorService.getAnnouncementApplicants(doctorId, announcementId);
 
@@ -108,5 +112,34 @@ export class DoctorController {
             data: applicants,
             ...responseMessage
         });
+    }
+
+    public approveApplicant = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+        const doctorId = req.user?.id;
+        const { applicantId } = req.params;
+        const { announcementId } = req.query;
+        if (!doctorId) {
+            const error = createBilingualError(401, ErrorMessages.DOCTOR_ID_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+        
+        await this.doctorService.approveApplicant(announcementId as string, applicantId);
+        const responseMessage = createMultiLangMessage(SuccessResponseMessages.APPLICANT_APPROVED_SUCCESSFULLY);
+        res.status(200).json({ messageEn: responseMessage.messageEn, messageAr: responseMessage.messageAr });
+    }
+
+    public rejectApplicant = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+        const doctorId = req.user?.id;
+        const { applicantId } = req.params;
+        const { announcementId } = req.query;
+
+        if (!doctorId) {
+            const error = createBilingualError(401, ErrorMessages.DOCTOR_ID_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+        await this.doctorService.rejectApplicant(announcementId as string, applicantId);
+
+        const responseMessage = createMultiLangMessage(SuccessResponseMessages.APPLICANT_REJECTED_SUCCESSFULLY);
+        res.status(200).json({ messageEn: responseMessage.messageEn, messageAr: responseMessage.messageAr });
     }
 }

@@ -114,6 +114,10 @@ export const ErrorMessages = {
         en: 'You are not authorized to access this',
         ar: 'ليس لديك صلاحية للوصول إلى هذا ',
     },
+    DOCTOR_ID_NOT_FOUND: {
+        en: 'Doctor ID not found in request',
+        ar: 'معرف الطبيب غير موجود في الطلب',
+    },
 
     // nurse
     NURSE_PASSWORD_ALREADY_SET: {
@@ -139,6 +143,14 @@ export const ErrorMessages = {
     APPLICATION_ALREADY_EXISTS: {
         en: 'You have already applied to this announcement',
         ar: 'لقد تقدمت بالفعل لهذا الإعلان',
+    },
+    APPLICATION_NOT_FOUND: {
+        en: 'Application not found',
+        ar: 'الطلب غير موجود',
+    },
+    APPLICATION_ALREADY_PROCESSED: {
+        en: 'This application has already been processed',
+        ar: 'تمت معالجة هذا الطلب بالفعل',
     },
     
     // File upload errors

@@ -296,8 +296,8 @@ export class DoctorsRoute implements Routes {
                     description: 'Doctor not found'
                 }
             */
-           AuthMiddleware,
-           this.doctorsController.getDoctorAnnouncements
+            AuthMiddleware,
+            this.doctorsController.getDoctorAnnouncements
 
         )
 
@@ -354,6 +354,98 @@ export class DoctorsRoute implements Routes {
             */
             AuthMiddleware,
             this.doctorsController.getAnnouncementApplicants
+        )
+
+        this.router.patch(
+            `/doctors/announcements/:applicantId/approve`,
+            /*
+                #swagger.path = '/doctors/announcements/{applicantId}/approve'
+                #swagger.method = 'patch'
+                #swagger.tags = ['Doctors']
+                #swagger.description = 'Approves a nurse applicant for a specific announcement'
+                #swagger.parameters['applicantId'] = {
+                    in: 'path',
+                    description: 'ID of the nurse applicant to approve',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['announcementId'] = {
+                    in: 'query',
+                    description: 'ID of the announcement the applicant applied to',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.responses[200] = {
+                    description: 'Applicant approved successfully',
+                    schema: {
+                        messageEn: 'Applicant approved successfully',
+                        messageAr: 'تم قبول المتقدم بنجاح'
+                    }
+                }
+                #swagger.responses[401] = {
+                    description: 'Unauthorized – missing or invalid token'
+                }
+                #swagger.responses[403] = {
+                    description: 'Forbidden – announcement does not belong to this doctor'
+                }
+                #swagger.responses[404] = {
+                    description: 'Applicant or announcement not found'
+                }
+            */
+            AuthMiddleware,
+            this.doctorsController.approveApplicant
+        )
+
+        this.router.patch(
+            `/doctors/announcements/:applicantId/reject`,
+            /*
+                #swagger.path = '/doctors/announcements/{applicantId}/reject'
+                #swagger.method = 'patch'
+                #swagger.tags = ['Doctors']
+                #swagger.description = 'Rejects a nurse applicant for a specific announcement'
+                #swagger.parameters['applicantId'] = {
+                    in: 'path',
+                    description: 'ID of the nurse applicant to reject',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['announcementId'] = {
+                    in: 'query',
+                    description: 'ID of the announcement the applicant applied to',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.responses[200] = {
+                    description: 'Applicant rejected successfully',
+                    schema: {
+                        messageEn: 'Applicant rejected successfully',
+                        messageAr: 'تم رفض المتقدم بنجاح'
+                    }
+                }
+                #swagger.responses[401] = {
+                    description: 'Unauthorized – missing or invalid token'
+                }
+                #swagger.responses[403] = {
+                    description: 'Forbidden – announcement does not belong to this doctor'
+                }
+                #swagger.responses[404] = {
+                    description: 'Applicant or announcement not found'
+                }
+            */
+            AuthMiddleware,
+            this.doctorsController.rejectApplicant
         )
 
     }

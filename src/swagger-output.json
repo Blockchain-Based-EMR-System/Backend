@@ -3717,6 +3717,128 @@
         }
       }
     },
+    "/doctors/announcements/{applicantId}/approve": {
+      "patch": {
+        "tags": [
+          "Doctors"
+        ],
+        "description": "Approves a nurse applicant for a specific announcement",
+        "parameters": [
+          {
+            "name": "applicantId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "ID of the nurse applicant to approve"
+          },
+          {
+            "name": "announcementId",
+            "in": "query",
+            "description": "ID of the announcement the applicant applied to",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Applicant approved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "messageEn": {
+                  "type": "string",
+                  "example": "Applicant approved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم قبول المتقدم بنجاح"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized – missing or invalid token"
+          },
+          "403": {
+            "description": "Forbidden – announcement does not belong to this doctor"
+          },
+          "404": {
+            "description": "Applicant or announcement not found"
+          }
+        }
+      }
+    },
+    "/doctors/announcements/{applicantId}/reject": {
+      "patch": {
+        "tags": [
+          "Doctors"
+        ],
+        "description": "Rejects a nurse applicant for a specific announcement",
+        "parameters": [
+          {
+            "name": "applicantId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "ID of the nurse applicant to reject"
+          },
+          {
+            "name": "announcementId",
+            "in": "query",
+            "description": "ID of the announcement the applicant applied to",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Applicant rejected successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "messageEn": {
+                  "type": "string",
+                  "example": "Applicant rejected successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم رفض المتقدم بنجاح"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized – missing or invalid token"
+          },
+          "403": {
+            "description": "Forbidden – announcement does not belong to this doctor"
+          },
+          "404": {
+            "description": "Applicant or announcement not found"
+          }
+        }
+      }
+    },
     "/clinics": {
       "post": {
         "tags": [
@@ -6885,6 +7007,60 @@
           },
           "404": {
             "description": "Nurse account not approved (PENDING or REJECTED)"
+          }
+        }
+      }
+    },
+    "/nurses/announcements/{announcementId}/apply": {
+      "post": {
+        "tags": [
+          "Nurses"
+        ],
+        "description": "Apply to a specific announcement",
+        "parameters": [
+          {
+            "name": "announcementId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "ID of the announcement to apply for"
+          },
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Application submitted successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "messageEn": {
+                  "type": "string",
+                  "example": "Applied to announcement successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم التقديم على الإعلان بنجاح"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid announcement ID / already applied / validation error"
+          },
+          "401": {
+            "description": "Unauthorized – missing or invalid token"
+          },
+          "404": {
+            "description": "Announcement not found / Nurse account not approved (PENDING or REJECTED)"
           }
         }
       }

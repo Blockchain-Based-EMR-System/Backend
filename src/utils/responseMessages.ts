@@ -148,6 +148,14 @@ export const SuccessResponseMessages = {
         message_en: "Applied to announcement successfully.",
         message_ar: "تم التقديم للإعلان بنجاح.",
     },
+    APPLICANT_APPROVED_SUCCESSFULLY: {
+        message_en: "Applicant approved successfully.",
+        message_ar: "تم الموافقة على المتقدم بنجاح.",
+    },
+    APPLICANT_REJECTED_SUCCESSFULLY: {
+        message_en: "Applicant rejected successfully.",
+        message_ar: "تم رفض المتقدم بنجاح.",
+    },
 
     // Success messages for Google Auth
     PHONE_NUMBER_UPDATED_SUCCESSFULLY: {
