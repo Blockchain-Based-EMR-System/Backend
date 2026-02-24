@@ -7177,6 +7177,151 @@
         }
       }
     },
+    "/nurses/applications": {
+      "get": {
+        "tags": [
+          "Nurses"
+        ],
+        "description": "get all announcements the nurse has applied to",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Applications retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "uuid-string"
+                      },
+                      "application_status": {
+                        "type": "string",
+                        "example": "PENDING"
+                      },
+                      "doctor": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "example": "uuid-string"
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "Dr. House"
+                          },
+                          "gender": {
+                            "type": "string",
+                            "example": "MALE"
+                          },
+                          "profilePic": {
+                            "type": "string",
+                            "example": "https://res.cloudinary.com/example/image.jpg"
+                          }
+                        }
+                      },
+                      "clinic": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "example": "uuid-string"
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "Al Salam Clinic"
+                          },
+                          "address": {
+                            "type": "string",
+                            "example": "123 Main St, Cairo"
+                          },
+                          "address_maps_link": {
+                            "type": "string",
+                            "example": "https://maps.google.com/?q=..."
+                          }
+                        }
+                      },
+                      "working_days": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "day_of_week": {
+                              "type": "string",
+                              "example": "MONDAY"
+                            },
+                            "start_time": {
+                              "type": "string",
+                              "example": "09:00"
+                            },
+                            "end_time": {
+                              "type": "string",
+                              "example": "17:00"
+                            }
+                          }
+                        }
+                      },
+                      "status": {
+                        "type": "string",
+                        "example": "POSTED"
+                      },
+                      "gender": {
+                        "type": "string",
+                        "example": "FEMALE"
+                      },
+                      "max_age": {
+                        "type": "number",
+                        "example": 40
+                      },
+                      "years_of_experience": {
+                        "type": "number",
+                        "example": 3
+                      },
+                      "notes": {
+                        "type": "string",
+                        "example": "Looking for an experienced nurse"
+                      }
+                    }
+                  }
+                },
+                "messageEn": {
+                  "type": "string",
+                  "example": "Applications retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع الطلبات بنجاح"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Nurse ID not found in token"
+          },
+          "401": {
+            "description": "Unauthorized – missing or invalid token"
+          },
+          "404": {
+            "description": "Nurse account not approved (PENDING or REJECTED)"
+          }
+        }
+      }
+    },
     "/nurses/announcements/{announcementId}/apply": {
       "post": {
         "tags": [

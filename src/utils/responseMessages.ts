@@ -164,6 +164,10 @@ export const SuccessResponseMessages = {
         message_en: "Announcement edited successfully.",
         message_ar: "تم تعديل الإعلان بنجاح.",
     },
+    APPLICATIONS_RETRIEVED: {
+        message_en: "Applications retrieved successfully.",
+        message_ar: "تم استرجاع الطلبات بنجاح.",
+    },
 
     // Success messages for Google Auth
     PHONE_NUMBER_UPDATED_SUCCESSFULLY: {

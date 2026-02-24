@@ -1,4 +1,5 @@
-import { NurseAccountStatus, Gender, AnnouncementStatus} from "@prisma/client";
+import { NurseAccountStatus, Gender, AnnouncementStatus, AnnouncementNurseStatus} from "@prisma/client";
+import { WorkingDays } from "./doctors.interface";
 
 export interface NurseLoginData {
     id: string,
@@ -24,4 +25,27 @@ export interface NurseData {
     nationalCardUrl: string;
     brief: string | null;
     bonusFileUrl: string | null;
+}
+
+export interface NurseApplications {
+  id: string;
+  application_status: AnnouncementNurseStatus;
+  doctor: {
+    id: string;
+    name: string;
+    gender: Gender;
+    profilePic: string;
+  };
+  clinic: {
+    id: string;
+    name: string
+    address: string;
+    address_maps_link: string;
+  };
+  working_days: WorkingDays[];
+  status?: AnnouncementStatus;
+  gender?: Gender;
+  max_age?: number;
+  years_of_experience?: number;
+  notes?: string;
 }

@@ -4,7 +4,7 @@ import { ErrorMessages, createBilingualError } from "@/utils/errorMessages";
 import { hash, compare } from "bcrypt";
 import { AuthService } from "./auth.service";
 import { NurseSignupRequestDto, NurseLoginRequestDto } from "@/dtos/nurses.dto";
-import { NurseLoginData } from "@/interfaces/nurse.interface";
+import { NurseLoginData, NurseApplications } from "@/interfaces/nurse.interface";
 import { NURSE_FILES } from "@/interfaces";
 import prisma from '@/config/prisma';
 import { Role, NurseAccountStatus } from "@prisma/client";
@@ -218,7 +218,101 @@ export class NurseService {
         });
     }
 
-    public async getAllAnnouncements(nurseId): Promise<DoctorAnnouncements[]> {
+    public async getNurseApplications(nurseId: string): Promise<NurseApplications[]> {
+        const nurseData = await prisma.nurse.findUnique({
+            where: { 
+                id: nurseId 
+            },
+            select: { 
+                account_status: true 
+            }
+        });
+
+        if (!nurseData || nurseData.account_status !== NurseAccountStatus.APPROVED) {
+            const error = createBilingualError(404, ErrorMessages.NURSE_ACCOUNT_NOT_APPROVED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const applications = await prisma.announcementNurse.findMany({
+            where: { 
+                nurse_id: nurseId 
+            },
+            select: {
+                id: true,
+                status: true,
+                announcement: {
+                    select: {
+                        id: true,
+                        doctor: {
+                            select: {
+                                user: {
+                                    select: {
+                                        id: true,
+                                        name: true,
+                                        gender: true,
+                                        photo_url: true,
+                                    }
+                                }
+                            }
+                        },
+                        clinic: {
+                            select: {
+                                id: true,
+                                name: true,
+                                address: true,
+                                address_maps_link: true,
+                            }
+                        },
+                        working_days: {
+                            select: {
+                                day_of_week: true,
+                                start_time: true,
+                                end_time: true,
+                            }
+                        },
+                        status: true,
+                        gender: true,
+                        max_age: true,
+                        years_of_experience: true,
+                        notes: true,
+                    }
+                },
+            }
+        });
+
+        if (!applications.length) {
+            return [];
+        }
+
+        return applications.map(application => ({
+            id: application.announcement.id,
+            application_status: application.status,
+            doctor: {
+                id: application.announcement.doctor.user.id,
+                name: application.announcement.doctor.user.name,
+                gender: application.announcement.doctor.user.gender,
+                profilePic: application.announcement.doctor.user.photo_url,
+            },
+            clinic: {
+                id: application.announcement.clinic.id,
+                name: application.announcement.clinic.name,
+                address: application.announcement.clinic.address,
+                address_maps_link: application.announcement.clinic.address_maps_link,
+            },
+            working_days: application.announcement.working_days.map(workDay => ({
+                day_of_week: workDay.day_of_week,
+                start_time: workDay.start_time,
+                end_time: workDay.end_time,
+            })),
+            status: application.announcement.status,
+            gender: application.announcement.gender || undefined,
+            max_age: application.announcement.max_age || undefined,
+            years_of_experience: application.announcement.years_of_experience || undefined,
+            notes: application.announcement.notes || undefined,
+        }));
+    }
+
+    public async getAllAnnouncements(nurseId: string): Promise<DoctorAnnouncements[]> {
         const nurseData = await prisma.nurse.findUnique({
             where: { id: nurseId },
             select: { account_status: true }

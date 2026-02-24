@@ -263,6 +263,72 @@ export class NurseRoute implements Routes {
             this.nursesController.getAllAnnouncements
         );
 
+        this.router.get(
+            `${this.path}/applications`,
+            /* 
+                #swagger.path = '/nurses/applications'
+                #swagger.method = 'get'
+                #swagger.tags = ['Nurses']
+                #swagger.description = 'get all announcements the nurse has applied to'
+
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
+
+                #swagger.responses[200] = {
+                    description: 'Applications retrieved successfully',
+                    schema: {
+                        data: [
+                            {
+                                id: 'uuid-string',
+                                application_status: 'PENDING',
+                                doctor: {
+                                    id: 'uuid-string',
+                                    name: 'Dr. House',
+                                    gender: 'MALE',
+                                    profilePic: 'https://res.cloudinary.com/example/image.jpg'
+                                },
+                                clinic: {
+                                    id: 'uuid-string',
+                                    name: 'Al Salam Clinic',
+                                    address: '123 Main St, Cairo',
+                                    address_maps_link: 'https://maps.google.com/?q=...'
+                                },
+                                working_days: [
+                                    {
+                                        day_of_week: 'MONDAY',
+                                        start_time: '09:00',
+                                        end_time: '17:00'
+                                    }
+                                ],
+                                status: 'POSTED',
+                                gender: 'FEMALE',
+                                max_age: 40,
+                                years_of_experience: 3,
+                                notes: 'Looking for an experienced nurse'
+                            }
+                        ],
+                        messageEn: 'Applications retrieved successfully',
+                        messageAr: 'تم استرجاع الطلبات بنجاح'
+                    }
+                }
+                #swagger.responses[400] = {
+                    description: 'Nurse ID not found in token'
+                }
+                #swagger.responses[401] = {
+                    description: 'Unauthorized – missing or invalid token'
+                }
+                #swagger.responses[404] = {
+                    description: 'Nurse account not approved (PENDING or REJECTED)'
+                }
+            */
+            AuthMiddleware,
+            this.nursesController.getNurseApplications
+        );
+
         this.router.post(
             `${this.path}/announcements/:announcementId/apply`,
             /* 
