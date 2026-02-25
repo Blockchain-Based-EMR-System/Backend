@@ -294,6 +294,10 @@ export const SuccessResponseMessages = {
     APPOINTMENTS_BY_NURSE_RETRIEVED: {
         message_en: 'Appointments retrieved to the nurse successfully',
         message_ar: 'تم استرجاع المواعيد للممرضة بنجاح',
+    },
+    APPOINTMENT_COMPLETED_SUCCESSFULLY: {
+        message_en: 'Appointment completed successfully',
+        message_ar: 'تم إكمال الموعد بنجاح',
     }
 }
 

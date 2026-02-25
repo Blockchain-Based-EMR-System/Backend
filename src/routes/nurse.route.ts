@@ -513,6 +513,49 @@ export class NurseRoute implements Routes {
             */
             AuthMiddleware,
             this.appointmentController.getAppointmentsByDate
+        );
+
+        this.router.patch(
+            `${this.path}/appointments/:appointmentId/complete`,
+            /* 
+                #swagger.path = '/nurses/appointments/{appointmentId}/complete'
+                #swagger.method = 'patch'
+                #swagger.tags = ['Appointments']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication (must be a nurse)',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.description = 'Mark an appointment as completed. Only accessible by authenticated nurses'
+                #swagger.parameters['appointmentId'] = {
+                    in: 'path',
+                    description: 'UUID of the appointment to complete',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.responses[200] = {
+                    description: 'Appointment marked as completed successfully',
+                    schema: {
+                        messageEn: 'Appointment completed successfully',
+                        messageAr: 'تم إكمال الموعد بنجاح'
+                    }
+                }
+                #swagger.responses[400] = {
+                    description: 'Bad request - missing nurse ID or invalid appointment'
+                }
+                #swagger.responses[401] = {
+                    description: 'Unauthorized - missing or invalid token'
+                }
+                #swagger.responses[403] = {
+                    description: 'Forbidden - appointment does not belong to the authenticated user'
+                }
+                #swagger.responses[404] = {
+                    description: 'Appointment not found'
+                }
+            */
+            AuthMiddleware,
+            this.appointmentController.completeAppointment
         )
     }
 }

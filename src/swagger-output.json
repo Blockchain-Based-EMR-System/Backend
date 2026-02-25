@@ -7638,6 +7638,63 @@
           }
         }
       }
+    },
+    "/nurses/appointments/{appointmentId}/complete": {
+      "patch": {
+        "tags": [
+          "Appointments"
+        ],
+        "description": "Mark an appointment as completed. Only accessible by authenticated nurses",
+        "parameters": [
+          {
+            "name": "appointmentId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "UUID of the appointment to complete"
+          },
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication (must be a nurse)",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Appointment marked as completed successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "messageEn": {
+                  "type": "string",
+                  "example": "Appointment completed successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم إكمال الموعد بنجاح"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - missing nurse ID or invalid appointment"
+          },
+          "401": {
+            "description": "Unauthorized - missing or invalid token"
+          },
+          "403": {
+            "description": "Forbidden - appointment does not belong to the authenticated user"
+          },
+          "404": {
+            "description": "Appointment not found"
+          }
+        }
+      }
     }
   }
 }

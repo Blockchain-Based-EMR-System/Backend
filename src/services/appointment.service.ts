@@ -902,6 +902,31 @@ export class AppointmentService {
         }));
     }
 
+    public async completeAppointment(appointmentId: string): Promise<void> {
+        const appointment = await prisma.appointment.findUnique({
+            where: {
+                id: appointmentId,
+            },
+            select: {
+                doctor_id: true,
+            }
+        });
+
+        await this.getAndValidateAppointment(appointmentId, appointment.doctor_id);
+
+        await prisma.appointment.update({
+            where: {
+                id: appointmentId,
+                deleted_at: null,
+            },
+            data: {
+                status: 'COMPLETED',
+                is_completed: true,
+                deleted_at: new Date(),
+            }
+        })
+    }
+
     public async cancelDoctorVacation(doctorId: string, vacationId: string, scheduleId: string): Promise<void> {
         const schedule = await prisma.doctorSchedule.findUnique({
             where: {

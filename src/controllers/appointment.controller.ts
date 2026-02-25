@@ -480,4 +480,20 @@ export class AppointmentController {
             ...response
         });
     });
+
+    public completeAppointment = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
+        const nurseId = req.user?.id;
+        const { appointmentId } = req.params;
+
+        if (!nurseId) {
+            const error = createBilingualError(400, ErrorMessages.NURSE_ID_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        await this.appointmentService.completeAppointment(appointmentId);
+        const response = createMultiLangMessage(SuccessResponseMessages.APPOINTMENT_COMPLETED_SUCCESSFULLY);
+        res.status(200).json({
+            ...response
+        });
+    });
 }
