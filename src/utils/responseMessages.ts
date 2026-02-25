@@ -291,6 +291,10 @@ export const SuccessResponseMessages = {
         message_en: 'Online doctors retrieved successfully',
         message_ar: 'تم استرجاع الأطباء المتاحين عبر الإنترنت بنجاح',
     },
+    APPOINTMENTS_BY_NURSE_RETRIEVED: {
+        message_en: 'Appointments retrieved to the nurse successfully',
+        message_ar: 'تم استرجاع المواعيد للممرضة بنجاح',
+    }
 }
 
 interface MultiLangMessageObj {

@@ -7496,6 +7496,148 @@
           }
         }
       }
+    },
+    "/nurses/appointments": {
+      "get": {
+        "tags": [
+          "Nurses"
+        ],
+        "description": "Get all appointments for a specific doctor on a given date",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "doctorId",
+            "in": "query",
+            "description": "The ID of the doctor whose appointments are being retrieved",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "clinicId",
+            "in": "query",
+            "description": "The ID of the clinic to filter appointments by",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "description": "The date to retrieve appointments for, in YYYY-MM-DD format",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Appointments retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "uuid-string"
+                      },
+                      "clinic": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "example": "uuid-string"
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "Al Salam Clinic"
+                          },
+                          "address": {
+                            "type": "string",
+                            "example": "123 Main St, Cairo"
+                          },
+                          "address_maps_link": {
+                            "type": "string",
+                            "example": "https://maps.google.com/?q=..."
+                          }
+                        }
+                      },
+                      "patient": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "example": "uuid-string"
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "Ahmed Hassan"
+                          },
+                          "gender": {
+                            "type": "string",
+                            "example": "MALE"
+                          },
+                          "phone": {
+                            "type": "string",
+                            "example": "+201012345678"
+                          }
+                        }
+                      },
+                      "status": {
+                        "type": "string",
+                        "example": "CONFIRMED"
+                      },
+                      "slot_duration": {
+                        "type": "number",
+                        "example": 30
+                      },
+                      "appointment_date": {
+                        "type": "string",
+                        "example": "2025-03-15"
+                      },
+                      "start_time": {
+                        "type": "string",
+                        "example": "09:00 AM"
+                      },
+                      "end_time": {
+                        "type": "string",
+                        "example": "09:30 AM"
+                      }
+                    }
+                  }
+                },
+                "messageEn": {
+                  "type": "string",
+                  "example": "Appointments retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع المواعيد بنجاح"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request – missing or invalid parameters (nurseId, doctorId, date)"
+          },
+          "401": {
+            "description": "Unauthorized – missing or invalid token"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
     }
   }
 }

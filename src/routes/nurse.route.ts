@@ -2,6 +2,7 @@ import { Routes } from "@/interfaces";
 import { ValidationMiddleware } from "@/middlewares/validation.middleware";
 import { Router } from "express";
 import { NurseController } from "@/controllers/nurse.controller";
+import { AppointmentController } from "@/controllers/appointment.controller";
 import { NurseLoginRequestDto, NurseSetPasswordRequestDto, NurseSignupRequestDto } from "@/dtos/nurses.dto";
 import { AuthMiddleware, RoleMiddleware } from "@/middlewares/auth.middleware";
 import { Role } from "@prisma/client";
@@ -11,6 +12,7 @@ export class NurseRoute implements Routes {
     public path = '/nurses'
     public router = Router();
     public nursesController = new NurseController();
+    public appointmentController = new AppointmentController();
     constructor() {
         this.initializeRoutes();
     }
@@ -430,5 +432,87 @@ export class NurseRoute implements Routes {
             AuthMiddleware,
             this.nursesController.getNurseSchedule
         );
+
+        this.router.get(
+            `${this.path}/appointments`,
+            /*
+                #swagger.path = '/nurses/appointments'
+                #swagger.method = 'get'
+                #swagger.tags = ['Nurses']
+                #swagger.description = 'Get all appointments for a specific doctor on a given date'
+
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
+
+                #swagger.parameters['doctorId'] = {
+                    in: 'query',
+                    description: 'The ID of the doctor whose appointments are being retrieved',
+                    required: true,
+                    type: 'string'
+                }
+
+                #swagger.parameters['clinicId'] = {
+                    in: 'query',
+                    description: 'The ID of the clinic to filter appointments by',
+                    required: false,
+                    type: 'string'
+                }
+
+                #swagger.parameters['date'] = {
+                    in: 'query',
+                    description: 'The date to retrieve appointments for, in YYYY-MM-DD format',
+                    required: true,
+                    type: 'string'
+                }
+
+                #swagger.responses[200] = {
+                    description: 'Appointments retrieved successfully',
+                    schema: {
+                        data: [
+                            {
+                                id: 'uuid-string',
+                                clinic: {
+                                    id: 'uuid-string',
+                                    name: 'Al Salam Clinic',
+                                    address: '123 Main St, Cairo',
+                                    address_maps_link: 'https://maps.google.com/?q=...'
+                                },
+                                patient: {
+                                    id: 'uuid-string',
+                                    name: 'Ahmed Hassan',
+                                    gender: 'MALE',
+                                    phone: '+201012345678'
+                                },
+                                status: 'CONFIRMED',
+                                slot_duration: 30,
+                                appointment_date: '2025-03-15',
+                                start_time: '09:00 AM',
+                                end_time: '09:30 AM'
+                            }
+                        ],
+                        messageEn: 'Appointments retrieved successfully',
+                        messageAr: 'تم استرجاع المواعيد بنجاح'
+                    }
+                }
+
+                #swagger.responses[400] = {
+                    description: 'Bad request – missing or invalid parameters (nurseId, doctorId, date)'
+                }
+
+                #swagger.responses[401] = {
+                    description: 'Unauthorized – missing or invalid token'
+                }
+
+                #swagger.responses[500] = {
+                    description: 'Internal server error'
+                }
+            */
+            AuthMiddleware,
+            this.appointmentController.getAppointmentsByDate
+        )
     }
 }

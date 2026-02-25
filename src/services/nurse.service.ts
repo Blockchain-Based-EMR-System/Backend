@@ -5,6 +5,7 @@ import { hash, compare } from "bcrypt";
 import { AuthService } from "./auth.service";
 import { NurseSignupRequestDto, NurseLoginRequestDto } from "@/dtos/nurses.dto";
 import { NurseLoginData, NurseApplications, NurseSchedule } from "@/interfaces/nurse.interface";
+import { AppointmentData } from "@/interfaces";
 import { NURSE_FILES } from "@/interfaces";
 import prisma from '@/config/prisma';
 import { Role, NurseAccountStatus } from "@prisma/client";
