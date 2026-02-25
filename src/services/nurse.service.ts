@@ -4,7 +4,7 @@ import { ErrorMessages, createBilingualError } from "@/utils/errorMessages";
 import { hash, compare } from "bcrypt";
 import { AuthService } from "./auth.service";
 import { NurseSignupRequestDto, NurseLoginRequestDto } from "@/dtos/nurses.dto";
-import { NurseLoginData, NurseApplications } from "@/interfaces/nurse.interface";
+import { NurseLoginData, NurseApplications, NurseSchedule } from "@/interfaces/nurse.interface";
 import { NURSE_FILES } from "@/interfaces";
 import prisma from '@/config/prisma';
 import { Role, NurseAccountStatus } from "@prisma/client";
@@ -218,13 +218,107 @@ export class NurseService {
         });
     }
 
+    public async getNurseSchedule(nurseId: string): Promise<NurseSchedule[]> {
+        const nurseData = await prisma.nurse.findUnique({
+            where: {
+                id: nurseId
+            },
+            select: {
+                account_status: true
+            }
+        });
+
+        if (nurseData.account_status !== NurseAccountStatus.APPROVED) {
+            const error = createBilingualError(404, ErrorMessages.NURSE_ACCOUNT_NOT_APPROVED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const schedules = await prisma.nurseSchedule.findMany({
+            where: {
+                nurse_id: nurseId,
+                is_active: true,
+                deleted_at: null,
+            },
+            select: {
+                id: true,
+                doctor: {
+                    select: {
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                gender: true,
+                                photo_url: true,
+                            }
+                        }
+                    }
+                },
+                clinic: {
+                    select: {
+                        id: true,
+                        name: true,
+                        address: true,
+                        address_maps_link: true,
+                    }
+                },
+                day_of_week: true,
+                start_time: true,
+                end_time: true,
+            }
+        });
+
+        if (!schedules.length) {
+            return [];
+        }
+
+        const groupedMap = new Map<string, NurseSchedule>();
+
+        for (const schedule of schedules) {
+            const key = `${schedule.doctor.user.id}_${schedule.clinic?.id}`;
+
+            if (groupedMap.has(key)) {
+                groupedMap.get(key).working_days.push({
+                    day_of_week: schedule.day_of_week,
+                    start_time: schedule.start_time,
+                    end_time: schedule.end_time,
+                });
+            }
+            else {
+                groupedMap.set(key, {
+                    id: schedule.id,
+                    doctor: {
+                        id: schedule.doctor.user.id,
+                        name: schedule.doctor.user.name,
+                        gender: schedule.doctor.user.gender,
+                        profilePic: schedule.doctor.user.photo_url,
+                    },
+                    clinic: {
+                        id: schedule.clinic?.id || null,
+                        name: schedule.clinic?.name || null,
+                        address: schedule.clinic?.address || null,
+                        address_maps_link: schedule.clinic?.address_maps_link || null,
+                    },
+                    working_days: [
+                        {
+                            day_of_week: schedule.day_of_week,
+                            start_time: schedule.start_time,
+                            end_time: schedule.end_time,
+                        }
+                    ],
+                });
+            }
+        }
+
+        return Array.from(groupedMap.values());
+    }
+
     public async getNurseApplications(nurseId: string): Promise<NurseApplications[]> {
         const nurseData = await prisma.nurse.findUnique({
-            where: { 
-                id: nurseId 
+            where: {
+                id: nurseId
             },
-            select: { 
-                account_status: true 
+            select: {
+                account_status: true
             }
         });
 
@@ -234,8 +328,8 @@ export class NurseService {
         }
 
         const applications = await prisma.announcementNurse.findMany({
-            where: { 
-                nurse_id: nurseId 
+            where: {
+                nurse_id: nurseId
             },
             select: {
                 id: true,
@@ -325,9 +419,7 @@ export class NurseService {
         const announcements = await prisma.announcement.findMany({
             where: {
                 deleted_at: null,
-                status: {
-                    in: ['POSTED', 'PENDING']
-                }
+                status: 'PENDING',
             },
             select: {
                 id: true,

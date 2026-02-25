@@ -7375,6 +7375,127 @@
           }
         }
       }
+    },
+    "/nurses/schedule": {
+      "get": {
+        "tags": [
+          "Nurses"
+        ],
+        "description": "get the schedule for the nurse",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Schedule retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "uuid-string"
+                      },
+                      "doctor": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "example": "uuid-string"
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "Dr. House"
+                          },
+                          "gender": {
+                            "type": "string",
+                            "example": "MALE"
+                          },
+                          "profilePic": {
+                            "type": "string",
+                            "example": "https://res.cloudinary.com/example/image.jpg"
+                          }
+                        }
+                      },
+                      "clinic": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "example": "uuid-string"
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "Al Salam Clinic"
+                          },
+                          "address": {
+                            "type": "string",
+                            "example": "123 Main St, Cairo"
+                          },
+                          "address_maps_link": {
+                            "type": "string",
+                            "example": "https://maps.google.com/?q=..."
+                          }
+                        }
+                      },
+                      "working_days": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "day_of_week": {
+                              "type": "string",
+                              "example": "MONDAY"
+                            },
+                            "start_time": {
+                              "type": "string",
+                              "example": "09:00"
+                            },
+                            "end_time": {
+                              "type": "string",
+                              "example": "17:00"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "messageEn": {
+                  "type": "string",
+                  "example": "Nurse schedule retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع جدول الممرضة بنجاح"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Nurse ID not found in token"
+          },
+          "401": {
+            "description": "Unauthorized – missing or invalid token"
+          },
+          "404": {
+            "description": "Nurse account not approved or no schedule assigned"
+          }
+        }
+      }
     }
   }
 }

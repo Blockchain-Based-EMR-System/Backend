@@ -79,4 +79,15 @@ export class NurseController {
         const responseMessage = createMultiLangMessage(SuccessResponseMessages.APPLIED_TO_ANNOUNCEMENT_SUCCESSFULLY);
         res.status(200).json({ messageEn: responseMessage.messageEn, messageAr: responseMessage.messageAr });
     });
+
+    public getNurseSchedule = catchAsync(async (req: RequestWithUser, res: Response, next: NextFunction) => {
+        const nurseId = req.user?.id;
+        if (!nurseId) {
+            const error = createBilingualError(400, ErrorMessages.NURSE_ID_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+        const schedule = await this.nurseService.getNurseSchedule(nurseId);
+        const responseMessage = createMultiLangMessage(SuccessResponseMessages.NURSE_SCHEDULE_RETRIEVED);
+        res.status(200).json({ data: schedule, messageEn: responseMessage.messageEn, messageAr: responseMessage.messageAr });
+    });
 }

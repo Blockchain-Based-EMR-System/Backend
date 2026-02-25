@@ -370,5 +370,65 @@ export class NurseRoute implements Routes {
             AuthMiddleware,
             this.nursesController.applyToAnnouncement
         )
+
+        this.router.get(
+            `${this.path}/schedule`,
+            /* 
+                #swagger.path = '/nurses/schedule'
+                #swagger.method = 'get'
+                #swagger.tags = ['Nurses']
+                #swagger.description = 'get the schedule for the nurse'
+
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
+
+                #swagger.responses[200] = {
+                    description: 'Schedule retrieved successfully',
+                    schema: {
+                        data: [
+                            {
+                                id: 'uuid-string',
+                                doctor: {
+                                    id: 'uuid-string',
+                                    name: 'Dr. House',
+                                    gender: 'MALE',
+                                    profilePic: 'https://res.cloudinary.com/example/image.jpg'
+                                },
+                                clinic: {
+                                    id: 'uuid-string',
+                                    name: 'Al Salam Clinic',
+                                    address: '123 Main St, Cairo',
+                                    address_maps_link: 'https://maps.google.com/?q=...'
+                                },
+                                working_days: [
+                                    {
+                                        day_of_week: 'MONDAY',
+                                        start_time: '09:00',
+                                        end_time: '17:00'
+                                    }
+                                ]
+                            }
+                        ],
+                        messageEn: 'Nurse schedule retrieved successfully',
+                        messageAr: 'تم استرجاع جدول الممرضة بنجاح'
+                    }
+                }
+                #swagger.responses[400] = {
+                    description: 'Nurse ID not found in token'
+                }
+                #swagger.responses[401] = {
+                    description: 'Unauthorized – missing or invalid token'
+                }
+                #swagger.responses[404] = {
+                    description: 'Nurse account not approved or no schedule assigned'
+                }
+            */
+            AuthMiddleware,
+            this.nursesController.getNurseSchedule
+        );
     }
 }

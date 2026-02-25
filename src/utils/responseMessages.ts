@@ -168,6 +168,10 @@ export const SuccessResponseMessages = {
         message_en: "Applications retrieved successfully.",
         message_ar: "تم استرجاع الطلبات بنجاح.",
     },
+    NURSE_SCHEDULE_RETRIEVED: {
+        message_en: "Nurse schedule retrieved successfully.",
+        message_ar: "تم استرجاع جدول الممرضة بنجاح.",
+    },
 
     // Success messages for Google Auth
     PHONE_NUMBER_UPDATED_SUCCESSFULLY: {

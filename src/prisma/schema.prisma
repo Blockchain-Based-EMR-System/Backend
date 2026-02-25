@@ -75,6 +75,7 @@ model Doctor {
   vacations                              Vacation[]
   announcements                          Announcement[]      @relation("AnnouncementDoctor")
   announcementNurses                     AnnouncementNurse[] @relation("AnnouncementNurseDoctor")
+  nurseSchedules                         NurseSchedule[]     @relation("NurseScheduleDoctor") 
 
   @@map("Doctor")
 }
@@ -317,6 +318,7 @@ model NurseSchedule {
   modified_at DateTime  @updatedAt
   deleted_at  DateTime?
   nurse       Nurse     @relation("NurseScheduleNurse", fields: [nurse_id], references: [id], onDelete: Cascade)
+  doctor      Doctor    @relation("NurseScheduleDoctor", fields: [doctor_id], references: [id], onDelete: Cascade) 
   clinic      Clinic?   @relation(fields: [clinic_id], references: [id], onDelete: Cascade)
   user        User?     @relation(fields: [userId], references: [id])
   userId      String?
@@ -395,6 +397,7 @@ model AnnouncementNurse {
   clinic_id       String?
   created_at      DateTime                @default(now())
   modified_at     DateTime                @updatedAt
+  deleted_at      DateTime?
 
   announcement Announcement @relation("AnnouncementNurses", fields: [announcement_id], references: [id], onDelete: Cascade)
 
@@ -496,7 +499,6 @@ enum NurseAccountStatus {
 }
 
 enum AnnouncementStatus {
-  POSTED
   PENDING
   EXPIRED
 }

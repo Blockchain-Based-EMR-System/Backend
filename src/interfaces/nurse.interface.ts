@@ -49,3 +49,20 @@ export interface NurseApplications {
   years_of_experience?: number;
   notes?: string;
 }
+
+export interface NurseSchedule {
+    id: string;
+    doctor: {
+      id: string;
+      name: string;
+      gender: Gender;
+      profilePic: string;
+    };
+    clinic: {
+      id: string;
+      name: string
+      address: string;
+      address_maps_link: string;
+    };
+    working_days: WorkingDays[];
+}
