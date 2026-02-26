@@ -2166,13 +2166,13 @@
             "schema": {
               "type": "object",
               "properties": {
-                "isApproved": {
+                "isVerified": {
                   "type": "boolean",
                   "example": true
                 }
               },
               "required": [
-                "isApproved"
+                "isVerified"
               ]
             }
           },

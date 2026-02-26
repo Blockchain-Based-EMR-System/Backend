@@ -177,7 +177,6 @@ export class AdminController {
     }
 
     public updateNurseVerificationStatus = async (req: RequestWithLanguage, res: Response, next: NextFunction): Promise<void> => {
-
         const nurseId = req.params.id;
         const { isVerified } = req.body;
         await this.adminService.updateNurseVerificationStatus(nurseId, isVerified);

@@ -28,6 +28,8 @@ model User {
   hasCompletedProfile             Boolean             @default(false)
   photo_public_id                 String?             @db.VarChar(500)
   photo_url                       String?             @db.VarChar(500)
+  announcementNurses              AnnouncementNurse[]
+  announcements                   Announcement[]
   appointments_as_doctor          Appointment[]       @relation("DoctorAppointments")
   appointments_as_patient         Appointment[]       @relation("PatientAppointments")
   audit_logs                      AuditLog[]          @relation("UserAuditLogs")
@@ -36,15 +38,13 @@ model User {
   medical_records_as_patient      MedicalRecord[]     @relation("PatientMedicalRecords")
   medications_as_doctor           Medication[]        @relation("DoctorMedications")
   medications_as_patient          Medication[]        @relation("PatientMedications")
+  nurse                           Nurse?              @relation("UserAsNurse")
+  nurseSchedules                  NurseSchedule[]
   controlled_patients             Patient[]           @relation("ControllingNurse")
   patient                         Patient?            @relation("UserAsPatient")
   refresh_tokens                  RefreshToken[]      @relation("UserRefreshTokens")
   scans_labs_as_doctor            ScanLab[]           @relation("DoctorScansLabs")
   scans_labs_as_patient           ScanLab[]           @relation("PatientScansLabs")
-  nurse                           Nurse?              @relation("UserAsNurse")
-  nurseSchedules                  NurseSchedule[]
-  announcements                   Announcement[]
-  announcementNurses              AnnouncementNurse[]
 
   @@map("Users")
 }
@@ -55,27 +55,27 @@ model Doctor {
   avg_time                               DateTime?           @db.Time(0)
   account_status                         DoctorAccountStatus @default(PENDING)
   num_of_created_clinics                 Int                 @default(0)
-  graduationCertificateUrl               String?             @db.VarChar(500)
-  graduationCertificatePublicId          String?             @db.VarChar(500)
-  membershipCardUrl                      String?             @db.VarChar(500)
-  membershipCardPublicId                 String?             @db.VarChar(500)
-  professionalPracticeCardUrl            String?             @db.VarChar(500)
-  professionalPracticeCardPublicId       String?             @db.VarChar(500)
-  mastersCertificateUrl                  String?             @db.VarChar(500)
-  mastersCertificatePublicId             String?             @db.VarChar(500)
-  fellowshipCertificateUrl               String?             @db.VarChar(500)
   fellowshipCertificatePublicId          String?             @db.VarChar(500)
-  unionSpecializationCertificateUrl      String?             @db.VarChar(500)
+  fellowshipCertificateUrl               String?             @db.VarChar(500)
+  graduationCertificatePublicId          String?             @db.VarChar(500)
+  graduationCertificateUrl               String?             @db.VarChar(500)
+  mastersCertificatePublicId             String?             @db.VarChar(500)
+  mastersCertificateUrl                  String?             @db.VarChar(500)
+  membershipCardPublicId                 String?             @db.VarChar(500)
+  membershipCardUrl                      String?             @db.VarChar(500)
+  professionalPracticeCardPublicId       String?             @db.VarChar(500)
+  professionalPracticeCardUrl            String?             @db.VarChar(500)
   unionSpecializationCertificatePublicId String?             @db.VarChar(500)
+  unionSpecializationCertificateUrl      String?             @db.VarChar(500)
   availability_type                      AvailabilityType    @default(UNSET)
   present                                Boolean             @default(true)
+  announcementNurses                     AnnouncementNurse[] @relation("AnnouncementNurseDoctor")
+  announcements                          Announcement[]      @relation("AnnouncementDoctor")
   clinic_doctors                         ClinicDoctor[]
   user                                   User                @relation("UserAsDoctor", fields: [id], references: [id], onDelete: Cascade)
   doctorSchedules                        DoctorSchedule[]
+  nurseSchedules                         NurseSchedule[]     @relation("NurseScheduleDoctor")
   vacations                              Vacation[]
-  announcements                          Announcement[]      @relation("AnnouncementDoctor")
-  announcementNurses                     AnnouncementNurse[] @relation("AnnouncementNurseDoctor")
-  nurseSchedules                         NurseSchedule[]     @relation("NurseScheduleDoctor") 
 
   @@map("Doctor")
 }
@@ -95,14 +95,14 @@ model Nurse {
   id                   String              @id @default(uuid())
   account_status       NurseAccountStatus  @default(PENDING)
   years_of_experience  Int
-  nationalCardUrl      String?             @db.VarChar(500)
-  nationalCardPublicId String?             @db.VarChar(500)
-  bonusFileUrl         String?             @db.VarChar(500)
-  bonusFilePublicId    String?             @db.VarChar(500)
   brief                String?
+  bonusFilePublicId    String?             @db.VarChar(500)
+  bonusFileUrl         String?             @db.VarChar(500)
+  nationalCardPublicId String?             @db.VarChar(500)
+  nationalCardUrl      String?             @db.VarChar(500)
+  announcement_nurses  AnnouncementNurse[] @relation("AnnouncementNurseNurse")
   user                 User                @relation("UserAsNurse", fields: [id], references: [id], onDelete: Cascade)
   nurse_schedules      NurseSchedule[]     @relation("NurseScheduleNurse")
-  announcement_nurses  AnnouncementNurse[] @relation("AnnouncementNurseNurse")
 
   @@map("Nurse")
 }
@@ -114,12 +114,12 @@ model Appointment {
   scheduled_time DateTime
   is_online      Boolean           @default(false)
   is_completed   Boolean           @default(false)
-  position       Int               @default(0)
-  patients_ahead Int               @default(0)
   estimated_time Float?
   created_at     DateTime          @default(now())
   modified_at    DateTime          @updatedAt
   deleted_at     DateTime?
+  patients_ahead Int               @default(0)
+  position       Int               @default(0)
   cancelled_by   String?
   clinic_id      String?
   end_time       DateTime
@@ -195,13 +195,13 @@ model Clinic {
   name               String              @db.VarChar(255)
   opening_at         String              @db.VarChar(12)
   closing_at         String              @db.VarChar(12)
+  announcementNurses AnnouncementNurse[] @relation("AnnouncementNurseClinic")
+  announcements      Announcement[]      @relation("AnnouncementClinic")
   appointments       Appointment[]
   clinic_doctors     ClinicDoctor[]
   clinic_nurses      ClinicNurse[]
   doctorSchedules    DoctorSchedule[]
   nurseSchedules     NurseSchedule[]
-  announcements      Announcement[]      @relation("AnnouncementClinic")
-  announcementNurses AnnouncementNurse[] @relation("AnnouncementNurseClinic")
 
   @@map("Clinic")
 }
@@ -295,9 +295,9 @@ model DoctorSchedule {
   created_at    DateTime   @default(now())
   modified_at   DateTime   @updatedAt
   deleted_at    DateTime?
-  vacations     Vacation[]
   clinic        Clinic?    @relation(fields: [clinic_id], references: [id], onDelete: Cascade)
   doctor        Doctor     @relation(fields: [doctor_id], references: [id], onDelete: Cascade)
+  vacations     Vacation[]
 
   @@index([doctor_id])
   @@index([clinic_id])
@@ -317,11 +317,11 @@ model NurseSchedule {
   created_at  DateTime  @default(now())
   modified_at DateTime  @updatedAt
   deleted_at  DateTime?
-  nurse       Nurse     @relation("NurseScheduleNurse", fields: [nurse_id], references: [id], onDelete: Cascade)
-  doctor      Doctor    @relation("NurseScheduleDoctor", fields: [doctor_id], references: [id], onDelete: Cascade) 
-  clinic      Clinic?   @relation(fields: [clinic_id], references: [id], onDelete: Cascade)
-  user        User?     @relation(fields: [userId], references: [id])
   userId      String?
+  clinic      Clinic?   @relation(fields: [clinic_id], references: [id], onDelete: Cascade)
+  doctor      Doctor    @relation("NurseScheduleDoctor", fields: [doctor_id], references: [id], onDelete: Cascade)
+  nurse       Nurse     @relation("NurseScheduleNurse", fields: [nurse_id], references: [id], onDelete: Cascade)
+  user        User?     @relation(fields: [userId], references: [id])
 
   @@index([nurse_id])
   @@index([doctor_id])
@@ -339,9 +339,8 @@ model Vacation {
   created_at  DateTime       @default(now())
   modified_at DateTime       @updatedAt
   deleted_at  DateTime?
-
-  doctor   Doctor         @relation(fields: [doctor_id], references: [id], onDelete: Cascade)
-  schedule DoctorSchedule @relation(fields: [schedule_id], references: [id], onDelete: Cascade)
+  doctor      Doctor         @relation(fields: [doctor_id], references: [id], onDelete: Cascade)
+  schedule    DoctorSchedule @relation(fields: [schedule_id], references: [id], onDelete: Cascade)
 
   @@index([doctor_id])
   @@index([schedule_id])
@@ -351,24 +350,23 @@ model Vacation {
 }
 
 model Announcement {
-  id                  String             @id @default(uuid())
+  id                  String              @id @default(uuid())
   doctor_id           String
   clinic_id           String
-  status              AnnouncementStatus @default(PENDING)
+  status              AnnouncementStatus  @default(PENDING)
   gender              Gender?
   max_age             Int?
   years_of_experience Int?
   notes               String?
-  created_at          DateTime           @default(now())
-  modified_at         DateTime           @updatedAt
+  created_at          DateTime            @default(now())
+  modified_at         DateTime            @updatedAt
   deleted_at          DateTime?
-
-  doctor              Doctor              @relation("AnnouncementDoctor", fields: [doctor_id], references: [id], onDelete: Cascade)
-  clinic              Clinic              @relation("AnnouncementClinic", fields: [clinic_id], references: [id], onDelete: Cascade)
+  userId              String?
   working_days        AnnouncementDay[]
   announcement_nurses AnnouncementNurse[] @relation("AnnouncementNurses")
+  clinic              Clinic              @relation("AnnouncementClinic", fields: [clinic_id], references: [id], onDelete: Cascade)
+  doctor              Doctor              @relation("AnnouncementDoctor", fields: [doctor_id], references: [id], onDelete: Cascade)
   user                User?               @relation(fields: [userId], references: [id])
-  userId              String?
 
   @@index([doctor_id])
   @@index([clinic_id])
@@ -397,15 +395,13 @@ model AnnouncementNurse {
   clinic_id       String?
   created_at      DateTime                @default(now())
   modified_at     DateTime                @updatedAt
+  userId          String?
   deleted_at      DateTime?
-
-  announcement Announcement @relation("AnnouncementNurses", fields: [announcement_id], references: [id], onDelete: Cascade)
-
-  nurse  Nurse   @relation("AnnouncementNurseNurse", fields: [nurse_id], references: [id], onDelete: Cascade)
-  doctor Doctor? @relation("AnnouncementNurseDoctor", fields: [doctor_id], references: [id])
-  clinic Clinic? @relation("AnnouncementNurseClinic", fields: [clinic_id], references: [id])
-  user   User?   @relation(fields: [userId], references: [id])
-  userId String?
+  announcement    Announcement            @relation("AnnouncementNurses", fields: [announcement_id], references: [id], onDelete: Cascade)
+  clinic          Clinic?                 @relation("AnnouncementNurseClinic", fields: [clinic_id], references: [id])
+  doctor          Doctor?                 @relation("AnnouncementNurseDoctor", fields: [doctor_id], references: [id])
+  nurse           Nurse                   @relation("AnnouncementNurseNurse", fields: [nurse_id], references: [id], onDelete: Cascade)
+  user            User?                   @relation(fields: [userId], references: [id])
 
   @@unique([announcement_id, nurse_id])
   @@index([announcement_id])

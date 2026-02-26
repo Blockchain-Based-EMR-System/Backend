@@ -343,7 +343,7 @@ export class AdminRoute implements Routes {
                     description: 'Verification status',
                     required: true,
                     schema: {
-                        $isApproved: true
+                        $isVerified: true
                     }
                 }
                 #swagger.parameters['Authorization'] = {

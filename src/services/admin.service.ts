@@ -425,7 +425,7 @@ export class AdminService {
         const mailOptions = {
             from: SENDER_EMAIL,
             to: user.email,
-            subject: isApproved ? 'Doctor Account Approved - MedBridge' : 'Doctor Account Rejected - MedBridge',
+            subject: isApproved ? 'User Account Approved - HoloCura' : 'User Account Rejected - HoloCura',
             html: `
                 <p>Dear ${user.name},</p>
                 <p>Your account has been ${isApproved ? 'approved' : 'rejected'}.</p>
