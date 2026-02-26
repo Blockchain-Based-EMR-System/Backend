@@ -1,4 +1,4 @@
-import { DoctorAccountStatus, Role } from '@prisma/client';
+import { DoctorAccountStatus, Role , NurseAccountStatus} from '@prisma/client';
 import { compare, hash } from 'bcrypt';
 import { sign, verify } from 'jsonwebtoken';
 import { Service } from 'typedi';
@@ -65,7 +65,10 @@ export class AuthService {
           { username: userData.emailOrUsername }
         ]
       },
-      include: { doctor: true }
+      include: { 
+        doctor: true,
+        nurse: true,
+      }
     });
     if (!findUser) {
       const error = createBilingualError(404, ErrorMessages.USER_NOT_FOUND_CREDENTIALS);
@@ -78,8 +81,8 @@ export class AuthService {
       throw new HttpException(error.status, error.message, error.messageAr);
     }
 
-    const { name, gender, date_of_birth, email, isVerified, username, phone, role, hasCompletedProfile, doctor, photo_url } = findUser;
-    const patientLoginData: UserLoginData = {
+    const { name, gender, date_of_birth, email, isVerified, username, phone, role, hasCompletedProfile, doctor, nurse, photo_url } = findUser;
+    const userLoginData: UserLoginData = {
       name,
       email,
       username,
@@ -93,17 +96,26 @@ export class AuthService {
       doctor: doctor ? {
         specialization: doctor.specialization,
         account_status: doctor.account_status
+      } : undefined,
+      nurse: nurse ? {
+        account_status: nurse.account_status
       } : undefined
     };
-    if (patientLoginData.doctor && patientLoginData.doctor.account_status !== DoctorAccountStatus.APPROVED) {
+
+    if (userLoginData.doctor && userLoginData.doctor.account_status !== DoctorAccountStatus.APPROVED) {
       const error = createBilingualError(403, ErrorMessages.DOCTOR_ACCOUNT_NOT_APPROVED);
+      throw new HttpException(error.status, error.message, error.messageAr);
+    }
+
+    if (userLoginData.nurse && userLoginData.nurse.account_status !== NurseAccountStatus.APPROVED) {
+      const error = createBilingualError(403, ErrorMessages.NURSE_ACCOUNT_NOT_APPROVED);
       throw new HttpException(error.status, error.message, error.messageAr);
     }
 
     const tokenResponse = await this.createTokens(findUser, userData.rememberMe);
     const cookies = this.createCookies(tokenResponse);
 
-    return { cookies, findUser: patientLoginData };
+    return { cookies, findUser: userLoginData };
   }
 
   public async logout(userData: User): Promise<User> {

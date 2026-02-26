@@ -3,7 +3,7 @@ import { Medication } from './medications.interface';
 import { ScanLab } from './scans-labs.interface';
 import { ClinicNurse, ClinicDoctor } from './clinics.interface';
 import { AuditLog } from './audit-logs.interface';
-import { DoctorAccountStatus, Gender, Role } from '@prisma/client';
+import { DoctorAccountStatus, Gender, Role, NurseAccountStatus } from '@prisma/client';
 
 export interface User {
   id: string;
@@ -23,6 +23,7 @@ export interface User {
   photo_url?: string;
   patient?: Patient;
   doctor?: Partial<Doctor>;
+  nurse?: Partial<Nurse>;
   appointments_as_patient?: Appointment[];
   appointments_as_doctor?: Appointment[];
   medications_as_patient?: Medication[];
@@ -54,6 +55,15 @@ export interface Doctor {
   clinic_doctors?: ClinicDoctor[];
 }
 
+export interface Nurse {
+  id: string;
+  account_status: NurseAccountStatus;
+  years_of_experience: number;
+  brief?: string;
+
+  user: User;
+}
+
 export interface UserLoginData {
   name: string,
   email: string,
@@ -68,5 +78,8 @@ export interface UserLoginData {
   doctor?: {
     specialization: string;
     account_status: DoctorAccountStatus;
+  }
+  nurse?: {
+    account_status: NurseAccountStatus;
   }
 }
