@@ -240,6 +240,9 @@ export class NurseService {
                 is_active: true,
                 deleted_at: null,
             },
+            orderBy: {
+                day_of_week: 'asc',
+            },
             select: {
                 id: true,
                 doctor: {
@@ -363,6 +366,9 @@ export class NurseService {
                                 day_of_week: true,
                                 start_time: true,
                                 end_time: true,
+                            },
+                            orderBy: {
+                                day_of_week: 'asc',
                             }
                         },
                         status: true,
@@ -449,6 +455,9 @@ export class NurseService {
                         day_of_week: true,
                         start_time: true,
                         end_time: true,
+                    },
+                    orderBy: {
+                        day_of_week: 'asc',
                     }
                 },
                 status: true,
