@@ -520,7 +520,7 @@ export class NurseRoute implements Routes {
             /* 
                 #swagger.path = '/nurses/appointments/{appointmentId}/complete'
                 #swagger.method = 'patch'
-                #swagger.tags = ['Appointments']
+                #swagger.tags = ['Nurses']
                 #swagger.parameters['Authorization'] = {
                     in: 'cookie',
                     description: 'Bearer token for authentication (must be a nurse)',

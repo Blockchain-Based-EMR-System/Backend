@@ -1,6 +1,6 @@
 import { AdminController } from "@/controllers/admin.controller";
 import { SuperAdminController } from "@/controllers/superAdmin.controller";
-import { AddDoctorFromAdminDto } from "@/dtos/admins.dto";
+import { AddUserFromAdminDto } from "@/dtos/admins.dto";
 import { AddAdminFromSuperAdminDto } from "@/dtos/superAdmins.dto";
 import { Routes } from "@/interfaces";
 import { AuthMiddleware, RoleMiddleware } from "@/middlewares/auth.middleware";
@@ -191,8 +191,65 @@ export class SuperAdminRoute implements Routes {
             AuthMiddleware,
             RoleMiddleware(Role.SUPER_ADMIN),
             LanguageMiddleware,
-            ValidationMiddleware(AddDoctorFromAdminDto),
+            ValidationMiddleware(AddUserFromAdminDto),
             this.adminController.addDoctor,
+        );
+
+        this.router.post(
+            '/super-admin/nurses',
+            /* 
+                #swagger.tags = ['Super Admin']
+                #swagger.parameters['body'] = {
+                    in: 'body',
+                    description: 'Nurse data',
+                    required: true,
+                    schema: {
+                        $email: 'nurse@example.com',
+                        $name: 'Nurse Jane',
+                        $phone: '1234567890',
+                        $gender: 'MALE or FEMALE',
+                        $date_of_birth: '1995-06-15',
+                        years_of_experience: 3
+                    }
+                }
+                #swagger.parameters['Authorization'] = {
+                    in: 'header',
+                    description: 'Bearer access token (sent via Authorization cookie)',
+                    required: false,
+                    type: 'string'
+                }
+                #swagger.responses[201] = {
+                    description: 'Nurse added successfully',
+                    schema: {
+                        data: {
+                            id: '1',
+                            email: 'nurse@example.com',
+                            name: 'Nurse Jane',
+                            role: 'NURSE',
+                            username: 'jane',
+                            phone: '1234567890',
+                            gender: 'FEMALE',
+                            date_of_birth: '1995-06-15',
+                            isVerified: true,
+                            hasCompletedProfile: false,
+                            photo_url: null,
+                            nurse: {
+                                account_status: 'APPROVED',
+                                years_of_experience: 3,
+                                brief: null,
+                                nationalCardUrl: null,
+                                bonusFileUrl: null
+                            }
+                        },
+                        messageEn: 'Nurse account created successfully.',
+                        messageAr: '.تم إنشاء حساب الممرض بنجاح'
+                    }
+                }
+            */
+            AuthMiddleware,
+            RoleMiddleware(Role.SUPER_ADMIN),
+            ValidationMiddleware(AddUserFromAdminDto),
+            this.adminController.addNurse,
         );
 
         this.router.get(
@@ -230,6 +287,51 @@ export class SuperAdminRoute implements Routes {
             RoleMiddleware(Role.SUPER_ADMIN),
             LanguageMiddleware,
             this.adminController.getAllDoctors,
+        );
+
+        this.router.get(
+            '/super-admin/nurses',
+            /* 
+                #swagger.tags = ['Super Admin']
+                #swagger.parameters['Authorization'] = {
+                    in: 'header',
+                    description: 'Bearer access token (sent via Authorization cookie)',
+                    required: false,
+                    type: 'string'
+                }
+                #swagger.responses[200] = {
+                    description: 'Nurses retrieved successfully',
+                    schema: {
+                        data: [
+                            {
+                                id: '1',
+                                email: 'nurse@example.com',
+                                name: 'Nurse Jane',
+                                role: 'NURSE',
+                                username: 'jane',
+                                phone: '1234567890',
+                                gender: 'FEMALE',
+                                date_of_birth: '1995-06-15',
+                                isVerified: true,
+                                hasCompletedProfile: true,
+                                photo_url: null,
+                                nurse: {
+                                    account_status: 'APPROVED',
+                                    years_of_experience: 3,
+                                    brief: 'Experienced nurse in ICU',
+                                    nationalCardUrl: '',
+                                    bonusFileUrl: ''
+                                }
+                            }
+                        ],
+                        messageEn: 'Nurses retrieved successfully',
+                        messageAr: "تم استرجاع بيانات الممرضين بنجاح."
+                    }
+                }
+            */
+            AuthMiddleware,
+            RoleMiddleware(Role.SUPER_ADMIN),
+            this.adminController.getAllNurses,
         );
 
         this.router.get(
@@ -274,6 +376,58 @@ export class SuperAdminRoute implements Routes {
             LanguageMiddleware,
             this.adminController.getDoctorById,
         )
+
+        this.router.get(
+            '/super-admin/nurses/:id',
+            /* 
+                #swagger.tags = ['Super Admin']
+                #swagger.parameters['id'] = {
+                    in: 'path',
+                    description: 'Nurse ID',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['Authorization'] = {
+                    in: 'header',
+                    description: 'Bearer access token (sent via Authorization cookie)',
+                    required: false,
+                    type: 'string'
+                }
+                #swagger.responses[200] = {
+                    description: 'Nurse retrieved successfully',
+                    schema: {
+                        data: {
+                            id: '1',
+                            email: 'nurse@example.com',
+                            name: 'Nurse Jane',
+                            username: 'jane',
+                            phone: '1234567890',
+                            gender: 'FEMALE',
+                            date_of_birth: '1995-06-15',
+                            role: 'NURSE',
+                            isVerified: true,
+                            hasCompletedProfile: true,
+                            photo_url: null,
+                            nurse: {
+                                account_status: 'APPROVED',
+                                years_of_experience: 3,
+                                brief: 'Experienced nurse in ICU',
+                                nationalCardUrl: '',
+                                bonusFileUrl: ''
+                            }
+                        },
+                        messageEn: 'Nurse retrieved successfully',
+                        messageAr: "تم استرجاع بيانات الممرض بنجاح."
+                    }
+                }
+                #swagger.responses[404] = {
+                    description: 'Nurse not found',
+                }
+            */
+            AuthMiddleware,
+            RoleMiddleware(Role.SUPER_ADMIN),
+            this.adminController.getNurseById,
+        );
 
         // CLINIC ROUTES
         this.router.get(
