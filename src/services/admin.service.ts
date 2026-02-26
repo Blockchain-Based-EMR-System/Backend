@@ -1,7 +1,7 @@
-import { DoctorAccountStatus, PrismaClient, Role } from '@prisma/client';
+import { DoctorAccountStatus, NurseAccountStatus, PrismaClient, Role } from '@prisma/client';
 import { hash } from 'bcrypt';
 import { Service } from 'typedi';
-import { AddDoctorFromAdminDto, DoctorFromAdminResponseDto } from '@/dtos/admins.dto';
+import { AddUserFromAdminDto, DoctorFromAdminResponseDto, NurseFromAdminResponseDto } from '@/dtos/admins.dto';
 import { HttpException } from '@/exceptions/HttpException';
 import { ErrorMessages, createBilingualError } from '@/utils/errorMessages';
 import { User } from '@/interfaces';
@@ -14,7 +14,7 @@ const prisma = new PrismaClient();
 
 @Service()
 export class AdminService {
-    public async addDoctor(doctorData: AddDoctorFromAdminDto): Promise<DoctorFromAdminResponseDto> {
+    public async addDoctor(doctorData: AddUserFromAdminDto): Promise<DoctorFromAdminResponseDto> {
         // Check if email already exists
         const existingUser = await prisma.user.findUnique({
             where: { email: doctorData.email }
@@ -92,6 +92,84 @@ export class AdminService {
 
     }
 
+    public async addNurse(nurseData: AddUserFromAdminDto): Promise<NurseFromAdminResponseDto> {
+        const existingUser = await prisma.user.findUnique({
+            where: { 
+                email: nurseData.email 
+            }
+        });
+
+        if (existingUser) {
+            const error = createBilingualError(409, ErrorMessages.EMAIL_EXISTS);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const username = nurseData.email.split('@')[0];
+
+        const existingUsername = await prisma.user.findUnique({
+            where: { 
+                username 
+            }
+        });
+
+        if (existingUsername) {
+            const error = createBilingualError(409, ErrorMessages.USERNAME_EXISTS);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const defaultPassword = 'nurse123'; 
+        const hashedPassword = await hash(defaultPassword, 10);
+
+        const createdUser = await prisma.user.create({
+            data: {
+                email: nurseData.email,
+                name: nurseData.name,
+                username,
+                phone: nurseData.phone,
+                gender: nurseData.gender,
+                date_of_birth: new Date(nurseData.date_of_birth),
+                password_hash: hashedPassword,
+                role: Role.NURSE,
+                isVerified: true,
+                hasCompletedProfile: false,
+            },
+        });
+
+        await prisma.nurse.create({
+            data: {
+                id: createdUser.id,
+                years_of_experience: nurseData.years_of_experience,
+                account_status: NurseAccountStatus.APPROVED,
+            }
+        });
+        const createdNurse = await prisma.user.findUnique({
+            where: { 
+                id: createdUser.id 
+            },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                username: true,
+                phone: true,
+                gender: true,
+                date_of_birth: true,
+                role: true,
+                isVerified: true,
+                hasCompletedProfile: true,
+                photo_url: true,
+                nurse: {
+                    select: {
+                        years_of_experience: true,
+                    }
+                },
+            }
+        });
+
+        return createdNurse;
+
+    }
+
     public async getAllDoctors(): Promise<DoctorFromAdminResponseDto[]> {
 
         const doctors = await prisma.user.findMany({
@@ -125,6 +203,39 @@ export class AdminService {
         });
 
         return doctors;
+
+    }
+
+    public async getAllNurses(): Promise<NurseFromAdminResponseDto[]> {
+        const nurses = await prisma.user.findMany({
+            where: { 
+                role: Role.NURSE 
+            },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                username: true,
+                phone: true,
+                gender: true,
+                date_of_birth: true,
+                role: true,
+                isVerified: true,
+                hasCompletedProfile: true,
+                photo_url: true,
+                nurse: {
+                    select: {
+                        account_status: true,
+                        years_of_experience: true,
+                        brief: true,
+                        nationalCardUrl: true,
+                        bonusFileUrl: true,
+                    }
+                },
+            }
+        });
+
+        return nurses;
 
     }
 
@@ -168,6 +279,41 @@ export class AdminService {
         return doctor;
     }
 
+    public async getNurseById(id: string): Promise<NurseFromAdminResponseDto> {
+        const nurse = await prisma.user.findUnique({
+            where: { id, role: Role.NURSE },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                username: true,
+                phone: true,
+                gender: true,
+                date_of_birth: true,
+                role: true,
+                isVerified: true,
+                hasCompletedProfile: true,
+                photo_url: true,
+                nurse: {
+                    select: {
+                        account_status: true,
+                        years_of_experience: true,
+                        brief: true,
+                        nationalCardUrl: true,
+                        bonusFileUrl: true,
+                    }
+                },
+            }
+        });
+
+        if (!nurse) {
+            const error = createBilingualError(404, ErrorMessages.USER_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        return nurse;
+    }
+
     public async getUnverifiedDoctors(): Promise<DoctorFromAdminResponseDto[]> {
 
         const unverifiedDoctors = await prisma.user.findMany({
@@ -200,6 +346,42 @@ export class AdminService {
         return unverifiedDoctors
 
     }
+
+    public async getUnverifiedNurses(): Promise<NurseFromAdminResponseDto[]> {
+
+        const unverifiedNurses = await prisma.user.findMany({
+            where: {
+                role: Role.NURSE,
+                nurse: { 
+                    account_status: NurseAccountStatus.PENDING 
+                }
+            },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                username: true,
+                phone: true,
+                gender: true,
+                date_of_birth: true,
+                isVerified: true,
+                hasCompletedProfile: true,
+                photo_url: true,
+                nurse: {
+                    select: {
+                        account_status: true,
+                        years_of_experience: true,
+                        brief: true,
+                        nationalCardUrl: true,
+                        bonusFileUrl: true,
+                    }
+                },
+            },
+        });
+        return unverifiedNurses
+
+    }
+
     public async updateDoctorVerificationStatus(doctorId: string, isApproved: boolean | null): Promise<void> {
 
         const doctor = await prisma.user.findUnique({
@@ -231,27 +413,58 @@ export class AdminService {
         });
     }
 
-    public async sendVerificationStatusEmail(doctorId: string, isApproved: boolean): Promise<void> {
-        const doctor = await prisma.user.findUnique({
-            where: { id: doctorId, role: Role.DOCTOR },
+    public async sendVerificationStatusEmail(userId: string, isApproved: boolean): Promise<void> {
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
             select: { email: true, name: true }
         });
-        if (!doctor) {
+        if (!user) {
             const error = createBilingualError(404, ErrorMessages.USER_NOT_FOUND);
             throw new HttpException(error.status, error.message, error.messageAr);
         }
         const mailOptions = {
             from: SENDER_EMAIL,
-            to: doctor.email,
+            to: user.email,
             subject: isApproved ? 'Doctor Account Approved - MedBridge' : 'Doctor Account Rejected - MedBridge',
             html: `
-                <p>Dear Dr. ${doctor.name},</p>
+                <p>Dear ${user.name},</p>
                 <p>Your account has been ${isApproved ? 'approved' : 'rejected'}.</p>
                 <p>Thank you for using our platform.</p>
-                <p>Best regards,<br/>MedicBridge Team</p>
+                <p>Best regards,<br/>HoloCura Team</p>
             `
         };
 
         await transporter.sendMail(mailOptions);
+    }
+
+    public async updateNurseVerificationStatus(nurseId: string, isApproved: boolean | null): Promise<void> {
+
+        const nurse = await prisma.user.findUnique({
+            where: { id: nurseId, role: Role.NURSE },
+        });
+        if (!nurse) {
+            const error = createBilingualError(404, ErrorMessages.USER_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        let accountStatus: NurseAccountStatus;
+        if (isApproved === true) {
+            accountStatus = NurseAccountStatus.APPROVED;
+        } else if (isApproved === false) {
+            accountStatus = NurseAccountStatus.REJECTED;
+        } else {
+            accountStatus = NurseAccountStatus.PENDING;
+        }
+
+        await prisma.user.update({
+            where: { id: nurseId },
+            data: {
+                nurse: {
+                    update: {
+                        account_status: accountStatus,
+                    }
+                }
+            }
+        });
     }
 }

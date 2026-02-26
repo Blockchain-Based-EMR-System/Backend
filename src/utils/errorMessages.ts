@@ -106,6 +106,56 @@ export const ErrorMessages = {
         en: 'Maximum number of created clinics reached',
         ar: 'تم الوصول إلى الحد الأقصى لعدد العيادات',
     },
+    ANNOUNCEMENT_NOT_FOUND: {
+        en: 'Announcement not found',
+        ar: 'الإعلان غير موجود',
+    },
+    UNAUTHORIZED_ACCESS :{
+        en: 'You are not authorized to access this',
+        ar: 'ليس لديك صلاحية للوصول إلى هذا ',
+    },
+    DOCTOR_ID_NOT_FOUND: {
+        en: 'Doctor ID not found in request',
+        ar: 'معرف الطبيب غير موجود في الطلب',
+    },
+
+    // nurse
+    NURSE_PASSWORD_ALREADY_SET: {
+        en: 'Password has already been set',
+        ar: 'تم تعيين كلمة المرور بالفعل',
+    },
+    NURSE_ACCOUNT_NOT_APPROVED: {
+        en: 'Nurse account is not approved yet',
+        ar: 'حساب الممرضة غير مفعل بعد',
+    },
+    NATIONAL_CARD_REQUIRED: {
+        en: 'National card image is required',
+        ar: 'صورة البطاقة الوطنية مطلوبة',
+    },
+    NURSE_ID_NOT_FOUND: {
+        en: 'Nurse ID not found in request',
+        ar: 'معرف الممرضة غير موجود في الطلب',
+    },
+    ANNOUNCEMENT_EXPIRED: {
+        en: 'Announcement has expired',
+        ar: 'انتهت صلاحية الإعلان',
+    },
+    APPLICATION_ALREADY_EXISTS: {
+        en: 'You have already applied to this announcement',
+        ar: 'لقد تقدمت بالفعل لهذا الإعلان',
+    },
+    APPLICATION_NOT_FOUND: {
+        en: 'Application not found',
+        ar: 'الطلب غير موجود',
+    },
+    APPLICATION_ALREADY_PROCESSED: {
+        en: 'This application has already been processed',
+        ar: 'تمت معالجة هذا الطلب بالفعل',
+    },
+    NURSE_DATA_NOT_FOUND: {
+        en: 'Nurse data not found',
+        ar: 'بيانات الممرضة غير موجودة',
+    },
     
     // File upload errors
     NO_FILE_UPLOADED: {

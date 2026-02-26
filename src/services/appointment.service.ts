@@ -5,7 +5,7 @@ import { Service, Container } from 'typedi';
 import { TimeSlot } from '@/interfaces';
 import { HttpException } from "@/exceptions/HttpException";
 import { createBilingualError, ErrorMessages } from '@/utils/errorMessages';
-import { PatientTodayAppointment, DoctorAppointment, DoctorScheduleDay, PatientAppointment, DoctorSchedule, checkExistingAppointments, ConflictingAppointment, DoctorVacations, Vacations } from '@/interfaces/appointments.interface';
+import { PatientTodayAppointment, DoctorAppointment, DoctorScheduleDay, PatientAppointment, DoctorSchedule, checkExistingAppointments, ConflictingAppointment, DoctorVacations, Vacations, AppointmentData } from '@/interfaces/appointments.interface';
 import { QueueService } from './queue.service';
 import { start } from 'repl';
 
@@ -320,7 +320,7 @@ export class AppointmentService {
             end_time: this.formatTime(appointment.end_time),
             clinic_name: appointment.clinic ? appointment.clinic.name : null,
             clinic_address: appointment.clinic ? appointment.clinic.address : null,
-            address_maps_link: appointment.clinic? appointment.clinic.address_maps_link : null,
+            address_maps_link: appointment.clinic ? appointment.clinic.address_maps_link : null,
         }));
     }
 
@@ -372,7 +372,7 @@ export class AppointmentService {
             end_time: this.formatTime(appointment.end_time),
             clinic_name: appointment.clinic ? appointment.clinic.name : null,
             clinic_address: appointment.clinic ? appointment.clinic.address : null,
-            address_maps_link: appointment.clinic? appointment.clinic.address_maps_link : null,
+            address_maps_link: appointment.clinic ? appointment.clinic.address_maps_link : null,
         };
     }
 
@@ -461,7 +461,7 @@ export class AppointmentService {
                 end_time: this.formatTime(appointment.end_time),
                 clinic_name: appointment.clinic ? appointment.clinic.name : null,
                 clinic_address: appointment.clinic ? appointment.clinic.address : null,
-                address_maps_link: appointment.clinic? appointment.clinic.address_maps_link : null,
+                address_maps_link: appointment.clinic ? appointment.clinic.address_maps_link : null,
                 position: appointment.position,
                 estimatedWaitMinutes: appointment.estimated_time,
                 patientsAhead: appointment.patients_ahead
@@ -828,6 +828,103 @@ export class AppointmentService {
             clinic_address: appointment.clinic?.address || null,
         }));
 
+    }
+
+    public async getAppointmentsByDate(doctorId: string, clinicId: string, date: string): Promise<AppointmentData[]> {
+        const requestedDate = new Date(date);
+
+        const startOfDay = new Date(requestedDate);
+        startOfDay.setUTCHours(0, 0, 0, 0);
+
+        const endOfDay = new Date(requestedDate);
+        endOfDay.setUTCHours(23, 59, 59, 999);
+
+        const appointments = await prisma.appointment.findMany({
+            where: {
+                doctor_id: doctorId,
+                clinic_id: clinicId,
+                scheduled_time: {
+                    gte: startOfDay,
+                    lte: endOfDay
+                },
+                status: {
+                    in: ['CONFIRMED', 'COMPLETED']
+                },
+                deleted_at: null,
+            },
+            select: {
+                id: true,
+                scheduled_time: true,
+                end_time: true,
+                slot_duration: true,
+                status: true,
+                patient: {
+                    select: {
+                        id: true,
+                        name: true,
+                        gender: true,
+                        phone: true,
+                    }
+                },
+                clinic: {
+                    select: {
+                        id: true,
+                        name: true,
+                        address: true,
+                        address_maps_link: true,
+                    }
+                }
+            },
+            orderBy: {
+                scheduled_time: 'asc'
+            }
+        });
+
+        return appointments.map(appointment => ({
+            id: appointment.id,
+            patient: {
+                id: appointment.patient.id,
+                name: appointment.patient.name,
+                gender: appointment.patient.gender,
+                phone: appointment.patient.phone,
+            },
+            clinic: {
+                id: appointment.clinic.id,
+                name: appointment.clinic.name,
+                address: appointment.clinic.address,
+                address_maps_link: appointment.clinic.address_maps_link,
+            },
+            status: appointment.status,
+            slot_duration: appointment.slot_duration,
+            appointment_date: this.formatDate(new Date(appointment.scheduled_time)),
+            start_time: this.formatTime(new Date(appointment.scheduled_time)),
+            end_time: this.formatTime(new Date(appointment.end_time)),
+        }));
+    }
+
+    public async completeAppointment(appointmentId: string): Promise<void> {
+        const appointment = await prisma.appointment.findUnique({
+            where: {
+                id: appointmentId,
+            },
+            select: {
+                doctor_id: true,
+            }
+        });
+
+        await this.getAndValidateAppointment(appointmentId, appointment.doctor_id);
+
+        await prisma.appointment.update({
+            where: {
+                id: appointmentId,
+                deleted_at: null,
+            },
+            data: {
+                status: 'COMPLETED',
+                is_completed: true,
+                deleted_at: new Date(),
+            }
+        })
     }
 
     public async cancelDoctorVacation(doctorId: string, vacationId: string, scheduleId: string): Promise<void> {

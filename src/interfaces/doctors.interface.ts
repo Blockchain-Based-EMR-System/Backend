@@ -1,4 +1,4 @@
-import { DoctorAccountStatus, AvailabilityType, Gender} from "@prisma/client";
+import { DoctorAccountStatus, AvailabilityType, Gender, AnnouncementStatus, DayOfWeek} from "@prisma/client";
 import { DoctorClinics } from "./clinics.interface";
 
 export interface Doctor {
@@ -34,4 +34,32 @@ export interface DoctorPersonalData {
   profilePic: string;
   is_online: boolean;
   clinics?: DoctorClinics[]
+}
+
+export interface WorkingDays {
+  day_of_week: DayOfWeek;
+  start_time: string;
+  end_time: string;
+}
+
+export interface DoctorAnnouncements {
+  id: string;
+  doctor: {
+    id: string;
+    name: string;
+    gender: Gender;
+    profilePic: string;
+  };
+  clinic: {
+    id: string;
+    name: string
+    address: string;
+    address_maps_link: string;
+  };
+  working_days: WorkingDays[];
+  status?: AnnouncementStatus;
+  gender?: Gender;
+  max_age?: number;
+  years_of_experience?: number;
+  notes?: string;
 }

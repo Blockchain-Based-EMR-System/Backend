@@ -67,6 +67,21 @@ export const SuccessResponseMessages = {
         message_ar: "تم تحديث حالة اعتماد الطبيب بنجاح.",
     },
 
+    // get messages for Nurses by Admin
+    UNVERIFIED_NURSES_RETRIEVED: {
+        message_en: "Unverified nurses retrieved successfully.",
+        message_ar: "تم استرجاع بيانات الممرضات غير المعتمدين بنجاح.",
+    },
+    NURSE_CREATED: {
+        message_en: "Nurse created successfully.",
+        message_ar: "تم إنشاء حساب الممرضة بنجاح.",
+    },
+    NURSES_RETRIEVED: {
+        message_en: "Nurse retrieved successfully.",
+        message_ar: "تم استرجاع بيانات الممرضة بنجاح.",
+    },
+
+
     // Success messages for Clinics
     CLINIC_CREATED_SUCCESSFULLY: {
         message_en: "Clinic created successfully.",
@@ -109,6 +124,68 @@ export const SuccessResponseMessages = {
     PASSWORD_SET_SUCCESSFULLY_BY_DOCTOR: {
         message_en: "Password set successfully.",
         message_ar: "تم تعيين كلمة المرور بنجاح.",
+    },
+    ANNOUNCEMENT_CREATED_SUCCESSFULLY: {
+        message_en: "Announcement created successfully.",
+        message_ar: "تم إنشاء الإعلان بنجاح.",
+    },
+    ANNOUNCEMENTS_RETRIEVED_SUCCESSFULLY: {
+        message_en: "Announcements retrieved successfully.",
+        message_ar: "تم استرجاع الإعلانات بنجاح.",
+    },
+    APPLICANTS_RETRIEVED_SUCCESSFULLY: {
+        message_en: "Announcement applicants retrieved successfully.",
+        message_ar: "تم استرجاع المتقدمين للإعلان بنجاح.",
+    },
+    ANNOUNCEMENTS_RETRIEVED: {
+        message_en: "Announcements retrieved successfully.",
+        message_ar: "تم استرجاع الإعلانات بنجاح.",
+    },
+
+    // Success messages for nurses
+    NURSE_CREATED_WAITING_VERIFICATION: {
+        message_en: "Nurse account created successfully. Please wait for verification.",
+        message_ar: "تم إنشاء حساب الممرضة بنجاح. يرجى الانتظار للموافقة عليه.",
+    },
+    NURSE_RETRIEVED: {
+        message_en: "Nurse retrieved successfully.",
+        message_ar: "تم استرجاع بيانات الممرضة بنجاح.",
+    },
+    PASSWORD_SET_SUCCESSFULLY_BY_NURSE: {
+        message_en: 'Password set successfully by nurse',
+        message_ar: 'تم تعيين كلمة المرور بنجاح من قبل الممرضة',
+    },
+    NURSE_VERIFICATION_STATUS_UPDATED: {
+        message_en: "Nurse verification status updated successfully.",
+        message_ar: "تم تحديث حالة اعتماد الممرضة بنجاح.",
+    },
+    APPLIED_TO_ANNOUNCEMENT_SUCCESSFULLY: {
+        message_en: "Applied to announcement successfully.",
+        message_ar: "تم التقديم للإعلان بنجاح.",
+    },
+    APPLICANT_APPROVED_SUCCESSFULLY: {
+        message_en: "Applicant approved successfully.",
+        message_ar: "تم الموافقة على المتقدم بنجاح.",
+    },
+    APPLICANT_REJECTED_SUCCESSFULLY: {
+        message_en: "Applicant rejected successfully.",
+        message_ar: "تم رفض المتقدم بنجاح.",
+    },
+    ANNOUNCEMENT_DELETED_SUCCESSFULLY: {
+        message_en: "Announcement deleted successfully.",
+        message_ar: "تم حذف الإعلان بنجاح.",
+    },
+    ANNOUNCEMENT_EDITED_SUCCESSFULLY: {
+        message_en: "Announcement edited successfully.",
+        message_ar: "تم تعديل الإعلان بنجاح.",
+    },
+    APPLICATIONS_RETRIEVED: {
+        message_en: "Applications retrieved successfully.",
+        message_ar: "تم استرجاع الطلبات بنجاح.",
+    },
+    NURSE_SCHEDULE_RETRIEVED: {
+        message_en: "Nurse schedule retrieved successfully.",
+        message_ar: "تم استرجاع جدول الممرضة بنجاح.",
     },
 
     // Success messages for Google Auth
@@ -229,6 +306,15 @@ export const SuccessResponseMessages = {
         message_en: 'Online doctors retrieved successfully',
         message_ar: 'تم استرجاع الأطباء المتاحين عبر الإنترنت بنجاح',
     },
+    APPOINTMENTS_BY_NURSE_RETRIEVED: {
+        message_en: 'Appointments retrieved to the nurse successfully',
+        message_ar: 'تم استرجاع المواعيد للممرضة بنجاح',
+    },
+    APPOINTMENT_COMPLETED_SUCCESSFULLY: {
+        message_en: 'Appointment completed successfully',
+        message_ar: 'تم إكمال الموعد بنجاح',
+    },
+
 }
 
 interface MultiLangMessageObj {

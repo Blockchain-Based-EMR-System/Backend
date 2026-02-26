@@ -446,5 +446,54 @@ export class AppointmentController {
         res.status(200).json({
             ...response
         });
-    })
+    });
+
+    public getAppointmentsByDate = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
+        const nurseId = req.user?.id;
+        const { doctorId, clinicId, date } = req.query;
+
+        if (!nurseId) {
+            const error = createBilingualError(400, ErrorMessages.NURSE_ID_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        if (!doctorId) {
+            const error = createBilingualError(400, ErrorMessages.DOCTOR_ID_REQUIRED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        if (!date) {
+            const error = createBilingualError(400, ErrorMessages.DATE_REQUIRED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+        if (!dateRegex.test(date as string)) {
+            const error = createBilingualError(400, ErrorMessages.INVALID_DATE_FORMAT);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const appointments = await this.appointmentService.getAppointmentsByDate(doctorId as string, clinicId as string, date as string);
+        const response = createMultiLangMessage(SuccessResponseMessages.APPOINTMENTS_BY_NURSE_RETRIEVED);
+        res.status(200).json({
+            data: appointments,
+            ...response
+        });
+    });
+
+    public completeAppointment = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
+        const nurseId = req.user?.id;
+        const { appointmentId } = req.params;
+
+        if (!nurseId) {
+            const error = createBilingualError(400, ErrorMessages.NURSE_ID_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        await this.appointmentService.completeAppointment(appointmentId);
+        const response = createMultiLangMessage(SuccessResponseMessages.APPOINTMENT_COMPLETED_SUCCESSFULLY);
+        res.status(200).json({
+            ...response
+        });
+    });
 }

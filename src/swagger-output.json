@@ -43,6 +43,10 @@
     {
       "name": "Users",
       "description": "User account endpoints"
+    },
+    {
+      "name": "Nurses",
+      "description": "Nurse account endpoints"
     }
   ],
   "schemes": [
@@ -1577,6 +1581,258 @@
         }
       }
     },
+    "/admin/nurses": {
+      "post": {
+        "tags": [
+          "Admin"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Nurse data",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "example": "nurse@example.com"
+                },
+                "name": {
+                  "type": "string",
+                  "example": "Nurse Jane"
+                },
+                "phone": {
+                  "type": "string",
+                  "example": "1234567890"
+                },
+                "gender": {
+                  "type": "string",
+                  "example": "MALE or FEMALE"
+                },
+                "date_of_birth": {
+                  "type": "string",
+                  "example": "1995-06-15"
+                },
+                "years_of_experience": {
+                  "type": "number",
+                  "example": 3
+                }
+              },
+              "required": [
+                "email",
+                "name",
+                "phone",
+                "gender",
+                "date_of_birth"
+              ]
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer access token (sent via Authorization cookie)",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Nurse added successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "1"
+                    },
+                    "email": {
+                      "type": "string",
+                      "example": "nurse@example.com"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Nurse Jane"
+                    },
+                    "role": {
+                      "type": "string",
+                      "example": "NURSE"
+                    },
+                    "username": {
+                      "type": "string",
+                      "example": "jane"
+                    },
+                    "phone": {
+                      "type": "string",
+                      "example": "1234567890"
+                    },
+                    "gender": {
+                      "type": "string",
+                      "example": "FEMALE"
+                    },
+                    "date_of_birth": {
+                      "type": "string",
+                      "example": "1995-06-15"
+                    },
+                    "isVerified": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "hasCompletedProfile": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "photo_url": {},
+                    "nurse": {
+                      "type": "object",
+                      "properties": {
+                        "account_status": {
+                          "type": "string",
+                          "example": "APPROVED"
+                        },
+                        "years_of_experience": {
+                          "type": "number",
+                          "example": 3
+                        },
+                        "brief": {},
+                        "nationalCardUrl": {},
+                        "bonusFileUrl": {}
+                      }
+                    }
+                  }
+                },
+                "messageEn": {
+                  "type": "string",
+                  "example": "Nurse account created successfully."
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": ".تم إنشاء حساب الممرض بنجاح"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer access token (sent via Authorization cookie)",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Nurses retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "1"
+                      },
+                      "email": {
+                        "type": "string",
+                        "example": "nurse@example.com"
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "Nurse Jane"
+                      },
+                      "role": {
+                        "type": "string",
+                        "example": "NURSE"
+                      },
+                      "username": {
+                        "type": "string",
+                        "example": "jane"
+                      },
+                      "phone": {
+                        "type": "string",
+                        "example": "1234567890"
+                      },
+                      "gender": {
+                        "type": "string",
+                        "example": "FEMALE"
+                      },
+                      "date_of_birth": {
+                        "type": "string",
+                        "example": "1995-06-15"
+                      },
+                      "isVerified": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "hasCompletedProfile": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "photo_url": {},
+                      "nurse": {
+                        "type": "object",
+                        "properties": {
+                          "account_status": {
+                            "type": "string",
+                            "example": "APPROVED"
+                          },
+                          "years_of_experience": {
+                            "type": "number",
+                            "example": 3
+                          },
+                          "brief": {
+                            "type": "string",
+                            "example": "Experienced nurse in ICU"
+                          },
+                          "nationalCardUrl": {
+                            "type": "string",
+                            "example": ""
+                          },
+                          "bonusFileUrl": {
+                            "type": "string",
+                            "example": ""
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "messageEn": {
+                  "type": "string",
+                  "example": "Nurses retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع بيانات الممرضين بنجاح."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
     "/admin/doctors/unverified": {
       "get": {
         "tags": [
@@ -1710,6 +1966,121 @@
         }
       }
     },
+    "/admin/nurses/unverified": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer access token (sent via Authorization cookie)",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "accept-language",
+            "in": "header",
+            "description": "Language preference (en or ar)",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Unverified nurses retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "1"
+                      },
+                      "email": {
+                        "type": "string",
+                        "example": "nurse@example.com"
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "Nurse Jane"
+                      },
+                      "username": {
+                        "type": "string",
+                        "example": "jane"
+                      },
+                      "phone": {
+                        "type": "string",
+                        "example": "1234567890"
+                      },
+                      "gender": {
+                        "type": "string",
+                        "example": "FEMALE"
+                      },
+                      "date_of_birth": {
+                        "type": "string",
+                        "example": "1995-06-15"
+                      },
+                      "isVerified": {
+                        "type": "boolean",
+                        "example": false
+                      },
+                      "hasCompletedProfile": {
+                        "type": "boolean",
+                        "example": false
+                      },
+                      "photo_url": {},
+                      "nurse": {
+                        "type": "object",
+                        "properties": {
+                          "account_status": {
+                            "type": "string",
+                            "example": "PENDING"
+                          },
+                          "years_of_experience": {
+                            "type": "number",
+                            "example": 3
+                          },
+                          "brief": {
+                            "type": "string",
+                            "example": "Experienced nurse in ICU"
+                          },
+                          "nationalCardUrl": {
+                            "type": "string",
+                            "example": ""
+                          },
+                          "bonusFileUrl": {
+                            "type": "string",
+                            "example": ""
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "messageEn": {
+                  "type": "string",
+                  "example": "Unverified nurses retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع بيانات الممرضين غير المعتمدين بنجاح."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
     "/admin/doctors/verify/{id}": {
       "patch": {
         "tags": [
@@ -1763,6 +2134,69 @@
                 "messageAr": {
                   "type": "string",
                   "example": "تم تحديث حالة اعتماد الطبيب بنجاح."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/admin/nurses/verify/{id}": {
+      "patch": {
+        "tags": [
+          "Admin"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Nurse ID"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Verification status",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "isApproved": {
+                  "type": "boolean",
+                  "example": true
+                }
+              },
+              "required": [
+                "isApproved"
+              ]
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer access token (sent via Authorization cookie or Authorization header)",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Nurse verification status updated successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "messageEn": {
+                  "type": "string",
+                  "example": "Nurse verification status updated successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم تحديث حالة اعتماد الممرض بنجاح."
                 }
               },
               "xml": {
@@ -1906,6 +2340,125 @@
                 "name": "main"
               }
             }
+          }
+        }
+      }
+    },
+    "/admin/nurses/{id}": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Nurse ID"
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer access token (sent via Authorization cookie)",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Nurse retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "1"
+                    },
+                    "email": {
+                      "type": "string",
+                      "example": "nurse@example.com"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Nurse Jane"
+                    },
+                    "username": {
+                      "type": "string",
+                      "example": "jane"
+                    },
+                    "phone": {
+                      "type": "string",
+                      "example": "1234567890"
+                    },
+                    "gender": {
+                      "type": "string",
+                      "example": "FEMALE"
+                    },
+                    "date_of_birth": {
+                      "type": "string",
+                      "example": "1995-06-15"
+                    },
+                    "role": {
+                      "type": "string",
+                      "example": "NURSE"
+                    },
+                    "isVerified": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "hasCompletedProfile": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "photo_url": {},
+                    "nurse": {
+                      "type": "object",
+                      "properties": {
+                        "account_status": {
+                          "type": "string",
+                          "example": "APPROVED"
+                        },
+                        "years_of_experience": {
+                          "type": "number",
+                          "example": 3
+                        },
+                        "brief": {
+                          "type": "string",
+                          "example": "Experienced nurse in ICU"
+                        },
+                        "nationalCardUrl": {
+                          "type": "string",
+                          "example": ""
+                        },
+                        "bonusFileUrl": {
+                          "type": "string",
+                          "example": ""
+                        }
+                      }
+                    }
+                  }
+                },
+                "messageEn": {
+                  "type": "string",
+                  "example": "Nurse retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع بيانات الممرض بنجاح."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "404": {
+            "description": "Nurse not found"
           }
         }
       }
@@ -2725,6 +3278,258 @@
         }
       }
     },
+    "/super-admin/nurses": {
+      "post": {
+        "tags": [
+          "Super Admin"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Nurse data",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string",
+                  "example": "nurse@example.com"
+                },
+                "name": {
+                  "type": "string",
+                  "example": "Nurse Jane"
+                },
+                "phone": {
+                  "type": "string",
+                  "example": "1234567890"
+                },
+                "gender": {
+                  "type": "string",
+                  "example": "MALE or FEMALE"
+                },
+                "date_of_birth": {
+                  "type": "string",
+                  "example": "1995-06-15"
+                },
+                "years_of_experience": {
+                  "type": "number",
+                  "example": 3
+                }
+              },
+              "required": [
+                "email",
+                "name",
+                "phone",
+                "gender",
+                "date_of_birth"
+              ]
+            }
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer access token (sent via Authorization cookie)",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Nurse added successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "1"
+                    },
+                    "email": {
+                      "type": "string",
+                      "example": "nurse@example.com"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Nurse Jane"
+                    },
+                    "role": {
+                      "type": "string",
+                      "example": "NURSE"
+                    },
+                    "username": {
+                      "type": "string",
+                      "example": "jane"
+                    },
+                    "phone": {
+                      "type": "string",
+                      "example": "1234567890"
+                    },
+                    "gender": {
+                      "type": "string",
+                      "example": "FEMALE"
+                    },
+                    "date_of_birth": {
+                      "type": "string",
+                      "example": "1995-06-15"
+                    },
+                    "isVerified": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "hasCompletedProfile": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "photo_url": {},
+                    "nurse": {
+                      "type": "object",
+                      "properties": {
+                        "account_status": {
+                          "type": "string",
+                          "example": "APPROVED"
+                        },
+                        "years_of_experience": {
+                          "type": "number",
+                          "example": 3
+                        },
+                        "brief": {},
+                        "nationalCardUrl": {},
+                        "bonusFileUrl": {}
+                      }
+                    }
+                  }
+                },
+                "messageEn": {
+                  "type": "string",
+                  "example": "Nurse account created successfully."
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": ".تم إنشاء حساب الممرض بنجاح"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Super Admin"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer access token (sent via Authorization cookie)",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Nurses retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "1"
+                      },
+                      "email": {
+                        "type": "string",
+                        "example": "nurse@example.com"
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "Nurse Jane"
+                      },
+                      "role": {
+                        "type": "string",
+                        "example": "NURSE"
+                      },
+                      "username": {
+                        "type": "string",
+                        "example": "jane"
+                      },
+                      "phone": {
+                        "type": "string",
+                        "example": "1234567890"
+                      },
+                      "gender": {
+                        "type": "string",
+                        "example": "FEMALE"
+                      },
+                      "date_of_birth": {
+                        "type": "string",
+                        "example": "1995-06-15"
+                      },
+                      "isVerified": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "hasCompletedProfile": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "photo_url": {},
+                      "nurse": {
+                        "type": "object",
+                        "properties": {
+                          "account_status": {
+                            "type": "string",
+                            "example": "APPROVED"
+                          },
+                          "years_of_experience": {
+                            "type": "number",
+                            "example": 3
+                          },
+                          "brief": {
+                            "type": "string",
+                            "example": "Experienced nurse in ICU"
+                          },
+                          "nationalCardUrl": {
+                            "type": "string",
+                            "example": ""
+                          },
+                          "bonusFileUrl": {
+                            "type": "string",
+                            "example": ""
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "messageEn": {
+                  "type": "string",
+                  "example": "Nurses retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع بيانات الممرضين بنجاح."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
     "/super-admin/doctors/{id}": {
       "get": {
         "tags": [
@@ -2858,6 +3663,125 @@
                 "name": "main"
               }
             }
+          }
+        }
+      }
+    },
+    "/super-admin/nurses/{id}": {
+      "get": {
+        "tags": [
+          "Super Admin"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Nurse ID"
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer access token (sent via Authorization cookie)",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Nurse retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "1"
+                    },
+                    "email": {
+                      "type": "string",
+                      "example": "nurse@example.com"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Nurse Jane"
+                    },
+                    "username": {
+                      "type": "string",
+                      "example": "jane"
+                    },
+                    "phone": {
+                      "type": "string",
+                      "example": "1234567890"
+                    },
+                    "gender": {
+                      "type": "string",
+                      "example": "FEMALE"
+                    },
+                    "date_of_birth": {
+                      "type": "string",
+                      "example": "1995-06-15"
+                    },
+                    "role": {
+                      "type": "string",
+                      "example": "NURSE"
+                    },
+                    "isVerified": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "hasCompletedProfile": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "photo_url": {},
+                    "nurse": {
+                      "type": "object",
+                      "properties": {
+                        "account_status": {
+                          "type": "string",
+                          "example": "APPROVED"
+                        },
+                        "years_of_experience": {
+                          "type": "number",
+                          "example": 3
+                        },
+                        "brief": {
+                          "type": "string",
+                          "example": "Experienced nurse in ICU"
+                        },
+                        "nationalCardUrl": {
+                          "type": "string",
+                          "example": ""
+                        },
+                        "bonusFileUrl": {
+                          "type": "string",
+                          "example": ""
+                        }
+                      }
+                    }
+                  }
+                },
+                "messageEn": {
+                  "type": "string",
+                  "example": "Nurse retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع بيانات الممرض بنجاح."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "404": {
+            "description": "Nurse not found"
           }
         }
       }
@@ -3305,6 +4229,635 @@
                 "name": "main"
               }
             }
+          }
+        }
+      }
+    },
+    "/doctors/announcement": {
+      "post": {
+        "tags": [
+          "Doctors"
+        ],
+        "description": "Allows doctor to post a nurse hiring announcement",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Announcement data",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "clinic_id": {
+                  "type": "string",
+                  "example": "uuid-of-the-clinic"
+                },
+                "working_days": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "day_of_week": {
+                        "type": "string",
+                        "example": "TUESDAY"
+                      },
+                      "start_time": {
+                        "type": "string",
+                        "example": "10:00"
+                      },
+                      "end_time": {
+                        "type": "string",
+                        "example": "17:00"
+                      }
+                    },
+                    "required": [
+                      "day_of_week",
+                      "start_time",
+                      "end_time"
+                    ]
+                  }
+                },
+                "gender": {
+                  "type": "string",
+                  "example": "FEMALE"
+                },
+                "max_age": {
+                  "type": "number",
+                  "example": 40
+                },
+                "years_of_experience": {
+                  "type": "number",
+                  "example": 3
+                },
+                "notes": {
+                  "type": "string",
+                  "example": "Looking for an experienced nurse"
+                }
+              },
+              "required": [
+                "clinic_id",
+                "working_days"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Announcement posted successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "messageEn": {
+                  "type": "string",
+                  "example": "Announcement created successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم نشر الإعلان بنجاح"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "403": {
+            "description": "Doctor account not approved (PENDING or REJECTED)"
+          },
+          "404": {
+            "description": "Doctor not found or does not belong to the specified clinic"
+          }
+        }
+      }
+    },
+    "/doctors/announcements": {
+      "get": {
+        "tags": [
+          "Doctors"
+        ],
+        "description": "Retrieves all nurse hiring announcements posted by the doctor",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Announcements retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "uuid-string"
+                      },
+                      "doctor": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "example": "uuid-string"
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "Dr. Ahmed Ali"
+                          },
+                          "gender": {
+                            "type": "string",
+                            "example": "MALE"
+                          },
+                          "profilePic": {
+                            "type": "string",
+                            "example": "https://res.cloudinary.com/example/image.jpg"
+                          }
+                        }
+                      },
+                      "clinic": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "example": "uuid-string"
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "Al Salam Clinic"
+                          },
+                          "address": {
+                            "type": "string",
+                            "example": "123 Main St, Cairo"
+                          },
+                          "address_maps_link": {
+                            "type": "string",
+                            "example": "https://maps.google.com/?q=..."
+                          }
+                        }
+                      },
+                      "working_days": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "day_of_week": {
+                              "type": "string",
+                              "example": "MONDAY"
+                            },
+                            "start_time": {
+                              "type": "string",
+                              "example": "09:00"
+                            },
+                            "end_time": {
+                              "type": "string",
+                              "example": "17:00"
+                            }
+                          }
+                        }
+                      },
+                      "status": {
+                        "type": "string",
+                        "example": "PENDING"
+                      },
+                      "gender": {
+                        "type": "string",
+                        "example": "FEMALE"
+                      },
+                      "max_age": {
+                        "type": "number",
+                        "example": 40
+                      },
+                      "years_of_experience": {
+                        "type": "number",
+                        "example": 3
+                      },
+                      "notes": {
+                        "type": "string",
+                        "example": "Looking for an experienced nurse"
+                      }
+                    }
+                  }
+                },
+                "messageEn": {
+                  "type": "string",
+                  "example": "Announcements retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع الإعلانات بنجاح"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized – missing or invalid token"
+          },
+          "404": {
+            "description": "Doctor not found"
+          }
+        }
+      }
+    },
+    "/doctors/announcements/{announcementId}/applicants": {
+      "get": {
+        "tags": [
+          "Doctors"
+        ],
+        "description": "Retrieves all PENDING nurse applicants for a specific announcement",
+        "parameters": [
+          {
+            "name": "announcementId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "ID of the announcement to retrieve applicants for"
+          },
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Applicants retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "uuid-string"
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "Max Mustermann"
+                      },
+                      "email": {
+                        "type": "string",
+                        "example": "max.mustermann@example.com"
+                      },
+                      "gender": {
+                        "type": "string",
+                        "example": "FEMALE"
+                      },
+                      "phone": {
+                        "type": "string",
+                        "example": "+201234567890"
+                      },
+                      "age": {
+                        "type": "number",
+                        "example": 28
+                      },
+                      "profilePic": {
+                        "type": "string",
+                        "example": "https://res.cloudinary.com/example/photo.jpg"
+                      },
+                      "years_of_experience": {
+                        "type": "number",
+                        "example": 5
+                      },
+                      "nationalCardUrl": {
+                        "type": "string",
+                        "example": "https://res.cloudinary.com/example/national_card.pdf"
+                      },
+                      "brief": {
+                        "type": "string",
+                        "example": "Experienced ICU nurse with 5 years in critical care"
+                      },
+                      "bonusFileUrl": {
+                        "type": "string",
+                        "example": "https://res.cloudinary.com/example/bonus.pdf"
+                      }
+                    }
+                  }
+                },
+                "messageEn": {
+                  "type": "string",
+                  "example": "Applicants retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع المتقدمين بنجاح"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized – missing or invalid token"
+          },
+          "403": {
+            "description": "Forbidden – announcement does not belong to this doctor"
+          },
+          "404": {
+            "description": "Announcement not found"
+          }
+        }
+      }
+    },
+    "/doctors/announcements/{applicantId}/approve": {
+      "patch": {
+        "tags": [
+          "Doctors"
+        ],
+        "description": "Approves a nurse applicant for a specific announcement",
+        "parameters": [
+          {
+            "name": "applicantId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "ID of the nurse applicant to approve"
+          },
+          {
+            "name": "announcementId",
+            "in": "query",
+            "description": "ID of the announcement the applicant applied to",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Applicant approved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "messageEn": {
+                  "type": "string",
+                  "example": "Applicant approved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم قبول المتقدم بنجاح"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized – missing or invalid token"
+          },
+          "403": {
+            "description": "Forbidden – announcement does not belong to this doctor"
+          },
+          "404": {
+            "description": "Applicant or announcement not found"
+          }
+        }
+      }
+    },
+    "/doctors/announcements/{applicantId}/reject": {
+      "patch": {
+        "tags": [
+          "Doctors"
+        ],
+        "description": "Rejects a nurse applicant for a specific announcement",
+        "parameters": [
+          {
+            "name": "applicantId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "ID of the nurse applicant to reject"
+          },
+          {
+            "name": "announcementId",
+            "in": "query",
+            "description": "ID of the announcement the applicant applied to",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Applicant rejected successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "messageEn": {
+                  "type": "string",
+                  "example": "Applicant rejected successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم رفض المتقدم بنجاح"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized – missing or invalid token"
+          },
+          "403": {
+            "description": "Forbidden – announcement does not belong to this doctor"
+          },
+          "404": {
+            "description": "Applicant or announcement not found"
+          }
+        }
+      }
+    },
+    "/doctors/announcements/{announcementId}": {
+      "delete": {
+        "tags": [
+          "Doctors"
+        ],
+        "description": "Deletes a specific nurse hiring announcement",
+        "parameters": [
+          {
+            "name": "announcementId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "ID of the announcement to delete"
+          },
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Announcement deleted successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "messageEn": {
+                  "type": "string",
+                  "example": "Announcement deleted successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم حذف الإعلان بنجاح"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized – missing or invalid token"
+          },
+          "403": {
+            "description": "Forbidden – announcement does not belong to this doctor"
+          },
+          "404": {
+            "description": "Announcement not found"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "Doctors"
+        ],
+        "description": "Edits a specific nurse hiring announcement (only if it is still PENDING)",
+        "parameters": [
+          {
+            "name": "announcementId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "ID of the announcement to edit"
+          },
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Updated announcement data (only include fields to be updated)",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "clinic_id": {
+                  "type": "string",
+                  "example": "uuid-of-the-clinic"
+                },
+                "working_days": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "day_of_week": {
+                        "type": "string",
+                        "example": "TUESDAY"
+                      },
+                      "start_time": {
+                        "type": "string",
+                        "example": "10:00"
+                      },
+                      "end_time": {
+                        "type": "string",
+                        "example": "17:00"
+                      }
+                    },
+                    "required": [
+                      "day_of_week",
+                      "start_time",
+                      "end_time"
+                    ]
+                  }
+                },
+                "gender": {
+                  "type": "string",
+                  "example": "FEMALE"
+                },
+                "max_age": {
+                  "type": "number",
+                  "example": 40
+                },
+                "years_of_experience": {
+                  "type": "number",
+                  "example": 3
+                },
+                "notes": {
+                  "type": "string",
+                  "example": "Looking for an experienced nurse"
+                }
+              },
+              "required": [
+                "clinic_id",
+                "working_days"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Announcement updated successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "messageEn": {
+                  "type": "string",
+                  "example": "Announcement updated successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم تحديث الإعلان بنجاح"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized – missing or invalid token"
+          },
+          "403": {
+            "description": "Forbidden – announcement does not belong to this doctor or is not PENDING"
+          },
+          "404": {
+            "description": "Announcement not found"
           }
         }
       }
@@ -6058,6 +7611,944 @@
                 "name": "main"
               }
             }
+          }
+        }
+      }
+    },
+    "/nurses/signup": {
+      "post": {
+        "tags": [
+          "Nurses"
+        ],
+        "description": "Creates a new nurse account. Requires national ID card upload and optional bonus file",
+        "consumes": [
+          "multipart/form-data"
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "formData",
+            "description": "name of the nurse",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "email",
+            "in": "formData",
+            "description": "Email address",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "phone",
+            "in": "formData",
+            "description": "Phone number",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "password",
+            "in": "formData",
+            "description": "Initial password for the account",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "years_of_experience",
+            "in": "formData",
+            "description": "Number of years of professional nursing experience",
+            "required": true,
+            "type": "integer"
+          },
+          {
+            "name": "gender",
+            "in": "formData",
+            "description": "Gender (must match Prisma enum: MALE or FEMALE)",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "date_of_birth",
+            "in": "formData",
+            "description": "Date of birth (format YYYY-MM-DD)",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "brief",
+            "in": "formData",
+            "description": "Short professional summary / bio (optional)",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "nationalCard",
+            "in": "formData",
+            "description": "National ID card or passport scan (PDF only)",
+            "required": true,
+            "type": "file"
+          },
+          {
+            "name": "bonusFile",
+            "in": "formData",
+            "description": "Additional document: nursing license, experience certificate, etc.",
+            "required": false,
+            "type": "file"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Account created successfully – awaiting admin approval",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message_en": {
+                  "type": "string",
+                  "example": "Nurse account created successfully. Please wait for verification."
+                },
+                "message_ar": {
+                  "type": "string",
+                  "example": "تم إنشاء حساب الممرضة بنجاح. يرجى الانتظار للموافقة عليه."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed (missing fields, wrong file type, invalid date format, etc.)"
+          },
+          "500": {
+            "description": "Server error during file upload or database transaction"
+          }
+        }
+      }
+    },
+    "/nurses/login": {
+      "post": {
+        "tags": [
+          "Nurses"
+        ],
+        "description": "Authenticates nurse credentials",
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Nurse login data",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "emailOrUsername": {
+                  "type": "string",
+                  "example": "nurse@example.com"
+                },
+                "password": {
+                  "type": "string",
+                  "example": "SecurePassword123"
+                },
+                "rememberMe": {
+                  "type": "string",
+                  "example": "true"
+                }
+              },
+              "required": [
+                "emailOrUsername",
+                "password",
+                "rememberMe"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Login successful – approved nurse with completed profile",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "uuid-string"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Maxine Lee"
+                    },
+                    "email": {
+                      "type": "string",
+                      "example": "maxine.lee@example.com"
+                    },
+                    "username": {
+                      "type": "string",
+                      "example": "maxine.lee"
+                    },
+                    "phone": {
+                      "type": "string",
+                      "example": "+201234567890"
+                    },
+                    "gender": {
+                      "type": "string",
+                      "example": "FEMALE"
+                    },
+                    "nurse": {
+                      "type": "object",
+                      "properties": {
+                        "account_status": {
+                          "type": "string",
+                          "example": "APPROVED"
+                        }
+                      }
+                    }
+                  }
+                },
+                "messageEn": {
+                  "type": "string",
+                  "example": "Nurse retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع بيانات الممرض بنجاح"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials (wrong email/username or password)"
+          },
+          "403": {
+            "description": "Account not approved (PENDING or REJECTED)"
+          }
+        }
+      }
+    },
+    "/nurses/set-password": {
+      "patch": {
+        "tags": [
+          "Nurses"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "New password data",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "password": {
+                  "type": "string",
+                  "example": "NewSecurePassword123"
+                }
+              },
+              "required": [
+                "password"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Password set successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "messageEn": {
+                  "type": "string",
+                  "example": "Password updated successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم تحديث كلمة المرور بنجاح"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Password already set / validation error"
+          },
+          "401": {
+            "description": "Unauthorized – missing or invalid token"
+          },
+          "403": {
+            "description": "Forbidden – user is not a nurse role"
+          },
+          "404": {
+            "description": "Nurse user not found"
+          }
+        }
+      }
+    },
+    "/nurses/announcements": {
+      "get": {
+        "tags": [
+          "Nurses"
+        ],
+        "description": "Retrieves all active announcements for the nurse",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Announcements retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "uuid-string"
+                      },
+                      "doctor": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "example": "uuid-string"
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "Dr. House"
+                          },
+                          "gender": {
+                            "type": "string",
+                            "example": "MALE"
+                          },
+                          "profilePic": {
+                            "type": "string",
+                            "example": "https://res.cloudinary.com/example/image.jpg"
+                          }
+                        }
+                      },
+                      "clinic": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "example": "uuid-string"
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "Al Salam Clinic"
+                          },
+                          "address": {
+                            "type": "string",
+                            "example": "123 Main St, Cairo"
+                          },
+                          "address_maps_link": {
+                            "type": "string",
+                            "example": "https://maps.google.com/?q=..."
+                          }
+                        }
+                      },
+                      "working_days": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "day_of_week": {
+                              "type": "string",
+                              "example": "MONDAY"
+                            },
+                            "start_time": {
+                              "type": "string",
+                              "example": "09:00"
+                            },
+                            "end_time": {
+                              "type": "string",
+                              "example": "17:00"
+                            }
+                          }
+                        }
+                      },
+                      "status": {
+                        "type": "string",
+                        "example": "PENDING"
+                      },
+                      "gender": {
+                        "type": "string",
+                        "example": "FEMALE"
+                      },
+                      "max_age": {
+                        "type": "number",
+                        "example": 40
+                      },
+                      "years_of_experience": {
+                        "type": "number",
+                        "example": 3
+                      },
+                      "notes": {
+                        "type": "string",
+                        "example": "Looking for an experienced nurse"
+                      }
+                    }
+                  }
+                },
+                "messageEn": {
+                  "type": "string",
+                  "example": "Announcements retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع الإعلانات بنجاح"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized – missing or invalid token"
+          },
+          "404": {
+            "description": "Nurse account not approved (PENDING or REJECTED)"
+          }
+        }
+      }
+    },
+    "/nurses/applications": {
+      "get": {
+        "tags": [
+          "Nurses"
+        ],
+        "description": "get all announcements the nurse has applied to",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Applications retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "uuid-string"
+                      },
+                      "application_status": {
+                        "type": "string",
+                        "example": "PENDING"
+                      },
+                      "doctor": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "example": "uuid-string"
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "Dr. House"
+                          },
+                          "gender": {
+                            "type": "string",
+                            "example": "MALE"
+                          },
+                          "profilePic": {
+                            "type": "string",
+                            "example": "https://res.cloudinary.com/example/image.jpg"
+                          }
+                        }
+                      },
+                      "clinic": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "example": "uuid-string"
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "Al Salam Clinic"
+                          },
+                          "address": {
+                            "type": "string",
+                            "example": "123 Main St, Cairo"
+                          },
+                          "address_maps_link": {
+                            "type": "string",
+                            "example": "https://maps.google.com/?q=..."
+                          }
+                        }
+                      },
+                      "working_days": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "day_of_week": {
+                              "type": "string",
+                              "example": "MONDAY"
+                            },
+                            "start_time": {
+                              "type": "string",
+                              "example": "09:00"
+                            },
+                            "end_time": {
+                              "type": "string",
+                              "example": "17:00"
+                            }
+                          }
+                        }
+                      },
+                      "status": {
+                        "type": "string",
+                        "example": "POSTED"
+                      },
+                      "gender": {
+                        "type": "string",
+                        "example": "FEMALE"
+                      },
+                      "max_age": {
+                        "type": "number",
+                        "example": 40
+                      },
+                      "years_of_experience": {
+                        "type": "number",
+                        "example": 3
+                      },
+                      "notes": {
+                        "type": "string",
+                        "example": "Looking for an experienced nurse"
+                      }
+                    }
+                  }
+                },
+                "messageEn": {
+                  "type": "string",
+                  "example": "Applications retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع الطلبات بنجاح"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Nurse ID not found in token"
+          },
+          "401": {
+            "description": "Unauthorized – missing or invalid token"
+          },
+          "404": {
+            "description": "Nurse account not approved (PENDING or REJECTED)"
+          }
+        }
+      }
+    },
+    "/nurses/announcements/{announcementId}/apply": {
+      "post": {
+        "tags": [
+          "Nurses"
+        ],
+        "description": "Apply to a specific announcement",
+        "parameters": [
+          {
+            "name": "announcementId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "ID of the announcement to apply for"
+          },
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Application submitted successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "messageEn": {
+                  "type": "string",
+                  "example": "Applied to announcement successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم التقديم على الإعلان بنجاح"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid announcement ID / already applied / validation error"
+          },
+          "401": {
+            "description": "Unauthorized – missing or invalid token"
+          },
+          "404": {
+            "description": "Announcement not found / Nurse account not approved (PENDING or REJECTED)"
+          }
+        }
+      }
+    },
+    "/nurses/schedule": {
+      "get": {
+        "tags": [
+          "Nurses"
+        ],
+        "description": "get the schedule for the nurse",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Schedule retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "uuid-string"
+                      },
+                      "doctor": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "example": "uuid-string"
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "Dr. House"
+                          },
+                          "gender": {
+                            "type": "string",
+                            "example": "MALE"
+                          },
+                          "profilePic": {
+                            "type": "string",
+                            "example": "https://res.cloudinary.com/example/image.jpg"
+                          }
+                        }
+                      },
+                      "clinic": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "example": "uuid-string"
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "Al Salam Clinic"
+                          },
+                          "address": {
+                            "type": "string",
+                            "example": "123 Main St, Cairo"
+                          },
+                          "address_maps_link": {
+                            "type": "string",
+                            "example": "https://maps.google.com/?q=..."
+                          }
+                        }
+                      },
+                      "working_days": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "day_of_week": {
+                              "type": "string",
+                              "example": "MONDAY"
+                            },
+                            "start_time": {
+                              "type": "string",
+                              "example": "09:00"
+                            },
+                            "end_time": {
+                              "type": "string",
+                              "example": "17:00"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "messageEn": {
+                  "type": "string",
+                  "example": "Nurse schedule retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع جدول الممرضة بنجاح"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Nurse ID not found in token"
+          },
+          "401": {
+            "description": "Unauthorized – missing or invalid token"
+          },
+          "404": {
+            "description": "Nurse account not approved or no schedule assigned"
+          }
+        }
+      }
+    },
+    "/nurses/appointments": {
+      "get": {
+        "tags": [
+          "Nurses"
+        ],
+        "description": "Get all appointments for a specific doctor on a given date",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "doctorId",
+            "in": "query",
+            "description": "The ID of the doctor whose appointments are being retrieved",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "clinicId",
+            "in": "query",
+            "description": "The ID of the clinic to filter appointments by",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "date",
+            "in": "query",
+            "description": "The date to retrieve appointments for, in YYYY-MM-DD format",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Appointments retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "uuid-string"
+                      },
+                      "clinic": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "example": "uuid-string"
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "Al Salam Clinic"
+                          },
+                          "address": {
+                            "type": "string",
+                            "example": "123 Main St, Cairo"
+                          },
+                          "address_maps_link": {
+                            "type": "string",
+                            "example": "https://maps.google.com/?q=..."
+                          }
+                        }
+                      },
+                      "patient": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string",
+                            "example": "uuid-string"
+                          },
+                          "name": {
+                            "type": "string",
+                            "example": "Ahmed Hassan"
+                          },
+                          "gender": {
+                            "type": "string",
+                            "example": "MALE"
+                          },
+                          "phone": {
+                            "type": "string",
+                            "example": "+201012345678"
+                          }
+                        }
+                      },
+                      "status": {
+                        "type": "string",
+                        "example": "CONFIRMED"
+                      },
+                      "slot_duration": {
+                        "type": "number",
+                        "example": 30
+                      },
+                      "appointment_date": {
+                        "type": "string",
+                        "example": "2025-03-15"
+                      },
+                      "start_time": {
+                        "type": "string",
+                        "example": "09:00 AM"
+                      },
+                      "end_time": {
+                        "type": "string",
+                        "example": "09:30 AM"
+                      }
+                    }
+                  }
+                },
+                "messageEn": {
+                  "type": "string",
+                  "example": "Appointments retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع المواعيد بنجاح"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request – missing or invalid parameters (nurseId, doctorId, date)"
+          },
+          "401": {
+            "description": "Unauthorized – missing or invalid token"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/nurses/appointments/{appointmentId}/complete": {
+      "patch": {
+        "tags": [
+          "Nurses"
+        ],
+        "description": "Mark an appointment as completed. Only accessible by authenticated nurses",
+        "parameters": [
+          {
+            "name": "appointmentId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "UUID of the appointment to complete"
+          },
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication (must be a nurse)",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Appointment marked as completed successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "messageEn": {
+                  "type": "string",
+                  "example": "Appointment completed successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم إكمال الموعد بنجاح"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - missing nurse ID or invalid appointment"
+          },
+          "401": {
+            "description": "Unauthorized - missing or invalid token"
+          },
+          "403": {
+            "description": "Forbidden - appointment does not belong to the authenticated user"
+          },
+          "404": {
+            "description": "Appointment not found"
           }
         }
       }

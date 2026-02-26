@@ -8,39 +8,43 @@ datasource db {
 }
 
 model User {
-  id                              String          @id @default(uuid())
-  name                            String          @db.VarChar(255)
-  email                           String          @unique @db.VarChar(255)
-  username                        String          @unique @db.VarChar(255)
-  phone                           String          @db.VarChar(20)
-  password_hash                   String          @db.VarChar(255)
+  id                              String              @id @default(uuid())
+  name                            String              @db.VarChar(255)
+  email                           String              @unique @db.VarChar(255)
+  username                        String              @unique @db.VarChar(255)
+  phone                           String              @db.VarChar(20)
+  password_hash                   String              @db.VarChar(255)
   gender                          Gender
   date_of_birth                   DateTime
-  created_at                      DateTime        @default(now())
-  modified_at                     DateTime        @updatedAt
+  created_at                      DateTime            @default(now())
+  modified_at                     DateTime            @updatedAt
   deleted_at                      DateTime?
-  email_OTP                       String?         @db.VarChar(6)
+  email_OTP                       String?             @db.VarChar(6)
   email_OTP_expires_at            DateTime?
-  isVerified                      Boolean         @default(false)
-  password_reset_token            String?         @db.VarChar(255)
+  isVerified                      Boolean             @default(false)
+  password_reset_token            String?             @db.VarChar(255)
   password_reset_token_expires_at DateTime?
-  role                            Role            @default(PATIENT)
-  hasCompletedProfile             Boolean         @default(false)
-  photo_public_id                 String?         @db.VarChar(500)
-  photo_url                       String?         @db.VarChar(500)
-  appointments_as_doctor          Appointment[]   @relation("DoctorAppointments")
-  appointments_as_patient         Appointment[]   @relation("PatientAppointments")
-  audit_logs                      AuditLog[]      @relation("UserAuditLogs")
-  clinics_as_nurse                ClinicNurse[]   @relation("NurseClinics")
-  doctor                          Doctor?         @relation("UserAsDoctor")
-  medical_records_as_patient      MedicalRecord[] @relation("PatientMedicalRecords")
-  medications_as_doctor           Medication[]    @relation("DoctorMedications")
-  medications_as_patient          Medication[]    @relation("PatientMedications")
-  controlled_patients             Patient[]       @relation("ControllingNurse")
-  patient                         Patient?        @relation("UserAsPatient")
-  refresh_tokens                  RefreshToken[]  @relation("UserRefreshTokens")
-  scans_labs_as_doctor            ScanLab[]       @relation("DoctorScansLabs")
-  scans_labs_as_patient           ScanLab[]       @relation("PatientScansLabs")
+  role                            Role                @default(PATIENT)
+  hasCompletedProfile             Boolean             @default(false)
+  photo_public_id                 String?             @db.VarChar(500)
+  photo_url                       String?             @db.VarChar(500)
+  appointments_as_doctor          Appointment[]       @relation("DoctorAppointments")
+  appointments_as_patient         Appointment[]       @relation("PatientAppointments")
+  audit_logs                      AuditLog[]          @relation("UserAuditLogs")
+  clinics_as_nurse                ClinicNurse[]       @relation("NurseClinics")
+  doctor                          Doctor?             @relation("UserAsDoctor")
+  medical_records_as_patient      MedicalRecord[]     @relation("PatientMedicalRecords")
+  medications_as_doctor           Medication[]        @relation("DoctorMedications")
+  medications_as_patient          Medication[]        @relation("PatientMedications")
+  controlled_patients             Patient[]           @relation("ControllingNurse")
+  patient                         Patient?            @relation("UserAsPatient")
+  refresh_tokens                  RefreshToken[]      @relation("UserRefreshTokens")
+  scans_labs_as_doctor            ScanLab[]           @relation("DoctorScansLabs")
+  scans_labs_as_patient           ScanLab[]           @relation("PatientScansLabs")
+  nurse                           Nurse?              @relation("UserAsNurse")
+  nurseSchedules                  NurseSchedule[]
+  announcements                   Announcement[]
+  announcementNurses              AnnouncementNurse[]
 
   @@map("Users")
 }
@@ -69,6 +73,9 @@ model Doctor {
   user                                   User                @relation("UserAsDoctor", fields: [id], references: [id], onDelete: Cascade)
   doctorSchedules                        DoctorSchedule[]
   vacations                              Vacation[]
+  announcements                          Announcement[]      @relation("AnnouncementDoctor")
+  announcementNurses                     AnnouncementNurse[] @relation("AnnouncementNurseDoctor")
+  nurseSchedules                         NurseSchedule[]     @relation("NurseScheduleDoctor") 
 
   @@map("Doctor")
 }
@@ -82,6 +89,22 @@ model Patient {
   user                   User    @relation("UserAsPatient", fields: [id], references: [id], onDelete: Cascade)
 
   @@map("Patient")
+}
+
+model Nurse {
+  id                   String              @id @default(uuid())
+  account_status       NurseAccountStatus  @default(PENDING)
+  years_of_experience  Int
+  nationalCardUrl      String?             @db.VarChar(500)
+  nationalCardPublicId String?             @db.VarChar(500)
+  bonusFileUrl         String?             @db.VarChar(500)
+  bonusFilePublicId    String?             @db.VarChar(500)
+  brief                String?
+  user                 User                @relation("UserAsNurse", fields: [id], references: [id], onDelete: Cascade)
+  nurse_schedules      NurseSchedule[]     @relation("NurseScheduleNurse")
+  announcement_nurses  AnnouncementNurse[] @relation("AnnouncementNurseNurse")
+
+  @@map("Nurse")
 }
 
 model Appointment {
@@ -159,23 +182,26 @@ model ScanLab {
 }
 
 model Clinic {
-  id                String           @id @default(uuid())
-  is_active         Boolean          @default(true)
-  address           String           @db.VarChar(300)
-  created_at        DateTime         @default(now())
-  modified_at       DateTime         @updatedAt
-  deleted_at        DateTime?
-  address_maps_link String?          @db.VarChar(500)
-  canPayOnline      Boolean          @default(false)
-  phone             String           @db.VarChar(20)
-  created_by        String           @db.VarChar(255)
-  name              String           @db.VarChar(255)
-  opening_at        String           @db.VarChar(12)
-  closing_at        String           @db.VarChar(12)
-  appointments      Appointment[]
-  clinic_doctors    ClinicDoctor[]
-  clinic_nurses     ClinicNurse[]
-  doctorSchedules   DoctorSchedule[]
+  id                 String              @id @default(uuid())
+  is_active          Boolean             @default(true)
+  address            String              @db.VarChar(300)
+  created_at         DateTime            @default(now())
+  modified_at        DateTime            @updatedAt
+  deleted_at         DateTime?
+  address_maps_link  String?             @db.VarChar(500)
+  canPayOnline       Boolean             @default(false)
+  phone              String              @db.VarChar(20)
+  created_by         String              @db.VarChar(255)
+  name               String              @db.VarChar(255)
+  opening_at         String              @db.VarChar(12)
+  closing_at         String              @db.VarChar(12)
+  appointments       Appointment[]
+  clinic_doctors     ClinicDoctor[]
+  clinic_nurses      ClinicNurse[]
+  doctorSchedules    DoctorSchedule[]
+  nurseSchedules     NurseSchedule[]
+  announcements      Announcement[]      @relation("AnnouncementClinic")
+  announcementNurses AnnouncementNurse[] @relation("AnnouncementNurseClinic")
 
   @@map("Clinic")
 }
@@ -278,6 +304,31 @@ model DoctorSchedule {
   @@map("DoctorSchedules")
 }
 
+model NurseSchedule {
+  id          String    @id @default(uuid())
+  nurse_id    String
+  doctor_id   String
+  clinic_id   String?
+  day_of_week DayOfWeek
+  start_time  String    @db.VarChar(12)
+  end_time    String    @db.VarChar(12)
+  is_online   Boolean   @default(false)
+  is_active   Boolean   @default(true)
+  created_at  DateTime  @default(now())
+  modified_at DateTime  @updatedAt
+  deleted_at  DateTime?
+  nurse       Nurse     @relation("NurseScheduleNurse", fields: [nurse_id], references: [id], onDelete: Cascade)
+  doctor      Doctor    @relation("NurseScheduleDoctor", fields: [doctor_id], references: [id], onDelete: Cascade) 
+  clinic      Clinic?   @relation(fields: [clinic_id], references: [id], onDelete: Cascade)
+  user        User?     @relation(fields: [userId], references: [id])
+  userId      String?
+
+  @@index([nurse_id])
+  @@index([doctor_id])
+  @@index([clinic_id])
+  @@map("NurseSchedules")
+}
+
 model Vacation {
   id          String         @id @default(uuid())
   doctor_id   String
@@ -297,6 +348,71 @@ model Vacation {
   @@index([start_date])
   @@index([end_date])
   @@map("Vacations")
+}
+
+model Announcement {
+  id                  String             @id @default(uuid())
+  doctor_id           String
+  clinic_id           String
+  status              AnnouncementStatus @default(PENDING)
+  gender              Gender?
+  max_age             Int?
+  years_of_experience Int?
+  notes               String?
+  created_at          DateTime           @default(now())
+  modified_at         DateTime           @updatedAt
+  deleted_at          DateTime?
+
+  doctor              Doctor              @relation("AnnouncementDoctor", fields: [doctor_id], references: [id], onDelete: Cascade)
+  clinic              Clinic              @relation("AnnouncementClinic", fields: [clinic_id], references: [id], onDelete: Cascade)
+  working_days        AnnouncementDay[]
+  announcement_nurses AnnouncementNurse[] @relation("AnnouncementNurses")
+  user                User?               @relation(fields: [userId], references: [id])
+  userId              String?
+
+  @@index([doctor_id])
+  @@index([clinic_id])
+  @@index([status])
+  @@map("Announcements")
+}
+
+model AnnouncementDay {
+  id              String       @id @default(uuid())
+  announcement_id String
+  day_of_week     DayOfWeek
+  start_time      String
+  end_time        String
+  announcement    Announcement @relation(fields: [announcement_id], references: [id], onDelete: Cascade)
+
+  @@index([announcement_id])
+  @@map("AnnouncementDays")
+}
+
+model AnnouncementNurse {
+  id              String                  @id @default(uuid())
+  announcement_id String
+  nurse_id        String
+  status          AnnouncementNurseStatus @default(PENDING)
+  doctor_id       String?
+  clinic_id       String?
+  created_at      DateTime                @default(now())
+  modified_at     DateTime                @updatedAt
+  deleted_at      DateTime?
+
+  announcement Announcement @relation("AnnouncementNurses", fields: [announcement_id], references: [id], onDelete: Cascade)
+
+  nurse  Nurse   @relation("AnnouncementNurseNurse", fields: [nurse_id], references: [id], onDelete: Cascade)
+  doctor Doctor? @relation("AnnouncementNurseDoctor", fields: [doctor_id], references: [id])
+  clinic Clinic? @relation("AnnouncementNurseClinic", fields: [clinic_id], references: [id])
+  user   User?   @relation(fields: [userId], references: [id])
+  userId String?
+
+  @@unique([announcement_id, nurse_id])
+  @@index([announcement_id])
+  @@index([nurse_id])
+  @@index([doctor_id])
+  @@index([clinic_id])
+  @@map("AnnouncementNurses")
 }
 
 enum VacationStatus {
@@ -374,4 +490,21 @@ enum AppointmentStatus {
   COMPLETED
   CANCELLED
   NO_SHOW
+}
+
+enum NurseAccountStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum AnnouncementStatus {
+  PENDING
+  EXPIRED
+}
+
+enum AnnouncementNurseStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
