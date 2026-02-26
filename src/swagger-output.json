@@ -1714,6 +1714,121 @@
         }
       }
     },
+    "/admin/nurses/unverified": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer access token (sent via Authorization cookie)",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "accept-language",
+            "in": "header",
+            "description": "Language preference (en or ar)",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Unverified nurses retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "1"
+                      },
+                      "email": {
+                        "type": "string",
+                        "example": "nurse@example.com"
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "Nurse Jane"
+                      },
+                      "username": {
+                        "type": "string",
+                        "example": "jane"
+                      },
+                      "phone": {
+                        "type": "string",
+                        "example": "1234567890"
+                      },
+                      "gender": {
+                        "type": "string",
+                        "example": "FEMALE"
+                      },
+                      "date_of_birth": {
+                        "type": "string",
+                        "example": "1995-06-15"
+                      },
+                      "isVerified": {
+                        "type": "boolean",
+                        "example": false
+                      },
+                      "hasCompletedProfile": {
+                        "type": "boolean",
+                        "example": false
+                      },
+                      "photo_url": {},
+                      "nurse": {
+                        "type": "object",
+                        "properties": {
+                          "account_status": {
+                            "type": "string",
+                            "example": "PENDING"
+                          },
+                          "years_of_experience": {
+                            "type": "number",
+                            "example": 3
+                          },
+                          "brief": {
+                            "type": "string",
+                            "example": "Experienced nurse in ICU"
+                          },
+                          "nationalCardUrl": {
+                            "type": "string",
+                            "example": ""
+                          },
+                          "bonusFileUrl": {
+                            "type": "string",
+                            "example": ""
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "messageEn": {
+                  "type": "string",
+                  "example": "Unverified nurses retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع بيانات الممرضين غير المعتمدين بنجاح."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
     "/admin/doctors/verify/{id}": {
       "patch": {
         "tags": [
@@ -1973,6 +2088,125 @@
                 "name": "main"
               }
             }
+          }
+        }
+      }
+    },
+    "/admin/nurses/{id}": {
+      "get": {
+        "tags": [
+          "Admin"
+        ],
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "Nurse ID"
+          },
+          {
+            "name": "Authorization",
+            "in": "header",
+            "description": "Bearer access token (sent via Authorization cookie)",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Nurse retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "1"
+                    },
+                    "email": {
+                      "type": "string",
+                      "example": "nurse@example.com"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "Nurse Jane"
+                    },
+                    "username": {
+                      "type": "string",
+                      "example": "jane"
+                    },
+                    "phone": {
+                      "type": "string",
+                      "example": "1234567890"
+                    },
+                    "gender": {
+                      "type": "string",
+                      "example": "FEMALE"
+                    },
+                    "date_of_birth": {
+                      "type": "string",
+                      "example": "1995-06-15"
+                    },
+                    "role": {
+                      "type": "string",
+                      "example": "NURSE"
+                    },
+                    "isVerified": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "hasCompletedProfile": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "photo_url": {},
+                    "nurse": {
+                      "type": "object",
+                      "properties": {
+                        "account_status": {
+                          "type": "string",
+                          "example": "APPROVED"
+                        },
+                        "years_of_experience": {
+                          "type": "number",
+                          "example": 3
+                        },
+                        "brief": {
+                          "type": "string",
+                          "example": "Experienced nurse in ICU"
+                        },
+                        "nationalCardUrl": {
+                          "type": "string",
+                          "example": ""
+                        },
+                        "bonusFileUrl": {
+                          "type": "string",
+                          "example": ""
+                        }
+                      }
+                    }
+                  }
+                },
+                "messageEn": {
+                  "type": "string",
+                  "example": "Nurse retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع بيانات الممرض بنجاح."
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "404": {
+            "description": "Nurse not found"
           }
         }
       }

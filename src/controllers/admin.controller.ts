@@ -91,6 +91,22 @@ export class AdminController {
         });
     }
 
+    public getNurseById = async (req: RequestWithLanguage, res: Response, next: NextFunction): Promise<void> => {
+
+        const nurseId = req.params.id;
+        const nurse = await this.adminService.getNurseById(nurseId);
+        if (!nurse) {
+            const error = createBilingualError(404, ErrorMessages.NURSE_DATA_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+        const responseMessage = createMultiLangMessage(SuccessResponseMessages.NURSE_RETRIEVED);
+        res.status(200).json({
+            data: nurse,
+            messageEn: responseMessage.messageEn,
+            messageAr: responseMessage.messageAr,
+        });
+    }
+
     public getUnverifiedDoctors = async (req: RequestWithLanguage, res: Response, next: NextFunction): Promise<void> => {
 
         const unverifiedDoctors = await this.adminService.getUnverifiedDoctors();
@@ -109,6 +125,17 @@ export class AdminController {
         const responseMessage = createMultiLangMessage(SuccessResponseMessages.UNVERIFIED_DOCTORS_RETRIEVED);
         res.status(200).json({
             data: formattedDoctors,
+            messageEn: responseMessage.messageEn,
+            messageAr: responseMessage.messageAr,
+        });
+    }
+
+    public getUnverifiedNurses = async (req: RequestWithLanguage, res: Response, next: NextFunction): Promise<void> => {
+
+        const unverifiedNurses = await this.adminService.getUnverifiedNurses();
+        const responseMessage = createMultiLangMessage(SuccessResponseMessages.UNVERIFIED_NURSES_RETRIEVED);
+        res.status(200).json({
+            data: unverifiedNurses,
             messageEn: responseMessage.messageEn,
             messageAr: responseMessage.messageAr,
         });

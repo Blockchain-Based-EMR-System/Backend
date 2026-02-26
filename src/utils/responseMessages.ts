@@ -67,6 +67,13 @@ export const SuccessResponseMessages = {
         message_ar: "تم تحديث حالة اعتماد الطبيب بنجاح.",
     },
 
+    // get messages for Nurses by Admin
+    UNVERIFIED_NURSES_RETRIEVED: {
+        message_en: "Unverified nurses retrieved successfully.",
+        message_ar: "تم استرجاع بيانات الممرضات غير المعتمدين بنجاح.",
+    },
+
+
     // Success messages for Clinics
     CLINIC_CREATED_SUCCESSFULLY: {
         message_en: "Clinic created successfully.",
@@ -298,7 +305,8 @@ export const SuccessResponseMessages = {
     APPOINTMENT_COMPLETED_SUCCESSFULLY: {
         message_en: 'Appointment completed successfully',
         message_ar: 'تم إكمال الموعد بنجاح',
-    }
+    },
+
 }
 
 interface MultiLangMessageObj {

@@ -138,6 +138,57 @@ export class AdminRoute implements Routes {
             this.adminController.getUnverifiedDoctors,
         );
 
+        this.router.get(
+            '/admin/nurses/unverified',
+            /* 
+                #swagger.tags = ['Admin']
+                #swagger.parameters['Authorization'] = {
+                    in: 'header',
+                    description: 'Bearer access token (sent via Authorization cookie)',
+                    required: false,
+                    type: 'string'
+                }
+                #swagger.parameters['accept-language'] = {
+                    in: 'header',
+                    description: 'Language preference (en or ar)',
+                    required: false,
+                    type: 'string'
+                }
+                #swagger.responses[200] = {
+                    description: 'Unverified nurses retrieved successfully',
+                    schema: {
+                        data: [
+                            {
+                                id: '1',
+                                email: 'nurse@example.com',
+                                name: 'Nurse Jane',
+                                username: 'jane',
+                                phone: '1234567890',
+                                gender: 'FEMALE',
+                                date_of_birth: '1995-06-15',
+                                isVerified: false,
+                                hasCompletedProfile: false,
+                                photo_url: null,
+                                nurse: {
+                                    account_status: 'PENDING',
+                                    years_of_experience: 3,
+                                    brief: 'Experienced nurse in ICU',
+                                    nationalCardUrl: '',
+                                    bonusFileUrl: ''
+                                }
+                            }
+                        ],
+                        messageEn: 'Unverified nurses retrieved successfully',
+                        messageAr: "تم استرجاع بيانات الممرضين غير المعتمدين بنجاح."
+                    }
+                }
+            */
+            AuthMiddleware,
+            RoleMiddleware(Role.ADMIN),
+            this.adminController.getUnverifiedNurses,
+        );
+  
+
         this.router.patch(
             '/admin/doctors/verify/:id',
             /* 
@@ -253,6 +304,58 @@ export class AdminRoute implements Routes {
             RoleMiddleware(Role.ADMIN),
             LanguageMiddleware,
             this.adminController.getDoctorById,
+        );
+
+        this.router.get(
+            '/admin/nurses/:id',
+            /* 
+                #swagger.tags = ['Admin']
+                #swagger.parameters['id'] = {
+                    in: 'path',
+                    description: 'Nurse ID',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['Authorization'] = {
+                    in: 'header',
+                    description: 'Bearer access token (sent via Authorization cookie)',
+                    required: false,
+                    type: 'string'
+                }
+                #swagger.responses[200] = {
+                    description: 'Nurse retrieved successfully',
+                    schema: {
+                        data: {
+                            id: '1',
+                            email: 'nurse@example.com',
+                            name: 'Nurse Jane',
+                            username: 'jane',
+                            phone: '1234567890',
+                            gender: 'FEMALE',
+                            date_of_birth: '1995-06-15',
+                            role: 'NURSE',
+                            isVerified: true,
+                            hasCompletedProfile: true,
+                            photo_url: null,
+                            nurse: {
+                                account_status: 'APPROVED',
+                                years_of_experience: 3,
+                                brief: 'Experienced nurse in ICU',
+                                nationalCardUrl: '',
+                                bonusFileUrl: ''
+                            }
+                        },
+                        messageEn: 'Nurse retrieved successfully',
+                        messageAr: "تم استرجاع بيانات الممرض بنجاح."
+                    }
+                }
+                #swagger.responses[404] = {
+                    description: 'Nurse not found',
+                }
+            */
+            AuthMiddleware,
+            RoleMiddleware(Role.ADMIN),
+            this.adminController.getNurseById,
         );
 
         // Clinic routes

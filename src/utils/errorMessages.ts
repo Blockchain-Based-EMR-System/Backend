@@ -152,6 +152,10 @@ export const ErrorMessages = {
         en: 'This application has already been processed',
         ar: 'تمت معالجة هذا الطلب بالفعل',
     },
+    NURSE_DATA_NOT_FOUND: {
+        en: 'Nurse data not found',
+        ar: 'بيانات الممرضة غير موجودة',
+    },
     
     // File upload errors
     NO_FILE_UPLOADED: {

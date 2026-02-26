@@ -1,7 +1,7 @@
 import { DoctorAccountStatus, NurseAccountStatus, PrismaClient, Role } from '@prisma/client';
 import { hash } from 'bcrypt';
 import { Service } from 'typedi';
-import { AddDoctorFromAdminDto, DoctorFromAdminResponseDto } from '@/dtos/admins.dto';
+import { AddDoctorFromAdminDto, DoctorFromAdminResponseDto, NurseFromAdminResponseDto } from '@/dtos/admins.dto';
 import { HttpException } from '@/exceptions/HttpException';
 import { ErrorMessages, createBilingualError } from '@/utils/errorMessages';
 import { User } from '@/interfaces';
@@ -168,6 +168,41 @@ export class AdminService {
         return doctor;
     }
 
+    public async getNurseById(id: string): Promise<NurseFromAdminResponseDto> {
+        const nurse = await prisma.user.findUnique({
+            where: { id, role: Role.NURSE },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                username: true,
+                phone: true,
+                gender: true,
+                date_of_birth: true,
+                role: true,
+                isVerified: true,
+                hasCompletedProfile: true,
+                photo_url: true,
+                nurse: {
+                    select: {
+                        account_status: true,
+                        years_of_experience: true,
+                        brief: true,
+                        nationalCardUrl: true,
+                        bonusFileUrl: true,
+                    }
+                },
+            }
+        });
+
+        if (!nurse) {
+            const error = createBilingualError(404, ErrorMessages.USER_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        return nurse;
+    }
+
     public async getUnverifiedDoctors(): Promise<DoctorFromAdminResponseDto[]> {
 
         const unverifiedDoctors = await prisma.user.findMany({
@@ -200,6 +235,42 @@ export class AdminService {
         return unverifiedDoctors
 
     }
+
+    public async getUnverifiedNurses(): Promise<NurseFromAdminResponseDto[]> {
+
+        const unverifiedNurses = await prisma.user.findMany({
+            where: {
+                role: Role.NURSE,
+                nurse: { 
+                    account_status: NurseAccountStatus.PENDING 
+                }
+            },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                username: true,
+                phone: true,
+                gender: true,
+                date_of_birth: true,
+                isVerified: true,
+                hasCompletedProfile: true,
+                photo_url: true,
+                nurse: {
+                    select: {
+                        account_status: true,
+                        years_of_experience: true,
+                        brief: true,
+                        nationalCardUrl: true,
+                        bonusFileUrl: true,
+                    }
+                },
+            },
+        });
+        return unverifiedNurses
+
+    }
+
     public async updateDoctorVerificationStatus(doctorId: string, isApproved: boolean | null): Promise<void> {
 
         const doctor = await prisma.user.findUnique({
@@ -233,7 +304,7 @@ export class AdminService {
 
     public async sendVerificationStatusEmail(userId: string, isApproved: boolean): Promise<void> {
         const user = await prisma.user.findUnique({
-            where: { id: userId},
+            where: { id: userId },
             select: { email: true, name: true }
         });
         if (!user) {
