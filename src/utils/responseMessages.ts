@@ -72,6 +72,14 @@ export const SuccessResponseMessages = {
         message_en: "Unverified nurses retrieved successfully.",
         message_ar: "تم استرجاع بيانات الممرضات غير المعتمدين بنجاح.",
     },
+    NURSE_CREATED: {
+        message_en: "Nurse created successfully.",
+        message_ar: "تم إنشاء حساب الممرضة بنجاح.",
+    },
+    NURSES_RETRIEVED: {
+        message_en: "Nurse retrieved successfully.",
+        message_ar: "تم استرجاع بيانات الممرضة بنجاح.",
+    },
 
 
     // Success messages for Clinics

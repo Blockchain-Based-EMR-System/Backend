@@ -2,7 +2,7 @@
 import { NextFunction, Request, Response } from 'express';
 import { Container } from 'typedi';
 import { AdminService } from '@/services/admin.service';
-import { AddDoctorFromAdminDto } from '@/dtos/admins.dto';
+import { AddUserFromAdminDto } from '@/dtos/admins.dto';
 import { RequestWithLanguage } from '@/middlewares/language.middleware';
 import { formatSpecializationResponse } from '@/utils/specializationTransform';
 import { SpecializationKey } from '@/constants/specializations';
@@ -17,7 +17,7 @@ export class AdminController {
     public clinicService = Container.get(ClinicService);
 
     public addDoctor = async (req: RequestWithLanguage, res: Response, next: NextFunction): Promise<void> => {
-        const doctorData: AddDoctorFromAdminDto = req.body;
+        const doctorData: AddUserFromAdminDto = req.body;
         const newDoctor = await this.adminService.addDoctor(doctorData);
 
         const formattedNewDoctor = newDoctor.doctor ? {
@@ -35,6 +35,17 @@ export class AdminController {
         const responseMessage = createMultiLangMessage(SuccessResponseMessages.DOCTOR_CREATED);
         res.status(201).json({
             data: doctorResponse,
+            messageEn: responseMessage.messageEn,
+            messageAr: responseMessage.messageAr,
+        });
+    };
+
+    public addNurse = async (req: RequestWithLanguage, res: Response, next: NextFunction): Promise<void> => {
+        const nurseData: AddUserFromAdminDto = req.body;
+        const newNurse = await this.adminService.addNurse(nurseData);
+        const responseMessage = createMultiLangMessage(SuccessResponseMessages.NURSE_CREATED);
+        res.status(201).json({
+            data: newNurse,
             messageEn: responseMessage.messageEn,
             messageAr: responseMessage.messageAr,
         });
@@ -59,6 +70,17 @@ export class AdminController {
         const responseMessage = createMultiLangMessage(SuccessResponseMessages.DOCTORS_RETRIEVED);
         res.status(200).json({
             data: formattedDoctors,
+            messageEn: responseMessage.messageEn,
+            messageAr: responseMessage.messageAr,
+        });
+    }
+
+    public getAllNurses = async (req: RequestWithLanguage, res: Response, next: NextFunction): Promise<void> => {
+
+        const nurses = await this.adminService.getAllNurses();
+        const responseMessage = createMultiLangMessage(SuccessResponseMessages.NURSES_RETRIEVED);
+        res.status(200).json({
+            data: nurses,
             messageEn: responseMessage.messageEn,
             messageAr: responseMessage.messageAr,
         });

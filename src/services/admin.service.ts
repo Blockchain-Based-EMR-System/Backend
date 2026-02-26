@@ -1,7 +1,7 @@
 import { DoctorAccountStatus, NurseAccountStatus, PrismaClient, Role } from '@prisma/client';
 import { hash } from 'bcrypt';
 import { Service } from 'typedi';
-import { AddDoctorFromAdminDto, DoctorFromAdminResponseDto, NurseFromAdminResponseDto } from '@/dtos/admins.dto';
+import { AddUserFromAdminDto, DoctorFromAdminResponseDto, NurseFromAdminResponseDto } from '@/dtos/admins.dto';
 import { HttpException } from '@/exceptions/HttpException';
 import { ErrorMessages, createBilingualError } from '@/utils/errorMessages';
 import { User } from '@/interfaces';
@@ -14,7 +14,7 @@ const prisma = new PrismaClient();
 
 @Service()
 export class AdminService {
-    public async addDoctor(doctorData: AddDoctorFromAdminDto): Promise<DoctorFromAdminResponseDto> {
+    public async addDoctor(doctorData: AddUserFromAdminDto): Promise<DoctorFromAdminResponseDto> {
         // Check if email already exists
         const existingUser = await prisma.user.findUnique({
             where: { email: doctorData.email }
@@ -92,6 +92,84 @@ export class AdminService {
 
     }
 
+    public async addNurse(nurseData: AddUserFromAdminDto): Promise<NurseFromAdminResponseDto> {
+        const existingUser = await prisma.user.findUnique({
+            where: { 
+                email: nurseData.email 
+            }
+        });
+
+        if (existingUser) {
+            const error = createBilingualError(409, ErrorMessages.EMAIL_EXISTS);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const username = nurseData.email.split('@')[0];
+
+        const existingUsername = await prisma.user.findUnique({
+            where: { 
+                username 
+            }
+        });
+
+        if (existingUsername) {
+            const error = createBilingualError(409, ErrorMessages.USERNAME_EXISTS);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const defaultPassword = 'nurse123'; 
+        const hashedPassword = await hash(defaultPassword, 10);
+
+        const createdUser = await prisma.user.create({
+            data: {
+                email: nurseData.email,
+                name: nurseData.name,
+                username,
+                phone: nurseData.phone,
+                gender: nurseData.gender,
+                date_of_birth: new Date(nurseData.date_of_birth),
+                password_hash: hashedPassword,
+                role: Role.NURSE,
+                isVerified: true,
+                hasCompletedProfile: false,
+            },
+        });
+
+        await prisma.nurse.create({
+            data: {
+                id: createdUser.id,
+                years_of_experience: nurseData.years_of_experience,
+                account_status: NurseAccountStatus.APPROVED,
+            }
+        });
+        const createdNurse = await prisma.user.findUnique({
+            where: { 
+                id: createdUser.id 
+            },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                username: true,
+                phone: true,
+                gender: true,
+                date_of_birth: true,
+                role: true,
+                isVerified: true,
+                hasCompletedProfile: true,
+                photo_url: true,
+                nurse: {
+                    select: {
+                        years_of_experience: true,
+                    }
+                },
+            }
+        });
+
+        return createdNurse;
+
+    }
+
     public async getAllDoctors(): Promise<DoctorFromAdminResponseDto[]> {
 
         const doctors = await prisma.user.findMany({
@@ -125,6 +203,39 @@ export class AdminService {
         });
 
         return doctors;
+
+    }
+
+    public async getAllNurses(): Promise<NurseFromAdminResponseDto[]> {
+        const nurses = await prisma.user.findMany({
+            where: { 
+                role: Role.NURSE 
+            },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                username: true,
+                phone: true,
+                gender: true,
+                date_of_birth: true,
+                role: true,
+                isVerified: true,
+                hasCompletedProfile: true,
+                photo_url: true,
+                nurse: {
+                    select: {
+                        account_status: true,
+                        years_of_experience: true,
+                        brief: true,
+                        nationalCardUrl: true,
+                        bonusFileUrl: true,
+                    }
+                },
+            }
+        });
+
+        return nurses;
 
     }
 
