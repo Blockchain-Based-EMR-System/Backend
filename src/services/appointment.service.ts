@@ -909,10 +909,29 @@ export class AppointmentService {
             },
             select: {
                 doctor_id: true,
+                scheduled_time: true,
+                status: true,
             }
         });
 
         await this.getAndValidateAppointment(appointmentId, appointment.doctor_id);
+
+        if (appointment.status === 'COMPLETED') {
+            const error = createBilingualError(400, ErrorMessages.APPOINTMENT_ALREADY_COMPLETED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const nowUTC = new Date();
+        const egyptOffset = 2 * 60 * 60 * 1000;
+        const now = new Date(nowUTC.getTime() + egyptOffset);
+
+        console.log('Current time in Egypt:', now);
+        console.log('Appointment scheduled time:', appointment.scheduled_time);
+
+        if (now < appointment.scheduled_time) {
+            const error = createBilingualError(400, ErrorMessages.CANNOT_BE_COMPLETED_BEFORE_SCHEDULED_TIME);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
 
         await prisma.appointment.update({
             where: {

@@ -313,6 +313,14 @@ export const ErrorMessages = {
         en: "Please choose either online or offline",
         ar: "يرجى اختيار إما الإلكتروني أو الحضوري"
     },
+    APPOINTMENT_ALREADY_COMPLETED: {
+        en: 'Appointment is already completed',
+        ar: 'الموعد مكتمل بالفعل',
+    },
+    CANNOT_BE_COMPLETED_BEFORE_SCHEDULED_TIME: {
+        en: "Appointment cannot be completed before its scheduled time",
+        ar: "لا يمكن إكمال الموعد قبل وقته المحدد"
+    },
     // Generic errors
     SOMETHING_WENT_WRONG: {
         en: 'Something went wrong',
