@@ -48,6 +48,7 @@
     "nodemailer": "^7.0.10",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
+    "pinata": "^1.10.1",
     "prisma": "6.18.0",
     "reflect-metadata": "^0.2.2",
     "socket.io": "^4.8.3",

@@ -1,8 +1,8 @@
-import { promises } from 'dns';
-import { port } from 'envalid'
+import { PinataSDK } from 'pinata';
 import { create, IPFSHTTPClient } from 'ipfs-http-client'
 import { HttpException } from '@/exceptions/HttpException';
 import { Service } from 'typedi';
+
 
 
 @Service()
