@@ -1,5 +1,6 @@
 import { HttpException } from '@/exceptions/HttpException';
 import { CreateMedicalRecordDto } from '@/dtos/medical-records.dto';
+import { MedicalRecord, MedicalRecordFile } from '@/interfaces/medicalRecords.interface';
 import prisma from '@/config/prisma';
 import { Service } from 'typedi';
 import { IpfsService } from '@/services/ipfs.service';
@@ -15,8 +16,6 @@ export class MedicalRecordService {
     private encryptionService = new EncryptionService();
     private keyManagementService = new KeyManagementService();
 
-
-    // create a new  MR
     public async createMedicalRecord(
         patientId: string,
         doctorId: string,
@@ -25,11 +24,15 @@ export class MedicalRecordService {
         fileName: string,
         mimeType: string,
     ): Promise<void> {
+        console.log("we r in");
         const patientDEK = await this.keyManagementService.getPatientDEK(patientId);
+        console.log(`patient key ${patientDEK}`);
         const encryptedFile = this.encryptionService.encryptFile(fileBuffer, patientDEK);
+        console.log(`encryptedFile ${encryptedFile}`)
         patientDEK.fill(0);
 
         const cid = await this.ipfsService.uploadFile(encryptedFile, fileName, mimeType);
+        console.log(`got cid ${cid}`);
 
         const keyRecord = await prisma.encryptionKey.findUnique({
             where: {
@@ -40,7 +43,6 @@ export class MedicalRecordService {
             },
         });
 
-        // save to db
         await prisma.medicalRecord.create({
             data: {
                 patient_id: patientId,
@@ -57,11 +59,23 @@ export class MedicalRecordService {
 
     }
 
-    public async getRecordFile(recordId: string): Promise<{ buffer: Buffer; mimeType: string; name: string }> {
+    public async getRecordFile(recordId: string): Promise<MedicalRecordFile> {
+        console.log("inside the service");
         const record = await prisma.medicalRecord.findFirst({
             where: {
                 id: recordId,
                 deleted_at: null
+            },
+            select: {
+                id: true,
+                patient_id: true,
+                clinic_id: true,
+                doctor_id: true,
+                appointment_id: true,
+                name: true,
+                type: true,
+                mime_type: true,
+                cid: true,
             }
         });
 
@@ -69,18 +83,63 @@ export class MedicalRecordService {
             const error = createBilingualError(404, ErrorMessages.RECORD_NOT_FOUND);
             throw new HttpException(error.status, error.message, error.messageAr);
         }
+        console.log("we got heree");
 
         const encryptedFile = await this.ipfsService.getFile(record.cid);
+        console.log(`encryptedFile ${encryptedFile}`)
 
         const patientDEK = await this.keyManagementService.getPatientDEK(record.patient_id);
         const decryptedFile = this.encryptionService.decryptFile(encryptedFile, patientDEK);
+        console.log(`decryptedFile ${decryptedFile}`)
         patientDEK.fill(0);
 
         return {
-            buffer: decryptedFile,
-            mimeType: record.mime_type,
+            id: record.id,
+            patient_id: record.patient_id,
+            clinic_id: record.clinic_id,
+            doctor_id: record.doctor_id ?? undefined,
+            appointment_id: record.appointment_id ?? undefined,
             name: record.name,
+            type: record.type,
+            mime_type: record.mime_type,
+            cid: record.cid,
+            buffer: decryptedFile,
         };
+    }
+
+    public async getPatientFiles(patientId: string): Promise<MedicalRecord[]> {
+        const records = await prisma.medicalRecord.findMany({
+            where: {
+                patient_id: patientId,
+                deleted_at: null
+            },
+            select: {
+                id: true,
+                patient_id: true,
+                clinic_id: true,
+                doctor_id: true,
+                appointment_id: true,
+                name: true,
+                type: true,
+                mime_type: true,
+                cid: true,
+            },
+            orderBy: { 
+                created_at: 'desc' 
+            },
+        });
+
+        return records.map(record => ({
+            id: record.id,
+            patient_id: record.patient_id,
+            clinic_id: record.clinic_id,
+            doctor_id: record.doctor_id ?? undefined,
+            appointment_id: record.appointment_id ?? undefined,
+            name: record.name,
+            type: record.type,
+            cid: record.cid,
+            mime_type: record.mime_type,
+        }));
     }
 
     // delete any MR (soft)

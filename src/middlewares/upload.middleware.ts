@@ -13,6 +13,7 @@ const AllowedFileTypes = [
     'application/msword', 
     'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 
     'text/plain',
+    'application/json',
 ];
 
 

@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsDateString, IsOptional, IsUUID, IsNumber, ValidateIf, IsString, Min, IsInt, Max } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional, IsUUID, IsString } from 'class-validator';
 import { RecordType } from '@prisma/client';
 
 export class CreateMedicalRecordDto {
@@ -18,8 +18,4 @@ export class CreateMedicalRecordDto {
     @IsUUID()
     @IsOptional()
     public appointmentId?: string;
-}
-
-export class UpdateMedicalRecordDto {
-
 }

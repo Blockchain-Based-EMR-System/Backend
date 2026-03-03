@@ -1,6 +1,7 @@
 import { PinataSDK } from 'pinata';
 import { HttpException } from '@/exceptions/HttpException';
 import { Service } from 'typedi';
+import { Blob, File } from 'buffer';
 
 @Service()
 export class IpfsService {
@@ -28,7 +29,7 @@ export class IpfsService {
     public async getFile(cid: string): Promise<Buffer> {
         try {
             // CID → gateway URL → HTTP request → raw bytes stream → read all bytes → Buffer
-            const url = `https://${process.env.PINATA_GATEWAY}/ipfs/${cid}`;
+            const url = `https://${process.env.PINATA_GATEWAY}/files/${cid}?pinataGatewayToken=${process.env.PINATA_GATEWAY_TOKEN}`;
             const response = await fetch(url);
 
             if (!response.ok) {

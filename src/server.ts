@@ -10,13 +10,14 @@ import { AppointmentRoute } from './routes/appointment.route';
 import { QueueRoute } from './routes/queue.route';
 import { NurseRoute } from './routes/nurse.route';
 import { UsersRoute } from './routes/user.route';
+import { MedicalRecordRoute } from './routes/medical-record.route';
 ValidateEnv();
 
 const app = new App(
     [
         new AuthRoute(), new FabricRoute(), new AdminRoute(),
         new SuperAdminRoute(), new DoctorsRoute(), new ClinicRoute(), new AppointmentRoute(), new QueueRoute(),
-        new UsersRoute(), new NurseRoute(),
+        new UsersRoute(), new NurseRoute(),new MedicalRecordRoute()
     ]);
 
 app.listen();

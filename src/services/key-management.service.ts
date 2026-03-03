@@ -41,11 +41,10 @@ export class KeyManagementService {
         });
 
         if (!keyRecord) {
-            const error = createBilingualError(404, ErrorMessages.PATIENT_KEY_NOT_FOUND);
-            throw new HttpException(error.status, error.message, error.messageAr);
-
+            await this.createPatientKey(patientId);
+            // const error = createBilingualError(404, ErrorMessages.PATIENT_KEY_NOT_FOUND);
+            // throw new HttpException(error.status, error.message, error.messageAr);
         }
-
         return this.encryptionService.decryptDEK(keyRecord.encrypted_key);
     }
 

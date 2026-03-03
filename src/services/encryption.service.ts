@@ -16,8 +16,8 @@ export class EncryptionService {
         const iv = crypto.randomBytes(this.ivLength);
         const cipher = crypto.createCipheriv(this.algorithm, dek, iv);
 
-        const tag = cipher.getAuthTag();
         const encryptedData = Buffer.concat([cipher.update(fileBuffer), cipher.final()]);
+        const tag = cipher.getAuthTag();
 
         return Buffer.concat([iv, tag, encryptedData])
     }
@@ -39,9 +39,9 @@ export class EncryptionService {
         const iv = crypto.randomBytes(this.ivLength);
 
         const cipher = crypto.createCipheriv(this.algorithm, masterKey, iv);
-        const tag = cipher.getAuthTag();
 
         const encryptedData = Buffer.concat([cipher.update(dek), cipher.final()]);
+        const tag = cipher.getAuthTag();
         return Buffer.concat([iv, tag, encryptedData]).toString('hex');
 
     }
