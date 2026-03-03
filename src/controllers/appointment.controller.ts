@@ -496,4 +496,16 @@ export class AppointmentController {
             ...response
         });
     });
+
+    public getAgoraToken = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
+        const userId = req.user?.id;
+        const { appointmentId } = req.params;
+
+        const token = await this.appointmentService.generateAgoraToken(appointmentId, userId);
+        const response = createMultiLangMessage(SuccessResponseMessages.AGORA_TOKEN_GENERATED_SUCCESSFULLY);
+        res.status(200).json({
+            ...response,
+            data: token
+        });
+    });
 }

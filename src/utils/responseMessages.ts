@@ -315,6 +315,12 @@ export const SuccessResponseMessages = {
         message_ar: 'تم إكمال الموعد بنجاح',
     },
 
+    // Agora success messages
+    AGORA_TOKEN_GENERATED_SUCCESSFULLY: {
+        message_en: "Agora token generated successfully.",
+        message_ar: "تم إنشاء رمز Agora بنجاح.",
+    },
+
 }
 
 interface MultiLangMessageObj {

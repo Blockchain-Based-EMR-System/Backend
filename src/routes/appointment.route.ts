@@ -16,6 +16,7 @@ export class AppointmentRoute implements Routes {
 
     constructor() {
         this.initializeRoutes();
+        // this.router.use()
     }
 
     private initializeRoutes() {
@@ -1296,6 +1297,30 @@ export class AppointmentRoute implements Routes {
             */
             AuthMiddleware,
             this.appointmentController.cancelDoctorVacation
+        );
+
+        this.router.get(
+            `${this.path}/:appointmentId/agora-token`,
+            /* 
+                #swagger.path = '/appointments/{appointmentId}/agora-token'
+                #swagger.method = 'get'
+                #swagger.tags = ['Appointments']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication (patient or doctor of the appointment)',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.description = 'Get Agora token and channel name for a specific appointment'
+                #swagger.parameters['appointmentId'] = {
+                    in: 'path',
+                    description: 'The ID of the appointment',
+                    required: true,
+                    type: 'string'
+                }
+            */
+            AuthMiddleware,
+            this.appointmentController.getAgoraToken
         );
     }
 }
