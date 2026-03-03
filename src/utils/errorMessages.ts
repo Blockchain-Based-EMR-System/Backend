@@ -93,6 +93,16 @@ export const ErrorMessages = {
         ar: 'خطأ في المصادقة عبر Google',
     },
 
+    // patient 
+    PATIENT_KEY_NOT_FOUND: {
+        en: 'Patient key not found',
+        ar: 'مفتاح المريض غير موجود',
+    },
+    PATIENT_KEY_ALREADY_EXISTS: {
+        en: 'Patient key already exists',
+        ar: 'مفتاح المريض موجود بالفعل',
+    },
+
     //Doctor specific errors
     DOCTOR_ACCOUNT_NOT_APPROVED: {
         en: 'Doctor account is not approved yet',
@@ -325,6 +335,14 @@ export const ErrorMessages = {
     SOMETHING_WENT_WRONG: {
         en: 'Something went wrong',
         ar: 'حدث خطأ ما',
+    },
+    MASTER_KEY_NOT_SET: {
+        en: 'Master encryption key is not set in environment variables',
+        ar: 'مفتاح التشفير الرئيسي غير مضبوط',
+    },
+    INVALID_MASTER_KEY_LENGTH: {
+        en: 'Invalid master key length. Expected 32 bytes',
+        ar: 'طول مفتاح رئيسي غير صالح. يجب أن يكون 32 بايت',
     },
 
     APPOINTMENT_NOT_FOUND: {
