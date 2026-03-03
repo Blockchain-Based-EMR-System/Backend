@@ -1,63 +1,25 @@
-import { IsDateString, IsOptional, IsString, Length } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsDateString, IsOptional, IsUUID, IsNumber, ValidateIf, IsString, Min, IsInt, Max } from 'class-validator';
+import { RecordType } from '@prisma/client';
 
 export class CreateMedicalRecordDto {
-  @IsString()
-  @Length(3, 64)
-  public patientId: string;
 
-  @IsString()
-  @Length(1, 64)
-  public firstName: string;
+    @IsString()
+    @IsNotEmpty()
+    public name: string;
 
-  @IsString()
-  @Length(1, 64)
-  public lastName: string;
+    @IsEnum(RecordType)
+    @IsNotEmpty()
+    public type: RecordType;
 
-  @IsDateString()
-  public dateOfBirth: string;
+    @IsUUID()
+    @IsNotEmpty()
+    public clinicId: string;
 
-  @IsString()
-  @Length(1, 32)
-  public gender: string;
-
-  @IsString()
-  @Length(1, 8)
-  public bloodType: string;
-
-  @IsString()
-  @Length(10, 128)
-  public ipfsCid: string;
-
-  @IsOptional()
-  @IsString()
-  public summary?: string;
+    @IsUUID()
+    @IsOptional()
+    public appointmentId?: string;
 }
 
 export class UpdateMedicalRecordDto {
-  @IsString()
-  @Length(1, 64)
-  public firstName: string;
 
-  @IsString()
-  @Length(1, 64)
-  public lastName: string;
-
-  @IsDateString()
-  public dateOfBirth: string;
-
-  @IsString()
-  @Length(1, 32)
-  public gender: string;
-
-  @IsString()
-  @Length(1, 8)
-  public bloodType: string;
-
-  @IsString()
-  @Length(10, 128)
-  public ipfsCid: string;
-
-  @IsOptional()
-  @IsString()
-  public summary?: string;
 }

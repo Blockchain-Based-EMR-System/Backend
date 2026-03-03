@@ -216,6 +216,14 @@ export const ErrorMessages = {
         en: "Language must be 'en' or 'ar'",
         ar: "يجب أن تكون اللغة 'en' أو 'ar'"
     },
+    RECORD_NOT_FOUND: {
+        en: 'Record not found',
+        ar: 'السجل غير موجود',
+    },
+    RECORD_ALREADY_DELETED: {
+        en: 'Record has already been deleted',
+        ar: 'تم حذف السجل بالفعل',
+    },
 
     // Clinic errors
     CLINIC_NOT_FOUND: {

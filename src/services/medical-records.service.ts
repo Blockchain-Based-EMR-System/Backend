@@ -1,106 +1,114 @@
-import { PrismaClient } from '@prisma/client';
 import { HttpException } from '@/exceptions/HttpException';
 import { CreateMedicalRecordDto } from '@/dtos/medical-records.dto';
-import { MedicalRecord } from '@/interfaces/medicalRecords.interface';
 import prisma from '@/config/prisma';
 import { Service } from 'typedi';
 import { IpfsService } from '@/services/ipfs.service';
+import { EncryptionService } from '@/services/encryption.service';
+import { KeyManagementService } from '@/services/key-management.service';
+import { createBilingualError, ErrorMessages } from '@/utils/errorMessages';
+
 
 @Service()
 export class MedicalRecordService {
 
-    constructor(private ipfsService: IpfsService) { }
+    private ipfsService = new IpfsService();
+    private encryptionService = new EncryptionService();
+    private keyManagementService = new KeyManagementService();
+
 
     // create a new  MR
     public async createMedicalRecord(
         patientId: string,
+        doctorId: string,
         fileData: CreateMedicalRecordDto,
         fileBuffer: Buffer,
         fileName: string,
-    ): Promise<MedicalRecord> {
-        // upload to IPFS and get cid
-        const cid = await this.ipfsService.uploadFile(fileBuffer, fileName);
-        console.log(`file is uploaded to ipfs, cid:" ${cid}`)
+        mimeType: string,
+    ): Promise<void> {
+        const patientDEK = await this.keyManagementService.getPatientDEK(patientId);
+        const encryptedFile = this.encryptionService.encryptFile(fileBuffer, patientDEK);
+        patientDEK.fill(0);
 
-        // blockchain stuff
+        const cid = await this.ipfsService.uploadFile(encryptedFile, fileName, mimeType);
+
+        const keyRecord = await prisma.encryptionKey.findUnique({
+            where: {
+                patient_id: patientId
+            },
+            select: {
+                id: true
+            },
+        });
 
         // save to db
-        const medicalRecord = await prisma.medicalRecord.create({
+        await prisma.medicalRecord.create({
             data: {
                 patient_id: patientId,
-                doctor_id: fileData.doctor_id || null,
+                doctor_id: doctorId,
+                clinic_id: (fileData as any).clinicId,
+                appointment_id: (fileData as any).appointmentId,
                 name: fileData.name,
                 cid: cid,
                 type: fileData.type,
-            },
-            include: {
-                patient: true,
-            },
-        });
-
-        return medicalRecord;
-    }
-
-    // get all medical records for a specific patient
-
-    public async getPatientRecords(patientId: string): Promise<MedicalRecord[]> {
-        const records = await prisma.medicalRecord.findMany({
-            where: {
-                patient_id: patientId,
-                deleted_at: null,
-            },
-            orderBy: {
-                created_at: 'desc',
-            },
-            include: {
-                patient: true,
+                mime_type: mimeType,
+                key_id: keyRecord.id,
             },
         });
 
-        return records;
     }
 
-    // get MR shared with a doctor 
-    public async getDoctorRecords(doctorId: string): Promise<MedicalRecord[]> {
-        const records = await prisma.medicalRecord.findMany({
-            where: {
-                doctor_id: doctorId,
-                deleted_at: null,
-            },
-            orderBy: {
-                created_at: 'desc',
-            },
-            include: {
-                patient: true,
-            },
-        });
-
-        return records;
-    }
-
-    // delete any MR (soft)
-    public async deleteRecord(recordId: string) {
-        // checking if it's already deleted
+    public async getRecordFile(recordId: string): Promise<{ buffer: Buffer; mimeType: string; name: string }> {
         const record = await prisma.medicalRecord.findFirst({
             where: {
                 id: recordId,
-                deleted_at: null,
+                deleted_at: null
+            }
+        });
+
+        if (!record) {
+            const error = createBilingualError(404, ErrorMessages.RECORD_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const encryptedFile = await this.ipfsService.getFile(record.cid);
+
+        const patientDEK = await this.keyManagementService.getPatientDEK(record.patient_id);
+        const decryptedFile = this.encryptionService.decryptFile(encryptedFile, patientDEK);
+        patientDEK.fill(0);
+
+        return {
+            buffer: decryptedFile,
+            mimeType: record.mime_type,
+            name: record.name,
+        };
+    }
+
+    // delete any MR (soft)
+    public async deleteRecord(recordId: string): Promise<void> {
+        const record = await prisma.medicalRecord.findFirst({
+            where: {
+                id: recordId,
+                deleted_at: null
             },
         });
+
         if (!record) {
-            throw new HttpException(404, 'medical record not found or already deleted');
+            const error = createBilingualError(404, ErrorMessages.RECORD_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        if (record.deleted_at) {
+            const error = createBilingualError(404, ErrorMessages.RECORD_ALREADY_DELETED);
+            throw new HttpException(error.status, error.message, error.messageAr);
         }
 
         await prisma.medicalRecord.update({
             where: {
-                id: recordId,
+                id: recordId
             },
             data: {
-                deleted_at: new Date(),
+                deleted_at: new Date()
             },
         });
     }
-    // get a specific MR by id?? 
-    // handle permissions --> fabric stuff 
-
 }

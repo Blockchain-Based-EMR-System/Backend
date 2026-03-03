@@ -1,46 +1,53 @@
 import { PinataSDK } from 'pinata';
-import { create, IPFSHTTPClient } from 'ipfs-http-client'
 import { HttpException } from '@/exceptions/HttpException';
 import { Service } from 'typedi';
 
-
-
 @Service()
 export class IpfsService {
-    private ipfsClient: IPFSHTTPClient;
+    private pinata: PinataSDK;
 
     constructor() {
-        // temp --> selecting the pinning service (4EVERLAND)
-        this.ipfsClient = create({
-            host: process.env.IPFS_HOST,
-            port: parseInt(process.env.IPFS_PORT),
-            protocol: process.env.IPFS_PROTOCOL
+        this.pinata = new PinataSDK({
+            pinataJwt: process.env.PINATA_JWT,
+            pinataGateway: process.env.PINATA_GATEWAY,
         });
     }
 
-    // upload med file to IPFS --> generate and return CID
-    public async uploadFile(fileData: Buffer, fileName: string): Promise<string> {
-        const result = await this.ipfsClient.add({
-            path: fileName,
-            content: fileData,
-        });
-        const cid = result.cid.toString();
-        return cid
-    };
-
-    // get file using CID
-    public async getFile(cid: string): Promise<Buffer> {
-        // note --> each chunk in ipfs is Uint8Array
-        const chunks: Uint8Array[] = [];
-
-        for await (const chunk of this.ipfsClient.cat(cid)) {
-            chunks.push(chunk);
+    public async uploadFile(fileData: Buffer, fileName: string, mimeType: string): Promise<string> {
+        try {
+            const file = new File([fileData], fileName, { type: mimeType });
+            const upload = await this.pinata.upload.file(file);
+            return upload.cid;
+        } 
+        catch (e) {
+            throw new HttpException(500, `IPFS upload failed: ${e.message}`);
         }
-        const fileData = Buffer.concat(chunks);
-        return fileData;
+    }
+            
+
+    public async getFile(cid: string): Promise<Buffer> {
+        try {
+            // CID → gateway URL → HTTP request → raw bytes stream → read all bytes → Buffer
+            const url = `https://${process.env.PINATA_GATEWAY}/ipfs/${cid}`;
+            const response = await fetch(url);
+
+            if (!response.ok) {
+                throw new Error(`Gateway responded with ${response.status}`);
+            }
+
+            const arrayBuffer = await response.arrayBuffer();
+            return Buffer.from(arrayBuffer);
+        } catch (e) {
+            throw new HttpException(500, `IPFS fetch failed: ${e.message}`);
+        }
     }
 
-    // pin management --> TBD
-
-
+    public async deleteFile(cid: string): Promise<void> {
+        try {
+            await this.pinata.files.delete([cid]);
+        } 
+        catch (e) {
+            throw new HttpException(500, `IPFS delete failed: ${e.message}`);
+        }
+    }
 }
