@@ -19,26 +19,23 @@ export class IpfsService {
             const file = new File([fileData], fileName, { type: mimeType });
             const upload = await this.pinata.upload.file(file);
             return upload.cid;
-        } 
+        }
         catch (e) {
             throw new HttpException(500, `IPFS upload failed: ${e.message}`);
         }
     }
-            
 
     public async getFile(cid: string): Promise<Buffer> {
         try {
-            // CID → gateway URL → HTTP request → raw bytes stream → read all bytes → Buffer
-            const url = `https://${process.env.PINATA_GATEWAY}/files/${cid}?pinataGatewayToken=${process.env.PINATA_GATEWAY_TOKEN}`;
-            const response = await fetch(url);
+            const response = await this.pinata.gateways.get(cid);
 
-            if (!response.ok) {
-                throw new Error(`Gateway responded with ${response.status}`);
+            if (response.data instanceof Blob) {
+                const arrayBuffer = await response.data.arrayBuffer();
+                return Buffer.from(arrayBuffer);
             }
-
-            const arrayBuffer = await response.arrayBuffer();
-            return Buffer.from(arrayBuffer);
-        } catch (e) {
+            return Buffer.from(response.data as string, 'binary');
+        } 
+        catch (e) {
             throw new HttpException(500, `IPFS fetch failed: ${e.message}`);
         }
     }
@@ -46,7 +43,7 @@ export class IpfsService {
     public async deleteFile(cid: string): Promise<void> {
         try {
             await this.pinata.files.delete([cid]);
-        } 
+        }
         catch (e) {
             throw new HttpException(500, `IPFS delete failed: ${e.message}`);
         }

@@ -60,7 +60,6 @@ export class MedicalRecordService {
     }
 
     public async getRecordFile(recordId: string): Promise<MedicalRecordFile> {
-        console.log("inside the service");
         const record = await prisma.medicalRecord.findFirst({
             where: {
                 id: recordId,
@@ -83,14 +82,13 @@ export class MedicalRecordService {
             const error = createBilingualError(404, ErrorMessages.RECORD_NOT_FOUND);
             throw new HttpException(error.status, error.message, error.messageAr);
         }
-        console.log("we got heree");
 
         const encryptedFile = await this.ipfsService.getFile(record.cid);
-        console.log(`encryptedFile ${encryptedFile}`)
+        console.log(`encryptedFile`)
 
         const patientDEK = await this.keyManagementService.getPatientDEK(record.patient_id);
         const decryptedFile = this.encryptionService.decryptFile(encryptedFile, patientDEK);
-        console.log(`decryptedFile ${decryptedFile}`)
+        console.log(`decryptedFile`)
         patientDEK.fill(0);
 
         return {

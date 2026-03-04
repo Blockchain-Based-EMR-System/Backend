@@ -71,4 +71,21 @@ export class MedicalRecordController {
             message: 'Medical record deleted successfully',
         });
     });
+
+    // // metadata only
+    // public getRecordMetadata = catchAsync(async (req: Request, res: Response): Promise<void> => {
+    //     const record = await this.medicalRecordService.getRecordMetadata(req.params.id);
+    //     res.status(200).json({
+    //         message: 'Medical record retrieved successfully',
+    //         data: record,
+    //     });
+    // });
+
+    // // raw file stream
+    // public getRecordFile = catchAsync(async (req: Request, res: Response): Promise<void> => {
+    //     const record = await this.medicalRecordService.getRecordFile(req.params.id);
+    //     res.setHeader('Content-Type', record.mime_type);
+    //     res.setHeader('Content-Disposition', `inline; filename="${record.name}"`);
+    //     res.status(200).send(record.buffer);
+    // });
 }

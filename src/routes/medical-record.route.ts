@@ -8,7 +8,7 @@ import { CreateMedicalRecordDto } from "@/dtos/medical-records.dto";
 import { uploadSingleFile } from "@/middlewares/upload.middleware";
 
 export class MedicalRecordRoute implements Routes {
-    public path = '/records';
+    public path = '/record';
     public router = Router();
     public medicalRecordController = new MedicalRecordController();
 
@@ -21,7 +21,7 @@ export class MedicalRecordRoute implements Routes {
         this.router.get(
             `${this.path}/:id`,
             /*
-                #swagger.path = '/records/{id}'
+                #swagger.path = '/record/{id}'
                 #swagger.method = 'get'
                 #swagger.tags = ['Medical Records']
                 #swagger.description = 'Downloads and decrypts a single medical record file. Returns raw file bytes with appropriate Content-Type header.'
@@ -51,14 +51,13 @@ export class MedicalRecordRoute implements Routes {
                 }
             */
             AuthMiddleware,
-            RoleMiddleware(Role.PATIENT, Role.DOCTOR),
             this.medicalRecordController.getRecordFile
         );
 
         this.router.post(
             `${this.path}/:doctorId/upload`,
             /*
-                #swagger.path = '/records/{doctorId}/upload'
+                #swagger.path = '/record/{doctorId}/upload'
                 #swagger.method = 'post'
                 #swagger.tags = ['Medical Records']
                 #swagger.description = 'Patient uploads a new medical record file'
@@ -139,7 +138,7 @@ export class MedicalRecordRoute implements Routes {
         this.router.get(
             `${this.path}/patient`,
             /*
-                #swagger.path = '/records/patient'
+                #swagger.path = '/record/patient'
                 #swagger.method = 'get'
                 #swagger.tags = ['Medical Records']
                 #swagger.description = 'Retrieves all medical record metadata for the authenticated patient (no file bytes)'
@@ -184,7 +183,7 @@ export class MedicalRecordRoute implements Routes {
         this.router.delete(
             `${this.path}/:id`,
             /*
-                #swagger.path = '/records/{id}'
+                #swagger.path = '/record/{id}'
                 #swagger.method = 'delete'
                 #swagger.tags = ['Medical Records']
                 #swagger.description = 'Soft-deletes a medical record (sets deleted_at). File remains on IPFS but is inaccessible via the API.'
