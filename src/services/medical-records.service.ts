@@ -24,15 +24,11 @@ export class MedicalRecordService {
         fileName: string,
         mimeType: string,
     ): Promise<void> {
-        console.log("we r in");
         const patientDEK = await this.keyManagementService.getPatientDEK(patientId);
-        console.log(`patient key ${patientDEK}`);
         const encryptedFile = this.encryptionService.encryptFile(fileBuffer, patientDEK);
-        console.log(`encryptedFile ${encryptedFile}`)
         patientDEK.fill(0);
 
         const cid = await this.ipfsService.uploadFile(encryptedFile, fileName, mimeType);
-        console.log(`got cid ${cid}`);
 
         const keyRecord = await prisma.encryptionKey.findUnique({
             where: {
@@ -84,11 +80,9 @@ export class MedicalRecordService {
         }
 
         const encryptedFile = await this.ipfsService.getFile(record.cid);
-        console.log(`encryptedFile`)
 
         const patientDEK = await this.keyManagementService.getPatientDEK(record.patient_id);
         const decryptedFile = this.encryptionService.decryptFile(encryptedFile, patientDEK);
-        console.log(`decryptedFile`)
         patientDEK.fill(0);
 
         return {

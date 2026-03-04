@@ -19,6 +19,49 @@ export class MedicalRecordRoute implements Routes {
     private initializeRoutes() {
 
         this.router.get(
+            `${this.path}/patient`,
+            /*
+                #swagger.path = '/record/patient'
+                #swagger.method = 'get'
+                #swagger.tags = ['Medical Records']
+                #swagger.description = 'Retrieves all medical record metadata for the authenticated patient (no file bytes)'
+
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
+
+                #swagger.responses[200] = {
+                    description: 'Medical records retrieved successfully',
+                    schema: {
+                        message: 'Medical records retrieved successfully',
+                        data: [
+                            {
+                                id: 'uuid-string',
+                                patient_id: 'uuid-string',
+                                clinic_id: 'uuid-string',
+                                doctor_id: 'uuid-string',
+                                appointment_id: 'uuid-string',
+                                name: 'Blood Test Results',
+                                type: 'LAB_RESULT',
+                                mime_type: 'application/pdf',
+                                cid: 'bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi'
+                            }
+                        ]
+                    }
+                }
+                #swagger.responses[401] = {
+                    description: 'Unauthorized – missing or invalid token'
+                }
+            */
+            AuthMiddleware,
+            RoleMiddleware(Role.PATIENT),
+            this.medicalRecordController.getPatientMedicalRecords
+        );
+
+        this.router.get(
             `${this.path}/:id`,
             /*
                 #swagger.path = '/record/{id}'
@@ -132,50 +175,6 @@ export class MedicalRecordRoute implements Routes {
             uploadSingleFile,
             ValidationMiddleware(CreateMedicalRecordDto),
             this.medicalRecordController.uploadRecord
-        );
-        
-
-        this.router.get(
-            `${this.path}/patient`,
-            /*
-                #swagger.path = '/record/patient'
-                #swagger.method = 'get'
-                #swagger.tags = ['Medical Records']
-                #swagger.description = 'Retrieves all medical record metadata for the authenticated patient (no file bytes)'
-
-                #swagger.parameters['Authorization'] = {
-                    in: 'cookie',
-                    description: 'Bearer token for authentication',
-                    required: true,
-                    type: 'string'
-                }
-
-                #swagger.responses[200] = {
-                    description: 'Medical records retrieved successfully',
-                    schema: {
-                        message: 'Medical records retrieved successfully',
-                        data: [
-                            {
-                                id: 'uuid-string',
-                                patient_id: 'uuid-string',
-                                clinic_id: 'uuid-string',
-                                doctor_id: 'uuid-string',
-                                appointment_id: 'uuid-string',
-                                name: 'Blood Test Results',
-                                type: 'LAB_RESULT',
-                                mime_type: 'application/pdf',
-                                cid: 'bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi'
-                            }
-                        ]
-                    }
-                }
-                #swagger.responses[401] = {
-                    description: 'Unauthorized – missing or invalid token'
-                }
-            */
-            AuthMiddleware,
-            RoleMiddleware(Role.PATIENT),
-            this.medicalRecordController.getPatientMedicalRecords
         );
 
         
