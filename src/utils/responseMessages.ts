@@ -327,6 +327,12 @@ export const SuccessResponseMessages = {
         message_ar: "تم إنشاء رابط التحميل لـ BackBlaze B2 بنجاح.",
     },
 
+    // AI Appointments success messages
+    AI_PROCESSING_STARTED: {
+        message_en: "AI processing started successfully.",
+        message_ar: "تم بدء المعالجة بالذكاء الاصطناعي بنجاح.",
+    },
+
 }
 
 interface MultiLangMessageObj {

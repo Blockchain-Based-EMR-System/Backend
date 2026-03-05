@@ -18,5 +18,9 @@ export class AiAppointmentsRoute implements Routes {
             this.aiAppointmentsController.getUploadUrl
         )
 
+        this.router.post(`${this.path}/:appointmentId/process-audio-ai`,
+            // AuthMiddleware,
+            this.aiAppointmentsController.processAudioAI
+        )
     }
 }

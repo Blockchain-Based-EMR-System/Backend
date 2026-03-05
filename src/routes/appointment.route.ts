@@ -1320,6 +1320,18 @@ export class AppointmentRoute implements Routes {
                     required: true,
                     type: 'string'
                 }
+                #swagger.responses[200] = {
+                    description: 'Agora token and channel name retrieved successfully',
+                    schema: {
+                        message: 'Agora token retrieved successfully',
+                        messageAr: 'تم استرجاع توكن أجورا بنجاح',
+                        data: {
+                            token: 'string',
+                            appId: 'string'
+                        },
+                        message: 'Agora token retrieved successfully'
+                    }
+                }
             */
             AuthMiddleware,
             this.appointmentController.getAgoraToken

@@ -347,11 +347,21 @@ export const ErrorMessages = {
         en: "Provide either new scheduled time or shift minutes",
         ar: "يرجى تقديم وقت موعد جديد أو عدد دقائق التغيير"
     },
-    
+
     // Agora Errors
     AGORA_CREDENTIALS_NOT_CONFIGURED: {
         en: "Agora credentials are not configured",
         ar: "بيانات اعتماد Agora غير مكونة"
+    },
+
+    // AI Errors
+    INVALID_USER_TYPE: {
+        en: "Invalid user type. Must be 'doctor' or 'patient'",
+        ar: "نوع المستخدم غير صالح. يجب أن يكون 'doctor' أو 'patient'"
+    },
+    MISSING_AUDIO_KEYS: {
+        en: "Missing audio keys. Provide either doctorKey and patientKey, or mixedKey",
+        ar: "مفاتيح الصوت مفقودة. يرجى تقديم إما doctorKey و patientKey، أو mixedKey"
     }
 };
 
