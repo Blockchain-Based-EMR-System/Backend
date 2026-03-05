@@ -35,6 +35,6 @@
       "@validators/*": ["validators/*"]
     }
   },
-  "include": ["src/**/*.ts", "src/**/*.json", ".env"],
+  "include": ["src/**/*.ts", "src/**/*.json", ".env", "src/test/backblaze.test.js"],
   "exclude": ["node_modules", "src/http", "src/logs"]
 }

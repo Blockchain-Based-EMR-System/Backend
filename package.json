@@ -24,6 +24,8 @@
     "schema": "src/prisma/schema.prisma"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1002.0",
+    "@aws-sdk/s3-request-presigner": "^3.1002.0",
     "@grpc/grpc-js": "^1.14.0",
     "@hyperledger/fabric-gateway": "^1.9.0",
     "@prisma/client": "6.18.0",

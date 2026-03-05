@@ -321,6 +321,12 @@ export const SuccessResponseMessages = {
         message_ar: "تم إنشاء رمز Agora بنجاح.",
     },
 
+    // BackBlaze B2 success messages
+    UPLOAD_URL_GENERATED: {
+        message_en: "BackBlaze B2 upload URL generated successfully.",
+        message_ar: "تم إنشاء رابط التحميل لـ BackBlaze B2 بنجاح.",
+    },
+
 }
 
 interface MultiLangMessageObj {

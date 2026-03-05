@@ -9,6 +9,7 @@ import { PatientTodayAppointment, DoctorAppointment, DoctorScheduleDay, PatientA
 import { QueueService } from './queue.service';
 import { start } from 'repl';
 import { RtcRole, RtcTokenBuilder } from 'agora-token';
+import { Agora_APP_CERTIFICATE, Agora_APP_ID } from '@/config';
 
 @Service()
 export class AppointmentService {
@@ -1664,8 +1665,8 @@ export class AppointmentService {
             throw new HttpException(error.status, error.message, error.messageAr);
         }
 
-        const appId = process.env.AGORA_APP_ID;
-        const appCertificate = process.env.AGORA_APP_CERTIFICATE;
+        const appId = Agora_APP_ID;
+        const appCertificate = Agora_APP_CERTIFICATE;
 
         if (!appId || !appCertificate) {
             const error = createBilingualError(500, ErrorMessages.AGORA_CREDENTIALS_NOT_CONFIGURED);

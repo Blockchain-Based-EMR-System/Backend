@@ -6,6 +6,7 @@ import { AppointmentController } from "@/controllers/appointment.controller";
 import { ValidationMiddleware } from "@/middlewares/validation.middleware";
 import { AuthMiddleware } from "@/middlewares/auth.middleware";
 import { BookAppointmentDto, RescheduleAppointmentDto, RescheduleAppointmentByDoctorDto, EnterDoctorScheduleDto, EditDoctorScheduleDto, HandleDoctorVacationDto } from "@/dtos/appointments.dto";
+import { AiAppointmentsRoute } from "./ai_appointments.route";
 
 export class AppointmentRoute implements Routes {
     public path = '/appointments';
@@ -13,13 +14,14 @@ export class AppointmentRoute implements Routes {
     clinicController = new ClinicController();
     doctorController = new DoctorController();
     appointmentController = new AppointmentController();
-
+    private _aiRouter = new AiAppointmentsRoute();
     constructor() {
         this.initializeRoutes();
-        // this.router.use()
     }
 
     private initializeRoutes() {
+        this.router.use(`${this.path}/ai`, this._aiRouter.router);
+
         this.router.get(
             `${this.path}/doctors`,
             /* 

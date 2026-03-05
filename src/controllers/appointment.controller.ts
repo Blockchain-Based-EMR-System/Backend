@@ -7,6 +7,7 @@ import Container from "typedi";
 import { createBilingualError, ErrorMessages } from '@/utils/errorMessages';
 import { SuccessResponseMessages, createMultiLangMessage } from '@/utils/responseMessages';
 import { SocketService } from "@/services/socket.service";
+import { Agora_APP_ID } from "@/config";
 
 export class AppointmentController {
 
@@ -505,7 +506,10 @@ export class AppointmentController {
         const response = createMultiLangMessage(SuccessResponseMessages.AGORA_TOKEN_GENERATED_SUCCESSFULLY);
         res.status(200).json({
             ...response,
-            data: token
+            data: {
+                token,
+                appId: Agora_APP_ID
+            }
         });
     });
 }

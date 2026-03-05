@@ -40,3 +40,10 @@ export enum NURSE_FILES {
   BONUS_FILE = 'bonusFile',
 
 }
+
+export enum USER_ROLE {
+  DOCTOR = 'DOCTOR',
+  NURSE = 'NURSE',
+  PATIENT = 'PATIENT',
+  ADMIN = 'ADMIN',
+}

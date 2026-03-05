@@ -30,7 +30,7 @@ export class App {
     this.env = NODE_ENV || 'development';
     this.port = PORT || 3000;
     this.httpServer = createServer(this.app);
-    
+
     this.initializeMiddlewares();
     this.initializeRoutes(routes);
     this.initializeErrorHandling();
