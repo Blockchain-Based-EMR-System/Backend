@@ -3,6 +3,7 @@ import { RequestWithUser } from "@/interfaces";
 import { HttpException } from "@/exceptions/HttpException";
 import { catchAsync } from '@/utils/catchAsync';
 import { AppointmentService } from "@/services/appointment.service"
+import { AppointmentStatusChangedPayload } from "@/interfaces";
 import Container from "typedi";
 import { createBilingualError, ErrorMessages } from '@/utils/errorMessages';
 import { SuccessResponseMessages, createMultiLangMessage } from '@/utils/responseMessages';
@@ -11,7 +12,7 @@ import { SocketService } from "@/services/socket.service";
 export class AppointmentController {
 
     public appointmentService = Container.get(AppointmentService);
-    public socketService = new SocketService();
+    public socketService = Container.get(SocketService);
 
     public getAvailableDays = catchAsync(async (req: Request, res: Response): Promise<void> => {
         const { doctorId } = req.params;
@@ -139,20 +140,19 @@ export class AppointmentController {
         const { appointmentId } = req.params;
         const { newScheduledTime } = req.body;
 
-        // const { doctorId, scheduledTime } = await this.appointmentService.getAppointmentOwners(appointmentId);
+        const result = await this.appointmentService.rescheduleAppointmentByPatient(patientId, appointmentId, new Date(newScheduledTime));
 
-        await this.appointmentService.rescheduleAppointmentByPatient(patientId, appointmentId, new Date(newScheduledTime));
+        const payload: AppointmentStatusChangedPayload = {
+            appointmentId,
+            newStatus: 'CONFIRMED',
+            doctorId: result.doctorId,
+            patientId: result.patientId,
+            patientName: result.patientName,
+            appointmentDate: result.appointmentDate,
+            startTime: result.startTime,
+        };
+        await this.socketService.emitAppointmentStatusChanged(payload);
 
-        // await this.socketService.emitQueueUpdatesToPatients(doctorId, new Date(scheduledTime));
-        // await this.socketService.emitQueueUpdatesToPatients(doctorId, new Date(newScheduledTime));
-
-        // this.socketService.emitToUser(doctorId, 'appointment_rescheduled_by_patient', {
-        //     appointmentId,
-        //     patientId,
-        //     oldScheduledTime: scheduledTime,
-        //     newScheduledTime: new Date(newScheduledTime).toISOString(),
-        // });
-        // idk
         const response = createMultiLangMessage(SuccessResponseMessages.APPOINTMENT_RESCHEDULED_SUCCESSFULLY);
         res.status(200).json({
             ...response
@@ -163,7 +163,19 @@ export class AppointmentController {
         const userId = req.user.id;
         const { appointmentId } = req.params;
 
-        await this.appointmentService.cancelAppointment(userId, appointmentId);
+        const result = await this.appointmentService.cancelAppointment(userId, appointmentId);
+        const payload: AppointmentStatusChangedPayload = {
+            appointmentId,
+            newStatus: 'CANCELLED',
+            doctorId: result.doctorId,
+            patientId: result.patientId,
+            patientName: result.patientName,
+            appointmentDate: result.appointmentDate,
+            startTime: result.startTime,
+        };
+        await this.socketService.emitAppointmentStatusChanged(payload);
+        await this.socketService.emitQueueUpdatesToPatients(result.doctorId, new Date(result.appointmentDate));
+
         const response = createMultiLangMessage(SuccessResponseMessages.APPOINTMENT_CANCELLED_SUCCESSFULLY);
         res.status(200).json({
             ...response
@@ -185,7 +197,24 @@ export class AppointmentController {
             throw new HttpException(error.status, error.message, error.messageAr);
         }
 
-        await this.appointmentService.rescheduleAppointmentByDoctor(doctorId, appointmentId, minutes);
+        const affectedAppointments = await this.appointmentService.rescheduleAppointmentByDoctor(doctorId, appointmentId, minutes);
+        for (const appointment of affectedAppointments) {
+            const payload: AppointmentStatusChangedPayload = {
+                appointmentId: appointment.appointmentId,
+                newStatus: 'CONFIRMED',
+                doctorId: appointment.doctorId,
+                patientId: appointment.patientId,
+                patientName: appointment.patientName,
+                appointmentDate: appointment.appointmentDate,
+                startTime: appointment.startTime,
+            };
+            await this.socketService.emitAppointmentStatusChanged(payload);
+        }
+
+        if (affectedAppointments.length > 0) {
+            await this.socketService.emitQueueUpdatesToPatients(doctorId, new Date(affectedAppointments[0].appointmentDate));
+        }
+
         const response = createMultiLangMessage(SuccessResponseMessages.APPOINTMENT_RESCHEDULED_SUCCESSFULLY);
         res.status(200).json({
             ...response

@@ -5,7 +5,7 @@ import { Service, Container } from 'typedi';
 import { TimeSlot } from '@/interfaces';
 import { HttpException } from "@/exceptions/HttpException";
 import { createBilingualError, ErrorMessages } from '@/utils/errorMessages';
-import { PatientTodayAppointment, DoctorAppointment, DoctorScheduleDay, PatientAppointment, DoctorSchedule, checkExistingAppointments, ConflictingAppointment, DoctorVacations, Vacations, AppointmentData } from '@/interfaces/appointments.interface';
+import { PatientTodayAppointment, DoctorAppointment, DoctorScheduleDay, PatientAppointment, DoctorSchedule, checkExistingAppointments, ConflictingAppointment, DoctorVacations, Vacations, AppointmentData, AppointmentEventData } from '@/interfaces/appointments.interface';
 import { QueueService } from './queue.service';
 import { start } from 'repl';
 
@@ -473,7 +473,25 @@ export class AppointmentService {
 
     }
 
-    public async rescheduleAppointmentByPatient(patientId: string, appointmentId: string, newScheduledTime: Date): Promise<void> {
+    public async rescheduleAppointmentByPatient(patientId: string, appointmentId: string, newScheduledTime: Date): Promise<AppointmentEventData> {
+        const appointment = await prisma.appointment.findUnique({
+            where: {
+                id: appointmentId
+            },
+            select: {
+                id: true,
+                patient_id: true,
+                doctor_id: true,
+                scheduled_time: true,
+                deleted_at: true,
+                patient: {
+                    select: {
+                        name: true
+                    }
+                }
+            }
+        });
+
         const slotDuration = await prisma.appointment.findUnique({
             where: {
                 id: appointmentId,
@@ -496,10 +514,19 @@ export class AppointmentService {
             }
         });
 
+        return {
+            appointmentId: appointment.id,
+            doctorId: appointment.doctor_id,
+            patientId: appointment.patient_id,
+            patientName: appointment.patient.name,
+            appointmentDate: this.formatDate(appointment.scheduled_time),
+            startTime: this.formatTime(appointment.scheduled_time),
+        };
+
         // penalty to be added later
     }
 
-    public async rescheduleAppointmentByDoctor(doctorId: string, appointmentId: string, minutes: number): Promise<void> {
+    public async rescheduleAppointmentByDoctor(doctorId: string, appointmentId: string, minutes: number): Promise<AppointmentEventData[]> {
         const appointment = await this.getAndValidateAppointment(appointmentId, doctorId);
         const appointments = await prisma.appointment.findMany({
             where: {
@@ -511,13 +538,34 @@ export class AppointmentService {
                 }
             },
             select: {
-                id: true
+                id: true,
+                patient_id: true,
+                doctor_id: true,
+                scheduled_time: true,
+                patient: {
+                    select: {
+                        name: true,
+                    }
+                }
             }
         })
 
         for (const { id: appointmentId } of appointments) {
             await this.rescheduleSingleAppointment(doctorId, appointmentId, minutes);
         }
+
+        return appointments.map(appointment => {
+            const newScheduledTime = new Date(appointment.scheduled_time.getTime() + minutes * 60000);
+            return {
+                appointmentId: appointment.id,
+                doctorId: appointment.doctor_id,
+                patientId: appointment.patient_id,
+                patientName: appointment.patient.name,
+                appointmentDate: this.formatDate(newScheduledTime),
+                startTime: this.formatTime(newScheduledTime),   
+            };
+        });
+
     }
 
     public async enterDoctorSchedule(doctorId: string, clinicId: string | null, workingDay: number, startTime: string, endTime: string, slotDuration: number, bufferTime: number, isOnline: boolean): Promise<void> {
@@ -653,17 +701,23 @@ export class AppointmentService {
         });
     }
 
-    public async cancelAppointment(userId: string, appointmentId: string): Promise<void> {
+    public async cancelAppointment(userId: string, appointmentId: string): Promise<AppointmentEventData> {
         // see whether the user is patient or doctor
         const appointment = await prisma.appointment.findUnique({
             where: {
-                id: appointmentId,
+                id: appointmentId
             },
             select: {
                 id: true,
                 patient_id: true,
                 doctor_id: true,
+                scheduled_time: true,
                 deleted_at: true,
+                patient: {
+                    select: {
+                        name: true
+                    }
+                }
             }
         });
 
@@ -693,6 +747,16 @@ export class AppointmentService {
                 status: 'CANCELLED',
             }
         });
+
+        return {
+            appointmentId: appointment.id,
+            doctorId: appointment.doctor_id,
+            patientId: appointment.patient_id,
+            patientName: appointment.patient.name,
+            appointmentDate: this.formatDate(appointment.scheduled_time),
+            startTime: this.formatTime(appointment.scheduled_time),
+        };
+
         // penalty to be added later
     };
 
@@ -1331,6 +1395,63 @@ export class AppointmentService {
 
     }
 
+    public async getNurseAppointmentsToday(nurseId: string): Promise<AppointmentData[]> {
+        const crrentDate = new Date();
+        const today = this.formatDate(crrentDate);
+        const dayOfWeek = this.getDayOfWeek(crrentDate.getUTCDay());
+
+        const nurseSchedules = await prisma.nurseSchedule.findMany({
+            where: {
+                nurse_id: nurseId,
+                day_of_week: dayOfWeek,
+                is_active: true,
+                deleted_at: null,
+            },
+            select: {
+                doctor_id: true,
+                clinic_id: true
+            }
+        });
+
+        if (!nurseSchedules.length) {
+            return [];
+        }
+
+        const allAppointments = await Promise.all(
+            nurseSchedules.map(schedule =>
+                this.getAppointmentsByDate(schedule.doctor_id, schedule.clinic_id, today)
+            )
+        );
+
+        return allAppointments.flat();
+    }
+
+    public async getAppointmentsForDay(doctorId: string, date: Date): Promise<{ id: string; patient_id: string }[]> {
+        const startOfDay = new Date(date);
+        startOfDay.setHours(0, 0, 0, 0);
+
+        const endOfDay = new Date(date);
+        endOfDay.setHours(23, 59, 59, 999);
+
+
+        return prisma.appointment.findMany({
+            where: {
+                doctor_id: doctorId,
+                scheduled_time: {
+                    gte: startOfDay,
+                    lte: endOfDay
+                },
+                status: { in: ['CONFIRMED'] },
+                deleted_at: null,
+            },
+            select: {
+                id: true,
+                patient_id: true
+
+            },
+        });
+    }
+
     private async getConflictingAppointments(doctorId: string, scheduleId: string, breakStart?: string, breakEnd?: string): Promise<ConflictingAppointment[]> {
         const schedule = await prisma.doctorSchedule.findUnique({
             where: {
@@ -1550,6 +1671,11 @@ export class AppointmentService {
                 slot_duration: true,
                 status: true,
                 deleted_at: true,
+                patient: {
+                    select: {
+                        name: true,
+                    }
+                }
             }
         });
 
