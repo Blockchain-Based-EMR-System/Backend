@@ -62,7 +62,7 @@ export class AiAppointmentsController {
         }        
         const SOAP = this.aiAppointmentsService.generateSOAP(finalScript);
 
-        const responseMessage = createMultiLangMessage(SuccessResponseMessages.AI_PROCESSING_STARTED);
+        const responseMessage = createMultiLangMessage(SuccessResponseMessages.SOAP_GENERATED);
         res.status(202).json({
             ...responseMessage,
             data: {

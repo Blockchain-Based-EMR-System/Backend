@@ -47,6 +47,10 @@
     {
       "name": "Nurses",
       "description": "Nurse account endpoints"
+    },
+    {
+      "name": "AI Appointments",
+      "description": "AI-generated SOAP notes for appointments"
     }
   ],
   "schemes": [
@@ -7350,6 +7354,64 @@
         }
       }
     },
+    "/appointments/{appointmentId}/agora-token": {
+      "get": {
+        "tags": [
+          "Appointments"
+        ],
+        "description": "Get Agora token and channel name for a specific appointment",
+        "parameters": [
+          {
+            "name": "appointmentId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The ID of the appointment"
+          },
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication (patient or doctor of the appointment)",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Agora token and channel name retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Agora token retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع توكن أجورا بنجاح"
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "token": {
+                      "type": "string",
+                      "example": "string"
+                    },
+                    "appId": {
+                      "type": "string",
+                      "example": "string"
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          }
+        }
+      }
+    },
     "/queue/position/{appointmentId}": {
       "get": {
         "tags": [
@@ -8546,6 +8608,193 @@
           },
           "403": {
             "description": "Forbidden - appointment does not belong to the authenticated user"
+          },
+          "404": {
+            "description": "Appointment not found"
+          }
+        }
+      }
+    },
+    "/{appointmentId}/upload-url": {
+      "get": {
+        "tags": [
+          "AI Appointments"
+        ],
+        "description": "Get a pre-signed upload URL for uploading audio files to S3",
+        "parameters": [
+          {
+            "name": "appointmentId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The ID of the appointment"
+          },
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "userType",
+            "in": "query",
+            "description": "Type of user recording the audio (DOCTOR, PATIENT, or MIXED)",
+            "required": true,
+            "type": "string",
+            "enum": [
+              "DOCTOR",
+              "PATIENT",
+              "MIXED"
+            ]
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Upload URL generated successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Upload URL generated successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم إنشاء رابط التحميل بنجاح"
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "uploadUrl": {
+                      "type": "string",
+                      "example": "string"
+                    },
+                    "objectKey": {
+                      "type": "string",
+                      "example": "string"
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid userType parameter"
+          },
+          "401": {
+            "description": "Unauthorized - missing or invalid token"
+          },
+          "404": {
+            "description": "Appointment not found"
+          }
+        }
+      }
+    },
+    "/{appointmentId}/process-audio-ai": {
+      "post": {
+        "tags": [
+          "AI Appointments"
+        ],
+        "description": "Process audio recordings using AI to generate SOAP notes. Accepts either separate doctor/patient audio keys or a single mixed audio key",
+        "parameters": [
+          {
+            "name": "appointmentId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "The ID of the appointment"
+          },
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Audio file keys for processing. Provide either (doctorKey AND patientKey) OR mixedKey",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "doctorKey": {
+                  "type": "string",
+                  "example": "appointments/appointmentId/DOCTOR.webm"
+                },
+                "patientKey": {
+                  "type": "string",
+                  "example": "appointments/appointmentId/PATIENT.webm"
+                },
+                "mixedKey": {
+                  "type": "string",
+                  "example": "appointments/appointmentId/MIXED.webm"
+                }
+              },
+              "required": [
+                "doctorKey",
+                "patientKey",
+                "mixedKey"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": "SOAP notes generated successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "SOAP generated successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم إنشاء ملاحظات SOAP بنجاح"
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "SOAP": {
+                      "type": "object",
+                      "properties": {
+                        "subjective": {
+                          "type": "string",
+                          "example": "string"
+                        },
+                        "objective": {
+                          "type": "string",
+                          "example": "string"
+                        },
+                        "assessment": {
+                          "type": "string",
+                          "example": "string"
+                        },
+                        "plan": {
+                          "type": "string",
+                          "example": "string"
+                        }
+                      }
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - missing required audio keys"
+          },
+          "401": {
+            "description": "Unauthorized - missing or invalid token"
           },
           "404": {
             "description": "Appointment not found"

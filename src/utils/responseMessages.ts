@@ -332,6 +332,10 @@ export const SuccessResponseMessages = {
         message_en: "AI processing started successfully.",
         message_ar: "تم بدء المعالجة بالذكاء الاصطناعي بنجاح.",
     },
+    SOAP_GENERATED: {
+        message_en: "SOAP notes generated successfully.",
+        message_ar: "تم إنشاء ملاحظات SOAP بنجاح.",
+    },
 
 }
 
