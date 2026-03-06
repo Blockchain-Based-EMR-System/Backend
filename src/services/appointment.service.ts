@@ -379,11 +379,8 @@ export class AppointmentService {
     public async getTodayAppointment(patientId: string): Promise<PatientTodayAppointment[]> {
         const result: PatientTodayAppointment[] = [];
 
-        const today = new Date();
-        today.setUTCHours(0, 0, 0, 0);
-
-        const endOfToday = new Date();
-        endOfToday.setUTCHours(23, 59, 59, 999);
+        const now = new Date();
+        const { start: today, end: endOfToday } = this.getTodayBoundaries(now);
 
         const appointments = await prisma.appointment.findMany({
             where: {
@@ -562,7 +559,7 @@ export class AppointmentService {
                 patientId: appointment.patient_id,
                 patientName: appointment.patient.name,
                 appointmentDate: this.formatDate(newScheduledTime),
-                startTime: this.formatTime(newScheduledTime),   
+                startTime: this.formatTime(newScheduledTime),
             };
         });
 
@@ -1176,11 +1173,8 @@ export class AppointmentService {
     }
 
     public async getCurrentDoctorSchedule(doctorId: string): Promise<DoctorAppointment[]> {
-        const startOfDay = new Date();
-        startOfDay.setUTCHours(0, 0, 0, 0);
-
-        const endOfDay = new Date();
-        endOfDay.setUTCHours(23, 59, 59, 999);
+        const now = new Date();
+        const { start: startOfDay, end: endOfDay } = this.getTodayBoundaries(now);
 
         const appointments = await prisma.appointment.findMany({
             where: {
@@ -1427,12 +1421,7 @@ export class AppointmentService {
     }
 
     public async getAppointmentsForDay(doctorId: string, date: Date): Promise<{ id: string; patient_id: string }[]> {
-        const startOfDay = new Date(date);
-        startOfDay.setHours(0, 0, 0, 0);
-
-        const endOfDay = new Date(date);
-        endOfDay.setHours(23, 59, 59, 999);
-
+        const { start: startOfDay, end: endOfDay } = this.getTodayBoundaries(date);
 
         return prisma.appointment.findMany({
             where: {
@@ -1775,6 +1764,19 @@ export class AppointmentService {
 
     private camelToSnakeCase(str: string): string {
         return str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+    }
+
+    private getTodayBoundaries(date: Date, timezone: string = 'Africa/Cairo'): { start: Date; end: Date } {
+
+        const localDateStr = new Intl.DateTimeFormat('en-CA', {
+            timeZone: timezone,
+            year: 'numeric', month: '2-digit', day: '2-digit'
+        }).format(date);
+
+        const start = new Date(`${localDateStr}T00:00:00+02:00`);
+        const end = new Date(`${localDateStr}T23:59:59.999+02:00`);
+
+        return { start, end };
     }
 
 }
