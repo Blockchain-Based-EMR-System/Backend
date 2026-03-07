@@ -923,9 +923,9 @@
             "schema": {
               "type": "object",
               "properties": {
-                "label": {
+                "clinicId": {
                   "type": "string",
-                  "example": "org1"
+                  "example": "clinic-uuid-here"
                 },
                 "mspId": {
                   "type": "string",
@@ -961,7 +961,7 @@
                 }
               },
               "required": [
-                "label",
+                "clinicId",
                 "mspId",
                 "certificate",
                 "privateKey",
@@ -992,7 +992,7 @@
         }
       }
     },
-    "/fabric/identities/{label}": {
+    "/fabric/identities/{clinicId}": {
       "delete": {
         "tags": [
           "FabricIdentity"
@@ -1000,7 +1000,7 @@
         "description": "",
         "parameters": [
           {
-            "name": "label",
+            "name": "clinicId",
             "in": "path",
             "required": true,
             "type": "string"
@@ -1031,14 +1031,51 @@
         "tags": [
           "FabricIdentity"
         ],
-        "description": "",
+        "description": "Initialize the ledger, optionally seeding it with backup records",
         "parameters": [
           {
-            "name": "X-Fabric-Identity",
-            "in": "header",
-            "description": "Identity label (e.g., org1)",
-            "required": true,
-            "type": "string"
+            "name": "body",
+            "in": "body",
+            "description": "Optional backup data to seed the ledger",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "backupData": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "patientId": {
+                        "type": "string",
+                        "example": "patient-uuid"
+                      },
+                      "recordId": {
+                        "type": "string",
+                        "example": "record-uuid"
+                      },
+                      "doctorId": {
+                        "type": "string",
+                        "example": "doctor-uuid"
+                      },
+                      "type": {
+                        "type": "string",
+                        "example": "LAB_RESULT"
+                      },
+                      "ownerMsp": {
+                        "type": "string",
+                        "example": "Org1MSP"
+                      },
+                      "authorizedMsps": {
+                        "type": "array",
+                        "example": [],
+                        "items": {}
+                      }
+                    }
+                  }
+                }
+              }
+            }
           }
         ],
         "responses": {
@@ -1073,64 +1110,42 @@
         "tags": [
           "MedicalRecords"
         ],
-        "description": "",
+        "description": "Add a new medical record for a patient",
         "parameters": [
-          {
-            "name": "X-Fabric-Identity",
-            "in": "header",
-            "description": "Identity label (e.g., org1)",
-            "required": true,
-            "type": "string"
-          },
           {
             "name": "body",
             "in": "body",
-            "description": "Medical record data",
             "required": true,
             "schema": {
               "type": "object",
               "properties": {
                 "patientId": {
                   "type": "string",
-                  "example": "P12345"
+                  "example": "patient-uuid"
                 },
-                "firstName": {
+                "recordId": {
                   "type": "string",
-                  "example": "John"
+                  "example": "record-uuid"
                 },
-                "lastName": {
+                "doctorId": {
                   "type": "string",
-                  "example": "Doe"
+                  "example": "doctor-uuid"
                 },
-                "dateOfBirth": {
+                "type": {
                   "type": "string",
-                  "example": "1990-01-01"
+                  "example": "LAB_RESULT"
                 },
-                "gender": {
+                "ipfsCidKey": {
                   "type": "string",
-                  "example": "Male"
-                },
-                "bloodType": {
-                  "type": "string",
-                  "example": "O+"
-                },
-                "ipfsCid": {
-                  "type": "string",
-                  "example": "Qm..."
-                },
-                "summary": {
-                  "type": "string",
-                  "example": "Optional summary"
+                  "example": "bafybeigdyrzt..."
                 }
               },
               "required": [
                 "patientId",
-                "firstName",
-                "lastName",
-                "dateOfBirth",
-                "gender",
-                "bloodType",
-                "ipfsCid"
+                "recordId",
+                "doctorId",
+                "type",
+                "ipfsCidKey"
               ]
             }
           }
@@ -1160,18 +1175,11 @@
         "tags": [
           "MedicalRecords"
         ],
-        "description": "",
+        "description": "Get all records for a patient (authorized MSPs only)",
         "parameters": [
           {
             "name": "patientId",
             "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "X-Fabric-Identity",
-            "in": "header",
-            "description": "Identity label (e.g., org1)",
             "required": true,
             "type": "string"
           }
@@ -1181,12 +1189,14 @@
             "description": ""
           }
         }
-      },
+      }
+    },
+    "/records/{patientId}/{recordId}": {
       "put": {
         "tags": [
           "MedicalRecords"
         ],
-        "description": "",
+        "description": "Update an existing medical record (doctorId, type, optional new ipfsCidKey via transient)",
         "parameters": [
           {
             "name": "patientId",
@@ -1195,56 +1205,39 @@
             "type": "string"
           },
           {
-            "name": "X-Fabric-Identity",
-            "in": "header",
-            "description": "Identity label (e.g., org1)",
+            "name": "recordId",
+            "in": "path",
             "required": true,
             "type": "string"
           },
           {
             "name": "body",
             "in": "body",
-            "description": "Update medical record data",
             "required": true,
             "schema": {
               "type": "object",
               "properties": {
-                "firstName": {
+                "recordId": {
                   "type": "string",
-                  "example": "John"
+                  "example": "uuid-record-id"
                 },
-                "lastName": {
+                "doctorId": {
                   "type": "string",
-                  "example": "Doe"
+                  "example": "doctor-uuid"
                 },
-                "dateOfBirth": {
+                "type": {
                   "type": "string",
-                  "example": "1990-01-01"
+                  "example": "LAB_RESULT"
                 },
-                "gender": {
+                "ipfsCidKey": {
                   "type": "string",
-                  "example": "Male"
-                },
-                "bloodType": {
-                  "type": "string",
-                  "example": "O+"
-                },
-                "ipfsCid": {
-                  "type": "string",
-                  "example": "Qm..."
-                },
-                "summary": {
-                  "type": "string",
-                  "example": "Optional summary"
+                  "example": "optional-new-cid-key"
                 }
               },
               "required": [
-                "firstName",
-                "lastName",
-                "dateOfBirth",
-                "gender",
-                "bloodType",
-                "ipfsCid"
+                "recordId",
+                "doctorId",
+                "type"
               ]
             }
           }
@@ -1261,7 +1254,7 @@
         "tags": [
           "MedicalRecords"
         ],
-        "description": "",
+        "description": "Grant access to all records of a patient for a target MSP",
         "parameters": [
           {
             "name": "patientId",
@@ -1270,16 +1263,8 @@
             "type": "string"
           },
           {
-            "name": "X-Fabric-Identity",
-            "in": "header",
-            "description": "Identity label (e.g., org1)",
-            "required": true,
-            "type": "string"
-          },
-          {
             "name": "body",
             "in": "body",
-            "description": "Grant access to MSP",
             "required": true,
             "schema": {
               "type": "object",
@@ -8666,13 +8651,20 @@
         }
       }
     },
-    "/record/{id}": {
+    "/record/{clinicId}/{id}": {
       "get": {
         "tags": [
           "Medical Records"
         ],
-        "description": "Downloads and decrypts a single medical record file. Returns raw file bytes with appropriate Content-Type header.",
+        "description": "Downloads and decrypts a single medical record file. The clinicId identifies the caller\\'s clinic for on-chain authorization.",
         "parameters": [
+          {
+            "name": "clinicId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "UUID of the caller's clinic (used for on-chain access check)"
+          },
           {
             "name": "id",
             "in": "path",
@@ -8690,10 +8682,13 @@
         ],
         "responses": {
           "200": {
-            "description": "Decrypted file bytes streamed back with Content-Type, Content-Disposition, x-record-id, x-patient-id, x-record-type headers set"
+            "description": "Decrypted file returned as base64 with record metadata"
           },
           "401": {
             "description": "Unauthorized – missing or invalid token"
+          },
+          "403": {
+            "description": "Access denied – clinic not authorized for this record"
           },
           "404": {
             "description": "Record not found or already deleted"
@@ -8704,8 +8699,15 @@
         "tags": [
           "Medical Records"
         ],
-        "description": "Soft-deletes a medical record (sets deleted_at). File remains on IPFS but is inaccessible via the API.",
+        "description": "Soft-deletes a medical record. The clinicId identifies the caller\\'s clinic; chaincode enforces owner-only deletion.",
         "parameters": [
+          {
+            "name": "clinicId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "UUID of the caller's clinic (must be the record owner)"
+          },
           {
             "name": "id",
             "in": "path",
@@ -8740,19 +8742,29 @@
           "401": {
             "description": "Unauthorized – missing or invalid token"
           },
+          "403": {
+            "description": "Only the owner clinic can delete this record"
+          },
           "404": {
             "description": "Record not found or already deleted"
           }
         }
       }
     },
-    "/record/{doctorId}/upload": {
+    "/record/{clinicId}/{doctorId}/upload": {
       "post": {
         "tags": [
           "Medical Records"
         ],
-        "description": "Patient uploads a new medical record file",
+        "description": "Patient uploads a new medical record file. The clinic identity is used to store the encryption key on the blockchain.",
         "parameters": [
+          {
+            "name": "clinicId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "UUID of the clinic whose Fabric identity will store the encryption key"
+          },
           {
             "name": "doctorId",
             "in": "path",
@@ -8789,13 +8801,6 @@
             "type": "string"
           },
           {
-            "name": "clinicId",
-            "in": "formData",
-            "description": "UUID of the clinic",
-            "required": true,
-            "type": "string"
-          },
-          {
             "name": "appointmentId",
             "in": "formData",
             "description": "UUID of the appointment (optional)",
@@ -8827,6 +8832,211 @@
           },
           "404": {
             "description": "Patient encryption key not found"
+          }
+        }
+      }
+    },
+    "/record/grant-access": {
+      "post": {
+        "tags": [
+          "Medical Records"
+        ],
+        "description": "Patient grants a target clinic access to ALL their medical records across all owner clinics.",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "targetClinicId": {
+                  "type": "string",
+                  "example": "uuid-string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Access granted successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Access granted successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized – missing or invalid token"
+          }
+        }
+      }
+    },
+    "/record/{clinicId}/{patientId}/doctor-upload": {
+      "post": {
+        "tags": [
+          "Medical Records"
+        ],
+        "description": "Doctor uploads a medical record for a patient. Validates the doctor works at the clinic. The clinic identity is used for blockchain operations.",
+        "parameters": [
+          {
+            "name": "clinicId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "UUID of the clinic"
+          },
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "UUID of the patient"
+          },
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "file",
+            "in": "formData",
+            "description": "The medical record file",
+            "required": true,
+            "type": "file"
+          },
+          {
+            "name": "name",
+            "in": "formData",
+            "description": "Display name for the record",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "type",
+            "in": "formData",
+            "description": "Record type enum (LAB_RESULT | SCAN | DIAGNOSIS | VISIT_SUMMARY | SOAP_NOTE | MEDICAL_HISTORY)",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Medical record uploaded successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Medical record uploaded successfully"
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "recordId": {
+                      "type": "string",
+                      "example": "uuid-string"
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "No file uploaded or validation failed"
+          },
+          "403": {
+            "description": "Doctor is not associated with this clinic"
+          }
+        }
+      }
+    },
+    "/record/{clinicId}/{patientId}/soap-notes": {
+      "get": {
+        "tags": [
+          "Medical Records"
+        ],
+        "description": "Retrieves all SOAP_NOTE records for a patient, decrypts the JSON files, and returns their parsed contents. Requires on-chain authorization.",
+        "parameters": [
+          {
+            "name": "clinicId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "UUID of the caller's clinic (for on-chain access check)"
+          },
+          {
+            "name": "patientId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "UUID of the patient"
+          },
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "SOAP notes retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "SOAP notes retrieved successfully"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "recordId": {
+                        "type": "string",
+                        "example": "uuid-string"
+                      },
+                      "content": {
+                        "type": "object",
+                        "properties": {}
+                      }
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized – missing or invalid token"
+          },
+          "403": {
+            "description": "Access denied – clinic not authorized"
           }
         }
       }

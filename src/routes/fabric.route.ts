@@ -161,8 +161,6 @@ export class FabricRoute implements Routes {
                     schema: { $targetMsp: 'Org2MSP' }
                 }
             */
-                }
-            */
             this.fabricController.grantAccess,
         );
     }

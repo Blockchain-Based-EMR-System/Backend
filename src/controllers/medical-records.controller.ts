@@ -50,10 +50,11 @@ export class MedicalRecordController {
     });
 
 
-    public getRecordFile = catchAsync(async (req: Request, res: Response): Promise<void> => {
+    public getRecordFile = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
         const recordId = req.params.id;
+        const clinicId = req.params.clinicId;
 
-        const { buffer, ...metadata } = await this.medicalRecordService.getRecordFile(recordId);
+        const { buffer, ...metadata } = await this.medicalRecordService.getRecordFile(clinicId, recordId);
 
         res.status(200).json({
             message: 'Medical record retrieved successfully',
@@ -69,13 +70,67 @@ export class MedicalRecordController {
         res.status(200).json(result);
     });
 
-    public deleteRecord = catchAsync(async (req: Request, res: Response): Promise<void> => {
+    public deleteRecord = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
         const recordId = req.params.id;
+        const clinicId = req.params.clinicId;
 
-        await this.medicalRecordService.deleteRecord(recordId);
+        await this.medicalRecordService.deleteRecord(clinicId, recordId);
 
         res.status(200).json({
             message: 'Medical record deleted successfully',
+        });
+    });
+
+    public grantAccess = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
+        const patientId = req.user.id;
+        const { targetClinicId } = req.body;
+
+        await this.medicalRecordService.grantAccess(patientId, targetClinicId);
+
+        res.status(200).json({
+            message: 'Access granted successfully',
+        });
+    });
+
+    public addDoctorRecord = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
+        if (!req.file) {
+            res.status(400).json({ message: 'No file uploaded' });
+            return;
+        }
+
+        const clinicId = req.params.clinicId;
+        const patientId = req.params.patientId;
+        const doctorId = req.user.id;
+        const recordData: CreateMedicalRecordDto = req.body;
+        const fileBuffer = req.file.buffer;
+        const fileName = req.file.originalname;
+        const mimeType = req.file.mimetype;
+
+        const recordId = await this.medicalRecordService.addDoctorRecord(
+            clinicId,
+            patientId,
+            doctorId,
+            recordData,
+            fileBuffer,
+            fileName,
+            mimeType,
+        );
+
+        res.status(201).json({
+            message: 'Medical record uploaded successfully',
+            data: { recordId },
+        });
+    });
+
+    public getSOAPNotes = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
+        const clinicId = req.params.clinicId;
+        const patientId = req.params.patientId;
+
+        const notes = await this.medicalRecordService.getSOAPNotes(clinicId, patientId);
+
+        res.status(200).json({
+            message: 'SOAP notes retrieved successfully',
+            data: notes,
         });
     });
 
