@@ -57,7 +57,7 @@ export class AiAppointmentsService {
         return finalScript;
     }
 
-    public async generateSOAP(finalScript: string): Promise<string> {
+    public async generateSOAP(finalScript: string): Promise<any> {
         const chatCompletion = await this.groq.chat.completions.create({
             messages: [
                 {
@@ -88,10 +88,10 @@ CLINICAL GUIDELINES:
 
         // Extract the JSON string from the LLM response
         const jsonString = chatCompletion.choices[0]?.message?.content;
-
+        
         // Parse it into a native JavaScript object
         const soapNote = JSON.parse(jsonString);
-
+        
         return soapNote;
     }
 
