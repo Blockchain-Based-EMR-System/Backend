@@ -4587,6 +4587,99 @@
         }
       }
     },
+    "/doctors/nurses": {
+      "get": {
+        "tags": [
+          "Doctors"
+        ],
+        "description": "Retrieves all nurses working with the doctor",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Nurses retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "uuid-string"
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "Max Mustermann"
+                      },
+                      "email": {
+                        "type": "string",
+                        "example": "max.mustermann@example.com"
+                      },
+                      "gender": {
+                        "type": "string",
+                        "example": "FEMALE"
+                      },
+                      "phone": {
+                        "type": "string",
+                        "example": "+201234567890"
+                      },
+                      "age": {
+                        "type": "number",
+                        "example": 28
+                      },
+                      "profilePic": {
+                        "type": "string",
+                        "example": "https://res.cloudinary.com/example/photo.jpg"
+                      },
+                      "years_of_experience": {
+                        "type": "number",
+                        "example": 5
+                      },
+                      "nationalCardUrl": {
+                        "type": "string",
+                        "example": "https://res.cloudinary.com/example/national_card.pdf"
+                      },
+                      "brief": {
+                        "type": "string",
+                        "example": "Experienced ICU nurse with 5 years in critical care"
+                      },
+                      "bonusFileUrl": {
+                        "type": "string",
+                        "example": "https://res.cloudinary.com/example/bonus.pdf"
+                      }
+                    }
+                  }
+                },
+                "messageEn": {
+                  "type": "string",
+                  "example": "Nurses retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع الممرضين بنجاح"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized – missing or invalid token"
+          }
+        }
+      }
+    },
     "/doctors/announcements/{applicantId}/approve": {
       "patch": {
         "tags": [

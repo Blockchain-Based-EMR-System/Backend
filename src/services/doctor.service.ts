@@ -775,6 +775,54 @@ export class DoctorService {
         })));
     }
 
+    public async getWorkingNurses(doctorId: string): Promise<NurseData[]> {
+        const nurses = await prisma.nurseSchedule.findMany({
+            where: {
+                doctor_id: doctorId,
+                deleted_at: null
+            },
+            select: {
+                nurse: {
+                    select: {
+                        years_of_experience: true,
+                        nationalCardUrl: true,
+                        bonusFileUrl: true,
+                        brief: true,
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true,
+                                gender: true,
+                                phone: true,
+                                date_of_birth: true,
+                                photo_url: true,
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        const uniqueNurses = Array.from(
+            new Map(nurses.map(({ nurse }) => [nurse.user.id, nurse])).values()
+        );
+
+        return Promise.all(uniqueNurses.map(async (nurse) => ({
+            id: nurse.user.id,
+            name: nurse.user.name,
+            email: nurse.user.email,
+            gender: nurse.user.gender,
+            phone: nurse.user.phone,
+            age: await this.userService.calculateUserAge(nurse.user.date_of_birth),
+            profilePic: nurse.user.photo_url,
+            years_of_experience: nurse.years_of_experience,
+            nationalCardUrl: nurse.nationalCardUrl,
+            bonusFileUrl: nurse.bonusFileUrl,
+            brief: nurse.brief,
+        })));
+    }
+
     public async postAnnouncement(doctorId: string, data: PostAnnouncementDto): Promise<void> {
         const doctor = await prisma.doctor.findUnique({
             where: {

@@ -137,6 +137,10 @@ export const SuccessResponseMessages = {
         message_en: "Announcement applicants retrieved successfully.",
         message_ar: "تم استرجاع المتقدمين للإعلان بنجاح.",
     },
+    NURSES_RETRIEVED_SUCCESSFULLY: {
+        message_en: "Nurses retrieved successfully.",
+        message_ar: "تم استرجاع الممرضين بنجاح.",
+    },
     ANNOUNCEMENTS_RETRIEVED: {
         message_en: "Announcements retrieved successfully.",
         message_ar: "تم استرجاع الإعلانات بنجاح.",

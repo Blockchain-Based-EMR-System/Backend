@@ -362,6 +362,48 @@ export class DoctorsRoute implements Routes {
             AuthMiddleware,
             this.doctorsController.getAnnouncementApplicants
         )
+        this.router.get(
+            `/doctors/nurses`,
+            /*
+                #swagger.path = '/doctors/nurses'
+                #swagger.method = 'get'
+                #swagger.tags = ['Doctors']
+                #swagger.description = 'Retrieves all nurses working with the doctor'
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.responses[200] = {
+                    description: 'Nurses retrieved successfully',
+                    schema: {
+                        data: [
+                            {
+                                id: 'uuid-string',
+                                name: 'Max Mustermann',
+                                email: 'max.mustermann@example.com',
+                                gender: 'FEMALE',
+                                phone: '+201234567890',
+                                age: 28,
+                                profilePic: 'https://res.cloudinary.com/example/photo.jpg',
+                                years_of_experience: 5,
+                                nationalCardUrl: 'https://res.cloudinary.com/example/national_card.pdf',
+                                brief: 'Experienced ICU nurse with 5 years in critical care',
+                                bonusFileUrl: 'https://res.cloudinary.com/example/bonus.pdf'
+                            }
+                        ],
+                        messageEn: 'Nurses retrieved successfully',
+                        messageAr: 'تم استرجاع الممرضين بنجاح'
+                    }
+                }
+                #swagger.responses[401] = {
+                    description: 'Unauthorized – missing or invalid token'
+                }
+            */
+            AuthMiddleware,
+            this.doctorsController.getWorkingNurses
+        )
 
         this.router.patch(
             `/doctors/announcements/:applicantId/approve`,
