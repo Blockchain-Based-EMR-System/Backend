@@ -8552,6 +8552,284 @@
           }
         }
       }
+    },
+    "/record/health/ipfs": {
+      "get": {
+        "tags": [
+          "Medical Records"
+        ],
+        "description": "Checks connectivity to the IPFS (Pinata) service",
+        "responses": {
+          "200": {
+            "description": "IPFS connection is healthy",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "ok"
+                },
+                "message": {
+                  "type": "string",
+                  "example": "IPFS connection is healthy"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "503": {
+            "description": "IPFS service is unreachable"
+          }
+        }
+      }
+    },
+    "/record/patient": {
+      "get": {
+        "tags": [
+          "Medical Records"
+        ],
+        "description": "Retrieves all medical record metadata for the authenticated patient (no file bytes)",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Medical records retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Medical records retrieved successfully"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "uuid-string"
+                      },
+                      "patient_id": {
+                        "type": "string",
+                        "example": "uuid-string"
+                      },
+                      "clinic_id": {
+                        "type": "string",
+                        "example": "uuid-string"
+                      },
+                      "doctor_id": {
+                        "type": "string",
+                        "example": "uuid-string"
+                      },
+                      "appointment_id": {
+                        "type": "string",
+                        "example": "uuid-string"
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "Blood Test Results"
+                      },
+                      "type": {
+                        "type": "string",
+                        "example": "LAB_RESULT"
+                      },
+                      "mime_type": {
+                        "type": "string",
+                        "example": "application/pdf"
+                      },
+                      "cid": {
+                        "type": "string",
+                        "example": "bafybeigdyrzt5sfp7udm7hu76uh7y26nf3efuylqabf3oclgtqy55fbzdi"
+                      }
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized – missing or invalid token"
+          }
+        }
+      }
+    },
+    "/record/{id}": {
+      "get": {
+        "tags": [
+          "Medical Records"
+        ],
+        "description": "Downloads and decrypts a single medical record file. Returns raw file bytes with appropriate Content-Type header.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "UUID of the medical record"
+          },
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Decrypted file bytes streamed back with Content-Type, Content-Disposition, x-record-id, x-patient-id, x-record-type headers set"
+          },
+          "401": {
+            "description": "Unauthorized – missing or invalid token"
+          },
+          "404": {
+            "description": "Record not found or already deleted"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Medical Records"
+        ],
+        "description": "Soft-deletes a medical record (sets deleted_at). File remains on IPFS but is inaccessible via the API.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "UUID of the medical record to delete"
+          },
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Medical record deleted successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Medical record deleted successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized – missing or invalid token"
+          },
+          "404": {
+            "description": "Record not found or already deleted"
+          }
+        }
+      }
+    },
+    "/record/{doctorId}/upload": {
+      "post": {
+        "tags": [
+          "Medical Records"
+        ],
+        "description": "Patient uploads a new medical record file",
+        "parameters": [
+          {
+            "name": "doctorId",
+            "in": "path",
+            "required": true,
+            "type": "string",
+            "description": "UUID of the doctor associated with this record"
+          },
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "file",
+            "in": "formData",
+            "description": "The medical record file",
+            "required": true,
+            "type": "file"
+          },
+          {
+            "name": "name",
+            "in": "formData",
+            "description": "Display name for the record",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "type",
+            "in": "formData",
+            "description": "Record type enum (LAB_RESULT | SCAN | DIAGNOSIS | VISIT_SUMMARY | SOAP_NOTE | MEDICAL_HISTORY)",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "clinicId",
+            "in": "formData",
+            "description": "UUID of the clinic",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "appointmentId",
+            "in": "formData",
+            "description": "UUID of the appointment (optional)",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Medical record uploaded successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Medical record uploaded successfully"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "No file uploaded or validation failed"
+          },
+          "401": {
+            "description": "Unauthorized – missing or invalid token"
+          },
+          "404": {
+            "description": "Patient encryption key not found"
+          }
+        }
+      }
     }
   }
 }

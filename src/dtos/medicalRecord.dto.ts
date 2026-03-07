@@ -1,21 +1,43 @@
-import { IsEnum, IsNotEmpty, IsOptional, IsUUID, IsString } from 'class-validator';
-import { RecordType } from '@prisma/client';
+import { IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class CreateMedicalRecordDto {
 
+    @IsUUID()
+    @IsNotEmpty()
+    public patientId: string;
+
+    @IsUUID()
+    @IsNotEmpty()
+    public recordId: string;
+
+    @IsUUID()
+    @IsNotEmpty()
+    public doctorId: string;
+
     @IsString()
     @IsNotEmpty()
-    public name: string;
+    public type: string;
 
-    @IsEnum(RecordType)
+    @IsString()
     @IsNotEmpty()
-    public type: RecordType;
+    public ipfsCidKey: string;
+}
+
+export class UpdateMedicalRecordDto {
 
     @IsUUID()
     @IsNotEmpty()
-    public clinicId: string;
+    public recordId: string;
 
     @IsUUID()
+    @IsNotEmpty()
+    public doctorId: string;
+
+    @IsString()
+    @IsNotEmpty()
+    public type: string;
+
+    @IsString()
     @IsOptional()
-    public appointmentId?: string;
+    public ipfsCidKey?: string;
 }

@@ -40,6 +40,15 @@ export class IpfsService {
         }
     }
 
+    public async checkHealth(): Promise<{ status: string; message: string }> {
+        try {
+            await this.pinata.testAuthentication();
+            return { status: 'ok', message: 'IPFS connection is healthy' };
+        } catch (e) {
+            throw new HttpException(503, `IPFS connection failed: ${e.message}`);
+        }
+    }
+
     public async deleteFile(cid: string): Promise<void> {
         try {
             await this.pinata.files.delete([cid]);

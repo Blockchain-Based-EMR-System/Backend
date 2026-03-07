@@ -8,24 +8,15 @@ class FabricController {
     public fabricService = new FabricService();
 
 
-    private getIdentityLabel(req: Request): string {
-        const identityLabel = req.headers['x-fabric-identity'] as string;
-        if (!identityLabel) {
-            throw new HttpException(400, 'Missing X-Fabric-Identity header');
-        }
-        return identityLabel;
-    }
-
-
     public onboardIdentity = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const input: FabricIdentityInput = req.body;
             
             // Validate required fields
-            if (!input.label || !input.mspId || !input.certificate || 
+            if (!input.clinicId || !input.mspId || !input.certificate || 
                 !input.privateKey || !input.peerEndpoint || !input.peerHostAlias || 
                 !input.tlsCertificate) {
-                throw new HttpException(400, 'Missing required fields: label, mspId, certificate, privateKey, peerEndpoint, peerHostAlias, tlsCertificate');
+                throw new HttpException(400, 'Missing required fields: clinicId, mspId, certificate, privateKey, peerEndpoint, peerHostAlias, tlsCertificate');
             }
 
             const identity = await identityStorage.storeIdentity(input);
@@ -51,14 +42,9 @@ class FabricController {
 
     public deleteIdentity = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
-            const label = req.params.label;
-            
-            // Close any active connection for this identity
-            await this.fabricService.closeConnection(label);
-            
-            // Delete from storage
-            await identityStorage.deleteIdentity(label);
-            
+            const clinicId = req.params.clinicId;
+            await this.fabricService.closeConnection(clinicId);
+            await identityStorage.deleteIdentity(clinicId);
             res.status(200).json({ message: 'Identity deleted successfully' });
         } catch (error) {
             next(error);
@@ -76,20 +62,20 @@ class FabricController {
 
     public getAllRecords = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
-            const identityLabel = this.getIdentityLabel(req);
-            const records = await this.fabricService.getAllRecords(identityLabel);
+            const clinicId = req.params.clinicId;
+            const records = await this.fabricService.getAllRecords(clinicId);
             res.status(200).json({ data: records, message: 'findAll' });
         } catch (error) {
             next(error);
         }
     };
 
-    public getRecordById = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    public getRecordsByPatient = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
-            const identityLabel = this.getIdentityLabel(req);
+            const clinicId = req.params.clinicId;
             const patientId = req.params.patientId;
-            const record = await this.fabricService.getRecordByPatientId(identityLabel, patientId);
-            res.status(200).json({ data: record, message: 'findOne' });
+            const records = await this.fabricService.getRecordsByPatient(clinicId, patientId);
+            res.status(200).json({ data: records, message: 'findAll' });
         } catch (error) {
             next(error);
         }
@@ -97,8 +83,8 @@ class FabricController {
 
     public addRecord = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
-            const identityLabel = this.getIdentityLabel(req);
-            await this.fabricService.addRecord(identityLabel, req.body);
+            const clinicId = req.params.clinicId;
+            await this.fabricService.addRecord(clinicId, req.body);
             res.status(201).json({ message: 'created' });
         } catch (error) {
             next(error);
@@ -107,9 +93,9 @@ class FabricController {
 
     public updateRecord = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
-            const identityLabel = this.getIdentityLabel(req);
+            const clinicId = req.params.clinicId;
             const patientId = req.params.patientId;
-            await this.fabricService.updateRecord(identityLabel, patientId, req.body);
+            await this.fabricService.updateRecord(clinicId, patientId, req.body);
             res.status(200).json({ message: 'updated' });
         } catch (error) {
             next(error);
@@ -118,7 +104,7 @@ class FabricController {
 
     public grantAccess = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
-            const identityLabel = this.getIdentityLabel(req);
+            const clinicId = req.params.clinicId;
             const patientId = req.params.patientId;
             const { targetMsp } = req.body;
 
@@ -126,7 +112,7 @@ class FabricController {
                 throw new HttpException(400, 'targetMsp is required');
             }
 
-            await this.fabricService.grantAccess(identityLabel, patientId, targetMsp);
+            await this.fabricService.grantAccess(clinicId, patientId, targetMsp);
             res.status(200).json({ message: 'Access granted successfully' });
         } catch (error) {
             next(error);
@@ -135,9 +121,10 @@ class FabricController {
 
     public initLedger = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
-            const identityLabel = this.getIdentityLabel(req);
-            await this.fabricService.initLedger(identityLabel);
-            res.status(200).json({ message: 'Ledger initialized' });
+            const clinicId = req.params.clinicId;
+            const backupData = Array.isArray(req.body?.backupData) ? req.body.backupData : [];
+            await this.fabricService.initLedger(clinicId, backupData);
+            res.status(200).json({ message: 'Ledger initialized', seeded: backupData.length });
         } catch (error) {
             next(error);
         }

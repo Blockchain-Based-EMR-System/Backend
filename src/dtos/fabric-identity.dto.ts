@@ -2,7 +2,7 @@ import { IsString, IsOptional, IsNotEmpty } from 'class-validator';
 export class OnboardIdentityDto {
     @IsString()
     @IsNotEmpty()
-    public label: string;
+    public clinicId: string;
 
     @IsString()
     @IsNotEmpty()

@@ -251,21 +251,19 @@ model AuditLog {
 model MedicalRecord {
   id             String     @id @default(uuid())
   patient_id     String                        
-  clinic_id      String                        
+  clinic_id      String                      
   doctor_id      String?                       
   appointment_id String?                       
   name           String     @db.VarChar(255)
   cid            String     @unique @db.VarChar(255)   
   mime_type      String     @db.VarChar(100)   
   type           RecordType
-  key_id         String                        
   created_at     DateTime   @default(now())
   modified_at    DateTime   @updatedAt
   deleted_at     DateTime?
 
   patient        User          @relation("PatientMedicalRecords", fields: [patient_id], references: [id])
   appointment    Appointment?  @relation(fields: [appointment_id], references: [id])
-  encryption_key EncryptionKey @relation(fields: [key_id], references: [id])
 
   @@index([patient_id])
   @@index([clinic_id])    
@@ -285,7 +283,6 @@ model EncryptionKey {
   deleted_at      DateTime?
 
   patient         User            @relation("PatientEncryptionKey", fields: [patient_id], references: [id], onDelete: Cascade)
-  medical_records MedicalRecord[]
 
   @@map("EncryptionKeys")
 }

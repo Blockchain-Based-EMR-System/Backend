@@ -2,11 +2,14 @@ import { HttpException } from '@/exceptions/HttpException';
 import { CreateMedicalRecordDto } from '@/dtos/medical-records.dto';
 import { MedicalRecord, MedicalRecordFile } from '@/interfaces/medicalRecords.interface';
 import prisma from '@/config/prisma';
+import { Prisma } from '@prisma/client';
 import { Service } from 'typedi';
 import { IpfsService } from '@/services/ipfs.service';
 import { EncryptionService } from '@/services/encryption.service';
 import { KeyManagementService } from '@/services/key-management.service';
 import { createBilingualError, ErrorMessages } from '@/utils/errorMessages';
+import { randomUUID } from 'crypto';
+import FabricService from '@/services/fabric.service';
 
 
 @Service()
@@ -15,8 +18,10 @@ export class MedicalRecordService {
     private ipfsService = new IpfsService();
     private encryptionService = new EncryptionService();
     private keyManagementService = new KeyManagementService();
+    private fabricService = new FabricService();
 
     public async createMedicalRecord(
+        clinicId: string,
         patientId: string,
         doctorId: string,
         fileData: CreateMedicalRecordDto,
@@ -24,35 +29,36 @@ export class MedicalRecordService {
         fileName: string,
         mimeType: string,
     ): Promise<void> {
-        const patientDEK = await this.keyManagementService.getPatientDEK(patientId);
-        const encryptedFile = this.encryptionService.encryptFile(fileBuffer, patientDEK);
-        patientDEK.fill(0);
+        const recordId = randomUUID();
+
+        const recordDEK = await this.keyManagementService.getRecordDEK(clinicId, patientId, recordId);
+        const encryptedFile = this.encryptionService.encryptFile(fileBuffer, recordDEK);
+        recordDEK.fill(0);
 
         const cid = await this.ipfsService.uploadFile(encryptedFile, fileName, mimeType);
 
-        const keyRecord = await prisma.encryptionKey.findUnique({
-            where: {
-                patient_id: patientId
-            },
-            select: {
-                id: true
-            },
-        });
-
         await prisma.medicalRecord.create({
             data: {
+                id: recordId,
                 patient_id: patientId,
                 doctor_id: doctorId,
-                clinic_id: (fileData as any).clinicId,
+                clinic_id: clinicId,
                 appointment_id: (fileData as any).appointmentId,
                 name: fileData.name,
                 cid: cid,
                 type: fileData.type,
                 mime_type: mimeType,
-                key_id: keyRecord.id,
-            },
+            } as Prisma.MedicalRecordUncheckedCreateInput,
         });
 
+        // Sync to blockchain ledger
+        await this.fabricService.addRecord(clinicId, {
+            patientId,
+            recordId,
+            doctorId,
+            type: fileData.type,
+            ipfsCidKey: cid,
+        });
     }
 
     public async getRecordFile(recordId: string): Promise<MedicalRecordFile> {
@@ -81,9 +87,9 @@ export class MedicalRecordService {
 
         const encryptedFile = await this.ipfsService.getFile(record.cid);
 
-        const patientDEK = await this.keyManagementService.getPatientDEK(record.patient_id);
-        const decryptedFile = this.encryptionService.decryptFile(encryptedFile, patientDEK);
-        patientDEK.fill(0);
+        const recordDEK = await this.keyManagementService.getRecordDEK(record.clinic_id, record.patient_id, record.id);
+        const decryptedFile = this.encryptionService.decryptFile(encryptedFile, recordDEK);
+        recordDEK.fill(0);
 
         return {
             id: record.id,
@@ -97,6 +103,10 @@ export class MedicalRecordService {
             cid: record.cid,
             buffer: decryptedFile,
         };
+    }
+
+    public async checkIpfsHealth(): Promise<{ status: string; message: string }> {
+        return this.ipfsService.checkHealth();
     }
 
     public async getPatientFiles(patientId: string): Promise<MedicalRecord[]> {
@@ -153,13 +163,13 @@ export class MedicalRecordService {
             throw new HttpException(error.status, error.message, error.messageAr);
         }
 
+        // Remove from blockchain ledger
+        await this.fabricService.deleteRecord(record.clinic_id, record.patient_id, recordId);
+
+        // Soft-delete in DB
         await prisma.medicalRecord.update({
-            where: {
-                id: recordId
-            },
-            data: {
-                deleted_at: new Date()
-            },
+            where: { id: recordId },
+            data: { deleted_at: new Date() },
         });
     }
 }

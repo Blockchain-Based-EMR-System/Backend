@@ -1,12 +1,9 @@
 export interface MedicalRecord {
   patientId: string;
-  firstName: string;
-  lastName: string;
-  dateOfBirth: string;
-  gender: string;
-  bloodType: string;
-  ipfsCid: string;
-  summary?: string;
+  recordId: string;
+  doctorId: string;
+  type: string;
+  ipfsCidKey: string;
   ownerMsp?: string;
   authorizedMsps?: string[];
 }

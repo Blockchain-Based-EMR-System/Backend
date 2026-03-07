@@ -18,11 +18,13 @@ export class MedicalRecordController {
         const recordData: CreateMedicalRecordDto = req.body;
         const patientId = req.user.id;
         const doctorId = req.params.doctorId;
+        const clinicId = req.params.clinicId;
         const fileBuffer = req.file.buffer;
         const fileName = req.file.originalname;
         const mimeType = req.file.mimetype;
 
         await this.medicalRecordService.createMedicalRecord(
+            clinicId,
             patientId,
             doctorId,
             recordData,
@@ -60,6 +62,11 @@ export class MedicalRecordController {
                 file: buffer.toString('base64'),
             },
         });
+    });
+
+    public checkIpfsHealth = catchAsync(async (req: Request, res: Response): Promise<void> => {
+        const result = await this.medicalRecordService.checkIpfsHealth();
+        res.status(200).json(result);
     });
 
     public deleteRecord = catchAsync(async (req: Request, res: Response): Promise<void> => {

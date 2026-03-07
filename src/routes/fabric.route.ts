@@ -25,7 +25,7 @@ export class FabricRoute implements Routes {
                     description: 'Identity onboarding data',
                     required: true,
                     schema: {
-                        $label: 'org1',
+                        $clinicId: 'clinic-uuid-here',
                         $mspId: 'Org1MSP',
                         $certificate: 'PEM certificate',
                         $privateKey: 'PEM private key',
@@ -46,7 +46,7 @@ export class FabricRoute implements Routes {
             this.fabricController.listIdentities,
         );
         this.router.delete(
-            '/fabric/identities/:label',
+            '/fabric/identities/:clinicId',
             /* #swagger.tags = ['FabricIdentity'] */
             this.fabricController.deleteIdentity,
         );
@@ -57,13 +57,25 @@ export class FabricRoute implements Routes {
         );
         this.router.post(
             '/fabric/init-ledger',
-            /* 
+            /*
                 #swagger.tags = ['FabricIdentity']
-                #swagger.parameters['X-Fabric-Identity'] = {
-                    in: 'header',
-                    description: 'Identity label (e.g., org1)',
-                    required: true,
-                    type: 'string'
+                #swagger.description = 'Initialize the ledger, optionally seeding it with backup records'
+                #swagger.parameters['body'] = {
+                    in: 'body',
+                    description: 'Optional backup data to seed the ledger',
+                    required: false,
+                    schema: {
+                        backupData: [
+                            {
+                                patientId: 'patient-uuid',
+                                recordId: 'record-uuid',
+                                doctorId: 'doctor-uuid',
+                                type: 'LAB_RESULT',
+                                ownerMsp: 'Org1MSP',
+                                authorizedMsps: []
+                            }
+                        ]
+                    }
                 }
             */
             this.fabricController.initLedger,
@@ -92,40 +104,26 @@ export class FabricRoute implements Routes {
         );
         this.router.get(
             '/records/:patientId',
-            /* 
+            /*
                 #swagger.tags = ['MedicalRecords']
-                #swagger.parameters['X-Fabric-Identity'] = {
-                    in: 'header',
-                    description: 'Identity label (e.g., org1)',
-                    required: true,
-                    type: 'string'
-                }
+                #swagger.description = 'Get all records for a patient (authorized MSPs only)'
             */
-            this.fabricController.getRecordById,
+            this.fabricController.getRecordsByPatient,
         );
         this.router.post(
             '/records',
-            /* 
+            /*
                 #swagger.tags = ['MedicalRecords']
-                #swagger.parameters['X-Fabric-Identity'] = {
-                    in: 'header',
-                    description: 'Identity label (e.g., org1)',
-                    required: true,
-                    type: 'string'
-                }
+                #swagger.description = 'Add a new medical record for a patient'
                 #swagger.parameters['body'] = {
                     in: 'body',
-                    description: 'Medical record data',
                     required: true,
                     schema: {
-                        $patientId: 'P12345',
-                        $firstName: 'John',
-                        $lastName: 'Doe',
-                        $dateOfBirth: '1990-01-01',
-                        $gender: 'Male',
-                        $bloodType: 'O+',
-                        $ipfsCid: 'Qm...',
-                        summary: 'Optional summary'
+                        $patientId: 'patient-uuid',
+                        $recordId: 'record-uuid',
+                        $doctorId: 'doctor-uuid',
+                        $type: 'LAB_RESULT',
+                        $ipfsCidKey: 'bafybeigdyrzt...'
                     }
                 }
             */
@@ -133,27 +131,18 @@ export class FabricRoute implements Routes {
             this.fabricController.addRecord,
         );
         this.router.put(
-            '/records/:patientId',
-            /* 
+            '/records/:patientId/:recordId',
+            /*
                 #swagger.tags = ['MedicalRecords']
-                #swagger.parameters['X-Fabric-Identity'] = {
-                    in: 'header',
-                    description: 'Identity label (e.g., org1)',
-                    required: true,
-                    type: 'string'
-                }
+                #swagger.description = 'Update an existing medical record (doctorId, type, optional new ipfsCidKey via transient)'
                 #swagger.parameters['body'] = {
                     in: 'body',
-                    description: 'Update medical record data',
                     required: true,
                     schema: {
-                        $firstName: 'John',
-                        $lastName: 'Doe',
-                        $dateOfBirth: '1990-01-01',
-                        $gender: 'Male',
-                        $bloodType: 'O+',
-                        $ipfsCid: 'Qm...',
-                        summary: 'Optional summary'
+                        $recordId: 'uuid-record-id',
+                        $doctorId: 'doctor-uuid',
+                        $type: 'LAB_RESULT',
+                        ipfsCidKey: 'optional-new-cid-key'
                     }
                 }
             */
@@ -163,21 +152,15 @@ export class FabricRoute implements Routes {
 
         this.router.post(
             '/records/:patientId/access',
-            /* 
+            /*
                 #swagger.tags = ['MedicalRecords']
-                #swagger.parameters['X-Fabric-Identity'] = {
-                    in: 'header',
-                    description: 'Identity label (e.g., org1)',
-                    required: true,
-                    type: 'string'
-                }
+                #swagger.description = 'Grant access to all records of a patient for a target MSP'
                 #swagger.parameters['body'] = {
                     in: 'body',
-                    description: 'Grant access to MSP',
                     required: true,
-                    schema: {
-                        $targetMsp: 'Org2MSP'
-                    }
+                    schema: { $targetMsp: 'Org2MSP' }
+                }
+            */
                 }
             */
             this.fabricController.grantAccess,

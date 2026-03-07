@@ -1,51 +1,45 @@
 import { Service } from 'typedi';
-import prisma from '@/config/prisma';
 import { EncryptionService } from './encryption.service';
 import { HttpException } from '@/exceptions/HttpException';
-import { createBilingualError, ErrorMessages } from '@/utils/errorMessages';
+import FabricService from '@/services/fabric.service';
 
 @Service()
 export class KeyManagementService {
 
     private encryptionService = new EncryptionService();
+    private fabricService = new FabricService();
 
-    public async createPatientKey(patientId: string): Promise<void> {
-        const existing = await prisma.encryptionKey.findUnique({
-            where: {
-                patient_id: patientId
-            }
-        });
-        if (existing){
-            const error = createBilingualError(400, ErrorMessages.PATIENT_KEY_ALREADY_EXISTS);
-            throw new HttpException(error.status, error.message, error.messageAr);
+    /**
+     * Generates a fresh DEK, wraps it with the master key, and stores the
+     * encrypted form in the record's implicit private data collection on the
+     * blockchain. Throws if a key already exists for this record.
+     */
+    public async createRecordKey(clinicId: string, patientId: string, recordId: string): Promise<void> {
+        const exists = await this.fabricService.recordKeyExists(clinicId, patientId, recordId);
+        if (exists) {
+            throw new HttpException(400, `Encryption key already exists for record: ${recordId}`);
         }
 
-        const patientDEK = this.encryptionService.generateDEK();
-        const encryptedDEK = this.encryptionService.encryptDEK(patientDEK);
+        const recordDEK = this.encryptionService.generateDEK();
+        const encryptedDEK = this.encryptionService.encryptDEK(recordDEK);
+        recordDEK.fill(0);
 
-        await prisma.encryptionKey.create({
-            data: {
-                patient_id: patientId,
-                encrypted_key: encryptedDEK,
-                algorithm: 'AES-256-GCM',
-            }
-        });
-        patientDEK.fill(0);
+        await this.fabricService.storeRecordKey(clinicId, patientId, recordId, encryptedDEK);
     }
 
-    public async getPatientDEK(patientId: string): Promise<Buffer> {
-        const keyRecord = await prisma.encryptionKey.findUnique({
-            where: {
-                patient_id: patientId
-            }
-        });
-
-        if (!keyRecord) {
-            await this.createPatientKey(patientId);
-            // const error = createBilingualError(404, ErrorMessages.PATIENT_KEY_NOT_FOUND);
-            // throw new HttpException(error.status, error.message, error.messageAr);
+    /**
+     * Fetches the encrypted DEK for a specific record from the blockchain and
+     * decrypts it with the master key. Creates a new key automatically if one
+     * does not yet exist.
+     */
+    public async getRecordDEK(clinicId: string, patientId: string, recordId: string): Promise<Buffer> {
+        const exists = await this.fabricService.recordKeyExists(clinicId, patientId, recordId);
+        if (!exists) {
+            await this.createRecordKey(clinicId, patientId, recordId);
         }
-        return this.encryptionService.decryptDEK(keyRecord.encrypted_key);
-    }
 
+        const encryptedDEK = await this.fabricService.getRecordKey(clinicId, patientId, recordId);
+        return this.encryptionService.decryptDEK(encryptedDEK);
+    }
 }
+

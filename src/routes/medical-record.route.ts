@@ -19,6 +19,24 @@ export class MedicalRecordRoute implements Routes {
     private initializeRoutes() {
 
         this.router.get(
+            `${this.path}/health/ipfs`,
+            /*
+                #swagger.path = '/record/health/ipfs'
+                #swagger.method = 'get'
+                #swagger.tags = ['Medical Records']
+                #swagger.description = 'Checks connectivity to the IPFS (Pinata) service'
+                #swagger.responses[200] = {
+                    description: 'IPFS connection is healthy',
+                    schema: { status: 'ok', message: 'IPFS connection is healthy' }
+                }
+                #swagger.responses[503] = {
+                    description: 'IPFS service is unreachable'
+                }
+            */
+            this.medicalRecordController.checkIpfsHealth
+        );
+
+        this.router.get(
             `${this.path}/patient`,
             /*
                 #swagger.path = '/record/patient'
@@ -98,16 +116,23 @@ export class MedicalRecordRoute implements Routes {
         );
 
         this.router.post(
-            `${this.path}/:doctorId/upload`,
+            `${this.path}/:clinicId/:doctorId/upload`,
             /*
-                #swagger.path = '/record/{doctorId}/upload'
+                #swagger.path = '/record/{clinicId}/{doctorId}/upload'
                 #swagger.method = 'post'
                 #swagger.tags = ['Medical Records']
-                #swagger.description = 'Patient uploads a new medical record file'
+                #swagger.description = 'Patient uploads a new medical record file. The clinic identity is used to store the encryption key on the blockchain.'
 
                 #swagger.parameters['Authorization'] = {
                     in: 'cookie',
                     description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
+
+                #swagger.parameters['clinicId'] = {
+                    in: 'path',
+                    description: 'UUID of the clinic whose Fabric identity will store the encryption key',
                     required: true,
                     type: 'string'
                 }
@@ -136,13 +161,6 @@ export class MedicalRecordRoute implements Routes {
                 #swagger.parameters['type'] = {
                     in: 'formData',
                     description: 'Record type enum (LAB_RESULT | SCAN | DIAGNOSIS | VISIT_SUMMARY | SOAP_NOTE | MEDICAL_HISTORY)',
-                    required: true,
-                    type: 'string'
-                }
-
-                #swagger.parameters['clinicId'] = {
-                    in: 'formData',
-                    description: 'UUID of the clinic',
                     required: true,
                     type: 'string'
                 }

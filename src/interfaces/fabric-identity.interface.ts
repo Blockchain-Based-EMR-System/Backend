@@ -1,6 +1,6 @@
 
 export interface FabricIdentity {
-    label: string;
+    clinicId: string;
     mspId: string;
     certificate: string;
     privateKey: string;
@@ -14,7 +14,7 @@ export interface FabricIdentity {
 }
 
 export interface FabricIdentityInput {
-    label: string;
+    clinicId: string;
     mspId: string;
     certificate: string;
     privateKey: string;

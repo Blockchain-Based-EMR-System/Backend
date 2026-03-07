@@ -7,8 +7,6 @@ import { HttpException } from '@/exceptions/HttpException';
 class IdentityStorageService {
     private readonly storagePath: string;
     private readonly encryptionKey: Buffer;
-    private identities: Map<string, FabricIdentity> = new Map();
-    private initialized: boolean = false;
 
     constructor() {
         this.storagePath = process.env.FABRIC_IDENTITY_STORAGE_PATH || 
@@ -23,42 +21,32 @@ class IdentityStorageService {
         }
     }
 
-    public async initialize(): Promise<void> {
-        if (this.initialized) return;
-
+    private async readAll(): Promise<FabricIdentity[]> {
         try {
             const dir = path.dirname(this.storagePath);
             await fs.mkdir(dir, { recursive: true });
-
             const data = await fs.readFile(this.storagePath, 'utf-8');
             const stored = JSON.parse(data) as FabricIdentity[];
-            
-            for (const identity of stored) {
-                identity.privateKey = this.decrypt(identity.privateKey);
-                this.identities.set(identity.label, identity);
-            }
-            
-            console.log(`Loaded ${this.identities.size} Fabric identities from storage`);
+            return stored.map(identity => ({
+                ...identity,
+                privateKey: this.decrypt(identity.privateKey),
+            }));
         } catch (error: any) {
             if (error.code === 'ENOENT') {
-                console.log('No existing identity storage found. Starting fresh.');
-            } else {
-                console.error('Error loading identity storage:', error.message);
+                return [];
             }
+            throw error;
         }
-
-        this.initialized = true;
     }
 
 
     public async storeIdentity(input: FabricIdentityInput): Promise<FabricIdentity> {
-        await this.initialize();
-
+        const identities = await this.readAll();
         const now = new Date().toISOString();
-        const existing = this.identities.get(input.label);
+        const existing = identities.find(id => id.clinicId === input.clinicId);
 
         const identity: FabricIdentity = {
-            label: input.label,
+            clinicId: input.clinicId,
             mspId: input.mspId,
             certificate: input.certificate,
             privateKey: input.privateKey,
@@ -66,40 +54,39 @@ class IdentityStorageService {
             peerHostAlias: input.peerHostAlias,
             tlsCertificate: input.tlsCertificate,
             channelName: input.channelName || 'mychannel',
-            chaincodeName: input.chaincodeName || 'emr',
+            chaincodeName: input.chaincodeName || 'test',
             createdAt: existing?.createdAt || now,
             updatedAt: now,
         };
 
-
         this.validateIdentity(identity);
 
-        this.identities.set(identity.label, identity);
-        await this.persistToStorage();
+        const updated = identities.filter(id => id.clinicId !== identity.clinicId);
+        updated.push(identity);
+        await this.persistToStorage(updated);
 
-        console.log(`✅ Stored identity: ${identity.label} (MSP: ${identity.mspId})`);
-        
+        console.log(`✅ Stored identity for clinic: ${identity.clinicId} (MSP: ${identity.mspId})`);
 
         return this.sanitizeIdentity(identity);
     }
 
+    
+    public async getIdentity(clinicId: string): Promise<FabricIdentity> {
+        const identities = await this.readAll();
+        const identity = identities.find(id => id.clinicId === clinicId);
 
-    public async getIdentity(label: string): Promise<FabricIdentity> {
-        await this.initialize();
-
-        const identity = this.identities.get(label);
         if (!identity) {
-            throw new HttpException(404, `Identity not found: ${label}`);
+            throw new HttpException(404, `Identity not found for clinic: ${clinicId}`);
         }
 
         return identity;
     }
 
     public async listIdentities(): Promise<Array<Omit<FabricIdentity, 'privateKey' | 'certificate' | 'tlsCertificate'>>> {
-        await this.initialize();
+        const identities = await this.readAll();
 
-        return Array.from(this.identities.values()).map(identity => ({
-            label: identity.label,
+        return identities.map(identity => ({
+            clinicId: identity.clinicId,
             mspId: identity.mspId,
             peerEndpoint: identity.peerEndpoint,
             peerHostAlias: identity.peerHostAlias,
@@ -110,28 +97,29 @@ class IdentityStorageService {
         }));
     }
 
-    public async deleteIdentity(label: string): Promise<void> {
-        await this.initialize();
+    public async deleteIdentity(clinicId: string): Promise<void> {
+        const identities = await this.readAll();
+        const index = identities.findIndex(id => id.clinicId === clinicId);
 
-        if (!this.identities.has(label)) {
-            throw new HttpException(404, `Identity not found: ${label}`);
+        if (index === -1) {
+            throw new HttpException(404, `Identity not found for clinic: ${clinicId}`);
         }
 
-        this.identities.delete(label);
-        await this.persistToStorage();
+        identities.splice(index, 1);
+        await this.persistToStorage(identities);
 
-        console.log(`🗑️  Deleted identity: ${label}`);
+        console.log(`🗑️  Deleted identity for clinic: ${clinicId}`);
     }
 
-    public async hasIdentity(label: string): Promise<boolean> {
-        await this.initialize();
-        return this.identities.has(label);
+    public async hasIdentity(clinicId: string): Promise<boolean> {
+        const identities = await this.readAll();
+        return identities.some(id => id.clinicId === clinicId);
     }
 
 
     private validateIdentity(identity: FabricIdentity): void {
-        if (!identity.label || identity.label.trim() === '') {
-            throw new HttpException(400, 'Identity label is required');
+        if (!identity.clinicId || identity.clinicId.trim() === '') {
+            throw new HttpException(400, 'Clinic ID is required');
         }
 
         if (!identity.mspId || identity.mspId.trim() === '') {
@@ -156,10 +144,9 @@ class IdentityStorageService {
     }
 
 
-    private async persistToStorage(): Promise<void> {
-        const toStore = Array.from(this.identities.values()).map(identity => ({
+    private async persistToStorage(identities: FabricIdentity[]): Promise<void> {
+        const toStore = identities.map(identity => ({
             ...identity,
-
             privateKey: this.encrypt(identity.privateKey),
         }));
 
