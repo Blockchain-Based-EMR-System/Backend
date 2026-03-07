@@ -4004,6 +4004,19 @@
             ]
           },
           {
+            "name": "availability_type",
+            "in": "formData",
+            "description": "availability type of the doctor",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "UNSET",
+              "ONLINE",
+              "OFFLINE",
+              "BOTH"
+            ]
+          },
+          {
             "name": "date_of_birth",
             "in": "formData",
             "description": "Doctor date of birth (YYYY-MM-DD)",

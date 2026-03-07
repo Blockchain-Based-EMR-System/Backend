@@ -22,6 +22,9 @@ export class DoctorSignupRequestDto {
     public password: string;
 
     @IsString()
+    availability_type?: AvailabilityType;
+
+    @IsString()
     @IsNotEmpty()
     public gender: Gender;
 

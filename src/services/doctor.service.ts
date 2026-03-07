@@ -72,6 +72,7 @@ export class DoctorService {
                     id: createdUser.id,
                     specialization: "IMMUNOLOGY",
                     account_status: DoctorAccountStatus.PENDING,
+                    availability_type: doctorData.availability_type,
                 },
             });
             return createdUser.id;

@@ -56,6 +56,13 @@ export class DoctorsRoute implements Routes {
                     type: 'string',
                     enum: ['MALE', 'FEMALE']
                 }
+                #swagger.parameters['availability_type'] = {
+                    in: 'formData',
+                    description: 'availability type of the doctor',
+                    required: false,
+                    type: 'string',
+                    enum: ['UNSET', 'ONLINE', 'OFFLINE', 'BOTH']
+                }
                 #swagger.parameters['date_of_birth'] = {
                     in: 'formData',
                     description: 'Doctor date of birth (YYYY-MM-DD)',

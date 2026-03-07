@@ -57,7 +57,7 @@ export class AppointmentService {
         const today = new Date();
         today.setUTCHours(0, 0, 0, 0);
 
-        for (let i = 1; i <= daysAhead; i++) {
+        for (let i = 0; i < daysAhead; i++) {
             // create a copy from today --> if we used today directly it will be modified to today + 1 --> tomorrow date
             const currentDate = new Date(today);
             currentDate.setUTCDate(today.getUTCDate() + i); // current day now is = today + 1 
@@ -113,8 +113,8 @@ export class AppointmentService {
         const requestedDate = new Date(date);
         const dayOfWeek = this.getDayOfWeek(requestedDate.getUTCDay());
 
-        const today = new Date();
-        today.setUTCHours(0, 0, 0, 0);
+        const now = new Date();
+        const { start: today, end: endOfToday } = this.getTodayBoundaries(now);
 
         const requestedDateOnly = new Date(requestedDate);
         requestedDateOnly.setUTCHours(0, 0, 0, 0);
@@ -196,8 +196,10 @@ export class AppointmentService {
                     return this.doesSlotOverlap(slotStart, slotEnd, apptStart, apptEnd);
                 });
 
-                const now = new Date();
-                const isInPast = slotEnd <= now;
+                const nowUTC = new Date();
+                const egyptOffset = 2 * 60 * 60 * 1000;
+                const now = new Date(nowUTC.getTime() + egyptOffset);
+                const isInPast = slotStart <= now;
 
                 return {
                     start: slot.start,
