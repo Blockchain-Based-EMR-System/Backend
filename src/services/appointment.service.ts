@@ -268,6 +268,7 @@ export class AppointmentService {
                 doctor_id: doctorId,
                 clinic_id: isOnline ? null : clinicId,
                 scheduled_time: scheduledTime,
+                status: 'CONFIRMED',
                 slot_duration: schedule.slot_duration,
                 end_time: endTime,
                 is_online: isOnline,
@@ -427,24 +428,7 @@ export class AppointmentService {
             return [];
         }
         for (const appointment of appointments) {
-            if (appointment.status === 'CONFIRMED') {
-                await this.queueService.calculateQueuePosition(appointment.id);
-
-                const refreshed = await prisma.appointment.findUnique({
-                    where: { id: appointment.id },
-                    select: {
-                        position: true,
-                        estimated_time: true,
-                        patients_ahead: true,
-                    }
-                });
-
-                if (refreshed) {
-                    appointment.position = refreshed.position;
-                    appointment.estimated_time = refreshed.estimated_time;
-                    appointment.patients_ahead = refreshed.patients_ahead;
-                }
-            }
+            const queueParameters = await this.queueService.getQueuePosition(appointment.id);
 
             result.push({
                 id: appointment.id,
@@ -461,15 +445,13 @@ export class AppointmentService {
                 clinic_name: appointment.clinic ? appointment.clinic.name : null,
                 clinic_address: appointment.clinic ? appointment.clinic.address : null,
                 address_maps_link: appointment.clinic ? appointment.clinic.address_maps_link : null,
-                position: appointment.position,
-                estimatedWaitMinutes: appointment.estimated_time,
-                patientsAhead: appointment.patients_ahead
+                position: queueParameters.position,
+                estimatedWaitMinutes: queueParameters.estimatedWaitMinutes,
+                patientsAhead: queueParameters.patientsAhead
             });
         }
 
         return result;
-
-
     }
 
     public async rescheduleAppointmentByPatient(patientId: string, appointmentId: string, newScheduledTime: Date): Promise<AppointmentEventData> {
@@ -850,9 +832,6 @@ export class AppointmentService {
                     gte: startOfDay,
                     lte: endOfDay
                 },
-                status: {
-                    in: ['CONFIRMED', 'COMPLETED']
-                },
                 deleted_at: null,
             },
             select: {
@@ -988,8 +967,6 @@ export class AppointmentService {
         const egyptOffset = 2 * 60 * 60 * 1000;
         const now = new Date(nowUTC.getTime() + egyptOffset);
 
-        console.log('Current time in Egypt:', now);
-        console.log('Appointment scheduled time:', appointment.scheduled_time);
 
         if (now < appointment.scheduled_time) {
             const error = createBilingualError(400, ErrorMessages.CANNOT_BE_COMPLETED_BEFORE_SCHEDULED_TIME);
