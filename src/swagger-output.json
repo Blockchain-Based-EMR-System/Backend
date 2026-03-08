@@ -4635,7 +4635,7 @@
                       },
                       "age": {
                         "type": "number",
-                        "example": 28
+                        "example": 25
                       },
                       "profilePic": {
                         "type": "string",
@@ -4643,19 +4643,63 @@
                       },
                       "years_of_experience": {
                         "type": "number",
-                        "example": 5
+                        "example": 2
                       },
                       "nationalCardUrl": {
                         "type": "string",
                         "example": "https://res.cloudinary.com/example/national_card.pdf"
                       },
+                      "bonusFileUrl": {
+                        "type": "string",
+                        "example": "https://res.cloudinary.com/example/bonus.pdf"
+                      },
                       "brief": {
                         "type": "string",
                         "example": "Experienced ICU nurse with 5 years in critical care"
                       },
-                      "bonusFileUrl": {
-                        "type": "string",
-                        "example": "https://res.cloudinary.com/example/bonus.pdf"
+                      "clinics": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "example": "uuid-string"
+                            },
+                            "name": {
+                              "type": "string",
+                              "example": "Medical Park Clinic"
+                            },
+                            "address": {
+                              "type": "string",
+                              "example": "123 Main St, New Cairo"
+                            },
+                            "address_maps_link": {
+                              "type": "string",
+                              "example": "https://maps.google.com/?q=..."
+                            },
+                            "working_days": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "day_of_week": {
+                                    "type": "string",
+                                    "example": "TUESDAY"
+                                  },
+                                  "start_time": {
+                                    "type": "string",
+                                    "example": "10:00"
+                                  },
+                                  "end_time": {
+                                    "type": "string",
+                                    "example": "17:00"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
                       }
                     }
                   }

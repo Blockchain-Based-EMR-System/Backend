@@ -385,12 +385,45 @@ export class DoctorsRoute implements Routes {
                                 email: 'max.mustermann@example.com',
                                 gender: 'FEMALE',
                                 phone: '+201234567890',
-                                age: 28,
+                                age: 25,
                                 profilePic: 'https://res.cloudinary.com/example/photo.jpg',
-                                years_of_experience: 5,
+                                years_of_experience: 2,
                                 nationalCardUrl: 'https://res.cloudinary.com/example/national_card.pdf',
+                                bonusFileUrl: 'https://res.cloudinary.com/example/bonus.pdf',
                                 brief: 'Experienced ICU nurse with 5 years in critical care',
-                                bonusFileUrl: 'https://res.cloudinary.com/example/bonus.pdf'
+                                clinics: [
+                                    {
+                                        id: 'uuid-string',
+                                        name: 'Al Salam Clinic',
+                                        address: '123 Main St, Cairo',
+                                        address_maps_link: 'https://maps.google.com/?q=...',
+                                        working_days: [
+                                            {
+                                                day_of_week: 'SUNDAY',
+                                                start_time: '14:00',
+                                                end_time: '17:00'
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        id: 'uuid-string',
+                                        name: 'Medical Park Clinic',
+                                        address: '123 Main St, New Cairo',
+                                        address_maps_link: 'https://maps.google.com/?q=...',
+                                        working_days: [
+                                            {
+                                                day_of_week: 'MONDAY',
+                                                start_time: '10:00',
+                                                end_time: '17:00'
+                                            },
+                                            {
+                                                day_of_week: 'TUESDAY',
+                                                start_time: '10:00',
+                                                end_time: '17:00'
+                                            }
+                                        ]
+                                    }
+                                ]
                             }
                         ],
                         messageEn: 'Nurses retrieved successfully',
@@ -401,6 +434,7 @@ export class DoctorsRoute implements Routes {
                     description: 'Unauthorized – missing or invalid token'
                 }
             */
+
             AuthMiddleware,
             this.doctorsController.getWorkingNurses
         )
