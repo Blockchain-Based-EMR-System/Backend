@@ -68,6 +68,7 @@ export class EncryptionService {
 
     private getMasterKey(): Buffer {
         const masterKey = process.env.MASTER_ENCRYPTION_KEY;
+        console.log('Master Key:', masterKey);
         if (!masterKey) {
             const error = createBilingualError(500, ErrorMessages.MASTER_KEY_NOT_SET);
             throw new HttpException(error.status, error.message, error.messageAr);

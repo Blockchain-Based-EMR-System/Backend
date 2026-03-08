@@ -1,5 +1,5 @@
 import { HttpException } from '@/exceptions/HttpException';
-import { CreateMedicalRecordDto } from '@/dtos/medical-records.dto';
+import { CreateDoctorRecordJsonDto, CreateMedicalRecordDto } from '@/dtos/medical-records.dto';
 import { MedicalRecord, MedicalRecordFile } from '@/interfaces/medicalRecords.interface';
 import prisma from '@/config/prisma';
 import { Prisma } from '@prisma/client';
@@ -199,18 +199,15 @@ export class MedicalRecordService {
     }
 
     /**
-     * Doctor-initiated record creation.
-     * Validates the doctor works in the clinic, encrypts the file, uploads to IPFS,
-     * stores in DB, syncs to blockchain, and returns the record ID.
+     * Doctor-initiated record creation (JSON-based).
+     * Validates the doctor works in the clinic, serialises the JSON content to a Buffer,
+     * encrypts it, uploads to IPFS, stores in DB, syncs to blockchain, and returns the record ID.
      */
     public async addDoctorRecord(
         clinicId: string,
         patientId: string,
         doctorId: string,
-        fileData: CreateMedicalRecordDto,
-        fileBuffer: Buffer,
-        fileName: string,
-        mimeType: string,
+        dto: CreateDoctorRecordJsonDto,
     ): Promise<string> {
         // Validate the doctor is associated with this clinic
         const clinicDoctor = await prisma.clinicDoctor.findUnique({
@@ -222,11 +219,16 @@ export class MedicalRecordService {
 
         const recordId = randomUUID();
 
+        // Serialise JSON content to a UTF-8 Buffer and encrypt it
+        const contentBuffer = Buffer.from(JSON.stringify(dto.content), 'utf-8');
         const recordDEK = await this.keyManagementService.getRecordDEK(clinicId, patientId, recordId);
-        const encryptedFile = this.encryptionService.encryptFile(fileBuffer, recordDEK);
+        const encryptedFile = this.encryptionService.encryptFile(contentBuffer, recordDEK);
         recordDEK.fill(0);
 
-        const cid = await this.ipfsService.uploadFile(encryptedFile, fileName, mimeType);
+        // Upload as octet-stream — the file is encrypted binary regardless of original content type.
+        // Uploading as application/json causes Pinata's gateway to call .json() on the encrypted
+        // bytes when fetching, which throws a parse error.
+        const cid = await this.ipfsService.uploadFile(encryptedFile, `${recordId}.enc`, 'application/octet-stream');
 
         await prisma.medicalRecord.create({
             data: {
@@ -234,10 +236,10 @@ export class MedicalRecordService {
                 patient_id: patientId,
                 doctor_id: doctorId,
                 clinic_id: clinicId,
-                name: fileData.name,
+                name: dto.name,
                 cid: cid,
-                type: fileData.type,
-                mime_type: mimeType,
+                type: dto.type,
+                mime_type: 'application/json', // logical type of the decrypted content
             } as Prisma.MedicalRecordUncheckedCreateInput,
         });
 
@@ -246,7 +248,7 @@ export class MedicalRecordService {
             patientId,
             recordId,
             doctorId,
-            type: fileData.type,
+            type: dto.type,
             ipfsCidKey: cid,
         });
 
@@ -257,11 +259,51 @@ export class MedicalRecordService {
      * Retrieves all SOAP_NOTE records for a patient, decrypts the JSON files,
      * and returns their parsed contents as a list of objects.
      */
+    /**
+     * Doctor-facing: returns DB metadata for all of a patient's records
+     * that the caller's clinic is authorized to access on-chain.
+     */
+    public async getPatientRecordsForDoctor(callerClinicId: string, patientId: string): Promise<MedicalRecord[]> {
+        // Get on-chain authorized record IDs for this clinic
+        const authorizedOnChain = await this.fabricService.getRecordsByPatient(callerClinicId, patientId);
+        const authorizedIds = new Set(authorizedOnChain.map(r => r.recordId));
+
+        const records = await prisma.medicalRecord.findMany({
+            where: { patient_id: patientId, deleted_at: null },
+            select: {
+                id: true,
+                patient_id: true,
+                clinic_id: true,
+                doctor_id: true,
+                appointment_id: true,
+                name: true,
+                type: true,
+                mime_type: true,
+                cid: true,
+            },
+            orderBy: { created_at: 'desc' },
+        });
+
+        return records
+            .filter(r => authorizedIds.has(r.id))
+            .map(record => ({
+                id: record.id,
+                patient_id: record.patient_id,
+                clinic_id: record.clinic_id,
+                doctor_id: record.doctor_id ?? undefined,
+                appointment_id: record.appointment_id ?? undefined,
+                name: record.name,
+                type: record.type,
+                cid: record.cid,
+                mime_type: record.mime_type,
+            }));
+    }
+
     public async getSOAPNotes(callerClinicId: string, patientId: string): Promise<Array<{ recordId: string; content: any }>> {
         const records = await prisma.medicalRecord.findMany({
             where: {
                 patient_id: patientId,
-                type: 'SOAP_NOTE',
+                mime_type: 'application/json',
                 deleted_at: null,
             },
             select: {
@@ -282,15 +324,97 @@ export class MedicalRecordService {
         for (const record of records) {
             if (!authorizedIds.has(record.id)) continue;
 
-            const encryptedFile = await this.ipfsService.getFile(record.cid);
-            const recordDEK = await this.keyManagementService.getRecordDEK(record.clinic_id, record.patient_id, record.id);
-            const decryptedFile = this.encryptionService.decryptFile(encryptedFile, recordDEK);
-            recordDEK.fill(0);
+            try {
+                const encryptedFile = await this.ipfsService.getFile(record.cid);
+                const recordDEK = await this.keyManagementService.getRecordDEK(record.clinic_id, record.patient_id, record.id);
+                const decryptedFile = this.encryptionService.decryptFile(encryptedFile, recordDEK);
+                recordDEK.fill(0);
 
-            const content = JSON.parse(decryptedFile.toString('utf-8'));
-            results.push({ recordId: record.id, content });
+                const content = JSON.parse(decryptedFile.toString('utf-8'));
+                results.push({ recordId: record.id, content });
+            } catch (e) {
+                // Skip records that are binary files (not JSON-based)
+                console.warn(`⚠️  Skipping record ${record.id}: not a JSON record (${e.message})`);
+            }
         }
 
         return results;
+    }
+    public async getSOAPNotesForPatient(patientId: string): Promise<Array<{ recordId: string; content: any }>> {
+        const records = await prisma.medicalRecord.findMany({
+            where: {
+                patient_id: patientId,
+                mime_type: 'application/json',
+                deleted_at: null,
+            },
+            select: {
+                id: true,
+                patient_id: true,
+                clinic_id: true,
+                cid: true,
+            },
+            orderBy: { created_at: 'desc' },
+        });
+        
+        // Get all distinct clinics from the records
+        const distinctClinicIds = [...new Set(records.map(r => r.clinic_id))];
+
+        // Call getRecordsByPatient for each clinic sequentially to avoid concurrent gRPC channel conflicts
+        const authorizedIds = new Set<string>();
+        for (const clinicId of distinctClinicIds) {
+            const authorizedRecords = await this.fabricService.getRecordsByPatient(clinicId, patientId);
+            authorizedRecords.forEach(r => authorizedIds.add(r.recordId));
+        }
+
+        const results: Array<{ recordId: string; content: any }> = [];
+
+        for (const record of records) {
+            if (!authorizedIds.has(record.id)) continue;
+
+            try {
+                const encryptedFile = await this.ipfsService.getFile(record.cid);
+                const recordDEK = await this.keyManagementService.getRecordDEK(record.clinic_id, record.patient_id, record.id);
+                const decryptedFile = this.encryptionService.decryptFile(encryptedFile, recordDEK);
+                recordDEK.fill(0);
+
+                const content = JSON.parse(decryptedFile.toString('utf-8'));
+                results.push({ recordId: record.id, content });
+            } catch (e) {
+                // Skip records that are binary files (not JSON-based)
+                console.warn(`⚠️  Skipping record ${record.id}: not a JSON record (${e.message})`);
+            }
+        }
+
+        return results;
+    }
+
+    /**
+     * DEV ONLY — hard-deletes every medical record from DB, IPFS, and the blockchain.
+     */
+    public async deleteAllRecords(): Promise<{ deleted: number }> {
+        const records = await prisma.medicalRecord.findMany({
+            select: { id: true, patient_id: true, clinic_id: true, cid: true },
+        });
+
+        for (const record of records) {
+            // 1. Remove from blockchain
+            try {
+                await this.fabricService.deleteRecord(record.clinic_id, record.patient_id, record.id);
+            } catch (e) {
+                console.warn(`⚠️  Chain delete skipped for ${record.id}: ${e.message}`);
+            }
+
+            // 2. Remove from IPFS
+            try {
+                await this.ipfsService.deleteFile(record.cid);
+            } catch (e) {
+                console.warn(`⚠️  IPFS delete skipped for ${record.id}: ${e.message}`);
+            }
+
+            // 3. Hard-delete from DB
+            await prisma.medicalRecord.delete({ where: { id: record.id } });
+        }
+
+        return { deleted: records.length };
     }
 }

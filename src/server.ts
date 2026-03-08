@@ -11,7 +11,20 @@ import { QueueRoute } from './routes/queue.route';
 import { NurseRoute } from './routes/nurse.route';
 import { UsersRoute } from './routes/user.route';
 import { MedicalRecordRoute } from './routes/medical-record.route';
+import { logger } from '@utils/logger';
+
 ValidateEnv();
+
+// Prevent the process from crashing on unhandled async errors
+process.on('unhandledRejection', (reason: any) => {
+  logger.error(`⚠️  Unhandled Promise Rejection: ${reason?.message || reason}`);
+  if (reason?.stack) logger.error(reason.stack);
+});
+
+process.on('uncaughtException', (err: Error) => {
+  logger.error(`⚠️  Uncaught Exception: ${err.message}`);
+  if (err.stack) logger.error(err.stack);
+});
 
 const app = new App(
     [

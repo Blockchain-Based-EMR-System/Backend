@@ -52,6 +52,14 @@
   "schemes": [
     "http"
   ],
+  "securityDefinitions": {
+    "bearerAuth": {
+      "type": "apiKey",
+      "in": "header",
+      "name": "Authorization",
+      "description": "Enter your Bearer token: Bearer <token>"
+    }
+  },
   "paths": {
     "/auth/signup": {
       "post": {
@@ -8651,27 +8659,116 @@
         }
       }
     },
-    "/record/{clinicId}/{id}": {
-      "get": {
+    "/record/{clinicId}/{patientId}/soap-note": {
+      "post": {
         "tags": [
           "Medical Records"
         ],
-        "description": "Downloads and decrypts a single medical record file. The clinicId identifies the caller\\'s clinic for on-chain authorization.",
+        "description": "Doctor creates a JSON-based medical record for a patient. Validates the doctor works at the clinic. Content is encrypted and stored on IPFS.",
         "parameters": [
           {
             "name": "clinicId",
             "in": "path",
             "required": true,
             "type": "string",
-            "description": "UUID of the caller's clinic (used for on-chain access check)"
+            "description": "UUID of the clinic"
           },
           {
-            "name": "id",
+            "name": "patientId",
             "in": "path",
             "required": true,
             "type": "string",
-            "description": "UUID of the medical record"
+            "description": "UUID of the patient"
           },
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Medical record payload",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "example": "SOAP Note 2026-03-08"
+                },
+                "type": {
+                  "type": "string",
+                  "example": "SOAP_NOTE"
+                },
+                "content": {
+                  "type": "object",
+                  "properties": {
+                    "subjective": {
+                      "type": "string",
+                      "example": "Patient reports headache"
+                    },
+                    "objective": {
+                      "type": "string",
+                      "example": "BP 120/80"
+                    },
+                    "assessment": {
+                      "type": "string",
+                      "example": "Tension headache"
+                    },
+                    "plan": {
+                      "type": "string",
+                      "example": "Ibuprofen 400mg"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Medical record created successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "Medical record created successfully"
+                },
+                "data": {
+                  "type": "object",
+                  "properties": {
+                    "recordId": {
+                      "type": "string",
+                      "example": "uuid-string"
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "400": {
+            "description": "Validation failed"
+          },
+          "403": {
+            "description": "Doctor is not associated with this clinic"
+          }
+        }
+      }
+    },
+    "/record/patient/soap-notes": {
+      "get": {
+        "tags": [
+          "Medical Records"
+        ],
+        "description": "Patient retrieves all their own SOAP notes, authorized across all clinics on-chain.",
+        "parameters": [
           {
             "name": "Authorization",
             "in": "cookie",
@@ -8682,19 +8779,43 @@
         ],
         "responses": {
           "200": {
-            "description": "Decrypted file returned as base64 with record metadata"
+            "description": "SOAP notes retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "message": {
+                  "type": "string",
+                  "example": "SOAP notes retrieved successfully"
+                },
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "recordId": {
+                        "type": "string",
+                        "example": "uuid-string"
+                      },
+                      "content": {
+                        "type": "object",
+                        "properties": {}
+                      }
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
           },
           "401": {
             "description": "Unauthorized – missing or invalid token"
-          },
-          "403": {
-            "description": "Access denied – clinic not authorized for this record"
-          },
-          "404": {
-            "description": "Record not found or already deleted"
           }
         }
-      },
+      }
+    },
+    "/record/{clinicId}/{recordId}": {
       "delete": {
         "tags": [
           "Medical Records"
@@ -8709,16 +8830,22 @@
             "description": "UUID of the caller's clinic (must be the record owner)"
           },
           {
-            "name": "id",
+            "name": "recordId",
             "in": "path",
             "required": true,
-            "type": "string",
-            "description": "UUID of the medical record to delete"
+            "type": "string"
           },
           {
             "name": "Authorization",
             "in": "cookie",
             "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "UUID of the medical record to delete",
             "required": true,
             "type": "string"
           }
@@ -8747,91 +8874,6 @@
           },
           "404": {
             "description": "Record not found or already deleted"
-          }
-        }
-      }
-    },
-    "/record/{clinicId}/{doctorId}/upload": {
-      "post": {
-        "tags": [
-          "Medical Records"
-        ],
-        "description": "Patient uploads a new medical record file. The clinic identity is used to store the encryption key on the blockchain.",
-        "parameters": [
-          {
-            "name": "clinicId",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "description": "UUID of the clinic whose Fabric identity will store the encryption key"
-          },
-          {
-            "name": "doctorId",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "description": "UUID of the doctor associated with this record"
-          },
-          {
-            "name": "Authorization",
-            "in": "cookie",
-            "description": "Bearer token for authentication",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "file",
-            "in": "formData",
-            "description": "The medical record file",
-            "required": true,
-            "type": "file"
-          },
-          {
-            "name": "name",
-            "in": "formData",
-            "description": "Display name for the record",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "type",
-            "in": "formData",
-            "description": "Record type enum (LAB_RESULT | SCAN | DIAGNOSIS | VISIT_SUMMARY | SOAP_NOTE | MEDICAL_HISTORY)",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "appointmentId",
-            "in": "formData",
-            "description": "UUID of the appointment (optional)",
-            "required": false,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "201": {
-            "description": "Medical record uploaded successfully",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string",
-                  "example": "Medical record uploaded successfully"
-                }
-              },
-              "xml": {
-                "name": "main"
-              }
-            }
-          },
-          "400": {
-            "description": "No file uploaded or validation failed"
-          },
-          "401": {
-            "description": "Unauthorized – missing or invalid token"
-          },
-          "404": {
-            "description": "Patient encryption key not found"
           }
         }
       }
@@ -8887,72 +8929,28 @@
         }
       }
     },
-    "/record/{clinicId}/{patientId}/doctor-upload": {
-      "post": {
+    "/record/dev/all": {
+      "delete": {
         "tags": [
           "Medical Records"
         ],
-        "description": "Doctor uploads a medical record for a patient. Validates the doctor works at the clinic. The clinic identity is used for blockchain operations.",
-        "parameters": [
-          {
-            "name": "clinicId",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "description": "UUID of the clinic"
-          },
-          {
-            "name": "patientId",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "description": "UUID of the patient"
-          },
-          {
-            "name": "Authorization",
-            "in": "cookie",
-            "description": "Bearer token for authentication",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "file",
-            "in": "formData",
-            "description": "The medical record file",
-            "required": true,
-            "type": "file"
-          },
-          {
-            "name": "name",
-            "in": "formData",
-            "description": "Display name for the record",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "type",
-            "in": "formData",
-            "description": "Record type enum (LAB_RESULT | SCAN | DIAGNOSIS | VISIT_SUMMARY | SOAP_NOTE | MEDICAL_HISTORY)",
-            "required": true,
-            "type": "string"
-          }
-        ],
+        "description": "DEV ONLY — hard-deletes every medical record from DB, IPFS, and blockchain. No authentication required.",
         "responses": {
-          "201": {
-            "description": "Medical record uploaded successfully",
+          "200": {
+            "description": "All records deleted",
             "schema": {
               "type": "object",
               "properties": {
                 "message": {
                   "type": "string",
-                  "example": "Medical record uploaded successfully"
+                  "example": "Deleted 5 records from DB, IPFS, and blockchain"
                 },
                 "data": {
                   "type": "object",
                   "properties": {
-                    "recordId": {
-                      "type": "string",
-                      "example": "uuid-string"
+                    "deleted": {
+                      "type": "number",
+                      "example": 5
                     }
                   }
                 }
@@ -8961,85 +8959,14 @@
                 "name": "main"
               }
             }
-          },
-          "400": {
-            "description": "No file uploaded or validation failed"
-          },
-          "403": {
-            "description": "Doctor is not associated with this clinic"
-          }
-        }
-      }
-    },
-    "/record/{clinicId}/{patientId}/soap-notes": {
-      "get": {
-        "tags": [
-          "Medical Records"
-        ],
-        "description": "Retrieves all SOAP_NOTE records for a patient, decrypts the JSON files, and returns their parsed contents. Requires on-chain authorization.",
-        "parameters": [
-          {
-            "name": "clinicId",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "description": "UUID of the caller's clinic (for on-chain access check)"
-          },
-          {
-            "name": "patientId",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "description": "UUID of the patient"
-          },
-          {
-            "name": "Authorization",
-            "in": "cookie",
-            "description": "Bearer token for authentication",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "SOAP notes retrieved successfully",
-            "schema": {
-              "type": "object",
-              "properties": {
-                "message": {
-                  "type": "string",
-                  "example": "SOAP notes retrieved successfully"
-                },
-                "data": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "recordId": {
-                        "type": "string",
-                        "example": "uuid-string"
-                      },
-                      "content": {
-                        "type": "object",
-                        "properties": {}
-                      }
-                    }
-                  }
-                }
-              },
-              "xml": {
-                "name": "main"
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized – missing or invalid token"
-          },
-          "403": {
-            "description": "Access denied – clinic not authorized"
           }
         }
       }
     }
-  }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ]
 }

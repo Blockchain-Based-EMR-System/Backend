@@ -27,11 +27,21 @@ class FabricService {
     this.startCleanupInterval();
   }
 
-  public async getGatewayConnection(clinicId: string): Promise<GatewayConnection> {
-    const cached = this.connections.get(clinicId);
-    if (cached) {
-      cached.lastUsed = new Date();
-      return cached;
+  public async getGatewayConnection(clinicId: string, forceNew = false): Promise<GatewayConnection> {
+    if (forceNew) {
+      const stale = this.connections.get(clinicId);
+      if (stale) {
+        try { stale.gateway.close(); } catch (_) {}
+        try { stale.client.close(); } catch (_) {}
+        this.connections.delete(clinicId);
+        console.log(`🔄 Evicted stale connection for clinic: ${clinicId}`);
+      }
+    } else {
+      const cached = this.connections.get(clinicId);
+      if (cached) {
+        cached.lastUsed = new Date();
+        return cached;
+      }
     }
 
     const identity = await identityStorage.getIdentity(clinicId);
@@ -69,7 +79,9 @@ class FabricService {
   }
 
   private async newGrpcConnection(identity: FabricIdentity): Promise<grpc.Client> {
-    const tlsRootCert = Buffer.from(identity.tlsCertificate);
+    // gRPC requires the PEM to end with a newline — ensure it regardless of how it was stored
+    const tlsPem = identity.tlsCertificate.endsWith('\n') ? identity.tlsCertificate : identity.tlsCertificate + '\n';
+    const tlsRootCert = Buffer.from(tlsPem);
     const tlsCredentials = grpc.credentials.createSsl(tlsRootCert);
 
     return new grpc.Client(identity.peerEndpoint, tlsCredentials, {
@@ -102,22 +114,18 @@ class FabricService {
   }
 
   public async storeRecordKey(clinicId: string, patientId: string, recordId: string, encryptedDEK: string): Promise<void> {
-    const { contract, identity } = await this.getGatewayConnection(clinicId);
+    const { contract } = await this.getGatewayConnection(clinicId);
     console.log(`\n--> Submit Transaction: StoreRecordKey (clinic: ${clinicId}, patient: ${patientId}, record: ${recordId})`);
     await contract.submit('StoreRecordKey', {
       arguments: [patientId, recordId],
       transientData: { encryptedDEK: Buffer.from(encryptedDEK) },
-      endorsingOrganizations: [identity.mspId],
     });
   }
 
   public async getRecordKey(clinicId: string, patientId: string, recordId: string): Promise<string> {
-    const { contract, identity } = await this.getGatewayConnection(clinicId);
+    const { contract } = await this.getGatewayConnection(clinicId);
     console.log(`\n--> Evaluate Transaction: GetRecordKey (clinic: ${clinicId}, patient: ${patientId}, record: ${recordId})`);
-    const resultBytes = await contract.evaluate('GetRecordKey', {
-      arguments: [patientId, recordId],
-      endorsingOrganizations: [identity.mspId],
-    });
+    const resultBytes = await contract.evaluateTransaction('GetRecordKey', patientId, recordId);
     return this.utf8Decoder.decode(resultBytes);
   }
 
@@ -137,36 +145,37 @@ class FabricService {
   }
 
   public async addRecord(clinicId: string, payload: MedicalRecord): Promise<void> {
-    const { contract, identity } = await this.getGatewayConnection(clinicId);
+    const { contract } = await this.getGatewayConnection(clinicId);
     console.log(`\n--> Submit Transaction: AddRecord (clinic: ${clinicId})`);
 
     await contract.submit('AddRecord', {
       arguments: [payload.patientId, payload.recordId, payload.doctorId, payload.type],
       transientData: {
-        ipfsCidKey: Buffer.from(payload.ipfsCidKey),
+        ipfsCid: Buffer.from(payload.ipfsCidKey),
       },
-      endorsingOrganizations: [identity.mspId],
     });
   }
 
-  public async getRecordsByPatient(clinicId: string, patientId: string): Promise<MedicalRecord[]> {
-    const { contract, identity } = await this.getGatewayConnection(clinicId);
+  public async getRecordsByPatient(clinicId: string, patientId: string, retry = true): Promise<MedicalRecord[]> {
+    const { contract } = await this.getGatewayConnection(clinicId);
     console.log(`\n--> Evaluate Transaction: GetRecordsByPatient (clinic: ${clinicId}, patient: ${patientId})`);
 
     try {
-      // Evaluate on owner's peers if the caller is not the owner; we pass endorsingOrganizations
-      // as the caller's own MSP so the peer can reach into its implicit private data collection.
-      const resultBytes = await contract.evaluate('GetRecordsByPatient', {
-        arguments: [patientId],
-        endorsingOrganizations: [identity.mspId],
-      });
+      const resultBytes = await contract.evaluateTransaction('GetRecordsByPatient', patientId);
 
       const resultJson = this.utf8Decoder.decode(resultBytes);
       return JSON.parse(resultJson) as MedicalRecord[];
-    } catch (err: any) {
-      const msg = err?.message || String(err);
+    } catch (err: unknown) {
+      const msg = (err instanceof Error ? err.message : String(err)) || '';
+      console.error(`❌ GetRecordsByPatient error for clinic ${clinicId}:`, err);
       if (msg.toLowerCase().includes('not authorized')) {
         throw new HttpException(403, `Access denied for clinic ${clinicId} to records of patient ${patientId}`, msg);
+      }
+      // ABORTED (gRPC code 10) usually means the channel is stale — evict and retry once
+      if (retry && (msg.includes('ABORTED') || msg.includes('10 ABORTED'))) {
+        console.warn(`⚠️  ABORTED on GetRecordsByPatient for clinic ${clinicId}, retrying with fresh connection...`);
+        await this.getGatewayConnection(clinicId, true);
+        return this.getRecordsByPatient(clinicId, patientId, false);
       }
       throw err;
     }
@@ -185,13 +194,12 @@ class FabricService {
 
     const transientData: Record<string, Buffer> = {};
     if (payload.ipfsCidKey) {
-      transientData.ipfsCidKey = Buffer.from(payload.ipfsCidKey);
+      transientData.ipfsCid = Buffer.from(payload.ipfsCidKey);
     }
 
     await contract.submit('UpdateRecord', {
       arguments: [patientId, payload.recordId, payload.doctorId, payload.type],
       ...(Object.keys(transientData).length > 0 ? { transientData } : {}),
-      endorsingOrganizations: [identity.mspId],
     });
   }
 

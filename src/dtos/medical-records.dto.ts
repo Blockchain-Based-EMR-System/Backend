@@ -1,4 +1,4 @@
-import { IsString, IsEnum, IsOptional, IsUUID } from "class-validator";
+import { IsString, IsEnum, IsOptional, IsUUID, IsObject } from "class-validator";
 import { RecordType } from "@/interfaces/enums.interface";
 
 
@@ -14,6 +14,18 @@ export class CreateMedicalRecordDto {
     @IsUUID()
     doctor_id?: string;
 
+}
+
+// checks data when a doctor submits a JSON-based medical record
+export class CreateDoctorRecordJsonDto {
+    @IsString()
+    name: string;
+
+    @IsEnum(RecordType)
+    type: RecordType;
+
+    @IsObject()
+    content: Record<string, any>;
 }
 
 // permissions --> later 

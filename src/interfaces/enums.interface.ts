@@ -19,11 +19,12 @@ export enum Action {
   LOGOUT = 'LOGOUT',
 }
 
+// should be changed to visit, histroy and file
 export enum RecordType {
   LAB_RESULT = 'LAB_RESULT',
   SCAN = 'SCAN',
   DIAGNOSIS = 'DIAGNOSIS',
-  VISIT_SUMMARY = 'VISIT_SUMMARY'
+  VISIT_SOAP = 'VISIT_SUMMARY'
 }
 
 export enum DOCTOR_FILES {

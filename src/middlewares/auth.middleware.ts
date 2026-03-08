@@ -13,7 +13,9 @@ const getAuthorization = (req: Request) => {
   if (cookie) return cookie;
 
   const header = req.header('Authorization');
-  if (header) return header.split('Bearer ')[1];
+  if (header) {
+    return header.startsWith('Bearer ') ? header.slice(7) : header;
+  }
 
   return null;
 };
