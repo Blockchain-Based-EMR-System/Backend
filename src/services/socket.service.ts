@@ -95,6 +95,11 @@ export class SocketService {
             message: 'Successfully connected to socket server',
             userId: userId
         });
+        socket.on('request_initial_data', () => {
+            if (userRole === 'PATIENT') this.sendInitialPatientData(userId);
+            else if (userRole === 'DOCTOR') this.sendInitialDoctorData(userId);
+            else if (userRole === 'NURSE') this.sendInitialNurseData(userId);
+        });
 
         if (userRole === 'PATIENT') {
             this.sendInitialPatientData(userId);
