@@ -832,7 +832,6 @@ export class AppointmentService {
                     gte: startOfDay,
                     lte: endOfDay
                 },
-                deleted_at: null,
             },
             select: {
                 id: true,

@@ -143,7 +143,7 @@ export class SocketService {
 
     private async sendInitialPatientData(patientId: string): Promise<void> {
         try {
-            const appointments = await this.appointmentService.getPatientAppointments(patientId);
+            const appointments = await this.appointmentService.getTodayAppointment(patientId) ?? [];
             const appointmentsWithQueue = await Promise.all(appointments.map(async (app) => {
                 await this.queueService.calculateQueuePosition(app.id);
                 const queuePosition = await this.queueService.getQueuePosition(app.id);
