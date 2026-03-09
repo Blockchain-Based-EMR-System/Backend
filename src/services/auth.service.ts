@@ -166,7 +166,7 @@ export class AuthService {
   }
 
   public createAccessToken(user: Partial<User>): AccessTokenData {
-    const dataStoredInToken: DataStoredInToken = { id: user.id };
+    const dataStoredInToken: DataStoredInToken = { id: user.id , role: user.role};
     const secretKey: string = SECRET_KEY;
     const expiresIn: number = this.parseTimeToSeconds(ACCESS_TOKEN_EXPIRY);
 
@@ -174,7 +174,7 @@ export class AuthService {
   }
 
   public async createRefreshToken(user: Partial<User>): Promise<RefreshTokenData> {
-    const dataStoredInToken: DataStoredInToken = { id: user.id };
+    const dataStoredInToken: DataStoredInToken = { id: user.id , role: user.role};
     const secretKey: string = REFRESH_TOKEN_SECRET;
     const expiresIn: number = this.parseTimeToSeconds(REFRESH_TOKEN_EXPIRY);
 
