@@ -28,6 +28,26 @@ export class CreateDoctorRecordJsonDto {
     content: Record<string, any>;
 }
 
+// checks data when a patient submits their own medical history entry
+export class CreatePatientMedicalHistoryDto {
+    @IsString()
+    name: string;
+
+    @IsObject()
+    content: Record<string, any>;
+}
+
+// checks data when a patient updates an existing medical history entry
+export class UpdatePatientMedicalHistoryDto {
+    @IsOptional()
+    @IsString()
+    name?: string;
+
+    @IsOptional()
+    @IsObject()
+    content?: Record<string, any>;
+}
+
 // permissions --> later 
 
 // checks data when searching/filtering MR

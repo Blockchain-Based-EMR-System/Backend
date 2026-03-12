@@ -4,9 +4,10 @@ import * as crypto from 'crypto';
 import { FabricIdentity, FabricIdentityInput } from '@/interfaces/fabric-identity.interface';
 import { HttpException } from '@/exceptions/HttpException';
 
-class IdentityStorageService {
+export class IdentityStorageService {
     private readonly storagePath: string;
     private readonly encryptionKey: Buffer;
+    private readonly defaultClinicId = 'default-clinic';
 
     constructor() {
         this.storagePath = process.env.FABRIC_IDENTITY_STORAGE_PATH || 
@@ -95,6 +96,14 @@ class IdentityStorageService {
             createdAt: identity.createdAt,
             updatedAt: identity.updatedAt,
         }));
+    }
+    public async defaultIdentity(): Promise<FabricIdentity> {
+        const identities = await this.readAll();
+        const defaultIdentity = identities.find(id => id.clinicId === this.defaultClinicId);
+        if (!defaultIdentity) {
+            throw new HttpException(404, 'Default identity not found');
+        }
+        return defaultIdentity;
     }
 
     public async deleteIdentity(clinicId: string): Promise<void> {

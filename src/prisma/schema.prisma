@@ -482,6 +482,8 @@ enum RecordType {
   VISIT_SUMMARY
   SOAP_NOTE
   MEDICAL_HISTORY
+  VISIT
+  FILE
 }
 
 enum DoctorAccountStatus {
