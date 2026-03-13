@@ -6,6 +6,7 @@ import { HttpException } from '@/exceptions/HttpException';
 import { MedicalRecord } from '@/interfaces/medical-records.interface';
 import { FabricIdentity } from '@/interfaces/fabric-identity.interface';
 import identityStorage from '@/services/identity-storage.service';
+import { backupService } from '@/services/backup.service';
 
 interface GatewayConnection {
   gateway: Gateway;
@@ -48,7 +49,7 @@ class FabricService {
     const connection = await this.createConnection(identity);
     this.connections.set(clinicId, connection);
 
-    console.log(`✅ Created new gateway connection for clinic: ${clinicId}`);
+    console.log(`Created new gateway connection for clinic: ${clinicId}`);
     return connection;
   }
 
@@ -73,13 +74,12 @@ class FabricService {
         lastUsed: new Date(),
       };
     } catch (error: any) {
-      console.error(`❌ Failed to create connection for clinic ${identity.clinicId}:`, error.message);
+      console.error(`Failed to create connection for clinic ${identity.clinicId}:`, error.message);
       throw new HttpException(503, `Failed to connect to Fabric network: ${error.message}`);
     }
   }
 
   private async newGrpcConnection(identity: FabricIdentity): Promise<grpc.Client> {
-    // gRPC requires the PEM to end with a newline — ensure it regardless of how it was stored
     const tlsPem = identity.tlsCertificate.endsWith('\n') ? identity.tlsCertificate : identity.tlsCertificate + '\n';
     const tlsRootCert = Buffer.from(tlsPem);
     const tlsCredentials = grpc.credentials.createSsl(tlsRootCert);
@@ -114,99 +114,173 @@ class FabricService {
   }
 
   public async storeRecordKey(clinicId: string, patientId: string, recordId: string, encryptedDEK: string): Promise<void> {
-    const { contract } = await this.getGatewayConnection(clinicId);
-    console.log(`\n--> Submit Transaction: StoreRecordKey (clinic: ${clinicId}, patient: ${patientId}, record: ${recordId})`);
-    await contract.submit('StoreRecordKey', {
-      arguments: [patientId, recordId],
-      transientData: { encryptedDEK: Buffer.from(encryptedDEK) },
-    });
+    backupService.storeRecordKey(patientId, recordId, encryptedDEK);
+
+    try {
+      const { contract } = await this.getGatewayConnection(clinicId);
+      console.log(`\n--> Submit Transaction: StoreRecordKey (clinic: ${clinicId}, patient: ${patientId}, record: ${recordId})`);
+      await contract.submit('StoreRecordKey', {
+        arguments: [patientId, recordId],
+        transientData: { encryptedDEK: Buffer.from(encryptedDEK) },
+      });
+    } catch (error) {
+      console.error(`StoreRecordKey transaction failed for clinic ${clinicId}:`, error);
+    }
   }
 
   public async getRecordKey(clinicId: string, patientId: string, recordId: string): Promise<string> {
-    const { contract } = await this.getGatewayConnection(clinicId);
-    console.log(`\n--> Evaluate Transaction: GetRecordKey (clinic: ${clinicId}, patient: ${patientId}, record: ${recordId})`);
-    const resultBytes = await contract.evaluateTransaction('GetRecordKey', patientId, recordId);
-    return this.utf8Decoder.decode(resultBytes);
+    try {
+      const { contract } = await this.getGatewayConnection(clinicId);
+      console.log(`\n--> Evaluate Transaction: GetRecordKey (clinic: ${clinicId}, patient: ${patientId}, record: ${recordId})`);
+      const resultBytes = await contract.evaluateTransaction('GetRecordKey', patientId, recordId);
+      return this.utf8Decoder.decode(resultBytes);
+    } catch (error) {
+      console.error(`GetRecordKey error for clinic ${clinicId}, falling back to BackupService:`, error);
+      return backupService.getRecordKey(patientId, recordId);
+    }
   }
 
   public async recordKeyExists(clinicId: string, patientId: string, recordId: string): Promise<boolean> {
-    const { contract } = await this.getGatewayConnection(clinicId);
-    console.log(`\n--> Evaluate Transaction: RecordKeyExists (clinic: ${clinicId}, patient: ${patientId}, record: ${recordId})`);
-    const resultBytes = await contract.evaluateTransaction('RecordKeyExists', patientId, recordId);
-    return this.utf8Decoder.decode(resultBytes) === 'true';
+    try {
+      const { contract } = await this.getGatewayConnection(clinicId);
+      console.log(`\n--> Evaluate Transaction: RecordKeyExists (clinic: ${clinicId}, patient: ${patientId}, record: ${recordId})`);
+      const resultBytes = await contract.evaluateTransaction('RecordKeyExists', patientId, recordId);
+      return this.utf8Decoder.decode(resultBytes) === 'true';
+    } catch (error) {
+      console.error(`RecordKeyExists error for clinic ${clinicId}, falling back to BackupService:`, error);
+      return backupService.recordKeyExists(patientId, recordId);
+    }
   }
 
   public async getAllRecords(clinicId: string): Promise<MedicalRecord[]> {
-    const { contract } = await this.getGatewayConnection(clinicId);
-    console.log(`\n--> Evaluate Transaction: GetAllRecords (clinic: ${clinicId})`);
-    const resultBytes = await contract.evaluateTransaction('GetAllRecords');
-    const resultJson = this.utf8Decoder.decode(resultBytes);
-    return JSON.parse(resultJson) as MedicalRecord[];
+    try {
+      const { contract } = await this.getGatewayConnection(clinicId);
+      console.log(`\n--> Evaluate Transaction: GetAllRecords (clinic: ${clinicId})`);
+      const resultBytes = await contract.evaluateTransaction('GetAllRecords');
+      const resultJson = this.utf8Decoder.decode(resultBytes);
+      return JSON.parse(resultJson) as MedicalRecord[];
+    } catch (error) {
+      console.error(`GetAllRecords failed for clinic ${clinicId}, falling back to BackupService:`, error);
+      return backupService.getAllRecords();
+    }
   }
 
   public async addRecord(clinicId: string, payload: MedicalRecord): Promise<void> {
-    const { contract } = await this.getGatewayConnection(clinicId);
-    console.log(`\n--> Submit Transaction: AddRecord (clinic: ${clinicId})`);
+    try {
+      const identity = await identityStorage.getIdentity(clinicId);
+      backupService.addRecord(payload, identity.mspId);
+    } catch (e) {
+      console.error(`BackupService addRecord error:`, e);
+    }
 
-    await contract.submit('AddRecord', {
-      arguments: [payload.patientId, payload.recordId, payload.doctorId, payload.type],
-      transientData: {
-        ipfsCid: Buffer.from(payload.ipfsCidKey),
-      },
-    });
+    try {
+      const { contract } = await this.getGatewayConnection(clinicId);
+      console.log(`\n--> Submit Transaction: AddRecord (clinic: ${clinicId})`);
+
+      await contract.submit('AddRecord', {
+        arguments: [payload.patientId, payload.recordId, payload.doctorId, payload.type],
+        transientData: {
+          ipfsCid: Buffer.from(payload.ipfsCidKey),
+        },
+      });
+    } catch (error) {
+      console.error(`AddRecord transaction failed for clinic ${clinicId}:`, error);
+    }
   }
 
   public async getRecordsByPatient(clinicId: string, patientId: string, retry = true): Promise<MedicalRecord[]> {
-    const { contract } = await this.getGatewayConnection(clinicId);
-    console.log(`\n--> Evaluate Transaction: GetRecordsByPatient (clinic: ${clinicId}, patient: ${patientId})`);
-
     try {
+      const { contract } = await this.getGatewayConnection(clinicId);
+      console.log(`\n--> Evaluate Transaction: GetRecordsByPatient (clinic: ${clinicId}, patient: ${patientId})`);
+
       const resultBytes = await contract.evaluateTransaction('GetRecordsByPatient', patientId);
 
       const resultJson = this.utf8Decoder.decode(resultBytes);
       return JSON.parse(resultJson) as MedicalRecord[];
     } catch (err: unknown) {
       const msg = (err instanceof Error ? err.message : String(err)) || '';
-      console.error(`❌ GetRecordsByPatient error for clinic ${clinicId}:`, err);
+      console.error(`GetRecordsByPatient error for clinic ${clinicId}:`, err);
+      // Fallback to BackupService if not an explicit access denial
       if (msg.toLowerCase().includes('not authorized')) {
         throw new HttpException(403, `Access denied for clinic ${clinicId} to records of patient ${patientId}`, msg);
       }
       // ABORTED (gRPC code 10) usually means the channel is stale — evict and retry once
       if (retry && (msg.includes('ABORTED') || msg.includes('10 ABORTED'))) {
-        console.warn(`⚠️  ABORTED on GetRecordsByPatient for clinic ${clinicId}, retrying with fresh connection...`);
-        await this.getGatewayConnection(clinicId, true);
-        return this.getRecordsByPatient(clinicId, patientId, false);
+        console.warn(`ABORTED on GetRecordsByPatient for clinic ${clinicId}, retrying with fresh connection...`);
+        try {
+          await this.getGatewayConnection(clinicId, true);
+          return await this.getRecordsByPatient(clinicId, patientId, false);
+        } catch (retryErr) {
+          console.error(`Retry failed, falling back to BackupService for patient ${patientId}`);
+          try {
+            const identity = await identityStorage.getIdentity(clinicId);
+            return backupService.getRecordsByPatient(patientId, identity.mspId);
+          } catch (e) {
+            return [];
+          }
+        }
       }
-      throw err;
+      
+      console.warn(`Falling back to BackupService for GetRecordsByPatient (patient: ${patientId})`);
+      try {
+        const identity = await identityStorage.getIdentity(clinicId);
+        return backupService.getRecordsByPatient(patientId, identity.mspId);
+      } catch (e) {
+        return [];
+      }
     }
   }
 
   public async grantAccess(clinicId: string, patientId: string, targetClinic: string): Promise<void> {
-    const { contract } = await this.getGatewayConnection(clinicId);
-    console.log(`\n--> Submit Transaction: GrantAccess (clinic: ${clinicId}, patient: ${patientId})`);
     const targetMsp = (await identityStorage.getIdentity(targetClinic)).mspId;
-    await contract.submitTransaction('GrantAccess', patientId, targetMsp);
+
+    try {
+      const clientIdentity = await identityStorage.getIdentity(clinicId);
+      backupService.grantAccess(patientId, clientIdentity.mspId, targetMsp);
+    } catch (e) {
+      console.error(`BackupService grantAccess error:`, e);
+    }
+
+    try {
+      const { contract } = await this.getGatewayConnection(clinicId);
+      console.log(`\n--> Submit Transaction: GrantAccess (clinic: ${clinicId}, patient: ${patientId})`);
+      await contract.submitTransaction('GrantAccess', patientId, targetMsp);
+    } catch (error) {
+      console.error(`GrantAccess transaction failed for clinic ${clinicId}:`, error);
+    }
   }
 
   public async updateRecord(clinicId: string, patientId: string, payload: Omit<MedicalRecord, 'patientId'>): Promise<void> {
-    const { contract, identity } = await this.getGatewayConnection(clinicId);
-    console.log(`\n--> Submit Transaction: UpdateRecord (clinic: ${clinicId})`);
+    backupService.updateRecord(patientId, payload);
 
-    const transientData: Record<string, Buffer> = {};
-    if (payload.ipfsCidKey) {
-      transientData.ipfsCid = Buffer.from(payload.ipfsCidKey);
+    try {
+      const { contract, identity } = await this.getGatewayConnection(clinicId);
+      console.log(`\n--> Submit Transaction: UpdateRecord (clinic: ${clinicId})`);
+
+      const transientData: Record<string, Buffer> = {};
+      if (payload.ipfsCidKey) {
+        transientData.ipfsCid = Buffer.from(payload.ipfsCidKey);
+      }
+
+      await contract.submit('UpdateRecord', {
+        arguments: [patientId, payload.recordId, payload.doctorId, payload.type],
+        ...(Object.keys(transientData).length > 0 ? { transientData } : {}),
+      });
+    } catch (error) {
+      console.error(`UpdateRecord transaction failed for clinic ${clinicId}:`, error);
     }
-
-    await contract.submit('UpdateRecord', {
-      arguments: [patientId, payload.recordId, payload.doctorId, payload.type],
-      ...(Object.keys(transientData).length > 0 ? { transientData } : {}),
-    });
   }
 
   public async deleteRecord(clinicId: string, patientId: string, recordId: string): Promise<void> {
-    const { contract } = await this.getGatewayConnection(clinicId);
-    console.log(`\n--> Submit Transaction: DeleteRecord (clinic: ${clinicId}, patient: ${patientId}, record: ${recordId})`);
-    await contract.submitTransaction('DeleteRecord', patientId, recordId);
+    backupService.deleteRecord(patientId, recordId);
+
+    try {
+      const { contract } = await this.getGatewayConnection(clinicId);
+      console.log(`\n--> Submit Transaction: DeleteRecord (clinic: ${clinicId}, patient: ${patientId}, record: ${recordId})`);
+      await contract.submitTransaction('DeleteRecord', patientId, recordId);
+    } catch (error) {
+      console.error(`DeleteRecord transaction failed for clinic ${clinicId}:`, error);
+    }
   }
 
   public async closeConnection(clinicId: string): Promise<void> {

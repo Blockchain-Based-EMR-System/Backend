@@ -12,6 +12,7 @@ import { randomUUID } from 'crypto';
 import FabricService from '@/services/fabric.service';
 import { RecordType } from '@/interfaces/enums.interface';
 import { IdentityStorageService } from '@/services/identity-storage.service';
+import { backupService } from '@/services/backup.service';
 
 @Service()
 export class MedicalRecordService {
@@ -426,6 +427,13 @@ export class MedicalRecordService {
         },
       });
 
+      await this.fabricService.updateRecord(record.clinic_id, patientId, {
+        recordId,
+        doctorId: patientId,
+        type: RecordType.MEDICAL_HISTORY,
+        ipfsCidKey: newCid,
+      });
+
       try {
         await this.ipfsService.deleteFile(oldCid);
       } catch (e) {
@@ -514,6 +522,8 @@ export class MedicalRecordService {
     const records = await prisma.medicalRecord.findMany({
       select: { id: true, patient_id: true, clinic_id: true, cid: true },
     });
+
+    backupService.deleteAllRecords();
 
     for (const record of records) {
       try {

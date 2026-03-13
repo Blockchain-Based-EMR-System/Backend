@@ -39,7 +39,6 @@ class FabricController {
         }
     };
 
-
     public deleteIdentity = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
         try {
             const clinicId = req.params.clinicId;
@@ -55,65 +54,6 @@ class FabricController {
         try {
             const stats = this.fabricService.getConnectionStats();
             res.status(200).json({ data: stats, message: 'connectionStats' });
-        } catch (error) {
-            next(error);
-        }
-    };
-
-    public getAllRecords = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-        try {
-            const clinicId = req.params.clinicId;
-            const records = await this.fabricService.getAllRecords(clinicId);
-            res.status(200).json({ data: records, message: 'findAll' });
-        } catch (error) {
-            next(error);
-        }
-    };
-
-    public getRecordsByPatient = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-        try {
-            const clinicId = req.params.clinicId;
-            const patientId = req.params.patientId;
-            const records = await this.fabricService.getRecordsByPatient(clinicId, patientId);
-            res.status(200).json({ data: records, message: 'findAll' });
-        } catch (error) {
-            next(error);
-        }
-    };
-
-    public addRecord = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-        try {
-            const clinicId = req.params.clinicId;
-            await this.fabricService.addRecord(clinicId, req.body);
-            res.status(201).json({ message: 'created' });
-        } catch (error) {
-            next(error);
-        }
-    };
-
-    public updateRecord = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-        try {
-            const clinicId = req.params.clinicId;
-            const patientId = req.params.patientId;
-            await this.fabricService.updateRecord(clinicId, patientId, req.body);
-            res.status(200).json({ message: 'updated' });
-        } catch (error) {
-            next(error);
-        }
-    };
-
-    public grantAccess = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
-        try {
-            const clinicId = req.params.clinicId;
-            const patientId = req.params.patientId;
-            const { targetMsp } = req.body;
-
-            if (!targetMsp) {
-                throw new HttpException(400, 'targetMsp is required');
-            }
-
-            await this.fabricService.grantAccess(clinicId, patientId, targetMsp);
-            res.status(200).json({ message: 'Access granted successfully' });
         } catch (error) {
             next(error);
         }

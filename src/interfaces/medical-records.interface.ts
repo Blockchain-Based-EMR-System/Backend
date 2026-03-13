@@ -6,4 +6,5 @@ export interface MedicalRecord {
   ipfsCidKey: string;
   ownerMsp?: string;
   authorizedMsps?: string[];
+  deleted?: boolean; 
 }

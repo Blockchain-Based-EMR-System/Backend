@@ -80,88 +80,10 @@ export class FabricRoute implements Routes {
             */
             this.fabricController.initLedger,
         );
-
-        // Medical Records Routes (require X-Fabric-Identity header)
-        this.router.get(
-            '/records',
-            /* 
-                #swagger.tags = ['MedicalRecords']
-                #swagger.parameters['X-Fabric-Identity'] = {
-                    in: 'header',
-                    description: 'Identity label (e.g., org1)',
-                    required: true,
-                    type: 'string'
-                }
-            */
-            this.fabricController.getAllRecords,
-        );
-        // Place the explicit health route before the dynamic `:patientId` route so the literal
-        // path `/records/health` is matched first instead of being captured as `:patientId = 'health'.
         this.router.get(
             '/records/health',
             /* #swagger.tags = ['MedicalRecords'] */
             this.fabricController.checkHealth,
-        );
-        this.router.get(
-            '/records/:patientId',
-            /*
-                #swagger.tags = ['MedicalRecords']
-                #swagger.description = 'Get all records for a patient (authorized MSPs only)'
-            */
-            this.fabricController.getRecordsByPatient,
-        );
-        this.router.post(
-            '/records',
-            /*
-                #swagger.tags = ['MedicalRecords']
-                #swagger.description = 'Add a new medical record for a patient'
-                #swagger.parameters['body'] = {
-                    in: 'body',
-                    required: true,
-                    schema: {
-                        $patientId: 'patient-uuid',
-                        $recordId: 'record-uuid',
-                        $doctorId: 'doctor-uuid',
-                        $type: 'LAB_RESULT',
-                        $ipfsCidKey: 'bafybeigdyrzt...'
-                    }
-                }
-            */
-            ValidationMiddleware(CreateMedicalRecordDto),
-            this.fabricController.addRecord,
-        );
-        this.router.put(
-            '/records/:patientId/:recordId',
-            /*
-                #swagger.tags = ['MedicalRecords']
-                #swagger.description = 'Update an existing medical record (doctorId, type, optional new ipfsCidKey via transient)'
-                #swagger.parameters['body'] = {
-                    in: 'body',
-                    required: true,
-                    schema: {
-                        $recordId: 'uuid-record-id',
-                        $doctorId: 'doctor-uuid',
-                        $type: 'LAB_RESULT',
-                        ipfsCidKey: 'optional-new-cid-key'
-                    }
-                }
-            */
-            ValidationMiddleware(UpdateMedicalRecordDto),
-            this.fabricController.updateRecord,
-        );
-
-        this.router.post(
-            '/records/:patientId/access',
-            /*
-                #swagger.tags = ['MedicalRecords']
-                #swagger.description = 'Grant access to all records of a patient for a target MSP'
-                #swagger.parameters['body'] = {
-                    in: 'body',
-                    required: true,
-                    schema: { $targetMsp: 'Org2MSP' }
-                }
-            */
-            this.fabricController.grantAccess,
         );
     }
 }
