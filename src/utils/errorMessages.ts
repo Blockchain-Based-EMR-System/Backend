@@ -120,7 +120,7 @@ export const ErrorMessages = {
         en: 'Announcement not found',
         ar: 'الإعلان غير موجود',
     },
-    UNAUTHORIZED_ACCESS :{
+    UNAUTHORIZED_ACCESS: {
         en: 'You are not authorized to access this',
         ar: 'ليس لديك صلاحية للوصول إلى هذا ',
     },
@@ -166,7 +166,7 @@ export const ErrorMessages = {
         en: 'Nurse data not found',
         ar: 'بيانات الممرضة غير موجودة',
     },
-    
+
     // File upload errors
     NO_FILE_UPLOADED: {
         en: 'No file uploaded',
@@ -372,6 +372,22 @@ export const ErrorMessages = {
     INVALID_RESCHEDULE_PARAMETERS: {
         en: "Provide either new scheduled time or shift minutes",
         ar: "يرجى تقديم وقت موعد جديد أو عدد دقائق التغيير"
+    },
+
+    // Agora Errors
+    AGORA_CREDENTIALS_NOT_CONFIGURED: {
+        en: "Agora credentials are not configured",
+        ar: "بيانات اعتماد Agora غير مكونة"
+    },
+
+    // AI Errors
+    INVALID_USER_TYPE: {
+        en: "Invalid user type. Must be 'doctor' or 'patient'",
+        ar: "نوع المستخدم غير صالح. يجب أن يكون 'doctor' أو 'patient'"
+    },
+    MISSING_AUDIO_KEYS: {
+        en: "Missing audio keys. Provide either doctorKey and patientKey, or mixedKey",
+        ar: "مفاتيح الصوت مفقودة. يرجى تقديم إما doctorKey و patientKey، أو mixedKey"
     }
 };
 

@@ -27,6 +27,7 @@ const doc = {
     { name: 'Queue', description: 'Queue endpoints' },
     { name: 'Users', description: 'User account endpoints' },
     { name: 'Nurses', description: 'Nurse account endpoints' },
+    { name: 'AI Appointments', description: 'AI-generated SOAP notes for appointments' }
   ],
 };
 
@@ -42,7 +43,8 @@ const endpointsFiles = [
   './routes/queue.route.ts',
   './routes/user.route.ts',
   './routes/nurse.route.ts',
-  './routes/medical-record.route.ts'
+  './routes/medical-record.route.ts',
+  './routes/ai_appointments.route.ts'
 ];
 
 swaggerAutogen()(outputFile, endpointsFiles, doc);

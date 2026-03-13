@@ -8,6 +8,7 @@ import Container from "typedi";
 import { createBilingualError, ErrorMessages } from '@/utils/errorMessages';
 import { SuccessResponseMessages, createMultiLangMessage } from '@/utils/responseMessages';
 import { SocketService } from "@/services/socket.service";
+import { Agora_APP_ID } from "@/config";
 
 export class AppointmentController {
 
@@ -523,6 +524,21 @@ export class AppointmentController {
         const response = createMultiLangMessage(SuccessResponseMessages.APPOINTMENT_COMPLETED_SUCCESSFULLY);
         res.status(200).json({
             ...response
+        });
+    });
+
+    public getAgoraToken = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
+        const userId = req.user?.id;
+        const { appointmentId } = req.params;
+
+        const token = await this.appointmentService.generateAgoraToken(appointmentId, userId);
+        const response = createMultiLangMessage(SuccessResponseMessages.AGORA_TOKEN_GENERATED_SUCCESSFULLY);
+        res.status(200).json({
+            ...response,
+            data: {
+                token,
+                appId: Agora_APP_ID
+            }
         });
     });
 }

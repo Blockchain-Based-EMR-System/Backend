@@ -6,6 +6,7 @@ import { AppointmentController } from "@/controllers/appointment.controller";
 import { ValidationMiddleware } from "@/middlewares/validation.middleware";
 import { AuthMiddleware } from "@/middlewares/auth.middleware";
 import { BookAppointmentDto, RescheduleAppointmentDto, RescheduleAppointmentByDoctorDto, EnterDoctorScheduleDto, EditDoctorScheduleDto, HandleDoctorVacationDto } from "@/dtos/appointments.dto";
+import { AiAppointmentsRoute } from "./ai_appointments.route";
 
 export class AppointmentRoute implements Routes {
     public path = '/appointments';
@@ -13,12 +14,14 @@ export class AppointmentRoute implements Routes {
     clinicController = new ClinicController();
     doctorController = new DoctorController();
     appointmentController = new AppointmentController();
-
+    private _aiRouter = new AiAppointmentsRoute();
     constructor() {
         this.initializeRoutes();
     }
 
     private initializeRoutes() {
+        this.router.use(`${this.path}/ai`, this._aiRouter.router);
+
         this.router.get(
             `${this.path}/doctors`,
             /* 
@@ -1296,6 +1299,42 @@ export class AppointmentRoute implements Routes {
             */
             AuthMiddleware,
             this.appointmentController.cancelDoctorVacation
+        );
+
+        this.router.get(
+            `${this.path}/:appointmentId/agora-token`,
+            /* 
+                #swagger.path = '/appointments/{appointmentId}/agora-token'
+                #swagger.method = 'get'
+                #swagger.tags = ['Appointments']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication (patient or doctor of the appointment)',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.description = 'Get Agora token and channel name for a specific appointment'
+                #swagger.parameters['appointmentId'] = {
+                    in: 'path',
+                    description: 'The ID of the appointment',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.responses[200] = {
+                    description: 'Agora token and channel name retrieved successfully',
+                    schema: {
+                        message: 'Agora token retrieved successfully',
+                        messageAr: 'تم استرجاع توكن أجورا بنجاح',
+                        data: {
+                            token: 'string',
+                            appId: 'string'
+                        },
+                        message: 'Agora token retrieved successfully'
+                    }
+                }
+            */
+            AuthMiddleware,
+            this.appointmentController.getAgoraToken
         );
     }
 }

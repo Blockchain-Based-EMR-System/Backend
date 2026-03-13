@@ -13,6 +13,7 @@ import { UsersRoute } from './routes/user.route';
 import { MedicalRecordRoute } from './routes/medical-record.route';
 import { logger } from '@utils/logger';
 
+import { AiAppointmentsRoute } from './routes/ai_appointments.route';
 ValidateEnv();
 
 // Prevent the process from crashing on unhandled async errors
@@ -30,7 +31,7 @@ const app = new App(
     [
         new AuthRoute(), new FabricRoute(), new AdminRoute(),
         new SuperAdminRoute(), new DoctorsRoute(), new ClinicRoute(), new AppointmentRoute(), new QueueRoute(),
-        new UsersRoute(), new NurseRoute(),new MedicalRecordRoute()
+        new UsersRoute(), new NurseRoute(),new MedicalRecordRoute(), new AiAppointmentsRoute()
     ]);
 
 app.listen();

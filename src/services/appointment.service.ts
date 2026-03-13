@@ -8,6 +8,8 @@ import { createBilingualError, ErrorMessages } from '@/utils/errorMessages';
 import { PatientTodayAppointment, DoctorAppointment, DoctorScheduleDay, PatientAppointment, DoctorSchedule, checkExistingAppointments, ConflictingAppointment, DoctorVacations, Vacations, AppointmentData, AppointmentEventData } from '@/interfaces/appointments.interface';
 import { QueueService } from './queue.service';
 import { start } from 'repl';
+import { RtcRole, RtcTokenBuilder } from 'agora-token';
+import { Agora_APP_CERTIFICATE, Agora_APP_ID } from '@/config';
 
 @Service()
 export class AppointmentService {
@@ -1757,4 +1759,33 @@ export class AppointmentService {
         return { start, end };
     }
 
+    public async generateAgoraToken(appointmentId: string, userId: string): Promise<string> {
+        const appointment = await prisma.appointment.findUnique({
+            where: {
+                id: appointmentId,
+            }
+        });
+
+        if (!appointment) {
+            const error = createBilingualError(404, ErrorMessages.APPOINTMENT_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const appId = Agora_APP_ID;
+        const appCertificate = Agora_APP_CERTIFICATE;
+
+        if (!appId || !appCertificate) {
+            const error = createBilingualError(500, ErrorMessages.AGORA_CREDENTIALS_NOT_CONFIGURED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const channelName = appointmentId;
+        const role = RtcRole.PUBLISHER;
+        const expirationTimeInSeconds = 3600; // 1 hour
+        const currentTimestamp = Math.floor(Date.now() / 1000);
+        const privilegeExpiredTs = currentTimestamp + expirationTimeInSeconds;
+
+        const token = RtcTokenBuilder.buildTokenWithUserAccount(appId, appCertificate, channelName, userId, role, privilegeExpiredTs, privilegeExpiredTs);
+        return token;
+    }
 }

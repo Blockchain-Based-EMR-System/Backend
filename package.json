@@ -24,9 +24,12 @@
     "schema": "src/prisma/schema.prisma"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1002.0",
+    "@aws-sdk/s3-request-presigner": "^3.1002.0",
     "@grpc/grpc-js": "^1.14.0",
     "@hyperledger/fabric-gateway": "^1.9.0",
     "@prisma/client": "6.18.0",
+    "agora-token": "^2.0.5",
     "bcrypt": "^6.0.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
@@ -38,6 +41,7 @@
     "envalid": "^8.1.0",
     "express": "^5.1.0",
     "express-session": "^1.18.2",
+    "groq-sdk": "^0.37.0",
     "helmet": "^8.1.0",
     "hpp": "^0.2.3",
     "ipfs-http-client": "^60.0.1",
