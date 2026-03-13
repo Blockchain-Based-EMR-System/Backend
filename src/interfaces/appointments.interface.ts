@@ -152,3 +152,22 @@ export interface AppointmentData {
     start_time: string;
     end_time: string;
 }
+
+export interface AppointmentStatusChangedPayload {
+    appointmentId: string;
+    newStatus: AppointmentStatus;
+    doctorId: string;
+    patientId: string;
+    patientName: string;
+    appointmentDate: string;
+    startTime: string;
+}
+
+export interface AppointmentEventData {
+    appointmentId: string;
+    doctorId: string;
+    patientId: string;
+    patientName: string;
+    appointmentDate: string;
+    startTime: string;
+}

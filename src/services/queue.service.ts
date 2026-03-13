@@ -67,10 +67,6 @@ export class QueueService {
             }
         });
 
-        if (!schedule){
-            const error = createBilingualError(404, ErrorMessages.DOCTOR_NOT_WORKING_ON_DAY);
-            throw new HttpException(error.status, error.message, error.messageAr);
-        }
         const bufferTime = schedule?.buffer_time || 0;
 
         const startOfDay = new Date(appointment.scheduled_time);
@@ -107,14 +103,19 @@ export class QueueService {
             throw new HttpException(error.status, error.message, error.messageAr);
         }
 
-        const appointmentsAhead = todayAppointments.slice(0, currentIdx).filter(app => app.status === 'CONFIRMED');
-
-        const patientsAhead = appointmentsAhead.length;
+        const patientsAhead = todayAppointments.slice(0, currentIdx).filter(app => app.status === 'CONFIRMED').length;
         const position = currentIdx + 1;
         // NOOTEEE --> now time - scheduled time but in mins 
 
-        const estimatedWaitMinutes = appointmentsAhead.reduce((total, app) => total + app.slot_duration + bufferTime, 0);
+        const nowUTC = new Date();
+        const egyptOffset = 2 * 60 * 60 * 1000;
+        const now = new Date(nowUTC.getTime() + egyptOffset);
+        let estimatedWaitMinutes = 0
 
+        // const estimatedWaitMinutes = appointmentsAhead.reduce((total, app) => total + app.slot_duration + bufferTime, 0);
+        if (appointment.scheduled_time.getTime() >= now.getTime()){
+            estimatedWaitMinutes = Math.max(0, Math.round((appointment.scheduled_time.getTime() - now.getTime()) / (1000 * 60)));
+        }
         this.updateQueueParameters(appointmentId, position, patientsAhead, estimatedWaitMinutes);
     }
 

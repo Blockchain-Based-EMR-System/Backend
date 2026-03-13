@@ -3,16 +3,24 @@ import { Server, Socket } from 'socket.io';
 import { verify } from 'jsonwebtoken';
 import { SocketStoredInToken } from '@/interfaces';
 import { SECRET_KEY } from '@/config';
-import prisma from '@/config/prisma';
 import { AppointmentService } from './appointment.service';
+import { AppointmentStatusChangedPayload } from '@/interfaces';
 import { QueueService } from './queue.service';
-import { Container } from 'typedi';
+import { Container, Service } from 'typedi';
 
 interface AuthenticatedSocket extends Socket {
     userId?: string;
     userRole?: string;
 }
 
+function parseCookies(cookieHeader: string = ''): Record<string, string> {
+    return Object.fromEntries(
+        cookieHeader.split(';').map(c => c.trim().split('=').map(decodeURIComponent))
+    );
+}
+
+
+@Service()
 export class SocketService {
     private io: Server;
     // userId --> set of socketIds (each tab/device = different socketId)
@@ -25,7 +33,7 @@ export class SocketService {
             cors: {
                 origin: process.env.ORIGIN,
                 credentials: true,
-                
+
             },
             // polling is just a fallback if websocket fails
             transports: ['websocket', 'polling'],
@@ -47,7 +55,7 @@ export class SocketService {
 
     private async authMiddleware(socket: AuthenticatedSocket, next: (err?: Error) => void): Promise<void> {
         try {
-            const token = socket.handshake.auth.token || socket.handshake.headers['authorization']?.split(' ')[1];
+            const token = parseCookies(socket.handshake.headers.cookie)['Authorization']?.replace(/^Bearer\s+/i, '');
             if (!token) {
                 return next(new Error('Authentication error: Token not provided'));
             }
@@ -56,7 +64,8 @@ export class SocketService {
             socket.userId = decoded.id;
             socket.userRole = decoded.role;
             next();
-        } catch (error) {
+        }
+        catch (error) {
             next(new Error('Authentication error: Invalid token'));
         }
     }
@@ -86,11 +95,20 @@ export class SocketService {
             message: 'Successfully connected to socket server',
             userId: userId
         });
+        socket.on('request_initial_data', () => {
+            if (userRole === 'PATIENT') this.sendInitialPatientData(userId);
+            else if (userRole === 'DOCTOR') this.sendInitialDoctorData(userId);
+            else if (userRole === 'NURSE') this.sendInitialNurseData(userId);
+        });
 
         if (userRole === 'PATIENT') {
             this.sendInitialPatientData(userId);
-        } else if (userRole === 'DOCTOR') {
+        }
+        else if (userRole === 'DOCTOR') {
             this.sendInitialDoctorData(userId);
+        }
+        else if (userRole === 'NURSE') {
+            this.sendInitialNurseData(userId);
         }
 
     }
@@ -114,60 +132,51 @@ export class SocketService {
         }
     }
 
-    public async emitQueueUpdatesToPatients(doctorId: string, date: Date): Promise<void> {
-        const appointments = await this.getAppointmentsForDay(doctorId, date); 
+    public async emitQueueUpdatesToPatients(doctorId: string, date?: Date): Promise<void> {
+        const appointments = await this.appointmentService.getAppointmentsForDay(doctorId, date);
         for (const app of appointments) {
             const queuePosition = await this.queueService.getQueuePosition(app.id);
             this.emitToUser(app.patient_id, 'queue_updated', queuePosition);
         }
     }
 
-    private async getAppointmentsForDay(doctorId: string, date: Date): Promise<{ id: string; patient_id: string }[]> {
-        const startOfDay = new Date(date);
-        startOfDay.setHours(0, 0, 0, 0);
-
-        const endOfDay = new Date(date); 
-        endOfDay.setHours(23, 59, 59, 999);
-
-
-        return prisma.appointment.findMany({
-            where: {
-                doctor_id: doctorId,
-                scheduled_time: { 
-                    gte: startOfDay, 
-                    lte: endOfDay 
-                },
-                status: { in: ['CONFIRMED'] },
-                deleted_at: null,
-            },
-            select: {
-                id: true,
-                patient_id: true
-
-            },
-        });
+    public async emitAppointmentStatusChanged(payload: AppointmentStatusChangedPayload) {
+        this.emitToUser(payload.doctorId, 'appointment_status_changed', payload);
+        this.emitToUser(payload.patientId, 'appointment_status_changed', payload);
     }
+
 
     private async sendInitialPatientData(patientId: string): Promise<void> {
         try {
-            const appointments = await this.appointmentService.getPatientAppointments(patientId);
+            const appointments = await this.appointmentService.getTodayAppointment(patientId) ?? [];
             const appointmentsWithQueue = await Promise.all(appointments.map(async (app) => {
-                await this.queueService.calculateQueuePosition(app.id); // Ensure up-to-date
+                await this.queueService.calculateQueuePosition(app.id);
                 const queuePosition = await this.queueService.getQueuePosition(app.id);
                 return { ...app, queuePosition };
             }));
             this.emitToUser(patientId, 'initial_data', { appointments: appointmentsWithQueue });
-        } catch (error) {
+        }
+        catch (error) {
             console.error('Error sending initial patient data:', error);
         }
     }
 
     private async sendInitialDoctorData(doctorId: string): Promise<void> {
         try {
-            const schedule = await this.appointmentService.getDoctorSchedule(doctorId);
+            const schedule = await this.appointmentService.getCurrentDoctorSchedule(doctorId);
             this.emitToUser(doctorId, 'initial_data', { schedule });
         } catch (error) {
             console.error('error sending initial doctor data:', error);
+        }
+    }
+
+    private async sendInitialNurseData(nurseId: string): Promise<void> {
+        try {
+            const appointments = await this.appointmentService.getNurseAppointmentsToday(nurseId);
+            this.emitToUser(nurseId, 'initial_data', { appointments });
+        }
+        catch (error) {
+            console.error('Error sending initial nurse data:', error);
         }
     }
 }

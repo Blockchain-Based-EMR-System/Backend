@@ -5,7 +5,7 @@ import { Service, Container } from 'typedi';
 import { TimeSlot } from '@/interfaces';
 import { HttpException } from "@/exceptions/HttpException";
 import { createBilingualError, ErrorMessages } from '@/utils/errorMessages';
-import { PatientTodayAppointment, DoctorAppointment, DoctorScheduleDay, PatientAppointment, DoctorSchedule, checkExistingAppointments, ConflictingAppointment, DoctorVacations, Vacations, AppointmentData } from '@/interfaces/appointments.interface';
+import { PatientTodayAppointment, DoctorAppointment, DoctorScheduleDay, PatientAppointment, DoctorSchedule, checkExistingAppointments, ConflictingAppointment, DoctorVacations, Vacations, AppointmentData, AppointmentEventData } from '@/interfaces/appointments.interface';
 import { QueueService } from './queue.service';
 import { start } from 'repl';
 
@@ -57,7 +57,7 @@ export class AppointmentService {
         const today = new Date();
         today.setUTCHours(0, 0, 0, 0);
 
-        for (let i = 1; i <= daysAhead; i++) {
+        for (let i = 0; i < daysAhead; i++) {
             // create a copy from today --> if we used today directly it will be modified to today + 1 --> tomorrow date
             const currentDate = new Date(today);
             currentDate.setUTCDate(today.getUTCDate() + i); // current day now is = today + 1 
@@ -113,8 +113,8 @@ export class AppointmentService {
         const requestedDate = new Date(date);
         const dayOfWeek = this.getDayOfWeek(requestedDate.getUTCDay());
 
-        const today = new Date();
-        today.setUTCHours(0, 0, 0, 0);
+        const now = new Date();
+        const { start: today, end: endOfToday } = this.getTodayBoundaries(now);
 
         const requestedDateOnly = new Date(requestedDate);
         requestedDateOnly.setUTCHours(0, 0, 0, 0);
@@ -196,8 +196,10 @@ export class AppointmentService {
                     return this.doesSlotOverlap(slotStart, slotEnd, apptStart, apptEnd);
                 });
 
-                const now = new Date();
-                const isInPast = slotEnd <= now;
+                const nowUTC = new Date();
+                const egyptOffset = 2 * 60 * 60 * 1000;
+                const now = new Date(nowUTC.getTime() + egyptOffset);
+                const isInPast = slotStart <= now;
 
                 return {
                     start: slot.start,
@@ -266,6 +268,7 @@ export class AppointmentService {
                 doctor_id: doctorId,
                 clinic_id: isOnline ? null : clinicId,
                 scheduled_time: scheduledTime,
+                status: 'CONFIRMED',
                 slot_duration: schedule.slot_duration,
                 end_time: endTime,
                 is_online: isOnline,
@@ -379,11 +382,8 @@ export class AppointmentService {
     public async getTodayAppointment(patientId: string): Promise<PatientTodayAppointment[]> {
         const result: PatientTodayAppointment[] = [];
 
-        const today = new Date();
-        today.setUTCHours(0, 0, 0, 0);
-
-        const endOfToday = new Date();
-        endOfToday.setUTCHours(23, 59, 59, 999);
+        const now = new Date();
+        const { start: today, end: endOfToday } = this.getTodayBoundaries(now);
 
         const appointments = await prisma.appointment.findMany({
             where: {
@@ -428,24 +428,7 @@ export class AppointmentService {
             return [];
         }
         for (const appointment of appointments) {
-            if (appointment.status === 'CONFIRMED') {
-                await this.queueService.calculateQueuePosition(appointment.id);
-
-                const refreshed = await prisma.appointment.findUnique({
-                    where: { id: appointment.id },
-                    select: {
-                        position: true,
-                        estimated_time: true,
-                        patients_ahead: true,
-                    }
-                });
-
-                if (refreshed) {
-                    appointment.position = refreshed.position;
-                    appointment.estimated_time = refreshed.estimated_time;
-                    appointment.patients_ahead = refreshed.patients_ahead;
-                }
-            }
+            const queueParameters = await this.queueService.getQueuePosition(appointment.id);
 
             result.push({
                 id: appointment.id,
@@ -462,18 +445,34 @@ export class AppointmentService {
                 clinic_name: appointment.clinic ? appointment.clinic.name : null,
                 clinic_address: appointment.clinic ? appointment.clinic.address : null,
                 address_maps_link: appointment.clinic ? appointment.clinic.address_maps_link : null,
-                position: appointment.position,
-                estimatedWaitMinutes: appointment.estimated_time,
-                patientsAhead: appointment.patients_ahead
+                position: queueParameters.position,
+                estimatedWaitMinutes: queueParameters.estimatedWaitMinutes,
+                patientsAhead: queueParameters.patientsAhead
             });
         }
 
         return result;
-
-
     }
 
-    public async rescheduleAppointmentByPatient(patientId: string, appointmentId: string, newScheduledTime: Date): Promise<void> {
+    public async rescheduleAppointmentByPatient(patientId: string, appointmentId: string, newScheduledTime: Date): Promise<AppointmentEventData> {
+        const appointment = await prisma.appointment.findUnique({
+            where: {
+                id: appointmentId
+            },
+            select: {
+                id: true,
+                patient_id: true,
+                doctor_id: true,
+                scheduled_time: true,
+                deleted_at: true,
+                patient: {
+                    select: {
+                        name: true
+                    }
+                }
+            }
+        });
+
         const slotDuration = await prisma.appointment.findUnique({
             where: {
                 id: appointmentId,
@@ -496,10 +495,19 @@ export class AppointmentService {
             }
         });
 
+        return {
+            appointmentId: appointment.id,
+            doctorId: appointment.doctor_id,
+            patientId: appointment.patient_id,
+            patientName: appointment.patient.name,
+            appointmentDate: this.formatDate(appointment.scheduled_time),
+            startTime: this.formatTime(appointment.scheduled_time),
+        };
+
         // penalty to be added later
     }
 
-    public async rescheduleAppointmentByDoctor(doctorId: string, appointmentId: string, minutes: number): Promise<void> {
+    public async rescheduleAppointmentByDoctor(doctorId: string, appointmentId: string, minutes: number): Promise<AppointmentEventData[]> {
         const appointment = await this.getAndValidateAppointment(appointmentId, doctorId);
         const appointments = await prisma.appointment.findMany({
             where: {
@@ -511,13 +519,34 @@ export class AppointmentService {
                 }
             },
             select: {
-                id: true
+                id: true,
+                patient_id: true,
+                doctor_id: true,
+                scheduled_time: true,
+                patient: {
+                    select: {
+                        name: true,
+                    }
+                }
             }
         })
 
         for (const { id: appointmentId } of appointments) {
             await this.rescheduleSingleAppointment(doctorId, appointmentId, minutes);
         }
+
+        return appointments.map(appointment => {
+            const newScheduledTime = new Date(appointment.scheduled_time.getTime() + minutes * 60000);
+            return {
+                appointmentId: appointment.id,
+                doctorId: appointment.doctor_id,
+                patientId: appointment.patient_id,
+                patientName: appointment.patient.name,
+                appointmentDate: this.formatDate(newScheduledTime),
+                startTime: this.formatTime(newScheduledTime),
+            };
+        });
+
     }
 
     public async enterDoctorSchedule(doctorId: string, clinicId: string | null, workingDay: number, startTime: string, endTime: string, slotDuration: number, bufferTime: number, isOnline: boolean): Promise<void> {
@@ -653,17 +682,23 @@ export class AppointmentService {
         });
     }
 
-    public async cancelAppointment(userId: string, appointmentId: string): Promise<void> {
+    public async cancelAppointment(userId: string, appointmentId: string): Promise<AppointmentEventData> {
         // see whether the user is patient or doctor
         const appointment = await prisma.appointment.findUnique({
             where: {
-                id: appointmentId,
+                id: appointmentId
             },
             select: {
                 id: true,
                 patient_id: true,
                 doctor_id: true,
+                scheduled_time: true,
                 deleted_at: true,
+                patient: {
+                    select: {
+                        name: true
+                    }
+                }
             }
         });
 
@@ -693,6 +728,16 @@ export class AppointmentService {
                 status: 'CANCELLED',
             }
         });
+
+        return {
+            appointmentId: appointment.id,
+            doctorId: appointment.doctor_id,
+            patientId: appointment.patient_id,
+            patientName: appointment.patient.name,
+            appointmentDate: this.formatDate(appointment.scheduled_time),
+            startTime: this.formatTime(appointment.scheduled_time),
+        };
+
         // penalty to be added later
     };
 
@@ -787,10 +832,6 @@ export class AppointmentService {
                     gte: startOfDay,
                     lte: endOfDay
                 },
-                status: {
-                    in: ['CONFIRMED', 'COMPLETED']
-                },
-                deleted_at: null,
             },
             select: {
                 id: true,
@@ -925,8 +966,6 @@ export class AppointmentService {
         const egyptOffset = 2 * 60 * 60 * 1000;
         const now = new Date(nowUTC.getTime() + egyptOffset);
 
-        console.log('Current time in Egypt:', now);
-        console.log('Appointment scheduled time:', appointment.scheduled_time);
 
         if (now < appointment.scheduled_time) {
             const error = createBilingualError(400, ErrorMessages.CANNOT_BE_COMPLETED_BEFORE_SCHEDULED_TIME);
@@ -1112,11 +1151,8 @@ export class AppointmentService {
     }
 
     public async getCurrentDoctorSchedule(doctorId: string): Promise<DoctorAppointment[]> {
-        const startOfDay = new Date();
-        startOfDay.setUTCHours(0, 0, 0, 0);
-
-        const endOfDay = new Date();
-        endOfDay.setUTCHours(23, 59, 59, 999);
+        const now = new Date();
+        const { start: startOfDay, end: endOfDay } = this.getTodayBoundaries(now);
 
         const appointments = await prisma.appointment.findMany({
             where: {
@@ -1329,6 +1365,58 @@ export class AppointmentService {
         })
         // DONT FORGET LATER --> notify patients / penalty
 
+    }
+
+    public async getNurseAppointmentsToday(nurseId: string): Promise<AppointmentData[]> {
+        const crrentDate = new Date();
+        const today = this.formatDate(crrentDate);
+        const dayOfWeek = this.getDayOfWeek(crrentDate.getUTCDay());
+
+        const nurseSchedules = await prisma.nurseSchedule.findMany({
+            where: {
+                nurse_id: nurseId,
+                day_of_week: dayOfWeek,
+                is_active: true,
+                deleted_at: null,
+            },
+            select: {
+                doctor_id: true,
+                clinic_id: true
+            }
+        });
+
+        if (!nurseSchedules.length) {
+            return [];
+        }
+
+        const allAppointments = await Promise.all(
+            nurseSchedules.map(schedule =>
+                this.getAppointmentsByDate(schedule.doctor_id, schedule.clinic_id, today)
+            )
+        );
+
+        return allAppointments.flat();
+    }
+
+    public async getAppointmentsForDay(doctorId: string, date: Date): Promise<{ id: string; patient_id: string }[]> {
+        const { start: startOfDay, end: endOfDay } = this.getTodayBoundaries(date);
+
+        return prisma.appointment.findMany({
+            where: {
+                doctor_id: doctorId,
+                scheduled_time: {
+                    gte: startOfDay,
+                    lte: endOfDay
+                },
+                status: { in: ['CONFIRMED'] },
+                deleted_at: null,
+            },
+            select: {
+                id: true,
+                patient_id: true
+
+            },
+        });
     }
 
     private async getConflictingAppointments(doctorId: string, scheduleId: string, breakStart?: string, breakEnd?: string): Promise<ConflictingAppointment[]> {
@@ -1550,6 +1638,11 @@ export class AppointmentService {
                 slot_duration: true,
                 status: true,
                 deleted_at: true,
+                patient: {
+                    select: {
+                        name: true,
+                    }
+                }
             }
         });
 
@@ -1649,6 +1742,19 @@ export class AppointmentService {
 
     private camelToSnakeCase(str: string): string {
         return str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+    }
+
+    private getTodayBoundaries(date: Date, timezone: string = 'Africa/Cairo'): { start: Date; end: Date } {
+
+        const localDateStr = new Intl.DateTimeFormat('en-CA', {
+            timeZone: timezone,
+            year: 'numeric', month: '2-digit', day: '2-digit'
+        }).format(date);
+
+        const start = new Date(`${localDateStr}T00:00:00+02:00`);
+        const end = new Date(`${localDateStr}T23:59:59.999+02:00`);
+
+        return { start, end };
     }
 
 }

@@ -3808,6 +3808,19 @@
             ]
           },
           {
+            "name": "availability_type",
+            "in": "formData",
+            "description": "availability type of the doctor",
+            "required": false,
+            "type": "string",
+            "enum": [
+              "UNSET",
+              "ONLINE",
+              "OFFLINE",
+              "BOTH"
+            ]
+          },
+          {
             "name": "date_of_birth",
             "in": "formData",
             "description": "Doctor date of birth (YYYY-MM-DD)",
@@ -4374,6 +4387,143 @@
           },
           "404": {
             "description": "Announcement not found"
+          }
+        }
+      }
+    },
+    "/doctors/nurses": {
+      "get": {
+        "tags": [
+          "Doctors"
+        ],
+        "description": "Retrieves all nurses working with the doctor",
+        "parameters": [
+          {
+            "name": "Authorization",
+            "in": "cookie",
+            "description": "Bearer token for authentication",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Nurses retrieved successfully",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "data": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "uuid-string"
+                      },
+                      "name": {
+                        "type": "string",
+                        "example": "Max Mustermann"
+                      },
+                      "email": {
+                        "type": "string",
+                        "example": "max.mustermann@example.com"
+                      },
+                      "gender": {
+                        "type": "string",
+                        "example": "FEMALE"
+                      },
+                      "phone": {
+                        "type": "string",
+                        "example": "+201234567890"
+                      },
+                      "age": {
+                        "type": "number",
+                        "example": 25
+                      },
+                      "profilePic": {
+                        "type": "string",
+                        "example": "https://res.cloudinary.com/example/photo.jpg"
+                      },
+                      "years_of_experience": {
+                        "type": "number",
+                        "example": 2
+                      },
+                      "nationalCardUrl": {
+                        "type": "string",
+                        "example": "https://res.cloudinary.com/example/national_card.pdf"
+                      },
+                      "bonusFileUrl": {
+                        "type": "string",
+                        "example": "https://res.cloudinary.com/example/bonus.pdf"
+                      },
+                      "brief": {
+                        "type": "string",
+                        "example": "Experienced ICU nurse with 5 years in critical care"
+                      },
+                      "clinics": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "id": {
+                              "type": "string",
+                              "example": "uuid-string"
+                            },
+                            "name": {
+                              "type": "string",
+                              "example": "Medical Park Clinic"
+                            },
+                            "address": {
+                              "type": "string",
+                              "example": "123 Main St, New Cairo"
+                            },
+                            "address_maps_link": {
+                              "type": "string",
+                              "example": "https://maps.google.com/?q=..."
+                            },
+                            "working_days": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "day_of_week": {
+                                    "type": "string",
+                                    "example": "TUESDAY"
+                                  },
+                                  "start_time": {
+                                    "type": "string",
+                                    "example": "10:00"
+                                  },
+                                  "end_time": {
+                                    "type": "string",
+                                    "example": "17:00"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
+                "messageEn": {
+                  "type": "string",
+                  "example": "Nurses retrieved successfully"
+                },
+                "messageAr": {
+                  "type": "string",
+                  "example": "تم استرجاع الممرضين بنجاح"
+                }
+              },
+              "xml": {
+                "name": "main"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized – missing or invalid token"
           }
         }
       }

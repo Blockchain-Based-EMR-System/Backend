@@ -5,7 +5,7 @@ import { ErrorMessages, createBilingualError } from "@/utils/errorMessages";
 import { Doctor, DoctorAccountStatus, PrismaClient, Role } from "@prisma/client";
 import { hash, compare } from "bcrypt";
 import { DoctorLoginData, DoctorPersonalData, DoctorAnnouncements } from "@/interfaces/doctors.interface";
-import { NurseData } from "@/interfaces/nurse.interface";
+import { NurseData, NurseFullDetails } from "@/interfaces/nurse.interface";
 import { AuthService } from "./auth.service";
 import prisma from "@/config/prisma";
 import cloudinary from "@/utils/cloudinary";
@@ -72,6 +72,7 @@ export class DoctorService {
                     id: createdUser.id,
                     specialization: "IMMUNOLOGY",
                     account_status: DoctorAccountStatus.PENDING,
+                    availability_type: doctorData.availability_type,
                 },
             });
             return createdUser.id;
@@ -704,8 +705,8 @@ export class DoctorService {
         }
 
         await prisma.announcement.update({
-            where: { 
-                id: announcementId 
+            where: {
+                id: announcementId
             },
             data: updateData
         });
@@ -772,6 +773,90 @@ export class DoctorService {
             bonusFileUrl: nurse.bonusFileUrl,
             brief: nurse.brief,
         })));
+    }
+
+    public async getWorkingNurses(doctorId: string): Promise<NurseFullDetails[]> {
+        const workingNurses = await prisma.nurseSchedule.findMany({
+            where: {
+                doctor_id: doctorId,
+                deleted_at: null
+            },
+            orderBy: {
+                day_of_week: 'asc',
+            },
+            select: {
+                nurse: {
+                    select: {
+                        id: true,
+                        years_of_experience: true,
+                        nationalCardUrl: true,
+                        bonusFileUrl: true,
+                        brief: true,
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true,
+                                gender: true,
+                                phone: true,
+                                date_of_birth: true,
+                                photo_url: true,
+                            }
+                        }
+                    }
+                },
+                clinic: {
+                    select: {
+                        id: true,
+                        name: true,
+                        address: true,
+                        address_maps_link: true,
+                    }
+                },
+                day_of_week: true,
+                start_time: true,
+                end_time: true,
+            }
+        });
+        const result: NurseFullDetails[] = [];
+
+        for (const row of workingNurses) {
+            const workingDay = { 
+                day_of_week: row.day_of_week,
+                start_time: row.start_time, 
+                end_time: row.end_time 
+            };
+
+            let nurse = result.find(n => n.id === row.nurse.id);
+
+            if (!nurse) {
+                nurse = {
+                    id: row.nurse.id,
+                    name: row.nurse.user.name,
+                    email: row.nurse.user.email,
+                    gender: row.nurse.user.gender,
+                    phone: row.nurse.user.phone,
+                    age: await this.userService.calculateUserAge(row.nurse.user.date_of_birth),
+                    profilePic: row.nurse.user.photo_url,
+                    years_of_experience: row.nurse.years_of_experience,
+                    nationalCardUrl: row.nurse.nationalCardUrl,
+                    bonusFileUrl: row.nurse.bonusFileUrl,
+                    brief: row.nurse.brief,
+                    clinics: [],
+                };
+                result.push(nurse);
+            }
+
+            let clinic = nurse.clinics.find(c => c.id === row.clinic?.id);
+
+            if (!clinic) {
+                clinic = { ...row.clinic, working_days: [] };
+                nurse.clinics.push(clinic);
+            }
+
+            clinic.working_days.push(workingDay);
+        }
+        return result;
     }
 
     public async postAnnouncement(doctorId: string, data: PostAnnouncementDto): Promise<void> {

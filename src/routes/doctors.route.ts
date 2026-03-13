@@ -56,6 +56,13 @@ export class DoctorsRoute implements Routes {
                     type: 'string',
                     enum: ['MALE', 'FEMALE']
                 }
+                #swagger.parameters['availability_type'] = {
+                    in: 'formData',
+                    description: 'availability type of the doctor',
+                    required: false,
+                    type: 'string',
+                    enum: ['UNSET', 'ONLINE', 'OFFLINE', 'BOTH']
+                }
                 #swagger.parameters['date_of_birth'] = {
                     in: 'formData',
                     description: 'Doctor date of birth (YYYY-MM-DD)',
@@ -354,6 +361,82 @@ export class DoctorsRoute implements Routes {
             */
             AuthMiddleware,
             this.doctorsController.getAnnouncementApplicants
+        )
+        this.router.get(
+            `/doctors/nurses`,
+            /*
+                #swagger.path = '/doctors/nurses'
+                #swagger.method = 'get'
+                #swagger.tags = ['Doctors']
+                #swagger.description = 'Retrieves all nurses working with the doctor'
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.responses[200] = {
+                    description: 'Nurses retrieved successfully',
+                    schema: {
+                        data: [
+                            {
+                                id: 'uuid-string',
+                                name: 'Max Mustermann',
+                                email: 'max.mustermann@example.com',
+                                gender: 'FEMALE',
+                                phone: '+201234567890',
+                                age: 25,
+                                profilePic: 'https://res.cloudinary.com/example/photo.jpg',
+                                years_of_experience: 2,
+                                nationalCardUrl: 'https://res.cloudinary.com/example/national_card.pdf',
+                                bonusFileUrl: 'https://res.cloudinary.com/example/bonus.pdf',
+                                brief: 'Experienced ICU nurse with 5 years in critical care',
+                                clinics: [
+                                    {
+                                        id: 'uuid-string',
+                                        name: 'Al Salam Clinic',
+                                        address: '123 Main St, Cairo',
+                                        address_maps_link: 'https://maps.google.com/?q=...',
+                                        working_days: [
+                                            {
+                                                day_of_week: 'SUNDAY',
+                                                start_time: '14:00',
+                                                end_time: '17:00'
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        id: 'uuid-string',
+                                        name: 'Medical Park Clinic',
+                                        address: '123 Main St, New Cairo',
+                                        address_maps_link: 'https://maps.google.com/?q=...',
+                                        working_days: [
+                                            {
+                                                day_of_week: 'MONDAY',
+                                                start_time: '10:00',
+                                                end_time: '17:00'
+                                            },
+                                            {
+                                                day_of_week: 'TUESDAY',
+                                                start_time: '10:00',
+                                                end_time: '17:00'
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+                        ],
+                        messageEn: 'Nurses retrieved successfully',
+                        messageAr: 'تم استرجاع الممرضين بنجاح'
+                    }
+                }
+                #swagger.responses[401] = {
+                    description: 'Unauthorized – missing or invalid token'
+                }
+            */
+
+            AuthMiddleware,
+            this.doctorsController.getWorkingNurses
         )
 
         this.router.patch(

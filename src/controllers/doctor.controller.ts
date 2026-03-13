@@ -114,6 +114,21 @@ export class DoctorController {
         });
     }
 
+    public getWorkingNurses = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
+        const doctorId = req.user?.id;
+        if (!doctorId) {
+            const error = createBilingualError(401, ErrorMessages.DOCTOR_ID_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+        const nurses = await this.doctorService.getWorkingNurses(doctorId);
+
+        const responseMessage = createMultiLangMessage(SuccessResponseMessages.NURSES_RETRIEVED_SUCCESSFULLY);
+        res.status(200).json({
+            data: nurses,
+            ...responseMessage
+        });
+    }
+
     public approveApplicant = async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
         const doctorId = req.user?.id;
         const { applicantId } = req.params;

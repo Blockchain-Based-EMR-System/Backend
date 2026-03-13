@@ -1,8 +1,11 @@
 import { Request } from 'express';
 import { User } from '@interfaces/users.interface';
+import { Role } from '@prisma/client';
+
 
 export interface DataStoredInToken {
   id: string;
+  role:Role;
 }
 
 export interface AccessTokenData {
