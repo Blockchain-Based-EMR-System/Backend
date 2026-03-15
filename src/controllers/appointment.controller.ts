@@ -537,7 +537,8 @@ export class AppointmentController {
             ...response,
             data: {
                 token,
-                appId: Agora_APP_ID
+                appId: Agora_APP_ID,
+                uid: userId
             }
         });
     });
