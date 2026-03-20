@@ -394,6 +394,7 @@ export class AppointmentService {
                     gte: today,
                     lte: endOfToday,
                 },
+                status: { in: ['CONFIRMED', 'COMPLETED'] },
             },
             select: {
                 id: true,
