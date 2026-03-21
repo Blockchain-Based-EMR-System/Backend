@@ -472,7 +472,7 @@ export class MedicalRecordService {
   }
 
   public async getVisitSummariesForDoctor(doctorId: string, patientId: string): Promise<Array<{ recordId: string; content: any }>> {
-    return this.getJsonRecordsForDoctor(doctorId, patientId, RecordType.VISIT);
+    return this.getJsonRecordsForDoctor(doctorId, patientId, RecordType.VISIT_SUMMARY);
   }
 
   public async getMedicalHistoryForDoctor(doctorId: string, patientId: string): Promise<Array<{ recordId: string; content: any }>> {
