@@ -394,6 +394,7 @@ export class AppointmentService {
                     gte: today,
                     lte: endOfToday,
                 },
+                status: { in: ['CONFIRMED', 'COMPLETED'] },
             },
             select: {
                 id: true,
@@ -1200,6 +1201,50 @@ export class AppointmentService {
             clinic_address: app.clinic ? app.clinic.address : null,
         }));
 
+    }
+
+    public async getDoctorAppointmentContext(
+        doctorId: string,
+        appointmentId: string,
+    ): Promise<{ appointmentId: string; clinicId: string; patientId: string }> {
+        const appointment = await prisma.appointment.findUnique({
+            where: {
+                id: appointmentId,
+            },
+            select: {
+                id: true,
+                doctor_id: true,
+                clinic_id: true,
+                patient_id: true,
+                deleted_at: true,
+            },
+        });
+
+        if (!appointment) {
+            const error = createBilingualError(404, ErrorMessages.APPOINTMENT_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        if (appointment.doctor_id !== doctorId) {
+            const error = createBilingualError(403, ErrorMessages.UNAUTHORIZED_APPOINTMENT_ACCESS);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        if (appointment.deleted_at) {
+            const error = createBilingualError(400, ErrorMessages.APPOINTMENT_ALREADY_DELETED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        if (!appointment.clinic_id) {
+            const error = createBilingualError(400, ErrorMessages.CLINIC_REQUIRED_FOR_OFFLINE);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        return {
+            appointmentId: appointment.id,
+            clinicId: appointment.clinic_id,
+            patientId: appointment.patient_id,
+        };
     }
 
     public async getAppointmentOwners(appointmentId: string): Promise<{ doctorId: string; scheduledTime: Date; }> {

@@ -144,5 +144,4 @@ vite.config.ts.timestamp-*
 docker-compose-local.yml
 docs
 uploads
-data/backup_keys.json
-data/backup_records.json
+

@@ -181,23 +181,49 @@ export class IdentityStorageService {
 
 
     private decrypt(ciphertext: string): string {
-        if (!ciphertext.includes(':')) {
-            // Data is not encrypted
+        if (!this.isEncryptedPayload(ciphertext)) {
+            // Value is plain text or a non-AES placeholder (e.g. dummy keys)
             return ciphertext;
         }
 
         const [ivHex, authTagHex, encrypted] = ciphertext.split(':');
-        
-        const iv = Buffer.from(ivHex, 'hex');
-        const authTag = Buffer.from(authTagHex, 'hex');
-        
-        const decipher = crypto.createDecipheriv('aes-256-gcm', this.encryptionKey, iv);
-        decipher.setAuthTag(authTag);
-        
-        let decrypted = decipher.update(encrypted, 'hex', 'utf8');
-        decrypted += decipher.final('utf8');
-        
-        return decrypted;
+
+        try {
+            const iv = Buffer.from(ivHex, 'hex');
+            const authTag = Buffer.from(authTagHex, 'hex');
+
+            const decipher = crypto.createDecipheriv('aes-256-gcm', this.encryptionKey, iv);
+            decipher.setAuthTag(authTag);
+
+            let decrypted = decipher.update(encrypted, 'hex', 'utf8');
+            decrypted += decipher.final('utf8');
+
+            return decrypted;
+        } catch {
+            // Keep backward compatibility with legacy/plaintext values that happen to contain ':'
+            return ciphertext;
+        }
+    }
+
+    private isEncryptedPayload(value: string): boolean {
+        const parts = value.split(':');
+        if (parts.length !== 3) {
+            return false;
+        }
+
+        const [ivHex, authTagHex, encryptedHex] = parts;
+        const isHex = (input: string) => /^[0-9a-fA-F]+$/.test(input);
+
+        // AES-256-GCM format: 16-byte IV + 16-byte auth tag + hex ciphertext
+        if (ivHex.length !== 32 || authTagHex.length !== 32) {
+            return false;
+        }
+
+        if (encryptedHex.length === 0 || encryptedHex.length % 2 !== 0) {
+            return false;
+        }
+
+        return isHex(ivHex) && isHex(authTagHex) && isHex(encryptedHex);
     }
 
     private sanitizeIdentity(identity: FabricIdentity): FabricIdentity {

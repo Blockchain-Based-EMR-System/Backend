@@ -6852,6 +6852,16 @@
         }
       }
     },
+    "${this.path}/doctor/{appointmentId}/context": {
+      "get": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
     "/appointments/doctor/daily-schedule": {
       "get": {
         "tags": [

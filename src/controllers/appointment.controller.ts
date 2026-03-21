@@ -254,6 +254,29 @@ export class AppointmentController {
         });
     });
 
+    public getDoctorAppointmentContext = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
+        const doctorId = req.user.id;
+        const { appointmentId } = req.params;
+
+        if (!doctorId) {
+            const error = createBilingualError(400, ErrorMessages.DOCTOR_ID_REQUIRED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        if (!appointmentId) {
+            const error = createBilingualError(400, ErrorMessages.APPOINTMENT_ID_REQUIRED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const context = await this.appointmentService.getDoctorAppointmentContext(doctorId, appointmentId);
+        const response = createMultiLangMessage(SuccessResponseMessages.APPOINTMENT_DETAILS_RETRIEVED);
+
+        res.status(200).json({
+            data: context,
+            ...response,
+        });
+    });
+
     public enterDoctorSchedule = catchAsync(async (req: RequestWithUser, res: Response): Promise<void> => {
         const doctorId = req.user.id;
         const {

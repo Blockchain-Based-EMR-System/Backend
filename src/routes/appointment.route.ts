@@ -4,9 +4,10 @@ import { ClinicController } from "@/controllers/clinic.controller";
 import { DoctorController } from "@/controllers/doctor.controller";
 import { AppointmentController } from "@/controllers/appointment.controller";
 import { ValidationMiddleware } from "@/middlewares/validation.middleware";
-import { AuthMiddleware } from "@/middlewares/auth.middleware";
+import { AuthMiddleware, RoleMiddleware } from "@/middlewares/auth.middleware";
 import { BookAppointmentDto, RescheduleAppointmentDto, RescheduleAppointmentByDoctorDto, EnterDoctorScheduleDto, EditDoctorScheduleDto, HandleDoctorVacationDto } from "@/dtos/appointments.dto";
 import { AiAppointmentsRoute } from "./ai_appointments.route";
+import { Role } from "@prisma/client";
 
 export class AppointmentRoute implements Routes {
     public path = '/appointments';
@@ -981,6 +982,13 @@ export class AppointmentRoute implements Routes {
             */
             AuthMiddleware,
             this.appointmentController.getCurrentDoctorSchedule
+        );
+
+        this.router.get(
+            `${this.path}/doctor/:appointmentId/context`,
+            AuthMiddleware,
+            RoleMiddleware(Role.DOCTOR),
+            this.appointmentController.getDoctorAppointmentContext,
         );
 
         this.router.get(
