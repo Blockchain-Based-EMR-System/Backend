@@ -118,8 +118,9 @@ export class AppointmentService {
         const now = new Date();
         const { start: today, end: endOfToday } = this.getTodayBoundaries(now);
 
-        const requestedDateOnly = new Date(requestedDate);
-        requestedDateOnly.setUTCHours(0, 0, 0, 0);
+        // const requestedDateOnly = new Date(requestedDate);
+        // requestedDateOnly.setUTCHours(0, 0, 0, 0);
+        const { start: requestedDateOnly } = this.getTodayBoundaries(requestedDate);
 
         if (requestedDateOnly < today) {
             const error = createBilingualError(400, ErrorMessages.APPOINTMENT_IN_PAST);
