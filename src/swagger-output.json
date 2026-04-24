@@ -6855,6 +6855,20 @@
     "${this.path}/doctor/{appointmentId}/context": {
       "get": {
         "description": "",
+        "parameters": [
+          {
+            "name": "this.path",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "appointmentId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
         "responses": {
           "default": {
             "description": ""
@@ -9352,12 +9366,17 @@
                 "mixedKey": {
                   "type": "string",
                   "example": "appointments/appointmentId/MIXED.webm"
+                },
+                "prompt": {
+                  "type": "string",
+                  "example": "string"
                 }
               },
               "required": [
                 "doctorKey",
                 "patientKey",
-                "mixedKey"
+                "mixedKey",
+                "prompt"
               ]
             }
           }

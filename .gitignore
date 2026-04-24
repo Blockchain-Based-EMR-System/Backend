@@ -144,4 +144,5 @@ vite.config.ts.timestamp-*
 docker-compose-local.yml
 docs
 uploads
+backblaze_cors.json
 

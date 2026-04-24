@@ -38,7 +38,7 @@ export class AiAppointmentsController {
 
     public processAudioAI = catchAsync(async (req: RequestWithUser, res: Response, next: NextFunction): Promise<void> => {
         const appointmentId = req.params.appointmentId;
-        const { doctorKey, patientKey, mixedKey } = req.body;
+        const { doctorKey, patientKey, mixedKey, prompt } = req.body;
 
         const isAppointmentExist = await this.aiAppointmentsService.checkAppointmentExistence(appointmentId);
         if (!isAppointmentExist) {
@@ -60,7 +60,7 @@ export class AiAppointmentsController {
             const error = createBilingualError(400, ErrorMessages.MISSING_AUDIO_KEYS);
             throw new HttpException(error.status, error.message, error.messageAr);
         }        
-        const SOAP = await this.aiAppointmentsService.generateSOAP(finalScript);
+        const SOAP = await this.aiAppointmentsService.generateSOAP(finalScript, prompt);
         const responseMessage = createMultiLangMessage(SuccessResponseMessages.SOAP_GENERATED);
         res.status(202).json({
             ...responseMessage,

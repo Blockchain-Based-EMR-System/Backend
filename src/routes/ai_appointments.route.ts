@@ -88,7 +88,8 @@ export class AiAppointmentsRoute implements Routes {
                     schema: {
                         $doctorKey: 'appointments/appointmentId/DOCTOR.webm',
                         $patientKey: 'appointments/appointmentId/PATIENT.webm',
-                        $mixedKey: 'appointments/appointmentId/MIXED.webm'
+                        $mixedKey: 'appointments/appointmentId/MIXED.webm',
+                        $prompt: 'string'
                     }
                 }
                 #swagger.responses[202] = {

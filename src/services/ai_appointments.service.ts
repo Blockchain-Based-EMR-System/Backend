@@ -57,12 +57,12 @@ export class AiAppointmentsService {
         return finalScript;
     }
 
-    public async generateSOAP(finalScript: string): Promise<any> {
+    public async generateSOAP(finalScript: string, prompt: string): Promise<any> {
         const chatCompletion = await this.groq.chat.completions.create({
             messages: [
                 {
                     role: "system",
-                    content: `You are an expert clinical AI scribe specializing in rheumatology and autoimmune diseases.
+                    content: prompt ? prompt : `You are an expert clinical AI scribe specializing in rheumatology and autoimmune diseases.
 Your task is to analyze the provided doctor-patient consultation transcript and generate a highly professional, concise medical SOAP note.
 
 CRITICAL INSTRUCTIONS:
@@ -71,7 +71,7 @@ CRITICAL INSTRUCTIONS:
 3. The input transcript may contain Egyptian Arabic, English, or a mix of both. You MUST translate all clinical findings into standard professional medical English.
 
 CLINICAL GUIDELINES:
-- Subjective: Focus on the chief complaint, history of present illness, pain levels, and specific autoimmune symptoms (e.g., duration of morning stiffness, fatigue).
+- Subjective: Focus on the chief complaint, history of present illness, family medical history, pain levels, and specific autoimmune symptoms (e.g., duration of morning stiffness, fatigue).
 - Objective: Extract any physical examination findings mentioned by the doctor (e.g., synovitis, swollen MCP/PIP joints, range of motion) and any lab/imaging results discussed.
 - Assessment: State the suspected or confirmed diagnosis (e.g., Rheumatoid Arthritis flare, SLE) based on the context.
 - Plan: List the treatment strategy clearly, including medication changes (e.g., Methotrexate, NSAIDs, Biologics), ordered labs (e.g., CRP, ESR, Anti-CCP), and follow-up instructions.`
