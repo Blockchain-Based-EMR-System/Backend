@@ -1639,19 +1639,6 @@ export class AppointmentService {
         return (slotStart < appointmentEnd && slotEnd > appointmentStart);
     }
 
-    private async doctorIsOnline(doctorId: string): Promise<boolean> {
-        const { availability_type } = await prisma.doctor.findUnique({
-            where: {
-                id: doctorId,
-            },
-            select: {
-                availability_type: true,
-            }
-        });
-        return availability_type === 'ONLINE' || availability_type === 'BOTH';
-    }
-
-
     private async rescheduleSingleAppointment(doctorId: string, appointmentId: string, minutes: number): Promise<void> {
         const appointment = await this.getAndValidateAppointment(appointmentId, doctorId);
 
@@ -1710,82 +1697,6 @@ export class AppointmentService {
         }
 
         return appointment;
-    }
-
-    private async validateDoctorAvailability(doctorId: string, clinicId: string | null, newScheduledTime: Date, newEndTime: Date, excludeAppointmentId?: string): Promise<void> {
-
-        // check if doctor works on this day
-        const dayOfWeek = this.getDayOfWeek(newScheduledTime.getUTCDay());
-        const isOnline = await this.doctorIsOnline(doctorId);
-
-        const schedule = await prisma.doctorSchedule.findFirst({
-            where: {
-                doctor_id: doctorId,
-                clinic_id: isOnline ? null : clinicId,
-                day_of_week: dayOfWeek,
-                is_active: true,
-                deleted_at: null,
-            },
-            select: {
-                start_time: true,
-                end_time: true,
-            }
-        });
-
-        if (!schedule) {
-            const error = createBilingualError(400, ErrorMessages.DOCTOR_NOT_WORKING_ON_DAY);
-            throw new HttpException(error.status, error.message, error.messageAr);
-        }
-
-        // check if the new time within schedule or not
-        const scheduleStart = this.parseTimeToDate(newScheduledTime, schedule.start_time);
-        const scheduleEnd = this.parseTimeToDate(newScheduledTime, schedule.end_time);
-
-        if (newScheduledTime < scheduleStart || newEndTime > scheduleEnd) {
-            const error = createBilingualError(400, ErrorMessages.TIME_OUTSIDE_SCHEDULE);
-            throw new HttpException(error.status, error.message, error.messageAr);
-        }
-
-        // check for any conflicts with existing appointments (appointments on the same calendar day)
-        const startOfDay = new Date(newScheduledTime);
-        startOfDay.setUTCHours(0, 0, 0, 0);
-
-        const endOfDay = new Date(newScheduledTime);
-        endOfDay.setUTCHours(23, 59, 59, 999);
-
-        const whereClause: any = {
-            doctor_id: doctorId,
-            clinic_id: isOnline ? null : clinicId,
-            scheduled_time: {
-                gte: startOfDay,
-                lte: endOfDay,
-            },
-            status: { in: ['CONFIRMED', 'COMPLETED'] },
-            deleted_at: null,
-        };
-
-        // exclude the appointment being rescheduled
-        if (excludeAppointmentId) {
-            whereClause.id = { not: excludeAppointmentId };
-        }
-
-        const conflictingAppointments = await prisma.appointment.findMany({
-            where: whereClause,
-            select: {
-                scheduled_time: true,
-                end_time: true,
-            }
-        });
-
-        // check for overlap
-        const hasConflict = conflictingAppointments.some(existing => {
-            return this.doesSlotOverlap(newScheduledTime, newEndTime, new Date(existing.scheduled_time), new Date(existing.end_time));
-        });
-
-        if (hasConflict) {
-            const error = createBilingualError(400, ErrorMessages.TIME_SLOT_NOT_AVAILABLE);
-            throw new HttpException(error.status, error.message, error.messageAr);
-        }
     }
 
     private camelToSnakeCase(str: string): string {
