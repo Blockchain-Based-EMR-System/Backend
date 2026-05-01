@@ -1700,27 +1700,20 @@ export class AppointmentService {
             hour12: false,
         });
 
-        const cairoDateTimeStr = cairoFormatter.format(now).replace(' ', 'T');
+        const cairoDateTimeStr = cairoFormatter.format(now).replace(', ', 'T');
         return new Date(`${cairoDateTimeStr}Z`);
     }
 
-    private getTodayBoundaries(date: Date = new Date(), timezone: string = 'Africa/Cairo'): { start: Date; end: Date } {
-        const formatter = new Intl.DateTimeFormat('en-CA', {
-            timeZone: timezone,
-            year: 'numeric',
-            month: '2-digit',
-            day: '2-digit'
-        });
+    private getTodayBoundaries(date: Date): { start: Date; end: Date } {
+        const year = date.getUTCFullYear();
+        const month = date.getUTCMonth();
+        const day = date.getUTCDate();
 
-        const localDateStr = formatter.format(date);
-        const [year, month, day] = localDateStr.split('-').map(Number);
-
-        const start = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
-        const end = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
+        const start = new Date(Date.UTC(year, month, day, 0, 0, 0, 0));
+        const end = new Date(Date.UTC(year, month, day, 23, 59, 59, 999));
 
         return { start, end };
     }
-
 
 
     public async generateAgoraToken(appointmentId: string, userId: string): Promise<string> {
