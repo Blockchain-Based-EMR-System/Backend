@@ -56,8 +56,8 @@ export class AppointmentService {
             scheduleMap.set(schedule.day_of_week, schedule);
         });
 
-        const today = new Date();
-        today.setUTCHours(0, 0, 0, 0);
+        const now = this.getNowInEgypt();
+        const today = this.getTodayBoundaries(now).start;
 
         for (let i = 0; i < daysAhead; i++) {
             // create a copy from today --> if we used today directly it will be modified to today + 1 --> tomorrow date
@@ -115,11 +115,8 @@ export class AppointmentService {
         const requestedDate = new Date(date);
         const dayOfWeek = this.getDayOfWeek(requestedDate.getUTCDay());
 
-        const now = new Date();
-        const { start: today, end: endOfToday } = this.getTodayBoundaries(now);
-
-        // const requestedDateOnly = new Date(requestedDate);
-        // requestedDateOnly.setUTCHours(0, 0, 0, 0);
+        const now = this.getNowInEgypt();
+        const { start: today } = this.getTodayBoundaries(now);
         const { start: requestedDateOnly } = this.getTodayBoundaries(requestedDate);
 
         if (requestedDateOnly < today) {
@@ -199,9 +196,6 @@ export class AppointmentService {
                     return this.doesSlotOverlap(slotStart, slotEnd, apptStart, apptEnd);
                 });
 
-                const nowUTC = new Date();
-                const egyptOffset = 2 * 60 * 60 * 1000;
-                const now = new Date(nowUTC.getTime() + egyptOffset);
                 const isInPast = slotStart <= now;
 
                 return {
@@ -385,7 +379,7 @@ export class AppointmentService {
     public async getTodayAppointment(patientId: string): Promise<PatientTodayAppointment[]> {
         const result: PatientTodayAppointment[] = [];
 
-        const now = new Date();
+        const now = this.getNowInEgypt();
         const { start: today, end: endOfToday } = this.getTodayBoundaries(now);
 
         const appointments = await prisma.appointment.findMany({
@@ -507,8 +501,6 @@ export class AppointmentService {
             appointmentDate: this.formatDate(appointment.scheduled_time),
             startTime: this.formatTime(appointment.scheduled_time),
         };
-
-        // penalty to be added later
     }
 
     public async rescheduleAppointmentByDoctor(doctorId: string, appointmentId: string, minutes: number): Promise<AppointmentEventData[]> {
@@ -746,10 +738,7 @@ export class AppointmentService {
     };
 
     public async getUpcommingDoctorSchedule(doctorId: string): Promise<DoctorScheduleDay[]> {
-        // to be changed later -->
-        const nowUTC = new Date();
-        const egyptOffset = 2 * 60 * 60 * 1000;
-        const now = new Date(nowUTC.getTime() + egyptOffset);
+        const now = this.getNowInEgypt();
 
         const appointments = await prisma.appointment.findMany({
             where: {
@@ -966,10 +955,7 @@ export class AppointmentService {
             throw new HttpException(error.status, error.message, error.messageAr);
         }
 
-        const nowUTC = new Date();
-        const egyptOffset = 2 * 60 * 60 * 1000;
-        const now = new Date(nowUTC.getTime() + egyptOffset);
-
+        const now = this.getNowInEgypt();
 
         if (now < appointment.scheduled_time) {
             const error = createBilingualError(400, ErrorMessages.CANNOT_BE_COMPLETED_BEFORE_SCHEDULED_TIME);
@@ -1155,7 +1141,7 @@ export class AppointmentService {
     }
 
     public async getCurrentDoctorSchedule(doctorId: string): Promise<DoctorAppointment[]> {
-        const now = new Date();
+        const now = this.getNowInEgypt();
         const { start: startOfDay, end: endOfDay } = this.getTodayBoundaries(now);
 
         const appointments = await prisma.appointment.findMany({
@@ -1382,7 +1368,6 @@ export class AppointmentService {
             }
 
         })
-        // DONT FORGET LATER --> notify patients/ penalty
     }
 
 
@@ -1411,12 +1396,10 @@ export class AppointmentService {
                 deleted_at: new Date(),
             }
         })
-        // DONT FORGET LATER --> notify patients / penalty
-
     }
 
     public async getNurseAppointmentsToday(nurseId: string): Promise<AppointmentData[]> {
-        const crrentDate = new Date();
+        const crrentDate = this.getNowInEgypt();
         const today = this.formatDate(crrentDate);
         const dayOfWeek = this.getDayOfWeek(crrentDate.getUTCDay());
 
@@ -1639,19 +1622,6 @@ export class AppointmentService {
         return (slotStart < appointmentEnd && slotEnd > appointmentStart);
     }
 
-    private async doctorIsOnline(doctorId: string): Promise<boolean> {
-        const { availability_type } = await prisma.doctor.findUnique({
-            where: {
-                id: doctorId,
-            },
-            select: {
-                availability_type: true,
-            }
-        });
-        return availability_type === 'ONLINE' || availability_type === 'BOTH';
-    }
-
-
     private async rescheduleSingleAppointment(doctorId: string, appointmentId: string, minutes: number): Promise<void> {
         const appointment = await this.getAndValidateAppointment(appointmentId, doctorId);
 
@@ -1712,99 +1682,39 @@ export class AppointmentService {
         return appointment;
     }
 
-    private async validateDoctorAvailability(doctorId: string, clinicId: string | null, newScheduledTime: Date, newEndTime: Date, excludeAppointmentId?: string): Promise<void> {
-
-        // check if doctor works on this day
-        const dayOfWeek = this.getDayOfWeek(newScheduledTime.getUTCDay());
-        const isOnline = await this.doctorIsOnline(doctorId);
-
-        const schedule = await prisma.doctorSchedule.findFirst({
-            where: {
-                doctor_id: doctorId,
-                clinic_id: isOnline ? null : clinicId,
-                day_of_week: dayOfWeek,
-                is_active: true,
-                deleted_at: null,
-            },
-            select: {
-                start_time: true,
-                end_time: true,
-            }
-        });
-
-        if (!schedule) {
-            const error = createBilingualError(400, ErrorMessages.DOCTOR_NOT_WORKING_ON_DAY);
-            throw new HttpException(error.status, error.message, error.messageAr);
-        }
-
-        // check if the new time within schedule or not
-        const scheduleStart = this.parseTimeToDate(newScheduledTime, schedule.start_time);
-        const scheduleEnd = this.parseTimeToDate(newScheduledTime, schedule.end_time);
-
-        if (newScheduledTime < scheduleStart || newEndTime > scheduleEnd) {
-            const error = createBilingualError(400, ErrorMessages.TIME_OUTSIDE_SCHEDULE);
-            throw new HttpException(error.status, error.message, error.messageAr);
-        }
-
-        // check for any conflicts with existing appointments (appointments on the same calendar day)
-        const startOfDay = new Date(newScheduledTime);
-        startOfDay.setUTCHours(0, 0, 0, 0);
-
-        const endOfDay = new Date(newScheduledTime);
-        endOfDay.setUTCHours(23, 59, 59, 999);
-
-        const whereClause: any = {
-            doctor_id: doctorId,
-            clinic_id: isOnline ? null : clinicId,
-            scheduled_time: {
-                gte: startOfDay,
-                lte: endOfDay,
-            },
-            status: { in: ['CONFIRMED', 'COMPLETED'] },
-            deleted_at: null,
-        };
-
-        // exclude the appointment being rescheduled
-        if (excludeAppointmentId) {
-            whereClause.id = { not: excludeAppointmentId };
-        }
-
-        const conflictingAppointments = await prisma.appointment.findMany({
-            where: whereClause,
-            select: {
-                scheduled_time: true,
-                end_time: true,
-            }
-        });
-
-        // check for overlap
-        const hasConflict = conflictingAppointments.some(existing => {
-            return this.doesSlotOverlap(newScheduledTime, newEndTime, new Date(existing.scheduled_time), new Date(existing.end_time));
-        });
-
-        if (hasConflict) {
-            const error = createBilingualError(400, ErrorMessages.TIME_SLOT_NOT_AVAILABLE);
-            throw new HttpException(error.status, error.message, error.messageAr);
-        }
-    }
-
     private camelToSnakeCase(str: string): string {
         return str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
     }
 
-    private getTodayBoundaries(date: Date, timezone: string = 'Africa/Cairo'): { start: Date; end: Date } {
-        const localDateStr = new Intl.DateTimeFormat('en-CA', {
-            timeZone: timezone,
+    private getNowInEgypt(): Date {
+        const now = new Date();
+
+        const cairoFormatter = new Intl.DateTimeFormat('en-CA', {
+            timeZone: 'Africa/Cairo',
             year: 'numeric',
             month: '2-digit',
-            day: '2-digit'}).format(date);
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false,
+        });
 
-        const [year, month, day] = localDateStr.split('-').map(Number);
+        const cairoDateTimeStr = cairoFormatter.format(now).replace(', ', 'T');
+        return new Date(`${cairoDateTimeStr}Z`);
+    }
 
-        const start = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
-        const end = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
+    private getTodayBoundaries(date: Date): { start: Date; end: Date } {
+        const year = date.getUTCFullYear();
+        const month = date.getUTCMonth();
+        const day = date.getUTCDate();
+
+        const start = new Date(Date.UTC(year, month, day, 0, 0, 0, 0));
+        const end = new Date(Date.UTC(year, month, day, 23, 59, 59, 999));
+
         return { start, end };
     }
+
 
     public async generateAgoraToken(appointmentId: string, userId: string): Promise<string> {
         const appointment = await prisma.appointment.findUnique({
