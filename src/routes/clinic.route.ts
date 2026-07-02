@@ -1,0 +1,261 @@
+import { ClinicController } from "@/controllers/clinic.controller";
+import {  ClinicUpdateFeesDto, CreateUpdateClinicRequestDto } from "@/dtos/clinics.dto";
+import { Routes } from "@/interfaces";
+import { AuthMiddleware, RoleMiddleware } from "@/middlewares/auth.middleware";
+import { ValidationMiddleware } from "@/middlewares/validation.middleware";
+import { Role } from "@prisma/client";
+import { Router } from "express";
+
+export class ClinicRoute implements Routes {
+    public path = '/clinics'
+    public router = Router();
+    public clinicController = new ClinicController();
+    constructor() {
+        this.initializeRoutes();
+    }
+
+    private initializeRoutes() {
+        this.router.post(
+            `${this.path}`,
+            /* 
+                #swagger.path = '/clinics'
+                #swagger.method = 'post'
+                #swagger.tags = ['Clinics']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['body'] = {
+                    in: 'body',
+                    description: 'Clinic creation data',
+                    required: true,
+                    schema: {
+                        $name: 'Downtown Medical Clinic',
+                        $opening_at: '09:00',
+                        $closing_at: '17:00',
+                        $address: '123 Main Street, City Center',
+                        address_maps_link: 'https://maps.google.com/?q=123+Main+Street',
+                        $phone: '+1234567890',
+                        canPayOnline: true,
+                        $fees: 100
+                    }
+                }
+                #swagger.responses[201] = {
+                    description: 'Clinic created successfully',
+                    schema: {
+                        messageEn: 'Clinic created successfully',
+                        messageAr: "تم إنشاء العيادة بنجاح"
+                    }
+                }
+            */
+            AuthMiddleware,
+            RoleMiddleware(Role.DOCTOR),
+            ValidationMiddleware(CreateUpdateClinicRequestDto),
+            this.clinicController.createClinic
+        );
+
+        this.router.get(
+            `${this.path}/:id`,
+            /* 
+                #swagger.path = '/clinics/{id}'
+                #swagger.method = 'get'
+                #swagger.tags = ['Clinics']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['id'] = {
+                    in: 'path',
+                    description: 'The unique identifier of the clinic',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.responses[200] = {
+                    description: 'Clinic details retrieved successfully',
+                    schema: {
+                        data: {
+                            id: 'clinic-uuid-123',
+                            name: 'Downtown Medical Clinic',
+                            is_active: true,
+                            opening_at: '09:00',
+                            closing_at: '17:00',
+                            address: '123 Main Street, City Center',
+                            address_maps_link: 'https://maps.google.com/?q=123+Main+Street',
+                            phone: '+1234567890',
+                            canPayOnline: true,
+                            created_at: '2024-01-01T00:00:00.000Z'
+                        },
+                        messageEn: 'Clinic retrieved successfully',
+                        messageAr: "تم استرجاع بيانات العيادة بنجاح"
+                    }
+                }
+            */
+            AuthMiddleware, // To be Discussed: Should patients be able to view clinic details?
+            this.clinicController.getClinicById
+        );
+
+        this.router.patch(
+            `${this.path}/:id`,
+            /* 
+                #swagger.path = '/clinics/{id}'
+                #swagger.method = 'patch'
+                #swagger.tags = ['Clinics']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['id'] = {
+                    in: 'path',
+                    description: 'The unique identifier of the clinic to update',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['body'] = {
+                    in: 'body',
+                    description: 'Clinic update data (all fields are optional)',
+                    required: true,
+                    schema: {
+                        name: 'Downtown Medical Clinic - Updated',
+                        opening_at: '08:00',
+                        closing_at: '18:00',
+                        address: '456 New Street, City Center',
+                        address_maps_link: 'https://maps.google.com/?q=456+New+Street',
+                        phone: '+1234567891',
+                        canPayOnline: false,
+                        fees: 150,
+                    }
+                }
+                #swagger.responses[200] = {
+                    description: 'Clinic updated successfully',
+                    schema: {
+                        messageEn: 'Clinic updated successfully',
+                        messageAr: "تم تحديث العيادة بنجاح"
+                    }
+                }
+            */
+            AuthMiddleware,
+            RoleMiddleware(Role.DOCTOR),
+            ValidationMiddleware(CreateUpdateClinicRequestDto, true),
+            this.clinicController.updateClinicById
+        );
+        
+        this.router.patch(
+            `${this.path}/:id/fees`,
+            /*
+                #swagger.path = '/clinics/{id}/fees'
+                #swagger.method = 'patch'
+                #swagger.tags = ['Clinics']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['id'] = {
+                    in: 'path',
+                    description: 'The unique identifier of the clinic to update fees for',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['body'] = {
+                    in: 'body',
+                    description: 'Clinic fees update data',
+                    required: true,
+                    schema: {
+                        fees: 200
+                    }
+                }
+                #swagger.responses[200] = {
+                    description: 'Clinic fees updated successfully',
+                    schema: {
+                        messageEn: 'Clinic fees updated successfully',
+                        messageAr: "تم تحديث رسوم العيادة بنجاح"
+                    }
+                }
+            */
+            AuthMiddleware,
+            RoleMiddleware(Role.DOCTOR),
+            ValidationMiddleware(ClinicUpdateFeesDto),
+            this.clinicController.updateClinicFeesById
+        );
+
+        this.router.delete(
+            `${this.path}/:id`,
+            /*
+                #swagger.path = '/clinics/{id}'
+                #swagger.method = 'delete'
+                #swagger.tags = ['Clinics']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.parameters['id'] = {
+                    in: 'path',
+                    description: 'The unique identifier of the clinic to delete',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.responses[200] = {
+                    description: 'Clinic deleted successfully',
+                    schema: {
+                        messageEn: 'Clinic deleted successfully',
+                        messageAr: "تم حذف العيادة بنجاح"
+                    }
+                }
+            */
+            AuthMiddleware,
+            RoleMiddleware(Role.DOCTOR),
+            this.clinicController.deleteClinicById
+        );
+
+        this.router.get(
+            `${this.path}`,
+            /* 
+                #swagger.path = '/clinics'
+                #swagger.method = 'get'
+                #swagger.tags = ['Clinics']
+                #swagger.parameters['Authorization'] = {
+                    in: 'cookie',
+                    description: 'Bearer token for authentication',
+                    required: true,
+                    type: 'string'
+                }
+                #swagger.responses[200] = {
+                    description: 'Get doctor clinics successful',
+                    schema: {
+                        data: [
+                            {
+                                id: 'clinic-uuid',
+                                name: 'Clinic Name',
+                                address: '123 Main St, City, Country',
+                                address_maps_link: 'https://maps.google.com/?q=123+Main+St,+City,+Country',
+                                phone: '1234567890',
+                                opening_at: '09:00',
+                                closing_at: '17:00',
+                                canPayOnline: true,
+                                is_active: true,
+                                created_at: '2024-01-01T00:00:00.000Z',
+                                fees: 100,
+                                created_by: 'doctor-uuid',
+                                isOwner: true
+                            }
+                        ],
+                        messageEn: "Doctor's clinics retrieved successfully",
+                        messageAr: "تم استرجاع عيادات الطبيب بنجاح"
+                    }
+                }
+            */
+            AuthMiddleware,
+            RoleMiddleware(Role.DOCTOR),
+            this.clinicController.getDoctorClinics
+        );
+    }
+}

@@ -1,0 +1,356 @@
+export const SuccessResponseMessages = {
+    // Success messages for Auth
+    SIGNED_UP_SUCCESSFULLY: {
+        message_en: "Signed up successfully.",
+        message_ar: "تم انشاء حساب جديد بنجاح.",
+    },
+    LOGGED_IN_SUCCESSFULLY: {
+        message_en: "Logged in successfully.",
+        message_ar: "تم تسجيل الدخول بنجاح.",
+    },
+    LOGGED_OUT_SUCCESSFULLY: {
+        message_en: "Logged out successfully.",
+        message_ar: "تم تسجيل الخروج بنجاح.",
+    },
+    TOKEN_REFRESHED_SUCCESSFULLY: {
+        message_en: "Token refreshed successfully.",
+        message_ar: "تم تحديث رمز الدخول بنجاح.",
+    },
+    PROFILE_COMPLETED_SUCCESSFULLY: {
+        message_en: "Profile completed successfully.",
+        message_ar: "تم إكمال الملف الشخصي بنجاح.",
+    },
+    OTP_VERIFIED_SUCCESSFULLY: {
+        message_en: "OTP verified successfully.",
+        message_ar: "تم التحقق من رمز التحقق بنجاح.",
+    },
+    PASSWORD_RESET_EMAIL_SENT_SUCCESSFULLY: {
+        message_en: "Password reset email sent successfully.",
+        message_ar: "تم إرسال بريد إعادة تعيين كلمة المرور بنجاح.",
+    },
+    PASSWORD_RESET_SUCCESSFULLY: {
+        message_en: "Password reset successfully.",
+        message_ar: "تم إعادة تعيين كلمة المرور بنجاح.",
+    },
+    OTP_RESENT_SUCCESSFULLY: {
+        message_en: "OTP resent successfully.",
+        message_ar: "تم إعادة إرسال رمز التحقق بنجاح.",
+    },
+    PASSWORD_CHECK_SUCCESSFUL: {
+        message_en: "Password check successful.",
+        message_ar: "تم التحقق من كلمة المرور بنجاح.",
+    },
+    PASSWORD_CHANGED_SUCCESSFULLY: {
+        message_en: "Password changed successfully.",
+        message_ar: "تم تغيير كلمة المرور بنجاح.",
+    },
+
+    // Success messages for Doctors by Admin
+    DOCTOR_CREATED: {
+        message_en: "Doctor created successfully.",
+        message_ar: "تم إنشاء حساب الطبيب بنجاح.",
+    },
+    DOCTOR_RETRIEVED: {
+        message_en: "Doctor retrieved successfully.",
+        message_ar: "تم استرجاع بيانات الطبيب بنجاح.",
+    },
+    DOCTORS_RETRIEVED: {
+        message_en: "Doctors retrieved successfully.",
+        message_ar: "تم استرجاع بيانات الأطباء بنجاح.",
+    },
+    UNVERIFIED_DOCTORS_RETRIEVED: {
+        message_en: "Unverified doctors retrieved successfully.",
+        message_ar: "تم استرجاع بيانات الأطباء غير المعتمدين بنجاح.",
+    },
+    DOCTOR_VERIFICATION_STATUS_UPDATED: {
+        message_en: "Doctor verification status updated successfully.",
+        message_ar: "تم تحديث حالة اعتماد الطبيب بنجاح.",
+    },
+
+    // get messages for Nurses by Admin
+    UNVERIFIED_NURSES_RETRIEVED: {
+        message_en: "Unverified nurses retrieved successfully.",
+        message_ar: "تم استرجاع بيانات الممرضات غير المعتمدين بنجاح.",
+    },
+    NURSE_CREATED: {
+        message_en: "Nurse created successfully.",
+        message_ar: "تم إنشاء حساب الممرضة بنجاح.",
+    },
+    NURSES_RETRIEVED: {
+        message_en: "Nurse retrieved successfully.",
+        message_ar: "تم استرجاع بيانات الممرضة بنجاح.",
+    },
+
+
+    // Success messages for Clinics
+    CLINIC_CREATED_SUCCESSFULLY: {
+        message_en: "Clinic created successfully.",
+        message_ar: "تم إنشاء العيادة بنجاح.",
+    },
+    CLINIC_RETRIEVED: {
+        message_en: "Clinic data retrieved successfully.",
+        message_ar: "تم استرجاع بيانات العيادة بنجاح.",
+    },
+    CLINIC_UPDATED_SUCCESSFULLY: {
+        message_en: "Clinic data updated successfully.",
+        message_ar: "تم تحديث بيانات العيادة بنجاح.",
+    },
+    CLINIC_DELETED_SUCCESSFULLY: {
+        message_en: "Clinic deleted successfully.",
+        message_ar: "تم حذف العيادة بنجاح.",
+    },
+    CLINIC_DOCTORS_RETRIEVED: {
+        message_en: "Clinic's doctors retrieved successfully.",
+        message_ar: "تم استرجاع أطباء العيادة بنجاح.",
+    },
+    CLINICS_RETRIEVED_SUCCESSFULLY: {
+        message_en: "Clinics retrieved successfully.",
+        message_ar: "تم استرجاع بيانات العيادات بنجاح.",
+    },
+    CLINIC_STATUS_UPDATED: {
+        message_en: "Clinic active status updated successfully.",
+        message_ar: "تم تحديث حالة العيادة بنجاح.",
+    },
+    CLINIC_FEES_UPDATED_SUCCESSFULLY: {
+        message_en: "Clinic fees updated successfully.",
+        message_ar: "تم تحديث رسوم العيادة بنجاح.",
+    },
+
+    // Success messages for Doctors
+    DOCTOR_CREATED_WAITING_VERIFICATION: {
+        message_en: "Doctor account created successfully. Please wait for verification.",
+        message_ar: "تم إنشاء حساب الطبيب بنجاح. يرجى الانتظار للموافقة عليه.",
+    },
+    PASSWORD_SET_SUCCESSFULLY_BY_DOCTOR: {
+        message_en: "Password set successfully.",
+        message_ar: "تم تعيين كلمة المرور بنجاح.",
+    },
+    ANNOUNCEMENT_CREATED_SUCCESSFULLY: {
+        message_en: "Announcement created successfully.",
+        message_ar: "تم إنشاء الإعلان بنجاح.",
+    },
+    ANNOUNCEMENTS_RETRIEVED_SUCCESSFULLY: {
+        message_en: "Announcements retrieved successfully.",
+        message_ar: "تم استرجاع الإعلانات بنجاح.",
+    },
+    APPLICANTS_RETRIEVED_SUCCESSFULLY: {
+        message_en: "Announcement applicants retrieved successfully.",
+        message_ar: "تم استرجاع المتقدمين للإعلان بنجاح.",
+    },
+    NURSES_RETRIEVED_SUCCESSFULLY: {
+        message_en: "Nurses retrieved successfully.",
+        message_ar: "تم استرجاع الممرضين بنجاح.",
+    },
+    ANNOUNCEMENTS_RETRIEVED: {
+        message_en: "Announcements retrieved successfully.",
+        message_ar: "تم استرجاع الإعلانات بنجاح.",
+    },
+
+    // Success messages for nurses
+    NURSE_CREATED_WAITING_VERIFICATION: {
+        message_en: "Nurse account created successfully. Please wait for verification.",
+        message_ar: "تم إنشاء حساب الممرضة بنجاح. يرجى الانتظار للموافقة عليه.",
+    },
+    NURSE_RETRIEVED: {
+        message_en: "Nurse retrieved successfully.",
+        message_ar: "تم استرجاع بيانات الممرضة بنجاح.",
+    },
+    PASSWORD_SET_SUCCESSFULLY_BY_NURSE: {
+        message_en: 'Password set successfully by nurse',
+        message_ar: 'تم تعيين كلمة المرور بنجاح من قبل الممرضة',
+    },
+    NURSE_VERIFICATION_STATUS_UPDATED: {
+        message_en: "Nurse verification status updated successfully.",
+        message_ar: "تم تحديث حالة اعتماد الممرضة بنجاح.",
+    },
+    APPLIED_TO_ANNOUNCEMENT_SUCCESSFULLY: {
+        message_en: "Applied to announcement successfully.",
+        message_ar: "تم التقديم للإعلان بنجاح.",
+    },
+    APPLICANT_APPROVED_SUCCESSFULLY: {
+        message_en: "Applicant approved successfully.",
+        message_ar: "تم الموافقة على المتقدم بنجاح.",
+    },
+    APPLICANT_REJECTED_SUCCESSFULLY: {
+        message_en: "Applicant rejected successfully.",
+        message_ar: "تم رفض المتقدم بنجاح.",
+    },
+    ANNOUNCEMENT_DELETED_SUCCESSFULLY: {
+        message_en: "Announcement deleted successfully.",
+        message_ar: "تم حذف الإعلان بنجاح.",
+    },
+    ANNOUNCEMENT_EDITED_SUCCESSFULLY: {
+        message_en: "Announcement edited successfully.",
+        message_ar: "تم تعديل الإعلان بنجاح.",
+    },
+    APPLICATIONS_RETRIEVED: {
+        message_en: "Applications retrieved successfully.",
+        message_ar: "تم استرجاع الطلبات بنجاح.",
+    },
+    NURSE_SCHEDULE_RETRIEVED: {
+        message_en: "Nurse schedule retrieved successfully.",
+        message_ar: "تم استرجاع جدول الممرضة بنجاح.",
+    },
+
+    // Success messages for Google Auth
+    PHONE_NUMBER_UPDATED_SUCCESSFULLY: {
+        message_en: "Phone number updated successfully.",
+        message_ar: "تم تحديث رقم الهاتف بنجاح.",
+    },
+    GOOGLE_USER_DATA_RETRIEVED: {
+        message_en: "Google user data retrieved successfully.",
+        message_ar: "تم استرجاع بيانات مستخدم جوجل بنجاح.",
+    },
+
+    // Success messages for Super Admin
+    ADMIN_ADDED_SUCCESSFULLY: {
+        message_en: "Admin added successfully.",
+        message_ar: "تم إضافة المسؤول بنجاح.",
+    },
+    ADMINS_RETRIEVED_SUCCESSFULLY: {
+        message_en: "Admins retrieved successfully.",
+        message_ar: "تم استرجاع بيانات المسؤولين بنجاح.",
+    },
+    ADMIN_RETRIEVED_SUCCESSFULLY: {
+        message_en: "Admin retrieved successfully.",
+        message_ar: "تم استرجاع بيانات المسؤول بنجاح.",
+    },
+
+    // Success messages for User
+    PROFILE_PICTURE_UPDATED_SUCCESSFULLY: {
+        message_en: "Profile picture updated successfully.",
+        message_ar: "تم تحديث صورة الملف الشخصي بنجاح.",
+    },
+    PROFILE_PICTURE_RETRIEVED_SUCCESSFULLY: {
+        message_en: "Profile picture retrieved successfully.",
+        message_ar: "تم استرجاع صورة الملف الشخصي بنجاح.",
+    },
+    PROFILE_PICTURE_DELETED_SUCCESSFULLY: {
+        message_en: "Profile picture deleted successfully.",
+        message_ar: "تم حذف صورة الملف الشخصي بنجاح.",
+    },
+    USER_PROFILE_UPDATED_SUCCESSFULLY: {
+        message_en: "User profile updated successfully.",
+        message_ar: "تم تحديث الملف الشخصي للمستخدم بنجاح.",
+    },
+    // success messages for appointments
+    APPOINTMENT_BOOKED_SUCCESSFULLY: {
+        message_en: "Appointment booked successfully.",
+        message_ar: "تم حجز الموعد بنجاح.",
+    },
+    APPOINTMENT_RESCHEDULED_SUCCESSFULLY: {
+        message_en: "Appointment rescheduled successfully.",
+        message_ar: "تم إعادة جدولة الموعد بنجاح.",
+    },
+    APPOINTMENTS_RESCHEDULED_SUCCESSFULLY: {
+        message_en: "Appointments rescheduled successfully.",
+        message_ar: "تم إعادة جدولة المواعيد بنجاح.",
+    },
+    APPOINTMENT_CANCELLED_SUCCESSFULLY: {
+        message_en: "Appointment cancelled successfully.",
+        message_ar: "تم إلغاء الموعد بنجاح.",
+    },
+    AVAILABLE_DAYS_RETRIEVED: {
+        message_en: "Available days retrieved successfully.",
+        message_ar: "تم استرجاع الأيام المتاحة بنجاح.",
+    },
+    AVAILABLE_SLOTS_RETRIEVED: {
+        message_en: "Available slots retrieved successfully.",
+        message_ar: "تم استرجاع الأوقات المتاحة بنجاح.",
+    },
+    PATIENT_APPOINTMENTS_RETRIEVED: {
+        message_en: "Patient appointments retrieved successfully.",
+        message_ar: "تم استرجاع مواعيد المريض بنجاح.",
+    },
+    APPOINTMENT_DETAILS_RETRIEVED: {
+        message_en: "Appointment details retrieved successfully.",
+        message_ar: "تم استرجاع تفاصيل الموعد بنجاح.",
+    },
+    PATIENT_TODAY_APPOINTMENT_RETRIEVED: {
+        message_en: "Patient's today appointment retrieved successfully.",
+        message_ar: "تم استرجاع موعد المريض لليوم بنجاح.",
+    },
+    QUEUE_POSITION_RETRIEVED: {
+        message_en: "Queue position retrieved successfully.",
+        message_ar: "تم استرجاع موقعك في قائمة الانتظار بنجاح.",
+    },
+    SCHEDULE_CREATED_SUCCESSFULLY: {
+        message_en: 'Schedule created successfully',
+        message_ar: 'تم إنشاء الجدول بنجاح'
+    },
+    DOCTOR_SCHEDULE_RETRIEVED: {
+        message_en: 'Doctor schedule retrieved successfully',
+        message_ar: 'تم استرجاع جدول الطبيب بنجاح'
+    },
+    SCHEDULE_UPDATED_SUCCESSFULLY: {
+        message_en: 'Schedule updated successfully',
+        message_ar: 'تم تحديث الجدول بنجاح'
+    },
+    VACATION_SET_SUCCESSFULLY: {
+        message_en: 'Vacation set successfully',
+        message_ar: 'تم تعيين الإجازة بنجاح',
+    },
+    SCHEDULE_DELETED_SUCCESSFULLY: {
+        message_en: 'Schedule deleted successfully',
+        message_ar: 'تم حذف الجدول بنجاح',
+    },
+    APPOINTMENTS_CHECK_COMPLETED: {
+        message_en: 'Appointments check completed',
+        message_ar: 'تم فحص المواعيد'
+    },
+    VACATION_REMOVED_SUCCESSFULLY: {
+        message_en: 'Vacation removed successfully',
+        message_ar: 'تم حذف الإجازة بنجاح',
+    },
+    DOCTOR_VACATIONS_RETRIEVED: {
+        message_en: 'Doctor vacations retrieved successfully',
+        message_ar: 'تم استرجاع إجازات الطبيب بنجاح',
+    },
+    DOCTORS_RETRIEVED_SUCCESSFULLY: {
+        message_en: 'Online doctors retrieved successfully',
+        message_ar: 'تم استرجاع الأطباء المتاحين عبر الإنترنت بنجاح',
+    },
+    APPOINTMENTS_BY_NURSE_RETRIEVED: {
+        message_en: 'Appointments retrieved to the nurse successfully',
+        message_ar: 'تم استرجاع المواعيد للممرضة بنجاح',
+    },
+    APPOINTMENT_COMPLETED_SUCCESSFULLY: {
+        message_en: 'Appointment completed successfully',
+        message_ar: 'تم إكمال الموعد بنجاح',
+    },
+
+    // Agora success messages
+    AGORA_TOKEN_GENERATED_SUCCESSFULLY: {
+        message_en: "Agora token generated successfully.",
+        message_ar: "تم إنشاء رمز Agora بنجاح.",
+    },
+
+    // BackBlaze B2 success messages
+    UPLOAD_URL_GENERATED: {
+        message_en: "BackBlaze B2 upload URL generated successfully.",
+        message_ar: "تم إنشاء رابط التحميل لـ BackBlaze B2 بنجاح.",
+    },
+
+    // AI Appointments success messages
+    AI_PROCESSING_STARTED: {
+        message_en: "AI processing started successfully.",
+        message_ar: "تم بدء المعالجة بالذكاء الاصطناعي بنجاح.",
+    },
+    SOAP_GENERATED: {
+        message_en: "SOAP notes generated successfully.",
+        message_ar: "تم إنشاء ملاحظات SOAP بنجاح.",
+    },
+
+}
+
+interface MultiLangMessageObj {
+    message_en: string;
+    message_ar: string;
+}
+
+export const createMultiLangMessage = (multiLangMessageObj: MultiLangMessageObj) => {
+    return {
+        messageEn: multiLangMessageObj.message_en,
+        messageAr: multiLangMessageObj.message_ar,
+    };
+}

@@ -1,0 +1,808 @@
+openapi: 3.0.0
+info:
+  title: GP Backend Authentication API
+  description: Comprehensive API documentation for authentication routes including email/password auth and Google OAuth
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@gpbackend.com
+
+servers:
+  - url: http://localhost:3000
+    description: Development server
+  - url: https://api.gpbackend.com
+    description: Production server
+
+tags:
+  - name: Authentication
+    description: Email/Password authentication endpoints
+  - name: Google OAuth
+    description: Google OAuth authentication endpoints
+  - name: Fabric
+    description: Hyperledger Fabric asset management endpoints
+
+paths:
+  /assets:
+    get:
+      tags:
+        - Fabric
+      summary: Get all assets
+      description: Retrieve a list of all assets from the blockchain ledger.
+      responses:
+        '200':
+          description: A list of assets.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Asset'
+                  message:
+                    type: string
+                    example: findAll
+        '500':
+          description: Internal Server Error
+  /assets/{id}:
+    get:
+      tags:
+        - Fabric
+      summary: Get asset by ID
+      description: Retrieve a specific asset from the blockchain ledger by its ID.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+          description: The ID of the asset to retrieve.
+      responses:
+        '200':
+          description: The requested asset.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Asset'
+                  message:
+                    type: string
+                    example: findOne
+        '404':
+          description: Asset not found
+        '500':
+          description: Internal Server Error
+  /auth/signup:
+    post:
+      tags:
+        - Authentication
+      summary: User registration
+      description: Register a new user with email, name, and password. Sends OTP email for verification.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateUserDto'
+            example:
+              email: user@example.com
+              name: John Doe
+              password: SecurePass123
+              phone: '+1234567890'
+      responses:
+        '201':
+          description: User successfully registered
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: Authorization=eyJhbGc...; Path=/; HttpOnly; RefreshToken=eyJhbGc...; Path=/; HttpOnly
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/User'
+                  message:
+                    type: string
+                    example: Signed Up Successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: User already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                messageEn: This email already exists
+                messageAr: البريد الإلكتروني موجود بالفعل
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: User login
+      description: Authenticate user with email and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginUserDto'
+            example:
+              emailOrUsername: user@example.com
+              password: SecurePass123
+              rememberMe: true
+      responses:
+        '200':
+          description: Login successful
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: Authorization=eyJhbGc...; Path=/; HttpOnly; RefreshToken=eyJhbGc...; Path=/; HttpOnly
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PatientLoginData'
+                  message:
+                    type: string
+                    example: Logged In Successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                messageEn: Password is not matching
+                messageAr: كلمة المرور غير صحيحة
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                messageEn: User with the provided credentials was not found
+                messageAr: لم يتم العثور على المستخدم ببيانات الاعتماد المقدمة
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication
+      summary: User logout
+      description: Logout authenticated user and clear cookies
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Logout successful
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: Authorization=; Max-age=0; RefreshToken=; Max-age=0
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Logged Out Successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/refresh:
+    post:
+      tags:
+        - Authentication
+      summary: Refresh access token
+      description: Generate new access token using refresh token from cookies
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Token refreshed successfully
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+                example: Authorization=eyJhbGc...; Path=/; HttpOnly
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      user:
+                        $ref: '#/components/schemas/User'
+                      accessToken:
+                        type: object
+                        properties:
+                          expiresIn:
+                            type: number
+                            example: 3600
+                          expiresAt:
+                            type: string
+                            format: date-time
+                            example: '2025-11-04T15:30:00.000Z'
+                  message:
+                    type: string
+                    example: Token Refreshed Successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          description: Invalid or expired refresh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                messageEn: Invalid or expired refresh token
+                messageAr: رمز التحديث غير صالح أو منتهي الصلاحية
+
+  /auth/complete-profile-info:
+    patch:
+      tags:
+        - Authentication
+      summary: Complete user profile
+      description: Update user profile with phone number, gender, and date of birth
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompleteUserProfileDto'
+            example:
+              gender: MALE
+              date_of_birth: '1990-01-15'
+      responses:
+        '200':
+          description: Profile updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/User'
+                  message:
+                    type: string
+                    example: Profile Completed Successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/verify-otp:
+    patch:
+      tags:
+        - Authentication
+      summary: Verify email OTP
+      description: Verify the OTP sent to user's email during registration
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - otp
+              properties:
+                otp:
+                  type: string
+                  description: 6-digit OTP code
+                  example: '123456'
+      responses:
+        '200':
+          description: OTP verified successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: boolean
+                    example: true
+                  message:
+                    type: string
+                    example: OTP Verified Successfully
+        '400':
+          description: Invalid or expired OTP
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                messageEn: Invalid OTP
+                messageAr: رمز التحقق غير صالح
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/resend-otp:
+    post:
+      tags:
+        - Authentication
+      summary: Resend OTP
+      description: Resend OTP verification code to authenticated user's email
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+      responses:
+        '200':
+          description: OTP resent successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: OTP Resent Successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                messageEn: User not found
+                messageAr: المستخدم غير موجود
+
+  /auth/forget-password:
+    post:
+      tags:
+        - Authentication
+      summary: Request password reset
+      description: Send password reset email with reset token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: User's email address
+                  example: user@example.com
+      responses:
+        '200':
+          description: Password reset email sent
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Password Reset Email Sent Successfully
+        '400':
+          description: Email is required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                messageEn: Validation error
+                messageAr: خطأ في التحقق من البيانات
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                messageEn: User email not found
+                messageAr: البريد الإلكتروني للمستخدم غير موجود
+
+  /auth/reset-password:
+    post:
+      tags:
+        - Authentication
+      summary: Reset password
+      description: Reset user password using the token from email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResetPasswordDto'
+            example:
+              token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+              newPassword: NewSecurePass123
+      responses:
+        '200':
+          description: Password reset successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Password Reset Successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          description: Invalid or expired reset token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                messageEn: Invalid or expired password reset token
+                messageAr: رمز إعادة تعيين كلمة المرور غير صالح أو منتهي الصلاحية
+
+  /auth/google:
+    get:
+      tags:
+        - Google OAuth
+      summary: Initiate Google OAuth
+      description: Redirect user to Google OAuth consent screen for authentication
+      responses:
+        '302':
+          description: Redirect to Google OAuth
+          headers:
+            Location:
+              schema:
+                type: string
+                example: https://accounts.google.com/o/oauth2/v2/auth?...
+
+  # /auth/google/callback:
+  #   get:
+  #     tags:
+  #       - Google OAuth
+  #     summary: Google OAuth callback
+  #     description: Handle Google OAuth callback and create user session
+  #     parameters:
+  #       - in: query
+  #         name: code
+  #         schema:
+  #           type: string
+  #         description: Authorization code from Google
+  #       - in: query
+  #         name: state
+  #         schema:
+  #           type: string
+  #         description: State parameter for CSRF protection
+  #     responses:
+  #       '302':
+  #         description: Redirect to dashboard on success or login on failure
+  #         headers:
+  #           Location:
+  #             schema:
+  #               type: string
+  #               example: /dashboard
+  #           Set-Cookie:
+  #             schema:
+  #               type: string
+  #               example: Authorization=eyJhbGc...; Path=/; HttpOnly; RefreshToken=eyJhbGc...; Path=/; HttpOnly
+  #       '401':
+  #         description: Authentication failed
+  #         headers:
+  #           Location:
+  #             schema:
+  #               type: string
+  #               example: /login
+
+  /auth/google/update-phone:
+    patch:
+      tags:
+        - Google OAuth
+      summary: Update phone number for Google OAuth user
+      description: Add or update phone number for users who signed in with Google
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateGoogleUserPhoneDto'
+            example:
+              phone: '+1234567890'
+      responses:
+        '200':
+          description: Phone number updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Phone Number Updated Successfully
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /auth/google/userData:
+    get:
+      tags:
+        - Google OAuth
+      summary: Get Google OAuth user data
+      description: Retrieve authenticated Google user's profile information
+      security:
+        - bearerAuth: []
+        - cookieAuth: []
+      responses:
+        '200':
+          description: User data retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/PatientLoginData'
+                  message:
+                    type: string
+                    example: Google User Data Retrieved Successfully
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                messageEn: User not found
+                messageAr: المستخدم غير موجود
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT access token in Authorization header
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: Authorization
+      description: JWT access token in cookie
+
+  schemas:
+    CreateUserDto:
+      type: object
+      required:
+        - email
+        - name
+        - password
+        - phone
+      properties:
+        email:
+          type: string
+          format: email
+          description: User's email address
+        name:
+          type: string
+          description: User's full name
+          minLength: 1
+        phone:
+          type: string
+          description: User's phone number with country code
+          example: '+1234567890'
+        password:
+          type: string
+          format: password
+          description: User's password
+          minLength: 8
+          maxLength: 32
+
+    LoginUserDto:
+      type: object
+      required:
+        - emailOrUsername
+        - password
+        - rememberMe
+      properties:
+        emailOrUsername:
+          type: string
+          description: User's email address or username
+        password:
+          type: string
+          format: password
+          description: User's password
+        rememberMe:
+          type: boolean
+          description: Keep user logged in for extended period
+          default: false
+
+    CompleteUserProfileDto:
+      type: object
+      required:
+        - gender
+        - date_of_birth
+      properties:
+        gender:
+          type: string
+          enum: [MALE, FEMALE]
+          description: User's gender
+        date_of_birth:
+          type: string
+          format: date
+          description: User's date of birth in ISO 8601 format
+          example: '1990-01-15'
+
+    ResetPasswordDto:
+      type: object
+      required:
+        - token
+        - newPassword
+      properties:
+        token:
+          type: string
+          description: Password reset token from email
+        newPassword:
+          type: string
+          format: password
+          description: New password for the account
+          minLength: 8
+          maxLength: 32
+
+    UpdateGoogleUserPhoneDto:
+      type: object
+      required:
+        - phone
+      properties:
+        phone:
+          type: string
+          description: User's phone number
+          maxLength: 15
+          example: '+1234567890'
+
+    Asset:
+      type: object
+      properties:
+        ID:
+          type: string
+          description: The unique identifier of the asset.
+        Color:
+          type: string
+          description: The color of the asset.
+        Size:
+          type: string
+          description: The size of the asset.
+        Owner:
+          type: string
+          description: The current owner of the asset.
+        AppraisedValue:
+          type: string
+          description: The appraised value of the asset.
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique user identifier
+        email:
+          type: string
+          format: email
+          description: User's email address
+        name:
+          type: string
+          description: User's full name
+        phone:
+          type: string
+          nullable: true
+          description: User's phone number
+        gender:
+          type: string
+          enum: [MALE, FEMALE]
+          nullable: true
+          description: User's gender
+        date_of_birth:
+          type: string
+          format: date
+          nullable: true
+          description: User's date of birth
+        isVerified:
+          type: boolean
+          description: Whether email is verified
+        hasCompletedProfile:
+          type: boolean
+          description: Whether user has completed profile
+          default: false
+        created_at:
+          type: string
+          format: date-time
+          description: Account creation timestamp
+        updated_at:
+          type: string
+          format: date-time
+          description: Last update timestamp
+
+    PatientLoginData:
+      type: object
+      properties:
+        name:
+          type: string
+          description: User's full name
+        email:
+          type: string
+          format: email
+          description: User's email address
+        username:
+          type: string
+          description: User's username
+        phone:
+          type: string
+          description: User's phone number
+        gender:
+          type: string
+          enum: [MALE, FEMALE]
+        date_of_birth:
+          type: string
+          format: date
+          description: User's date of birth
+        isVerified:
+          type: boolean
+          description: Whether email is verified
+        hasCompletedProfile:
+          type: boolean
+          description: Whether user has completed profile
+          default: false
+
+    Error:
+      type: object
+      properties:
+        messageEn:
+          type: string
+          description: Error message in English
+        messageAr:
+          type: string
+          description: Error message in Arabic
+
+  responses:
+    BadRequest:
+      description: Bad request - validation failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            messageEn: Validation error
+            messageAr: خطأ في التحقق من البيانات
+
+    Unauthorized:
+      description: Unauthorized - authentication required
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            messageEn: Authentication required
+            messageAr: المصادقة مطلوبة

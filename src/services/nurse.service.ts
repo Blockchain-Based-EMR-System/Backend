@@ -1,0 +1,566 @@
+import { Service } from "typedi";
+import { HttpException } from "@/exceptions/HttpException";
+import { ErrorMessages, createBilingualError } from "@/utils/errorMessages";
+import { hash, compare } from "bcrypt";
+import { AuthService } from "./auth.service";
+import { NurseSignupRequestDto, NurseLoginRequestDto } from "@/dtos/nurses.dto";
+import { NurseLoginData, NurseApplications, NurseSchedule } from "@/interfaces/nurse.interface";
+import { AppointmentData } from "@/interfaces";
+import { NURSE_FILES } from "@/interfaces";
+import prisma from '@/config/prisma';
+import { Role, NurseAccountStatus } from "@prisma/client";
+import cloudinary from "@/utils/cloudinary";
+import fs from "fs";
+import { DoctorAnnouncements } from "@/interfaces/doctors.interface";
+
+@Service()
+export class NurseService {
+
+    private authService = new AuthService();
+
+    public async nurseSignup(nurseData: NurseSignupRequestDto, nurseFiles: {}) {
+        const existingUser = await prisma.user.findUnique({
+            where: { email: nurseData.email }
+        });
+
+        if (existingUser) {
+            const error = createBilingualError(409, ErrorMessages.EMAIL_EXISTS);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const username = nurseData.email.split('@')[0];
+
+        const existingUsername = await prisma.user.findUnique({
+            where: { username }
+        });
+
+        if (existingUsername) {
+            const error = createBilingualError(409, ErrorMessages.USERNAME_EXISTS);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const files = nurseFiles as { [key: string]: Express.Multer.File[] | undefined };
+
+        if (!files?.nationalCard?.length) {
+            const error = createBilingualError(400, ErrorMessages.NATIONAL_CARD_REQUIRED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const hashedPassword = await hash(nurseData.password, 10);
+
+        const createdUserId = await prisma.$transaction(async (tx) => {
+            const createdUser = await tx.user.create({
+                data: {
+                    email: nurseData.email,
+                    name: nurseData.name,
+                    username,
+                    phone: nurseData.phone,
+                    gender: nurseData.gender,
+                    date_of_birth: new Date(nurseData.date_of_birth),
+                    password_hash: hashedPassword,
+                    role: Role.NURSE,
+                    isVerified: true,
+                    hasCompletedProfile: true,
+                },
+            });
+
+            await tx.nurse.create({
+                data: {
+                    id: createdUser.id,
+                    account_status: NurseAccountStatus.PENDING,
+                    years_of_experience: nurseData.years_of_experience,
+                    brief: nurseData.brief,
+                },
+            });
+            return createdUser.id;
+        });
+
+        if (nurseFiles && Object.keys(nurseFiles).length > 0) {
+            const nurseFilesArray = Object.values(nurseFiles).flat() as Express.Multer.File[];
+
+            await this._uploadFiles(nurseFilesArray, createdUserId);
+        }
+    }
+
+    public async nurseLogin(nurseLoginData: NurseLoginRequestDto): Promise<{ cookies: string[]; NurseAccountData: NurseLoginData } | boolean> {
+
+        const nurseUserData = await prisma.user.findFirst({
+            where: {
+                OR: [
+                    { email: nurseLoginData.emailOrUsername },
+                    { username: nurseLoginData.emailOrUsername }
+                ]
+            },
+            select: {
+                id: true,
+                email: true,
+                username: true,
+                name: true,
+                phone: true,
+                gender: true,
+                hasCompletedProfile: true,
+                password_hash: true,
+                nurse: {
+                    select: {
+                        account_status: true
+                    }
+                }
+            }
+        });
+
+        if (!nurseUserData) {
+            const error = createBilingualError(401, ErrorMessages.USER_NOT_FOUND_CREDENTIALS);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const isPasswordMatching = await compare(nurseLoginData.password, nurseUserData.password_hash);
+
+        if (!isPasswordMatching) {
+            const error = createBilingualError(401, ErrorMessages.USER_NOT_FOUND_CREDENTIALS);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        if (nurseUserData.nurse?.account_status !== NurseAccountStatus.APPROVED) {
+            const error = createBilingualError(403, ErrorMessages.NURSE_ACCOUNT_NOT_APPROVED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        if (!nurseUserData.hasCompletedProfile) {
+            return false;
+        }
+
+        const NurseAccountData: NurseLoginData =
+        {
+            id: nurseUserData.id,
+            name: nurseUserData.name,
+            email: nurseUserData.email,
+            username: nurseUserData.username,
+            phone: nurseUserData.phone,
+            gender: nurseUserData.gender,
+            nurse: {
+                account_status: nurseUserData.nurse?.account_status
+            }
+        }
+
+        const token = await this.authService.createTokens(nurseUserData, nurseLoginData.rememberMe);
+        const cookies = this.authService.createCookies(token);
+
+        return { cookies, NurseAccountData };
+    }
+
+    public async nurseSetPassword(nurseId: string, password: string): Promise<void> {
+        const hashedPassword = await hash(password, 10);
+        const nurseUserData = await prisma.user.findUnique({
+            where: { id: nurseId },
+            select: { hasCompletedProfile: true }
+        });
+        if (!nurseUserData) {
+            const error = createBilingualError(404, ErrorMessages.USER_NOT_FOUND);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+        if (nurseUserData.hasCompletedProfile) {
+            const error = createBilingualError(400, ErrorMessages.NURSE_PASSWORD_ALREADY_SET);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+        await prisma.user.update({
+            where: { id: nurseId },
+            data: {
+                password_hash: hashedPassword,
+                hasCompletedProfile: true
+            }
+        });
+    }
+
+    public async applyToAnnouncement(nurseId: string, announcementId: string): Promise<void> {
+        const nurseData = await prisma.nurse.findUnique({
+            where: { id: nurseId },
+            select: { account_status: true }
+        });
+
+        if (nurseData.account_status !== NurseAccountStatus.APPROVED) {
+            const error = createBilingualError(404, ErrorMessages.NURSE_ACCOUNT_NOT_APPROVED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const announcement = await prisma.announcement.findUnique({
+            where: {
+                id: announcementId,
+            },
+            select: {
+                status: true,
+            }
+        });
+
+        if (announcement.status == 'EXPIRED') {
+            const error = createBilingualError(404, ErrorMessages.ANNOUNCEMENT_EXPIRED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const existingApplication = await prisma.announcementNurse.findUnique({
+            where: {
+                announcement_id_nurse_id: {
+                    nurse_id: nurseId,
+                    announcement_id: announcementId
+                }
+            }
+        });
+
+        if (existingApplication) {
+            const error = createBilingualError(409, ErrorMessages.APPLICATION_ALREADY_EXISTS);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        await prisma.announcementNurse.create({
+            data: {
+                nurse_id: nurseId,
+                announcement_id: announcementId,
+                status: 'PENDING'
+            }
+        });
+    }
+
+    public async getNurseSchedule(nurseId: string): Promise<NurseSchedule[]> {
+        const nurseData = await prisma.nurse.findUnique({
+            where: {
+                id: nurseId
+            },
+            select: {
+                account_status: true
+            }
+        });
+
+        if (nurseData.account_status !== NurseAccountStatus.APPROVED) {
+            const error = createBilingualError(404, ErrorMessages.NURSE_ACCOUNT_NOT_APPROVED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const schedules = await prisma.nurseSchedule.findMany({
+            where: {
+                nurse_id: nurseId,
+                is_active: true,
+                deleted_at: null,
+            },
+            orderBy: {
+                day_of_week: 'asc',
+            },
+            select: {
+                id: true,
+                doctor: {
+                    select: {
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                gender: true,
+                                photo_url: true,
+                            }
+                        }
+                    }
+                },
+                clinic: {
+                    select: {
+                        id: true,
+                        name: true,
+                        address: true,
+                        address_maps_link: true,
+                    }
+                },
+                day_of_week: true,
+                start_time: true,
+                end_time: true,
+            }
+        });
+
+        if (!schedules.length) {
+            return [];
+        }
+
+        const groupedMap = new Map<string, NurseSchedule>();
+
+        for (const schedule of schedules) {
+            const key = `${schedule.doctor.user.id}_${schedule.clinic?.id}`;
+
+            if (groupedMap.has(key)) {
+                groupedMap.get(key).working_days.push({
+                    day_of_week: schedule.day_of_week,
+                    start_time: schedule.start_time,
+                    end_time: schedule.end_time,
+                });
+            }
+            else {
+                groupedMap.set(key, {
+                    id: schedule.id,
+                    doctor: {
+                        id: schedule.doctor.user.id,
+                        name: schedule.doctor.user.name,
+                        gender: schedule.doctor.user.gender,
+                        profilePic: schedule.doctor.user.photo_url,
+                    },
+                    clinic: {
+                        id: schedule.clinic?.id || null,
+                        name: schedule.clinic?.name || null,
+                        address: schedule.clinic?.address || null,
+                        address_maps_link: schedule.clinic?.address_maps_link || null,
+                    },
+                    working_days: [
+                        {
+                            day_of_week: schedule.day_of_week,
+                            start_time: schedule.start_time,
+                            end_time: schedule.end_time,
+                        }
+                    ],
+                });
+            }
+        }
+
+        return Array.from(groupedMap.values());
+    }
+
+    public async getNurseApplications(nurseId: string): Promise<NurseApplications[]> {
+        const nurseData = await prisma.nurse.findUnique({
+            where: {
+                id: nurseId
+            },
+            select: {
+                account_status: true
+            }
+        });
+
+        if (!nurseData || nurseData.account_status !== NurseAccountStatus.APPROVED) {
+            const error = createBilingualError(404, ErrorMessages.NURSE_ACCOUNT_NOT_APPROVED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+
+        const applications = await prisma.announcementNurse.findMany({
+            where: {
+                nurse_id: nurseId
+            },
+            select: {
+                id: true,
+                status: true,
+                announcement: {
+                    select: {
+                        id: true,
+                        doctor: {
+                            select: {
+                                user: {
+                                    select: {
+                                        id: true,
+                                        name: true,
+                                        gender: true,
+                                        photo_url: true,
+                                    }
+                                }
+                            }
+                        },
+                        clinic: {
+                            select: {
+                                id: true,
+                                name: true,
+                                address: true,
+                                address_maps_link: true,
+                            }
+                        },
+                        working_days: {
+                            select: {
+                                day_of_week: true,
+                                start_time: true,
+                                end_time: true,
+                            },
+                            orderBy: {
+                                day_of_week: 'asc',
+                            }
+                        },
+                        status: true,
+                        gender: true,
+                        max_age: true,
+                        years_of_experience: true,
+                        notes: true,
+                    }
+                },
+            }
+        });
+
+        if (!applications.length) {
+            return [];
+        }
+
+        return applications.map(application => ({
+            id: application.announcement.id,
+            application_status: application.status,
+            doctor: {
+                id: application.announcement.doctor.user.id,
+                name: application.announcement.doctor.user.name,
+                gender: application.announcement.doctor.user.gender,
+                profilePic: application.announcement.doctor.user.photo_url,
+            },
+            clinic: {
+                id: application.announcement.clinic.id,
+                name: application.announcement.clinic.name,
+                address: application.announcement.clinic.address,
+                address_maps_link: application.announcement.clinic.address_maps_link,
+            },
+            working_days: application.announcement.working_days.map(workDay => ({
+                day_of_week: workDay.day_of_week,
+                start_time: workDay.start_time,
+                end_time: workDay.end_time,
+            })),
+            status: application.announcement.status,
+            gender: application.announcement.gender || undefined,
+            max_age: application.announcement.max_age || undefined,
+            years_of_experience: application.announcement.years_of_experience || undefined,
+            notes: application.announcement.notes || undefined,
+        }));
+    }
+
+    public async getAllAnnouncements(nurseId: string): Promise<DoctorAnnouncements[]> {
+        const nurseData = await prisma.nurse.findUnique({
+            where: { id: nurseId },
+            select: { account_status: true }
+        });
+
+        if (nurseData.account_status !== NurseAccountStatus.APPROVED) {
+            const error = createBilingualError(404, ErrorMessages.NURSE_ACCOUNT_NOT_APPROVED);
+            throw new HttpException(error.status, error.message, error.messageAr);
+        }
+        const announcements = await prisma.announcement.findMany({
+            where: {
+                deleted_at: null,
+                status: 'PENDING',
+            },
+            select: {
+                id: true,
+                doctor: {
+                    select: {
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                gender: true,
+                                photo_url: true,
+                            }
+                        }
+                    }
+                },
+                clinic: {
+                    select: {
+                        id: true,
+                        name: true,
+                        address: true,
+                        address_maps_link: true,
+                    }
+                },
+                working_days: {
+                    select: {
+                        day_of_week: true,
+                        start_time: true,
+                        end_time: true,
+                    },
+                    orderBy: {
+                        day_of_week: 'asc',
+                    }
+                },
+                status: true,
+                gender: true,
+                max_age: true,
+                years_of_experience: true,
+                notes: true,
+
+            }
+        });
+
+        if (!announcements) {
+            return [];
+        }
+
+        return announcements.map(announcement => ({
+            id: announcement.id,
+            doctor: {
+                id: announcement.doctor.user.id,
+                name: announcement.doctor.user.name,
+                gender: announcement.doctor.user.gender,
+                profilePic: announcement.doctor.user.photo_url,
+            },
+            clinic: {
+                id: announcement.clinic.id,
+                name: announcement.clinic.name,
+                address: announcement.clinic.address,
+                address_maps_link: announcement.clinic.address_maps_link,
+            },
+            working_days: announcement.working_days.map(wd => ({
+                day_of_week: wd.day_of_week,
+                start_time: wd.start_time,
+                end_time: wd.end_time,
+            })),
+            status: announcement.status,
+            gender: announcement.gender || undefined,
+            max_age: announcement.max_age || undefined,
+            years_of_experience: announcement.years_of_experience || undefined,
+            notes: announcement.notes || undefined,
+        }));
+
+    }
+
+
+    private async _uploadFiles(files: Express.Multer.File[], nurseId: string): Promise<void> {
+        const uploadedFiles: { public_id: string }[] = [];
+
+        try {
+            for (const file of files) {
+                if (!Object.values(NURSE_FILES).includes(file.fieldname as any)) {
+                    const error = createBilingualError(400, ErrorMessages.UNKNOWN_FILE_FIELDNAME);
+                    throw new HttpException(error.status, error.message, error.messageAr);
+                }
+            }
+
+            const uploadResults = await Promise.all(
+                files.map(file =>
+                    cloudinary.uploader.upload(file.path, {
+                        folder: `NURSES/documents/${nurseId}`,
+                        overwrite: false,
+                        public_id: `NURSE_${nurseId}_${file.fieldname}_${Date.now()}`
+                    })
+                )
+            );
+
+            uploadedFiles.push(...uploadResults.map(r => ({ public_id: r.public_id })));
+
+            const updateData: any = {};
+            files.forEach((file, index) => {
+                const uploadResult = uploadResults[index];
+
+                switch (file.fieldname) {
+                    case NURSE_FILES.NATIONAL_CARD:
+                        updateData.nationalCardUrl = uploadResult.secure_url;
+                        updateData.nationalCardPublicId = uploadResult.public_id;
+                        break;
+                    case NURSE_FILES.BONUS_FILE:
+                        updateData.bonusFileUrl = uploadResult.secure_url;
+                        updateData.bonusFilePublicId = uploadResult.public_id;
+                        break;
+                }
+                fs.unlinkSync(file.path);
+            });
+
+            await prisma.nurse.update({
+                where: { id: nurseId },
+                data: updateData
+            });
+
+        } catch (error) {
+            if (uploadedFiles.length > 0) {
+                await Promise.all(
+                    uploadedFiles.map(f => cloudinary.uploader.destroy(f.public_id).catch(() => { }))
+                );
+
+            }
+
+            files.forEach(file => {
+                if (fs.existsSync(file.path)) {
+                    fs.unlinkSync(file.path);
+                }
+            });
+            throw error;
+        }
+    }
+}

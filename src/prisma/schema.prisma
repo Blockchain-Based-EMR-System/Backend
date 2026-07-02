@@ -1,0 +1,534 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                              String              @id @default(uuid())
+  name                            String              @db.VarChar(255)
+  email                           String              @unique @db.VarChar(255)
+  username                        String              @unique @db.VarChar(255)
+  phone                           String              @db.VarChar(20)
+  password_hash                   String              @db.VarChar(255)
+  gender                          Gender
+  date_of_birth                   DateTime
+  created_at                      DateTime            @default(now())
+  modified_at                     DateTime            @updatedAt
+  deleted_at                      DateTime?
+  email_OTP                       String?             @db.VarChar(6)
+  email_OTP_expires_at            DateTime?
+  isVerified                      Boolean             @default(false)
+  password_reset_token            String?             @db.VarChar(255)
+  password_reset_token_expires_at DateTime?
+  role                            Role                @default(PATIENT)
+  hasCompletedProfile             Boolean             @default(false)
+  photo_public_id                 String?             @db.VarChar(500)
+  photo_url                       String?             @db.VarChar(500)
+
+  announcementNurses              AnnouncementNurse[]
+  announcements                   Announcement[]
+  appointments_as_doctor          Appointment[]       @relation("DoctorAppointments")
+  appointments_as_patient         Appointment[]       @relation("PatientAppointments")
+  audit_logs                      AuditLog[]          @relation("UserAuditLogs")
+  clinics_as_nurse                ClinicNurse[]       @relation("NurseClinics")
+  doctor                          Doctor?             @relation("UserAsDoctor")
+  medications_as_doctor           Medication[]        @relation("DoctorMedications")
+  medications_as_patient          Medication[]        @relation("PatientMedications")
+  nurse                           Nurse?              @relation("UserAsNurse")
+  nurseSchedules                  NurseSchedule[]
+  controlled_patients             Patient[]           @relation("ControllingNurse")
+  patient                         Patient?            @relation("UserAsPatient")
+  refresh_tokens                  RefreshToken[]      @relation("UserRefreshTokens")
+  scans_labs_as_doctor            ScanLab[]           @relation("DoctorScansLabs")
+  scans_labs_as_patient           ScanLab[]           @relation("PatientScansLabs")
+  medical_records_as_patient      MedicalRecord[]     @relation("PatientMedicalRecords")
+  encryption_key                  EncryptionKey?      @relation("PatientEncryptionKey")
+
+  @@map("Users")
+}
+
+model Doctor {
+  id                                     String              @id @default(uuid())
+  specialization                         String              @db.VarChar(255)
+  avg_time                               DateTime?           @db.Time(0)
+  account_status                         DoctorAccountStatus @default(PENDING)
+  num_of_created_clinics                 Int                 @default(0)
+  fellowshipCertificatePublicId          String?             @db.VarChar(500)
+  fellowshipCertificateUrl               String?             @db.VarChar(500)
+  graduationCertificatePublicId          String?             @db.VarChar(500)
+  graduationCertificateUrl               String?             @db.VarChar(500)
+  mastersCertificatePublicId             String?             @db.VarChar(500)
+  mastersCertificateUrl                  String?             @db.VarChar(500)
+  membershipCardPublicId                 String?             @db.VarChar(500)
+  membershipCardUrl                      String?             @db.VarChar(500)
+  professionalPracticeCardPublicId       String?             @db.VarChar(500)
+  professionalPracticeCardUrl            String?             @db.VarChar(500)
+  unionSpecializationCertificatePublicId String?             @db.VarChar(500)
+  unionSpecializationCertificateUrl      String?             @db.VarChar(500)
+  availability_type                      AvailabilityType    @default(UNSET)
+  present                                Boolean             @default(true)
+  announcementNurses                     AnnouncementNurse[] @relation("AnnouncementNurseDoctor")
+  announcements                          Announcement[]      @relation("AnnouncementDoctor")
+  clinic_doctors                         ClinicDoctor[]
+  user                                   User                @relation("UserAsDoctor", fields: [id], references: [id], onDelete: Cascade)
+  doctorSchedules                        DoctorSchedule[]
+  nurseSchedules                         NurseSchedule[]     @relation("NurseScheduleDoctor")
+  vacations                              Vacation[]
+
+  @@map("Doctor")
+}
+
+model Patient {
+  id                     String  @id @default(uuid())
+  bc_address             String  @db.VarChar(255)
+  consent                Boolean @default(false)
+  controlling_nurse_id   String?
+  controlling_nurse_user User?   @relation("ControllingNurse", fields: [controlling_nurse_id], references: [id])
+  user                   User    @relation("UserAsPatient", fields: [id], references: [id], onDelete: Cascade)
+
+  @@map("Patient")
+}
+
+model Nurse {
+  id                   String              @id @default(uuid())
+  account_status       NurseAccountStatus  @default(PENDING)
+  years_of_experience  Int
+  brief                String?
+  bonusFilePublicId    String?             @db.VarChar(500)
+  bonusFileUrl         String?             @db.VarChar(500)
+  nationalCardPublicId String?             @db.VarChar(500)
+  nationalCardUrl      String?             @db.VarChar(500)
+  announcement_nurses  AnnouncementNurse[] @relation("AnnouncementNurseNurse")
+  user                 User                @relation("UserAsNurse", fields: [id], references: [id], onDelete: Cascade)
+  nurse_schedules      NurseSchedule[]     @relation("NurseScheduleNurse")
+
+  @@map("Nurse")
+}
+
+model Appointment {
+  id             String            @id @default(uuid())
+  patient_id     String?
+  doctor_id      String?
+  scheduled_time DateTime
+  is_online      Boolean           @default(false)
+  is_completed   Boolean           @default(false)
+  estimated_time Float?
+  created_at     DateTime          @default(now())
+  modified_at    DateTime          @updatedAt
+  deleted_at     DateTime?
+  patients_ahead Int               @default(0)
+  position       Int               @default(0)
+  cancelled_by   String?
+  clinic_id      String?
+  end_time       DateTime
+  slot_duration  Int
+  status         AppointmentStatus @default(CONFIRMED)
+  clinic         Clinic?           @relation(fields: [clinic_id], references: [id])
+  doctor         User?             @relation("DoctorAppointments", fields: [doctor_id], references: [id], onDelete: Restrict)
+  patient        User?             @relation("PatientAppointments", fields: [patient_id], references: [id], onDelete: Restrict)
+  medicalRecords MedicalRecord[]
+
+  @@index([patient_id])
+  @@index([doctor_id])
+  @@index([scheduled_time])
+  @@index([clinic_id])
+  @@index([status])
+  @@map("Appointments")
+}
+
+model Medication {
+  id                    String    @id @default(uuid())
+  patient_id            String
+  doctor_id             String
+  treatment_name        String    @db.VarChar(255)
+  category              String    @db.VarChar(100)
+  medication_end_date   DateTime
+  medication_start_time DateTime  @db.Time(0)
+  frequency             Int
+  period                Period
+  description           String?
+  created_at            DateTime  @default(now())
+  modified_at           DateTime  @updatedAt
+  deleted_at            DateTime?
+  doctor                User      @relation("DoctorMedications", fields: [doctor_id], references: [id])
+  patient               User      @relation("PatientMedications", fields: [patient_id], references: [id])
+
+  @@index([patient_id])
+  @@index([doctor_id])
+  @@map("Medications")
+}
+
+model ScanLab {
+  id             String      @id @default(uuid())
+  patient_id     String
+  doctor_id      String
+  name           String      @db.VarChar(255)
+  scheduled_date DateTime?
+  scheduled_time DateTime?   @db.Time(0)
+  frequency      Int?
+  period         Period?
+  description    String?
+  type           ScanLabType
+  created_at     DateTime    @default(now())
+  modified_at    DateTime    @updatedAt
+  deleted_at     DateTime?
+  doctor         User        @relation("DoctorScansLabs", fields: [doctor_id], references: [id])
+  patient        User        @relation("PatientScansLabs", fields: [patient_id], references: [id])
+
+  @@index([patient_id])
+  @@index([doctor_id])
+  @@map("Scans_Labs")
+}
+
+model Clinic {
+  id                 String              @id @default(uuid())
+  is_active          Boolean             @default(true)
+  address            String              @db.VarChar(300)
+  created_at         DateTime            @default(now())
+  modified_at        DateTime            @updatedAt
+  deleted_at         DateTime?
+  address_maps_link  String?             @db.VarChar(500)
+  canPayOnline       Boolean             @default(false)
+  phone              String              @db.VarChar(20)
+  created_by         String              @db.VarChar(255)
+  name               String              @db.VarChar(255)
+  opening_at         String              @db.VarChar(12)
+  closing_at         String              @db.VarChar(12)
+  announcementNurses AnnouncementNurse[] @relation("AnnouncementNurseClinic")
+  announcements      Announcement[]      @relation("AnnouncementClinic")
+  appointments       Appointment[]
+  clinic_doctors     ClinicDoctor[]
+  clinic_nurses      ClinicNurse[]
+  doctorSchedules    DoctorSchedule[]
+  nurseSchedules     NurseSchedule[]
+
+  @@map("Clinic")
+}
+
+model ClinicNurse {
+  id        String @id @default(uuid())
+  clinic_id String
+  nurse_id  String
+  clinic    Clinic @relation(fields: [clinic_id], references: [id], onDelete: Cascade)
+  nurse     User   @relation("NurseClinics", fields: [nurse_id], references: [id], onDelete: Cascade)
+
+  @@unique([clinic_id, nurse_id])
+  @@index([nurse_id])
+  @@map("ClinicNurse")
+}
+
+model ClinicDoctor {
+  id           String  @id @default(uuid())
+  clinic_id    String
+  doctor_id    String
+  fees         Float
+  is_accepting Boolean @default(true)
+  clinic       Clinic  @relation(fields: [clinic_id], references: [id], onDelete: Cascade)
+  doctor       Doctor  @relation(fields: [doctor_id], references: [id], onDelete: Cascade)
+
+  @@unique([clinic_id, doctor_id])
+  @@index([doctor_id])
+  @@map("ClinicDoctor")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  user_id    String
+  action     Action
+  bc_hash    String   @db.VarChar(255)
+  created_at DateTime @default(now())
+  user       User     @relation("UserAuditLogs", fields: [user_id], references: [id])
+
+  @@index([user_id])
+  @@index([created_at])
+  @@map("AuditLogs")
+}
+
+model MedicalRecord {
+  id             String     @id @default(uuid())
+  patient_id     String                        
+  clinic_id      String                      
+  doctor_id      String?                       
+  appointment_id String?                       
+  name           String     @db.VarChar(255)
+  cid            String     @unique @db.VarChar(255)   
+  mime_type      String     @db.VarChar(100)   
+  type           RecordType
+  created_at     DateTime   @default(now())
+  modified_at    DateTime   @updatedAt
+  deleted_at     DateTime?
+
+  patient        User          @relation("PatientMedicalRecords", fields: [patient_id], references: [id])
+  appointment    Appointment?  @relation(fields: [appointment_id], references: [id])
+
+  @@index([patient_id])
+  @@index([clinic_id])    
+  @@index([doctor_id])    
+  @@index([appointment_id])
+  @@index([cid])
+  @@map("MedicalRecords")
+}
+
+model EncryptionKey {
+  id              String          @id @default(uuid())
+  patient_id      String          @unique               
+  encrypted_key   String          @db.VarChar(500)    
+  algorithm       String          @default("AES-256-GCM") @db.VarChar(50)  
+  created_at      DateTime        @default(now())
+  modified_at     DateTime        @updatedAt
+  deleted_at      DateTime?
+
+  patient         User            @relation("PatientEncryptionKey", fields: [patient_id], references: [id], onDelete: Cascade)
+
+  @@map("EncryptionKeys")
+}
+
+model RefreshToken {
+  id         String    @id @default(uuid())
+  user_id    String
+  token_hash String    @db.VarChar(255)
+  expires_at DateTime
+  is_revoked Boolean   @default(false)
+  created_at DateTime  @default(now())
+  revoked_at DateTime?
+  user       User      @relation("UserRefreshTokens", fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([token_hash])
+  @@index([expires_at])
+  @@map("RefreshTokens")
+}
+
+model DoctorSchedule {
+  id            String     @id @default(uuid())
+  doctor_id     String
+  clinic_id     String?
+  day_of_week   DayOfWeek
+  start_time    String
+  end_time      String
+  slot_duration Int
+  buffer_time   Int        @default(0)
+  is_online     Boolean    @default(true)
+  is_active     Boolean    @default(true)
+  break_start   String?
+  break_end     String?
+  created_at    DateTime   @default(now())
+  modified_at   DateTime   @updatedAt
+  deleted_at    DateTime?
+  clinic        Clinic?    @relation(fields: [clinic_id], references: [id], onDelete: Cascade)
+  doctor        Doctor     @relation(fields: [doctor_id], references: [id], onDelete: Cascade)
+  vacations     Vacation[]
+
+  @@index([doctor_id])
+  @@index([clinic_id])
+  @@map("DoctorSchedules")
+}
+
+model NurseSchedule {
+  id          String    @id @default(uuid())
+  nurse_id    String
+  doctor_id   String
+  clinic_id   String?
+  day_of_week DayOfWeek
+  start_time  String    @db.VarChar(12)
+  end_time    String    @db.VarChar(12)
+  is_online   Boolean   @default(false)
+  is_active   Boolean   @default(true)
+  created_at  DateTime  @default(now())
+  modified_at DateTime  @updatedAt
+  deleted_at  DateTime?
+  userId      String?
+  clinic      Clinic?   @relation(fields: [clinic_id], references: [id], onDelete: Cascade)
+  doctor      Doctor    @relation("NurseScheduleDoctor", fields: [doctor_id], references: [id], onDelete: Cascade)
+  nurse       Nurse     @relation("NurseScheduleNurse", fields: [nurse_id], references: [id], onDelete: Cascade)
+  user        User?     @relation(fields: [userId], references: [id])
+
+  @@index([nurse_id])
+  @@index([doctor_id])
+  @@index([clinic_id])
+  @@map("NurseSchedules")
+}
+
+model Vacation {
+  id          String         @id @default(uuid())
+  doctor_id   String
+  schedule_id String
+  start_date  String
+  end_date    String
+  status      VacationStatus @default(UPCOMING)
+  created_at  DateTime       @default(now())
+  modified_at DateTime       @updatedAt
+  deleted_at  DateTime?
+  doctor      Doctor         @relation(fields: [doctor_id], references: [id], onDelete: Cascade)
+  schedule    DoctorSchedule @relation(fields: [schedule_id], references: [id], onDelete: Cascade)
+
+  @@index([doctor_id])
+  @@index([schedule_id])
+  @@index([start_date])
+  @@index([end_date])
+  @@map("Vacations")
+}
+
+model Announcement {
+  id                  String              @id @default(uuid())
+  doctor_id           String
+  clinic_id           String
+  status              AnnouncementStatus  @default(PENDING)
+  gender              Gender?
+  max_age             Int?
+  years_of_experience Int?
+  notes               String?
+  created_at          DateTime            @default(now())
+  modified_at         DateTime            @updatedAt
+  deleted_at          DateTime?
+  userId              String?
+  working_days        AnnouncementDay[]
+  announcement_nurses AnnouncementNurse[] @relation("AnnouncementNurses")
+  clinic              Clinic              @relation("AnnouncementClinic", fields: [clinic_id], references: [id], onDelete: Cascade)
+  doctor              Doctor              @relation("AnnouncementDoctor", fields: [doctor_id], references: [id], onDelete: Cascade)
+  user                User?               @relation(fields: [userId], references: [id])
+
+  @@index([doctor_id])
+  @@index([clinic_id])
+  @@index([status])
+  @@map("Announcements")
+}
+
+model AnnouncementDay {
+  id              String       @id @default(uuid())
+  announcement_id String
+  day_of_week     DayOfWeek
+  start_time      String
+  end_time        String
+  announcement    Announcement @relation(fields: [announcement_id], references: [id], onDelete: Cascade)
+
+  @@index([announcement_id])
+  @@map("AnnouncementDays")
+}
+
+model AnnouncementNurse {
+  id              String                  @id @default(uuid())
+  announcement_id String
+  nurse_id        String
+  status          AnnouncementNurseStatus @default(PENDING)
+  doctor_id       String?
+  clinic_id       String?
+  created_at      DateTime                @default(now())
+  modified_at     DateTime                @updatedAt
+  userId          String?
+  deleted_at      DateTime?
+  announcement    Announcement            @relation("AnnouncementNurses", fields: [announcement_id], references: [id], onDelete: Cascade)
+  clinic          Clinic?                 @relation("AnnouncementNurseClinic", fields: [clinic_id], references: [id])
+  doctor          Doctor?                 @relation("AnnouncementNurseDoctor", fields: [doctor_id], references: [id])
+  nurse           Nurse                   @relation("AnnouncementNurseNurse", fields: [nurse_id], references: [id], onDelete: Cascade)
+  user            User?                   @relation(fields: [userId], references: [id])
+
+  @@unique([announcement_id, nurse_id])
+  @@index([announcement_id])
+  @@index([nurse_id])
+  @@index([doctor_id])
+  @@index([clinic_id])
+  @@map("AnnouncementNurses")
+}
+
+enum VacationStatus {
+  UPCOMING
+  CURRENT
+  ENDED
+}
+
+enum ScanLabType {
+  SCAN
+  LAB
+}
+
+enum Action {
+  CREATE
+  UPDATE
+  DELETE
+  READ
+  LOGIN
+  LOGOUT
+}
+
+enum Period {
+  DAILY
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum Role {
+  ADMIN
+  DOCTOR
+  NURSE
+  PATIENT
+  SUPER_ADMIN
+}
+
+enum RecordType {
+  LAB_RESULT
+  SCAN
+  DIAGNOSIS
+  VISIT_SUMMARY
+  SOAP_NOTE
+  MEDICAL_HISTORY
+  VISIT
+  FILE
+}
+
+enum DoctorAccountStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum AvailabilityType {
+  UNSET
+  ONLINE
+  OFFLINE
+  BOTH
+}
+
+enum DayOfWeek {
+  SUNDAY
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+}
+
+enum AppointmentStatus {
+  CONFIRMED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum NurseAccountStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum AnnouncementStatus {
+  PENDING
+  EXPIRED
+}
+
+enum AnnouncementNurseStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}

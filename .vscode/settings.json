@@ -1,0 +1,10 @@
+{
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "editor.formatOnSave": false,
+  "yaml.schemas": {
+    "https://www.schemastore.org/github-workflow.json": "file:///home/enjy/work/GP/repo/Backend/.github/workflows/ci.yml"
+  },
+  "js/ts.tsdk.path": "node_modules\\typescript\\lib"
+}

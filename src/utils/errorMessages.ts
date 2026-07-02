@@ -1,0 +1,403 @@
+export const ErrorMessages = {
+    // Authentication errors
+    USER_NOT_FOUND: {
+        en: 'User not found',
+        ar: 'المستخدم غير موجود',
+    },
+
+    EMAIL_EXISTS: {
+        en: `This email already exists`,
+        ar: `البريد الإلكتروني موجود بالفعل`,
+    },
+    USERNAME_EXISTS: {
+        en: 'This username already exists',
+        ar: 'اسم المستخدم موجود بالفعل'
+    },
+    USER_NOT_FOUND_CREDENTIALS: {
+        en: 'User with the provided credentials was not found',
+        ar: 'لم يتم العثور على المستخدم ببيانات الاعتماد المقدمة',
+    },
+    PASSWORD_NOT_MATCHING: {
+        en: 'Password is not matching',
+        ar: 'كلمة المرور غير صحيحة',
+    },
+    USER_NOT_EXIST: {
+        en: "User doesn't exist",
+        ar: 'المستخدم غير موجود',
+    },
+    REFRESH_TOKEN_NOT_PROVIDED: {
+        en: 'Refresh token not provided',
+        ar: 'لم يتم تقديم رمز التحديث',
+    },
+    INVALID_REFRESH_TOKEN: {
+        en: 'Invalid or expired refresh token',
+        ar: 'رمز التحديث غير صالح أو منتهي الصلاحية',
+    },
+    USER_EMAIL_NOT_FOUND: {
+        en: 'User email not found',
+        ar: 'البريد الإلكتروني للمستخدم غير موجود',
+    },
+
+    OTP_REQUIRED: {
+        en: 'OTP is required',
+        ar: 'رمز التحقق مطلوب',
+    },
+    INVALID_OTP: {
+        en: 'Invalid OTP',
+        ar: 'رمز التحقق غير صالح',
+    },
+    OTP_EXPIRED: {
+        en: 'OTP has expired',
+        ar: 'انتهت صلاحية رمز التحقق',
+    },
+    EMAIL_SENT_IF_EXISTS: {
+        en: 'Email will be sent if account exists',
+        ar: 'سيتم إرسال البريد الإلكتروني إذا كان الحساب موجودًا',
+    },
+    INVALID_PASSWORD_RESET_TOKEN: {
+        en: 'Invalid or expired password reset token',
+        ar: 'رمز إعادة تعيين كلمة المرور غير صالح أو منتهي الصلاحية',
+    },
+
+    EMAIL_REQUIRED: {
+        en: 'Email is required',
+        ar: 'البريد الإلكتروني مطلوب',
+    },
+
+    // Authentication middleware errors
+    WRONG_AUTHENTICATION_TOKEN: {
+        en: 'Wrong authentication token',
+        ar: 'رمز المصادقة غير صحيح',
+    },
+    AUTHENTICATION_REQUIRED: {
+        en: 'Authentication required',
+        ar: 'المصادقة مطلوبة',
+    },
+
+    // Validation errors
+    VALIDATION_ERROR: {
+        en: 'Validation error',
+        ar: 'خطأ في التحقق من البيانات',
+    },
+    NO_PROFILE_DATA_PROVIDED: {
+        en: 'No profile data provided for update',
+        ar: 'لم يتم تقديم بيانات الملف الشخصي للتحديث',
+    },
+    // Google Auth errors
+    NO_EMAIL_IN_GOOGLE_PROFILE: {
+        en: 'No email found in Google profile',
+        ar: 'لم يتم العثور على البريد الإلكتروني في ملف Google الشخصي',
+    },
+    GOOGLE_AUTH_ERROR: {
+        en: 'Error in Google authentication',
+        ar: 'خطأ في المصادقة عبر Google',
+    },
+
+    // patient 
+    PATIENT_KEY_NOT_FOUND: {
+        en: 'Patient key not found',
+        ar: 'مفتاح المريض غير موجود',
+    },
+    PATIENT_KEY_ALREADY_EXISTS: {
+        en: 'Patient key already exists',
+        ar: 'مفتاح المريض موجود بالفعل',
+    },
+
+    //Doctor specific errors
+    DOCTOR_ACCOUNT_NOT_APPROVED: {
+        en: 'Doctor account is not approved yet',
+        ar: 'حساب الطبيب غير مفعل بعد',
+    },
+    DOCTOR_PASSWORD_ALREADY_SET: {
+        en: 'Password has already been set',
+        ar: 'تم تعيين كلمة المرور بالفعل',
+    },
+    MAX_CLINICS_REACHED: {
+        en: 'Maximum number of created clinics reached',
+        ar: 'تم الوصول إلى الحد الأقصى لعدد العيادات',
+    },
+    ANNOUNCEMENT_NOT_FOUND: {
+        en: 'Announcement not found',
+        ar: 'الإعلان غير موجود',
+    },
+    UNAUTHORIZED_ACCESS: {
+        en: 'You are not authorized to access this',
+        ar: 'ليس لديك صلاحية للوصول إلى هذا ',
+    },
+    DOCTOR_ID_NOT_FOUND: {
+        en: 'Doctor ID not found in request',
+        ar: 'معرف الطبيب غير موجود في الطلب',
+    },
+
+    // nurse
+    NURSE_PASSWORD_ALREADY_SET: {
+        en: 'Password has already been set',
+        ar: 'تم تعيين كلمة المرور بالفعل',
+    },
+    NURSE_ACCOUNT_NOT_APPROVED: {
+        en: 'Nurse account is not approved yet',
+        ar: 'حساب الممرضة غير مفعل بعد',
+    },
+    NATIONAL_CARD_REQUIRED: {
+        en: 'National card image is required',
+        ar: 'صورة البطاقة الوطنية مطلوبة',
+    },
+    NURSE_ID_NOT_FOUND: {
+        en: 'Nurse ID not found in request',
+        ar: 'معرف الممرضة غير موجود في الطلب',
+    },
+    ANNOUNCEMENT_EXPIRED: {
+        en: 'Announcement has expired',
+        ar: 'انتهت صلاحية الإعلان',
+    },
+    APPLICATION_ALREADY_EXISTS: {
+        en: 'You have already applied to this announcement',
+        ar: 'لقد تقدمت بالفعل لهذا الإعلان',
+    },
+    APPLICATION_NOT_FOUND: {
+        en: 'Application not found',
+        ar: 'الطلب غير موجود',
+    },
+    APPLICATION_ALREADY_PROCESSED: {
+        en: 'This application has already been processed',
+        ar: 'تمت معالجة هذا الطلب بالفعل',
+    },
+    NURSE_DATA_NOT_FOUND: {
+        en: 'Nurse data not found',
+        ar: 'بيانات الممرضة غير موجودة',
+    },
+
+    // File upload errors
+    NO_FILE_UPLOADED: {
+        en: 'No file uploaded',
+        ar: 'لم يتم تحميل أي ملف',
+    },
+    UNSUPPORTED_IMAGE_FILE_FORMAT: {
+        en: 'Unsupported file format. Only JPEG and PNG allowed.',
+        ar: 'تنسيق ملف غير مدعوم. يُسمح فقط بملفات JPEG و PNG.',
+    },
+    UNSUPPORTED_FILE_FORMAT_PDF: {
+        en: 'Unsupported file format. Only PDF allowed.',
+        ar: 'تنسيق ملف غير مدعوم. يُسمح فقط بملفات PDF.',
+    },
+    NO_PROFILE_PICTURE: {
+        en: 'No profile picture found',
+        ar: 'لم يتم العثور على صورة الملف الشخصي',
+    },
+    UNKNOWN_FILE_FIELDNAME: {
+        en: 'Unknown file fieldname',
+        ar: 'اسم حقل الملف غير معروف',
+    },
+    DOCTOR_NOT_WORKING_ON_DAY: {
+        en: "Doctor is not available on this day",
+        ar: "الطبيب غير متاح في هذا اليوم"
+    },
+    TIME_OUTSIDE_SCHEDULE: {
+        en: "Requested time is outside doctor's working hours",
+        ar: "الوقت المطلوب خارج ساعات عمل الطبيب"
+    },
+    DAY_OUTSIDE_SCHEDULE: {
+        en: "Requested date is outside doctor's working days",
+        ar: "الموعد المطلوب خارج أيام عمل الطبيب"
+    },
+    DOCTOR_NOT_ASSOCIATED_WITH_CLINIC: {
+        en: 'Doctor is not associated with this clinic',
+        ar: 'الطبيب غير مرتبط بهذه العيادة'
+    },
+    END_TIME_BEFORE_START_TIME: {
+        en: 'End time must be after start time',
+        ar: 'وقت الانتهاء يجب أن يكون بعد وقت البداية'
+    },
+    SCHEDULE_ALREADY_EXISTS: {
+        en: 'Schedule already exists for this day and clinic',
+        ar: 'الجدول موجود بالفعل لهذا اليوم والعيادة'
+    },
+    SPECIALIZATION_LANG: {
+        en: "Language must be 'en' or 'ar'",
+        ar: "يجب أن تكون اللغة 'en' أو 'ar'"
+    },
+    RECORD_NOT_FOUND: {
+        en: 'Record not found',
+        ar: 'السجل غير موجود',
+    },
+    RECORD_ALREADY_DELETED: {
+        en: 'Record has already been deleted',
+        ar: 'تم حذف السجل بالفعل',
+    },
+
+    // Clinic errors
+    CLINIC_NOT_FOUND: {
+        en: 'Clinic not found',
+        ar: 'العيادة غير موجودة',
+    },
+    CLINIC_REQUIRED_FOR_OFFLINE: {
+        en: 'Clinic ID is required for offline appointments',
+        ar: 'معرف العيادة مطلوب للمواعيد غير المتصلة بالإنترنت',
+    },
+    UNAUTHORIZED_CLINIC_DELETION: {
+        en: 'You are not authorized to delete this clinic',
+        ar: 'ليس لديك صلاحية لحذف هذه العيادة',
+    },
+    UNAUTHORIZED_CLINIC_UPDATE: {
+        en: 'You are not authorized to update this clinic',
+        ar: 'ليس لديك صلاحية لتحديث هذه العيادة',
+    },
+    SCHEDULE_ALREADY_DELETED: {
+        en: 'This schedule has already been deleted',
+        ar: 'تم حذف هذا الجدول مسبقًا',
+    },
+    SCHEDULE_ID_REQUIRED: {
+        en: 'Schedule ID is required',
+        ar: 'معرف الجدول مطلوب',
+    },
+    VACATION_DATES_REQUIRED: {
+        en: 'Vacation dates are required',
+        ar: 'تواريخ الإجازة مطلوبة',
+    },
+    INVALID_DATE_RANGE: {
+        en: 'Invalid date range',
+        ar: 'نطاق التاريخ غير صالح',
+    },
+    // appointments 
+    DOCTOR_ID_REQUIRED: {
+        en: 'Doctor ID is required',
+        ar: 'معرف الطبيب مطلوب',
+    },
+    INVALID_FEES_RANGE: {
+        en: 'Invalid fees range.',
+        ar: 'نطاق الرسوم غير صالح.'
+    },
+    APPOINTMENT_ALREADY_EXISTS: {
+        en: 'Appointment already exists.',
+        ar: 'الموعد موجود بالفعل.'
+    },
+    PATIENT_ID_REQUIRED: {
+        en: 'Patient ID is required',
+        ar: 'معرف المريض مطلوب',
+    },
+    SCHEDULED_TIME_REQUIRED: {
+        en: 'Scheduled time is required',
+        ar: 'وقت الموعد مطلوب',
+    },
+    INVALID_SCHEDULED_TIME: {
+        en: 'Invalid scheduled time format',
+        ar: 'تنسيق وقت الموعد غير صالح',
+    },
+    DATE_REQUIRED: {
+        en: 'Date is required',
+        ar: 'التاريخ مطلوب',
+    },
+    INVALID_DATE_FORMAT: {
+        en: 'Invalid date format. Please use YYYY-MM-DD',
+        ar: 'تنسيق التاريخ غير صالح. يرجى استخدام YYYY-MM-DD',
+    },
+    NO_AVAILABLE_DAYS: {
+        en: 'No available days found for this doctor',
+        ar: 'لم يتم العثور على أيام متاحة لهذا الطبيب',
+    },
+    SLOT_NOT_AVAILABLE: {
+        en: 'This time slot is not available',
+        ar: 'هذا الوقت غير متاح',
+    },
+    APPOINTMENT_IN_PAST: {
+        en: 'Cannot book appointment in the past',
+        ar: 'لا يمكن حجز موعد في الماضي',
+    },
+    TIME_SLOT_NOT_AVAILABLE: {
+        en: "This time slot is not available",
+        ar: "هذا الوقت غير متاح"
+    },
+    MINUTES_EXCEEDED_LIMIT: {
+        en: "The maximum allowed delay must not exceed 60 minutes.",
+        ar: "يجب ألا يتجاوز الحد الأقصى للتأجيل المسموح به 60 دقيقة."
+    },
+    SCHEDULE_NOT_FOUND: {
+        en: "Schedule not found",
+        ar: "لم يتم العثور على الجدول"
+    },
+    UNAUTHORIZED_SCHEDULE_ACCESS: {
+        en: "You are not authorized to access this schedule",
+        ar: "غير مصرح لك بالوصول إلى هذا الجدول"
+    },
+    SCHEDULE_CONFLICT_DIFFERENT_CLINIC: {
+        en: "There is a scheduling conflict on another clinic",
+        ar: "يوجد تعارض في المواعيد في عيادة اخرى"
+    },
+    ONLINE_OFFLINE_CONFLICT: {
+        en: "There is a conflict between online and offline schedules",
+        ar: "يوجد تعارض بين المواعيد الإلكترونية والحضورية"
+    },
+    EITHER_ONLINE_OR_OFFLINE: {
+        en: "Please choose either online or offline",
+        ar: "يرجى اختيار إما الإلكتروني أو الحضوري"
+    },
+    APPOINTMENT_ALREADY_COMPLETED: {
+        en: 'Appointment is already completed',
+        ar: 'الموعد مكتمل بالفعل',
+    },
+    CANNOT_BE_COMPLETED_BEFORE_SCHEDULED_TIME: {
+        en: "Appointment cannot be completed before its scheduled time",
+        ar: "لا يمكن إكمال الموعد قبل وقته المحدد"
+    },
+    // Generic errors
+    SOMETHING_WENT_WRONG: {
+        en: 'Something went wrong',
+        ar: 'حدث خطأ ما',
+    },
+    MASTER_KEY_NOT_SET: {
+        en: 'Master encryption key is not set in environment variables',
+        ar: 'مفتاح التشفير الرئيسي غير مضبوط',
+    },
+    INVALID_MASTER_KEY_LENGTH: {
+        en: 'Invalid master key length. Expected 32 bytes',
+        ar: 'طول مفتاح رئيسي غير صالح. يجب أن يكون 32 بايت',
+    },
+
+    APPOINTMENT_NOT_FOUND: {
+        en: "Appointment not found",
+        ar: "الموعد غير موجود"
+    },
+    APPOINTMENT_ID_REQUIRED: {
+        en: "Appointment ID is required",
+        ar: "معرف الموعد مطلوب"
+    },
+    UNAUTHORIZED_APPOINTMENT_ACCESS: {
+        en: "You are not authorized to access this appointment",
+        ar: "غير مصرح لك بالوصول إلى هذا الموعد"
+    },
+    APPOINTMENT_ALREADY_DELETED: {
+        en: "Appointment has already been deleted",
+        ar: "تم حذف الموعد بالفعل"
+    },
+    INVALID_RESCHEDULE_PARAMETERS: {
+        en: "Provide either new scheduled time or shift minutes",
+        ar: "يرجى تقديم وقت موعد جديد أو عدد دقائق التغيير"
+    },
+
+    // Agora Errors
+    AGORA_CREDENTIALS_NOT_CONFIGURED: {
+        en: "Agora credentials are not configured",
+        ar: "بيانات اعتماد Agora غير مكونة"
+    },
+
+    // AI Errors
+    INVALID_USER_TYPE: {
+        en: "Invalid user type. Must be 'doctor' or 'patient'",
+        ar: "نوع المستخدم غير صالح. يجب أن يكون 'doctor' أو 'patient'"
+    },
+    MISSING_AUDIO_KEYS: {
+        en: "Missing audio keys. Provide either doctorKey and patientKey, or mixedKey",
+        ar: "مفاتيح الصوت مفقودة. يرجى تقديم إما doctorKey و patientKey، أو mixedKey"
+    }
+};
+
+// Helper function to create bilingual error
+export const createBilingualError = (
+    status: number,
+    messageObj: { en: string; ar: string },
+) => {
+    const message = messageObj.en;
+    const messageAr = messageObj.ar;
+
+    return { status, message, messageAr };
+};

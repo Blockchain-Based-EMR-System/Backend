@@ -1,0 +1,61 @@
+
+services:
+  proxy:
+    container_name: proxy
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf 
+    restart: "unless-stopped"
+    depends_on:
+      - server    
+    networks:
+      - backend
+
+  server:
+    container_name: server
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3000" 
+      - "5556:5555" 
+    env_file:
+    - .env
+    environment:
+      NODE_ENV: development
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    restart: "unless-stopped"
+    depends_on:
+      - postgres
+    networks:
+      - backend
+    command: npm run dev
+
+
+  postgres:
+    container_name: postgres_db
+    image: postgres:16
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=NG
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=EMR_DB
+    volumes:
+      - data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - backend
+    
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  data:
+    driver: local
